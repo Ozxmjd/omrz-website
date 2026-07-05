@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prijzen · OMRZ-AI</title>
+  <meta name="description" content="Overzichtelijke pakketten voor het MKB. Starter vanaf €29/maand, Pro €69/maand. 20% korting bij jaarbetaling." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ===== Navbar ===== -->
+  <header class="nav">
+    <div class="container nav-inner">
+      <a href="index.html" class="brand"><span class="dot"></span>OMRZ<span>-AI</span></a>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="stempelkaart.html">Stempelkaart</a></li>
+          <li><a href="review-bot.html">Review Bot</a></li>
+          <li><a href="pricing.html" class="active">Prijzen</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+      <div class="nav-cta">
+        <a href="contact.html" class="btn btn-primary">Start gratis proefperiode</a>
+        <button class="nav-toggle" aria-label="Menu"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== Page header ===== -->
+  <section class="page-header">
+    <div class="container">
+      <span class="eyebrow reveal">Prijzen</span>
+      <h1 class="reveal" data-delay="1">Eerlijke prijzen,<br><span class="gold">geen verrassingen</span></h1>
+      <p class="reveal" data-delay="2">Kies het pakket dat bij jouw bedrijf past. Altijd maandelijks opzegbaar, of bespaar 20% met een jaarabonnement.</p>
+    </div>
+  </section>
+
+  <!-- ===== Toggle + kaarten ===== -->
+  <section class="section" style="padding-top:20px;">
+    <div class="container text-center">
+      <div class="pricing-toggle reveal" data-pricing-toggle>
+        <button class="active" data-mode="month">Maandelijks</button>
+        <button data-mode="year">Jaarlijks <span class="save">–20%</span></button>
+      </div>
+
+      <div class="grid grid-3" style="text-align:left;">
+        <!-- Starter -->
+        <div class="price-card reveal">
+          <div class="tier">Starter</div>
+          <div class="amount">€<span data-price data-month="29" data-year="278">29</span><small data-period>/maand</small></div>
+          <div class="amount-sub" data-note data-month-note="Alleen digitale stempelkaart" data-year-note="Per jaar · 2 maanden gratis">Alleen digitale stempelkaart</div>
+          <ul class="feature-list">
+            <li>Digitale stempelkaart</li>
+            <li>Onbeperkt spaarkaarten</li>
+            <li>QR-code & telefoon-integratie</li>
+            <li>Klantinzicht dashboard</li>
+            <li>E-mail support</li>
+          </ul>
+          <a href="contact.html" class="btn btn-ghost btn-block">Kies Starter</a>
+        </div>
+
+        <!-- Pro -->
+        <div class="price-card featured reveal" data-delay="1">
+          <div class="badge-pop">Meest gekozen</div>
+          <div class="tier">Pro</div>
+          <div class="amount">€<span data-price data-month="69" data-year="662">69</span><small data-period>/maand</small></div>
+          <div class="amount-sub" data-note data-month-note="Stempelkaart + AI Review Bot" data-year-note="Per jaar · 2 maanden gratis">Stempelkaart + AI Review Bot</div>
+          <ul class="feature-list">
+            <li>Alles uit Starter</li>
+            <li>AI Review Bot inbegrepen</li>
+            <li>Automatische review-antwoorden</li>
+            <li>Eigen tone-of-voice & meertalig</li>
+            <li>Prioriteit support</li>
+          </ul>
+          <a href="contact.html" class="btn btn-primary btn-block">Kies Pro</a>
+        </div>
+
+        <!-- Maatwerk -->
+        <div class="price-card reveal" data-delay="2">
+          <div class="tier">Maatwerk</div>
+          <div class="amount" style="font-size:40px;">Op maat</div>
+          <div class="amount-sub">Voor ketens & meerdere vestigingen</div>
+          <ul class="feature-list">
+            <li>Alles uit Pro</li>
+            <li>Meerdere locaties in één account</li>
+            <li>Persoonlijke accountmanager</li>
+            <li>Maatwerk-integraties</li>
+            <li>Telefonische support</li>
+          </ul>
+          <a href="contact.html" class="btn btn-ghost btn-block">Neem contact op</a>
+        </div>
+      </div>
+
+      <p class="hero-note reveal" style="justify-content:center;margin-top:34px;">✓ 14 dagen gratis proberen · ✓ Geen creditcard nodig · ✓ Prijzen excl. btw</p>
+    </div>
+  </section>
+
+  <!-- ===== Vergelijking / info ===== -->
+  <section class="section" style="padding-top:0;">
+    <div class="container">
+      <div class="grid grid-2">
+        <div class="card reveal">
+          <h3 style="font-size:24px;margin-bottom:14px;">Wat zit er in elk pakket?</h3>
+          <ul class="info-list">
+            <li><strong style="color:var(--white)">Starter (€29/mnd)</strong> — de digitale stempelkaart om klanten te binden.</li>
+            <li><strong style="color:var(--white)">Pro (€69/mnd)</strong> — stempelkaart én de AI Review Bot in één voordelig pakket.</li>
+            <li><strong style="color:var(--white)">Jaarkorting</strong> — betaal per jaar en ontvang 20% korting (2 maanden gratis).</li>
+          </ul>
+        </div>
+        <div class="card reveal" data-delay="1">
+          <h3 style="font-size:24px;margin-bottom:14px;">Veelgestelde vragen</h3>
+          <ul class="info-list">
+            <li><strong style="color:var(--white)">Kan ik maandelijks opzeggen?</strong> Ja, bij het maandabonnement zit je nergens aan vast.</li>
+            <li><strong style="color:var(--white)">Zijn er opstartkosten?</strong> Nee, en de eerste 14 dagen zijn gratis.</li>
+            <li><strong style="color:var(--white)">Kan ik later upgraden?</strong> Zeker, je stapt op elk moment over van Starter naar Pro.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA ===== -->
+  <section class="section-sm">
+    <div class="container">
+      <div class="cta-banner reveal">
+        <h2>Nog niet zeker welk pakket?</h2>
+        <p>We denken graag met je mee. Neem contact op of start gewoon een gratis proefperiode.</p>
+        <a href="contact.html" class="btn btn-primary">Start gratis proefperiode</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Footer ===== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <a href="index.html" class="brand"><span class="dot"></span>OMRZ<span>-AI</span></a>
+          <p>Slimme AI-oplossingen die het Nederlandse MKB laten groeien. Voor horeca, beauty en retail.</p>
+        </div>
+        <div><h4>Producten</h4><ul class="footer-links"><li><a href="stempelkaart.html">Digitale Stempelkaart</a></li><li><a href="review-bot.html">AI Review Bot</a></li><li><a href="pricing.html">Prijzen</a></li></ul></div>
+        <div><h4>Bedrijf</h4><ul class="footer-links"><li><a href="index.html">Home</a></li><li><a href="contact.html">Contact</a></li><li><a href="contact.html">Gratis proefperiode</a></li></ul></div>
+        <div><h4>Contact</h4><ul class="footer-links"><li><a href="mailto:info@omrz-ai.nl">info@omrz-ai.nl</a></li><li><a href="tel:+31850000000">085 - 000 00 00</a></li><li><a href="#">Utrecht, Nederland</a></li></ul></div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span data-year>2026</span> OMRZ-AI · Alle rechten voorbehouden</span>
+        <div class="socials"><a href="#">LinkedIn</a><a href="#">Instagram</a><a href="#">Privacy</a></div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
