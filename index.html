@@ -118,6 +118,33 @@
     .scroll-hint svg { width: 18px; height: 18px; }
     @keyframes bob { 0%,100%{transform:translate(-50%,0)} 50%{transform:translate(-50%,7px)} }
 
+    /* ---------- Ambient sound toggle ---------- */
+    .sound-toggle {
+      position: fixed; right: 22px; bottom: 22px; z-index: 90;
+      display: inline-flex; align-items: center; gap: 9px;
+      padding: 10px 15px 10px 12px; border-radius: 999px; cursor: pointer;
+      font-family: inherit; font-size: 12.5px; font-weight: 600; letter-spacing: .02em;
+      color: var(--muted); background: rgba(12,12,18,.72); border: 1px solid var(--border);
+      backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px);
+      transition: color .25s var(--ease), border-color .25s var(--ease),
+                  background .25s var(--ease), transform .25s var(--ease);
+    }
+    .sound-toggle:hover { color: var(--text); border-color: var(--accent); transform: translateY(-2px); }
+    .sound-toggle.playing { color: var(--text); border-color: rgba(249,115,22,.45); }
+    .sound-toggle .eq { display: flex; align-items: flex-end; gap: 2px; height: 15px; width: 16px; }
+    .sound-toggle .eq span {
+      flex: 1; background: var(--accent); border-radius: 2px; height: 30%;
+      transform-origin: bottom;
+    }
+    .sound-toggle.playing .eq span { animation: eq 1s ease-in-out infinite; }
+    .sound-toggle.playing .eq span:nth-child(2) { animation-delay: .2s; }
+    .sound-toggle.playing .eq span:nth-child(3) { animation-delay: .4s; }
+    .sound-toggle .eq span:nth-child(1) { height: 45%; }
+    .sound-toggle .eq span:nth-child(2) { height: 90%; }
+    .sound-toggle .eq span:nth-child(3) { height: 60%; }
+    @keyframes eq { 0%,100% { transform: scaleY(.35); } 50% { transform: scaleY(1); } }
+    @media (max-width: 520px) { .sound-toggle .label { display: none; } .sound-toggle { padding: 11px; } }
+
     /* ---------- Sections ---------- */
     .section { padding: 120px 0; position: relative; }
     .section-head { text-align: center; max-width: 620px; margin: 0 auto 64px; }
@@ -389,6 +416,12 @@
     </div>
   </section>
 
+  <!-- ===== Ambient sound toggle ===== -->
+  <button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false" aria-label="Ambient geluid aan/uit">
+    <span class="eq" aria-hidden="true"><span></span><span></span><span></span></span>
+    <span class="label" id="soundLabel">Geluid aan</span>
+  </button>
+
   <!-- ===== Review Bot showcase ===== -->
   <section class="section" id="review-bot">
     <div class="container">
@@ -626,61 +659,119 @@
       reveals.forEach(function (el) { el.classList.add('in'); });
     }
 
-    /* ================= Hero: Three.js particle sphere ================= */
-    (function heroParticles() {
+    /* ================= Hero: Three.js dark Earth globe ================= */
+    (function heroGlobe() {
       var canvas = document.getElementById('hero-canvas');
       if (typeof THREE === 'undefined' || !canvas) return;
 
-      var renderer, scene, camera, points, raf;
-      var mouse = { x: 0, y: 0 }, target = { x: 0, y: 0 };
-      var COUNT = 2000;
-
+      var renderer;
       try {
         renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
       } catch (e) { return; }
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-      scene = new THREE.Scene();
-      camera = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
-      camera.position.z = 6;
+      var scene = new THREE.Scene();
+      var camera = new THREE.PerspectiveCamera(55, 1, 0.1, 100);
+      camera.position.z = 6.4;
 
-      var positions = new Float32Array(COUNT * 3);
-      var colors = new Float32Array(COUNT * 3);
-      var radius = 3.1;
-      var cOrange = new THREE.Color(0xf97316);
-      var cAmber = new THREE.Color(0xfbbf24);
+      var mouse = { x: 0, y: 0 }, target = { x: 0, y: 0 };
+      var RADIUS = 2.4;
 
-      for (var i = 0; i < COUNT; i++) {
-        // even distribution on a sphere
-        var u = Math.random(), v = Math.random();
+      // Root group receives mouse tilt; world group holds everything
+      var root = new THREE.Group();
+      scene.add(root);
+
+      // --- Earth sphere: dark, no texture, subtle vertical gradient via vertex colors ---
+      var earthGeo = new THREE.SphereGeometry(RADIUS, 48, 48);
+      var cLow = new THREE.Color(0x050508);   // near-black (poles/bottom)
+      var cHigh = new THREE.Color(0x0a1628);  // dark blue (equator/top)
+      var pos = earthGeo.attributes.position;
+      var eColors = new Float32Array(pos.count * 3);
+      for (var v = 0; v < pos.count; v++) {
+        var t = (pos.getY(v) / RADIUS + 1) / 2; // 0..1 bottom->top
+        var c = cLow.clone().lerp(cHigh, 0.35 + t * 0.65);
+        eColors[v * 3] = c.r; eColors[v * 3 + 1] = c.g; eColors[v * 3 + 2] = c.b;
+      }
+      earthGeo.setAttribute('color', new THREE.BufferAttribute(eColors, 3));
+      var earth = new THREE.Mesh(earthGeo, new THREE.MeshBasicMaterial({ vertexColors: true }));
+
+      // --- Atmosphere rim glow (back-side additive) ---
+      var atmo = new THREE.Mesh(
+        new THREE.SphereGeometry(RADIUS * 1.055, 48, 48),
+        new THREE.MeshBasicMaterial({
+          color: 0x1e3f70, transparent: true, opacity: 0.35,
+          side: THREE.BackSide, blending: THREE.AdditiveBlending, depthWrite: false
+        })
+      );
+
+      // --- City lights: thousands of yellow/white points on the surface ---
+      var CITY_COUNT = 4000;
+      var cityPos = new Float32Array(CITY_COUNT * 3);
+      var cityCol = new Float32Array(CITY_COUNT * 3);
+      var cWhite = new THREE.Color(0xffffff);
+      var cWarm = new THREE.Color(0xffd27a);
+      for (var i = 0; i < CITY_COUNT; i++) {
+        // cluster slightly so it reads like landmasses rather than a uniform shell
+        var u = Math.random(), w = Math.random();
         var theta = 2 * Math.PI * u;
-        var phi = Math.acos(2 * v - 1);
-        var r = radius * (0.85 + Math.random() * 0.15);
-        var x = r * Math.sin(phi) * Math.cos(theta);
-        var y = r * Math.sin(phi) * Math.sin(theta);
-        var z = r * Math.cos(phi);
-        positions[i * 3] = x; positions[i * 3 + 1] = y; positions[i * 3 + 2] = z;
-        var mix = cOrange.clone().lerp(cAmber, Math.random());
-        colors[i * 3] = mix.r; colors[i * 3 + 1] = mix.g; colors[i * 3 + 2] = mix.b;
+        var phi = Math.acos(2 * w - 1);
+        var jitter = Math.pow(Math.random(), 2); // bias toward brighter clusters
+        var r = RADIUS * 1.002;
+        cityPos[i * 3]     = r * Math.sin(phi) * Math.cos(theta);
+        cityPos[i * 3 + 1] = r * Math.cos(phi);
+        cityPos[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
+        var col = cWarm.clone().lerp(cWhite, jitter);
+        var bright = 0.55 + jitter * 0.45;
+        cityCol[i * 3] = col.r * bright; cityCol[i * 3 + 1] = col.g * bright; cityCol[i * 3 + 2] = col.b * bright;
+      }
+      var cityGeo = new THREE.BufferGeometry();
+      cityGeo.setAttribute('position', new THREE.BufferAttribute(cityPos, 3));
+      cityGeo.setAttribute('color', new THREE.BufferAttribute(cityCol, 3));
+      var cities = new THREE.Points(cityGeo, new THREE.PointsMaterial({
+        size: 0.028, vertexColors: true, transparent: true, opacity: 0.95,
+        blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true
+      }));
+
+      // Earth + atmosphere + cities spin together
+      var earthGroup = new THREE.Group();
+      earthGroup.add(earth); earthGroup.add(atmo); earthGroup.add(cities);
+      earthGroup.rotation.z = 0.28; // slight axial tilt
+      root.add(earthGroup);
+
+      // --- Orbiting orange satellites at different radii/heights/speeds ---
+      var orbits = [];
+      var orbitDefs = [
+        { r: 3.35, tilt: 0.35, speed: 0.011, size: 0.10, phase: 0 },
+        { r: 3.75, tilt: -0.6, speed: 0.008, size: 0.075, phase: 1.8 },
+        { r: 4.15, tilt: 1.15, speed: 0.006, size: 0.12, phase: 3.4 },
+        { r: 3.55, tilt: -1.3, speed: 0.0135, size: 0.065, phase: 5.0 }
+      ];
+      var orangeMat = new THREE.MeshBasicMaterial({ color: 0xf97316 });
+      for (var o = 0; o < orbitDefs.length; o++) {
+        var d = orbitDefs[o];
+        var pivot = new THREE.Group();
+        pivot.rotation.x = d.tilt;              // orbit-plane inclination
+        pivot.rotation.y = Math.random() * 6.28;
+        var sat = new THREE.Mesh(new THREE.SphereGeometry(d.size, 16, 16), orangeMat);
+        sat.position.set(d.r, 0, 0);
+        // faint trail ring so the orbit path is legible
+        var ring = new THREE.Mesh(
+          new THREE.RingGeometry(d.r - 0.006, d.r + 0.006, 96),
+          new THREE.MeshBasicMaterial({ color: 0xf97316, transparent: true, opacity: 0.08,
+            side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false })
+        );
+        ring.rotation.x = Math.PI / 2;
+        pivot.add(sat); pivot.add(ring);
+        pivot.rotation.y += d.phase;
+        root.add(pivot);
+        orbits.push({ pivot: pivot, speed: d.speed });
       }
 
-      var geo = new THREE.BufferGeometry();
-      geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-      var mat = new THREE.PointsMaterial({
-        size: 0.045, vertexColors: true, transparent: true, opacity: 0.9,
-        blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true
-      });
-
-      points = new THREE.Points(geo, mat);
-      scene.add(points);
-
       function resize() {
-        var w = canvas.clientWidth, h = canvas.clientHeight;
-        if (!w || !h) return;
-        renderer.setSize(w, h, false);
-        camera.aspect = w / h; camera.updateProjectionMatrix();
+        var wd = canvas.clientWidth, ht = canvas.clientHeight;
+        if (!wd || !ht) return;
+        renderer.setSize(wd, ht, false);
+        camera.aspect = wd / ht; camera.updateProjectionMatrix();
       }
       resize();
       window.addEventListener('resize', resize);
@@ -691,24 +782,106 @@
       }, { passive: true });
 
       var running = true;
-      function render() {
-        raf = requestAnimationFrame(render);
+      function frame() {
+        requestAnimationFrame(frame);
         if (!running) return;
-        points.rotation.y += 0.0016;
-        target.x += (mouse.y * 0.35 - target.x) * 0.04;
-        target.y += (mouse.x * 0.35 - target.y) * 0.04;
-        points.rotation.x = target.x;
-        points.rotation.z = target.y * 0.15;
+        earthGroup.rotation.y += 0.0011;          // slow auto-rotation
+        for (var k = 0; k < orbits.length; k++) orbits[k].pivot.rotation.y += orbits[k].speed;
+        // mouse tilt on the whole scene
+        target.x += (mouse.y * 0.3 - target.x) * 0.045;
+        target.y += (mouse.x * 0.4 - target.y) * 0.045;
+        root.rotation.x = target.x;
+        root.rotation.y = target.y;
         renderer.render(scene, camera);
       }
       if (reduceMotion) { resize(); renderer.render(scene, camera); }
-      else render();
+      else frame();
 
       // pause when hero off-screen
       if ('IntersectionObserver' in window) {
         new IntersectionObserver(function (en) { running = en[0].isIntersecting; })
           .observe(document.querySelector('.hero'));
       }
+    })();
+
+    /* ================= Ambient drone (Web Audio API) ================= */
+    (function ambientSound() {
+      var btn = document.getElementById('soundToggle');
+      var label = document.getElementById('soundLabel');
+      if (!btn) return;
+
+      var ctx = null, master = null, lfo = null, voices = [], playing = false;
+      var TARGET_VOL = 0.07; // ~7% — very low
+
+      function build() {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return false;
+        ctx = new AC();
+
+        master = ctx.createGain();
+        master.gain.value = 0.0001;
+
+        // gentle low-pass so it stays soft and warm
+        var filter = ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 620;
+        filter.Q.value = 0.6;
+        master.connect(filter);
+        filter.connect(ctx.destination);
+
+        // layered drone: root + fifth + octave shimmer, slightly detuned
+        var freqs = [55, 82.5, 110, 164.81];
+        var gains = [0.5, 0.32, 0.22, 0.12];
+        for (var i = 0; i < freqs.length; i++) {
+          var osc = ctx.createOscillator();
+          osc.type = i === 3 ? 'triangle' : 'sine';
+          osc.frequency.value = freqs[i];
+          osc.detune.value = (i - 1.5) * 4; // subtle chorus
+          var g = ctx.createGain();
+          g.gain.value = gains[i];
+          osc.connect(g); g.connect(master);
+          osc.start();
+          voices.push(osc);
+        }
+
+        // slow amplitude LFO for a breathing feel
+        lfo = ctx.createOscillator();
+        lfo.type = 'sine';
+        lfo.frequency.value = 0.06;
+        var lfoGain = ctx.createGain();
+        lfoGain.gain.value = 0.02;
+        lfo.connect(lfoGain); lfoGain.connect(master.gain);
+        lfo.start();
+
+        return true;
+      }
+
+      function fade(to) {
+        var now = ctx.currentTime;
+        master.gain.cancelScheduledValues(now);
+        master.gain.setValueAtTime(Math.max(master.gain.value, 0.0001), now);
+        master.gain.exponentialRampToValueAtTime(Math.max(to, 0.0001), now + 1.4);
+      }
+
+      function play() {
+        if (!ctx && !build()) return;
+        if (ctx.state === 'suspended') ctx.resume();
+        fade(TARGET_VOL);
+        playing = true;
+        btn.classList.add('playing');
+        btn.setAttribute('aria-pressed', 'true');
+        if (label) label.textContent = 'Geluid uit';
+      }
+      function pause() {
+        if (!ctx) return;
+        fade(0.0001);
+        playing = false;
+        btn.classList.remove('playing');
+        btn.setAttribute('aria-pressed', 'false');
+        if (label) label.textContent = 'Geluid aan';
+      }
+
+      btn.addEventListener('click', function () { playing ? pause() : play(); });
     })();
 
     /* ================= Review Bot loop ================= */
