@@ -3,42 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OMRZ.AI · Laat AI jouw bedrijf groeien</title>
-  <meta name="description" content="AI-oplossingen voor het Nederlandse MKB. Automatisch reviews beantwoorden en digitale stempelkaarten voor jouw klanten." />
+  <title>OMRZ.AI · De toekomst van klantloyaliteit</title>
+  <meta name="description" content="AI die jouw reviews beantwoordt en klanten terugbrengt. Digitale stempelkaarten en een AI Review Bot voor het Nederlandse MKB." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
   <style>
     :root {
-      --bg: #09090b;
+      --bg: #050508;
+      --bg-soft: #0c0c12;
       --text: #fafafa;
       --accent: #f97316;
       --accent-2: #fb923c;
-      --surface: #27272a;
-      --border: #3f3f46;
-
+      --gold: #e0b155;
       --muted: #a1a1aa;
       --muted-dim: #71717a;
+      --border: #27272e;
+      --glass: rgba(255, 255, 255, .035);
       --radius: 20px;
-      --radius-sm: 12px;
       --maxw: 1180px;
       --ease: cubic-bezier(0.22, 1, 0.36, 1);
-      --font: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
 
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html {
-      scroll-behavior: smooth;
-      -webkit-text-size-adjust: 100%;
-    }
-
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
     body {
       font-family: var(--font);
       background: var(--bg);
@@ -47,11 +38,8 @@
       font-size: 17px;
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
     }
-
     a { color: inherit; text-decoration: none; }
-    img { max-width: 100%; display: block; }
 
     .container {
       width: 100%;
@@ -60,491 +48,303 @@
       padding-inline: 24px;
     }
 
-    /* ===================== Buttons ===================== */
+    /* ---------- Buttons ---------- */
     .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-family: inherit;
-      font-size: 15px;
-      font-weight: 600;
-      line-height: 1;
-      padding: 14px 24px;
-      border-radius: 999px;
-      border: 1px solid transparent;
-      cursor: pointer;
-      transition: transform .25s var(--ease), background .25s var(--ease),
-                  box-shadow .3s var(--ease), border-color .25s var(--ease);
-      white-space: nowrap;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      font-family: inherit; font-size: 15px; font-weight: 600; line-height: 1;
+      padding: 15px 28px; border-radius: 999px; border: 1px solid transparent;
+      cursor: pointer; white-space: nowrap;
+      transition: transform .25s var(--ease), box-shadow .3s var(--ease),
+                  background .25s var(--ease), border-color .25s var(--ease);
     }
     .btn-primary {
       background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: #1a0f00;
-      box-shadow: 0 8px 30px rgba(249, 115, 22, .35);
+      color: #1a0f00; box-shadow: 0 8px 30px rgba(249,115,22,.4);
     }
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 14px 44px rgba(249, 115, 22, .5);
-    }
-    .btn-ghost {
-      background: rgba(255, 255, 255, .02);
-      color: var(--text);
-      border-color: var(--border);
-    }
-    .btn-ghost:hover {
-      transform: translateY(-2px);
-      border-color: var(--accent);
-      background: rgba(249, 115, 22, .08);
-    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 44px rgba(249,115,22,.55); }
+    .btn-ghost { background: var(--glass); color: var(--text); border-color: var(--border); }
+    .btn-ghost:hover { transform: translateY(-2px); border-color: var(--accent); background: rgba(249,115,22,.08); }
     .btn-block { width: 100%; }
 
-    /* ===================== Navigation ===================== */
+    /* ---------- Nav ---------- */
     .nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(9, 9, 11, .6);
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(5,5,8,.5);
       backdrop-filter: saturate(160%) blur(16px);
       -webkit-backdrop-filter: saturate(160%) blur(16px);
       border-bottom: 1px solid transparent;
       transition: border-color .3s var(--ease), background .3s var(--ease);
     }
-    .nav.scrolled {
-      border-color: var(--border);
-      background: rgba(9, 9, 11, .82);
-    }
-    .nav-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 72px;
-    }
-    .brand {
-      font-size: 22px;
-      font-weight: 800;
-      letter-spacing: -.02em;
-    }
+    .nav.scrolled { border-color: var(--border); background: rgba(5,5,8,.8); }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 70px; }
+    .brand { font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
     .brand span { color: var(--accent); }
-    .nav-links {
-      display: flex;
-      gap: 34px;
-      list-style: none;
-    }
-    .nav-links a {
-      font-size: 15px;
-      font-weight: 500;
-      color: var(--muted);
-      transition: color .2s var(--ease);
-    }
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a { font-size: 15px; font-weight: 500; color: var(--muted); transition: color .2s var(--ease); }
     .nav-links a:hover { color: var(--text); }
     .nav-right { display: flex; align-items: center; gap: 8px; }
-    .nav-toggle {
-      display: none;
-      flex-direction: column;
-      gap: 5px;
-      background: none;
-      border: 0;
-      cursor: pointer;
-      padding: 8px;
-    }
-    .nav-toggle span {
-      width: 22px;
-      height: 2px;
-      background: var(--text);
-      border-radius: 2px;
-      transition: transform .3s var(--ease), opacity .2s var(--ease);
-    }
+    .nav-toggle { display: none; flex-direction: column; gap: 5px; background: none; border: 0; cursor: pointer; padding: 8px; }
+    .nav-toggle span { width: 22px; height: 2px; background: var(--text); border-radius: 2px; }
 
-    /* ===================== Hero ===================== */
-    .hero {
-      position: relative;
-      padding: 130px 0 120px;
-      overflow: hidden;
-      text-align: center;
-    }
-    .blobs {
-      position: absolute;
-      inset: -20% -10% auto -10%;
-      height: 130%;
-      z-index: 0;
-      pointer-events: none;
-      filter: blur(80px);
-    }
-    .blob {
-      position: absolute;
-      border-radius: 50%;
-      opacity: .5;
-      mix-blend-mode: screen;
-      will-change: transform;
-    }
-    .blob-1 {
-      width: 620px; height: 620px;
-      top: -160px; left: 8%;
-      background: radial-gradient(circle at 30% 30%, #f97316, transparent 70%);
-      animation: drift1 22s var(--ease) infinite alternate;
-    }
-    .blob-2 {
-      width: 540px; height: 540px;
-      top: -60px; right: 6%;
-      background: radial-gradient(circle at 60% 40%, #fb923c, transparent 70%);
-      animation: drift2 26s var(--ease) infinite alternate;
-    }
-    .blob-3 {
-      width: 480px; height: 480px;
-      top: 120px; left: 40%;
-      background: radial-gradient(circle at 50% 50%, #b45309, transparent 72%);
-      animation: drift3 30s var(--ease) infinite alternate;
-    }
-    @keyframes drift1 {
-      0%   { transform: translate(0, 0) scale(1); }
-      100% { transform: translate(120px, 80px) scale(1.18); }
-    }
-    @keyframes drift2 {
-      0%   { transform: translate(0, 0) scale(1); }
-      100% { transform: translate(-100px, 120px) scale(1.12); }
-    }
-    @keyframes drift3 {
-      0%   { transform: translate(0, 0) scale(1); }
-      100% { transform: translate(60px, -90px) scale(1.22); }
-    }
-    /* soft vignette so blobs melt into the background */
+    /* ---------- Hero ---------- */
+    .hero { position: relative; height: 100vh; min-height: 640px; display: grid; place-items: center; overflow: hidden; text-align: center; }
+    #hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
     .hero::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      z-index: 1;
-      background: radial-gradient(ellipse 80% 60% at 50% 0%, transparent 40%, var(--bg) 100%);
-      pointer-events: none;
+      content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      background: radial-gradient(ellipse 70% 60% at 50% 55%, transparent 30%, var(--bg) 92%);
     }
-    .hero .container { position: relative; z-index: 2; }
-
+    .hero-inner { position: relative; z-index: 2; padding: 0 24px; }
     .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13.5px;
-      font-weight: 500;
-      color: var(--accent-2);
-      padding: 8px 16px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: rgba(249, 115, 22, .06);
-      margin-bottom: 30px;
+      display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 500;
+      color: var(--accent-2); padding: 8px 16px; border-radius: 999px;
+      border: 1px solid var(--border); background: rgba(249,115,22,.06); margin-bottom: 28px;
+      backdrop-filter: blur(8px);
     }
-    .badge .sparkle { color: var(--accent); }
-
     .hero h1 {
-      font-size: clamp(48px, 8vw, 86px);
-      font-weight: 800;
-      line-height: 1.02;
-      letter-spacing: -.035em;
-      margin: 0 auto 26px;
-      max-width: 15ch;
+      font-size: clamp(44px, 7.5vw, 82px); font-weight: 800; line-height: 1.03;
+      letter-spacing: -.035em; max-width: 16ch; margin: 0 auto 22px;
+      background: linear-gradient(120deg, #fafafa 0%, #fafafa 40%, var(--accent-2) 70%, var(--accent) 100%);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; color: transparent;
     }
-    .hero h1 .grad {
-      background: linear-gradient(120deg, var(--accent) 0%, var(--accent-2) 35%, #fafafa 80%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      color: transparent;
+    .hero-sub { font-size: clamp(17px, 2.3vw, 20px); color: var(--muted); max-width: 52ch; margin: 0 auto 38px; }
+    .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .scroll-hint {
+      position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 2;
+      color: var(--muted-dim); font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      animation: bob 2.4s var(--ease) infinite;
     }
-    .hero-sub {
-      font-size: clamp(17px, 2.3vw, 20px);
-      color: var(--muted);
-      max-width: 56ch;
-      margin: 0 auto 40px;
-      line-height: 1.55;
-    }
-    .hero-actions {
-      display: flex;
-      gap: 14px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
+    .scroll-hint svg { width: 18px; height: 18px; }
+    @keyframes bob { 0%,100%{transform:translate(-50%,0)} 50%{transform:translate(-50%,7px)} }
 
-    /* ===================== Sections ===================== */
-    .section { padding: 110px 0; position: relative; }
+    /* ---------- Sections ---------- */
+    .section { padding: 120px 0; position: relative; }
     .section-head { text-align: center; max-width: 620px; margin: 0 auto 64px; }
     .eyebrow {
-      display: inline-block;
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 16px;
+      display: inline-block; font-size: 13px; font-weight: 600; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--accent); margin-bottom: 16px;
     }
-    .section-title {
-      font-size: clamp(32px, 4.5vw, 46px);
-      font-weight: 700;
-      letter-spacing: -.03em;
-      line-height: 1.08;
-    }
-    .section-sub {
-      color: var(--muted);
-      font-size: 18px;
-      margin-top: 16px;
-      line-height: 1.55;
-    }
+    .section-title { font-size: clamp(32px, 4.5vw, 46px); font-weight: 800; letter-spacing: -.03em; line-height: 1.08; }
+    .section-sub { color: var(--muted); font-size: 18px; margin-top: 16px; }
 
-    /* ===================== Product cards ===================== */
-    .grid-2 {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 26px;
+    .split { display: grid; grid-template-columns: 1.05fr .95fr; gap: 60px; align-items: center; }
+    .split.reverse .split-visual { order: 2; }
+    .split-copy h2 { font-size: clamp(30px, 4vw, 42px); font-weight: 800; letter-spacing: -.03em; line-height: 1.1; margin-bottom: 18px; }
+    .split-copy > p { color: var(--muted); font-size: 18px; margin-bottom: 28px; }
+    .benefit-list { list-style: none; display: grid; gap: 16px; }
+    .benefit-list li { display: flex; align-items: flex-start; gap: 12px; font-size: 16px; color: #d4d4d8; }
+    .benefit-list .ic {
+      width: 26px; height: 26px; flex-shrink: 0; border-radius: 8px; display: grid; place-items: center;
+      background: rgba(249,115,22,.12); color: var(--accent);
     }
-    .product-card {
-      position: relative;
-      padding: 40px;
+    .benefit-list .ic svg { width: 15px; height: 15px; }
+
+    /* ---------- Glass panel base ---------- */
+    .glass {
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015));
+      border: 1px solid var(--border);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
       border-radius: var(--radius);
-      border: 1px solid var(--border);
-      background: linear-gradient(180deg, rgba(39,39,42,.55), rgba(39,39,42,.2));
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      overflow: hidden;
-      transition: transform .4s var(--ease), border-color .4s var(--ease);
-    }
-    .product-card::before {
-      content: "";
-      position: absolute;
-      width: 340px; height: 340px;
-      top: -140px; right: -120px;
-      border-radius: 50%;
-      filter: blur(70px);
-      opacity: .28;
-      transition: opacity .4s var(--ease);
-      pointer-events: none;
-    }
-    .product-card.glow-orange::before { background: #f97316; }
-    .product-card.glow-amber::before  { background: #fbbf24; }
-    .product-card:hover {
-      transform: translateY(-6px);
-      border-color: var(--accent);
-    }
-    .product-card:hover::before { opacity: .45; }
-    .product-card > * { position: relative; z-index: 1; }
-
-    .card-icon {
-      width: 56px; height: 56px;
-      display: grid;
-      place-items: center;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      background: rgba(249, 115, 22, .08);
-      color: var(--accent-2);
-      margin-bottom: 24px;
-    }
-    .card-icon svg { width: 28px; height: 28px; }
-
-    .product-card h3 {
-      font-size: 26px;
-      font-weight: 700;
-      letter-spacing: -.02em;
-      margin-bottom: 12px;
-    }
-    .product-card > p {
-      color: var(--muted);
-      margin-bottom: 24px;
-      line-height: 1.55;
-    }
-    .feature-list {
-      list-style: none;
-      margin-bottom: 28px;
-      display: grid;
-      gap: 12px;
-    }
-    .feature-list li {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      font-size: 15px;
-      color: #d4d4d8;
-    }
-    .feature-list li svg {
-      width: 18px; height: 18px;
-      flex-shrink: 0;
-      margin-top: 1px;
-      color: var(--accent);
-    }
-    .price-row {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      padding-top: 24px;
-      border-top: 1px solid var(--border);
-      margin-bottom: 22px;
-    }
-    .price {
-      font-size: 34px;
-      font-weight: 800;
-      letter-spacing: -.03em;
-    }
-    .price small {
-      font-size: 15px;
-      font-weight: 500;
-      color: var(--muted);
-    }
-    .price-tag {
-      font-size: 13px;
-      color: var(--muted-dim);
     }
 
-    /* ===================== Why / features ===================== */
-    .grid-3 {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 22px;
+    /* ---------- Browser mockup (Review bot) ---------- */
+    .browser {
+      position: relative; border-radius: 16px; overflow: hidden;
+      box-shadow: 0 40px 100px rgba(0,0,0,.6), 0 0 0 1px var(--border);
+      background: #0d0d13;
     }
-    .feature {
-      padding: 34px 30px;
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      background: rgba(39, 39, 42, .3);
-      transition: transform .35s var(--ease), border-color .35s var(--ease), background .35s var(--ease);
+    .browser::before {
+      content: ""; position: absolute; inset: -1px; border-radius: 16px; z-index: -1;
+      background: radial-gradient(circle at 30% 0%, rgba(249,115,22,.35), transparent 60%);
+      filter: blur(20px);
     }
-    .feature:hover {
-      transform: translateY(-5px);
-      border-color: var(--accent);
-      background: rgba(39, 39, 42, .5);
+    .browser-bar {
+      display: flex; align-items: center; gap: 8px; padding: 13px 16px;
+      background: #15151d; border-bottom: 1px solid var(--border);
     }
-    .feature-icon {
-      width: 48px; height: 48px;
-      display: grid;
-      place-items: center;
-      border-radius: 12px;
-      background: linear-gradient(135deg, rgba(249,115,22,.16), rgba(251,146,60,.06));
-      color: var(--accent-2);
-      margin-bottom: 22px;
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot.r { background: #ff5f57; } .dot.y { background: #febc2e; } .dot.g { background: #28c840; }
+    .browser-url {
+      margin-left: 12px; font-size: 12px; color: var(--muted-dim);
+      background: #0d0d13; border: 1px solid var(--border); border-radius: 8px;
+      padding: 5px 12px; flex: 1; max-width: 320px;
     }
-    .feature-icon svg { width: 24px; height: 24px; }
-    .feature h3 {
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: -.02em;
-      margin-bottom: 10px;
-    }
-    .feature p {
-      color: var(--muted);
-      font-size: 15.5px;
-      line-height: 1.6;
-    }
+    .browser-body { padding: 22px; min-height: 340px; display: flex; flex-direction: column; gap: 16px; }
 
-    /* ===================== CTA ===================== */
-    .cta-wrap { padding: 40px 0 120px; }
-    .cta {
-      position: relative;
-      text-align: center;
-      padding: 80px 40px;
-      border-radius: 28px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      background:
-        radial-gradient(ellipse 80% 120% at 50% -20%, rgba(249,115,22,.5), transparent 60%),
-        linear-gradient(160deg, #1c1206, #09090b 70%);
+    .review-card {
+      border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px;
+      opacity: 0; transform: translateY(14px); transition: opacity .5s var(--ease), transform .5s var(--ease);
+      background: rgba(255,255,255,.02);
     }
-    .cta::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at 50% 120%, rgba(251,146,60,.28), transparent 55%);
-      pointer-events: none;
-    }
-    .cta > * { position: relative; z-index: 1; }
-    .cta h2 {
-      font-size: clamp(30px, 4.5vw, 46px);
-      font-weight: 800;
-      letter-spacing: -.03em;
-      margin-bottom: 16px;
-    }
-    .cta p {
-      color: var(--muted);
-      font-size: 18px;
-      max-width: 46ch;
-      margin: 0 auto 34px;
-    }
+    .review-card.show { opacity: 1; transform: none; }
+    .review-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .review-avatar { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+      font-size: 13px; font-weight: 700; color: #1a0f00;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+    .review-name { font-size: 14px; font-weight: 600; }
+    .review-stars { font-size: 13px; letter-spacing: 1px; color: #febc2e; }
+    .review-stars .dim { color: #3a3a45; }
+    .review-text { font-size: 14.5px; color: #e4e4e7; }
 
-    /* ===================== Footer ===================== */
-    .footer {
-      border-top: 1px solid var(--border);
-      padding: 60px 0 40px;
-      background: #060607;
+    .ai-reply {
+      display: flex; gap: 12px; align-items: flex-start;
+      opacity: 0; transform: translateY(10px); transition: opacity .4s var(--ease), transform .4s var(--ease);
     }
-    .footer-top {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 40px;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 44px;
+    .ai-reply.show { opacity: 1; transform: none; }
+    .ai-badge {
+      flex-shrink: 0; width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center;
+      background: rgba(249,115,22,.14); color: var(--accent); font-size: 11px; font-weight: 700;
+      border: 1px solid rgba(249,115,22,.3);
     }
+    .ai-bubble {
+      background: rgba(249,115,22,.07); border: 1px solid rgba(249,115,22,.18);
+      border-radius: 12px; padding: 12px 14px; font-size: 14.5px; color: #f4f4f5; min-height: 20px;
+    }
+    .ai-bubble .caret { display: inline-block; width: 2px; height: 15px; background: var(--accent);
+      margin-left: 1px; vertical-align: -2px; animation: blink 1s step-end infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+    .ai-label { font-size: 11px; color: var(--muted-dim); margin-bottom: 5px; font-weight: 600; letter-spacing: .04em; }
+
+    /* ---------- Phone mockup (Stempelkaart) ---------- */
+    .phone-stage { display: grid; place-items: center; position: relative; }
+    .phone {
+      position: relative; width: 300px; height: 610px; border-radius: 46px;
+      background: #0a0a0f; border: 2px solid #26262e; padding: 12px;
+      box-shadow: 0 40px 100px rgba(0,0,0,.65), inset 0 0 0 6px #000;
+    }
+    .phone::before {
+      content: ""; position: absolute; inset: -30px; border-radius: 60px; z-index: -1;
+      background: radial-gradient(circle at 50% 20%, rgba(224,177,85,.28), transparent 60%);
+      filter: blur(24px);
+    }
+    .phone-notch { position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+      width: 120px; height: 26px; background: #000; border-radius: 0 0 16px 16px; z-index: 3; }
+    .phone-screen {
+      width: 100%; height: 100%; border-radius: 36px; overflow: hidden; position: relative;
+      background: linear-gradient(180deg, #12100a, #0a0a0f);
+      display: flex; flex-direction: column;
+    }
+    .wallet-top { padding: 46px 22px 18px; }
+    .wallet-brand { display: flex; align-items: center; justify-content: space-between; }
+    .wallet-brand .b { font-size: 15px; font-weight: 800; }
+    .wallet-brand .b span { color: var(--gold); }
+    .wallet-chip { width: 30px; height: 22px; border-radius: 5px;
+      background: linear-gradient(135deg, var(--gold), #a9812f); opacity: .9; }
+    .wallet-card {
+      margin: 8px 22px 0; border-radius: 20px; padding: 22px 20px;
+      background: linear-gradient(155deg, #1c1710, #0e0d0a);
+      border: 1px solid rgba(224,177,85,.25);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+    }
+    .wallet-title { font-size: 13px; color: var(--gold); font-weight: 600; letter-spacing: .04em; margin-bottom: 3px; }
+    .wallet-sub { font-size: 12px; color: var(--muted-dim); margin-bottom: 20px; }
+    .stamp-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px 10px; }
+    .stamp {
+      aspect-ratio: 1; border-radius: 50%; border: 1.5px dashed rgba(224,177,85,.4);
+      display: grid; place-items: center; color: var(--gold);
+      transition: transform .35s var(--ease), background .35s var(--ease), border-color .35s var(--ease);
+    }
+    .stamp svg { width: 16px; height: 16px; opacity: 0; transform: scale(.4); transition: opacity .3s var(--ease), transform .35s var(--ease); }
+    .stamp.filled {
+      background: linear-gradient(135deg, var(--gold), #b8862f);
+      border-color: transparent; border-style: solid; color: #1a1206;
+      transform: scale(1.06);
+    }
+    .stamp.filled svg { opacity: 1; transform: scale(1); }
+    .wallet-progress { margin: 18px 22px 0; font-size: 12px; color: var(--muted); text-align: center; }
+    .wallet-foot { margin-top: auto; padding: 16px 22px 26px; text-align: center; }
+    .wallet-barcode { height: 44px; border-radius: 8px; background:
+      repeating-linear-gradient(90deg, #e9e9ec 0 2px, transparent 2px 4px, #e9e9ec 4px 5px, transparent 5px 9px);
+      opacity: .85; }
+
+    .reward-overlay {
+      position: absolute; inset: 0; z-index: 5; display: grid; place-items: center;
+      background: rgba(5,5,8,.7); backdrop-filter: blur(4px);
+      opacity: 0; pointer-events: none; transition: opacity .4s var(--ease);
+    }
+    .reward-overlay.show { opacity: 1; }
+    .reward-card { text-align: center; padding: 26px; transform: scale(.85); transition: transform .5s var(--ease); }
+    .reward-overlay.show .reward-card { transform: scale(1); }
+    .reward-emoji { font-size: 48px; margin-bottom: 10px; }
+    .reward-card h4 { font-size: 24px; font-weight: 800; color: var(--gold); margin-bottom: 6px; }
+    .reward-card p { font-size: 14px; color: var(--muted); }
+    #confetti-canvas { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+
+    /* ---------- How it works ---------- */
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+    .step { padding: 34px 30px; position: relative; }
+    .step-num {
+      position: absolute; top: 26px; right: 30px; font-size: 46px; font-weight: 800;
+      color: rgba(249,115,22,.14); letter-spacing: -.04em; line-height: 1;
+    }
+    .step-icon {
+      width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center;
+      background: linear-gradient(135deg, rgba(249,115,22,.16), rgba(251,146,60,.05));
+      color: var(--accent-2); margin-bottom: 22px;
+    }
+    .step-icon svg { width: 26px; height: 26px; }
+    .step h3 { font-size: 20px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 10px; }
+    .step p { color: var(--muted); font-size: 15.5px; }
+
+    /* ---------- Pricing ---------- */
+    .pricing-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; max-width: 820px; margin: 0 auto; }
+    .price-card { padding: 38px 34px; position: relative; transition: transform .35s var(--ease), border-color .35s var(--ease); }
+    .price-card:hover { transform: translateY(-5px); }
+    .price-card.featured { border-color: rgba(249,115,22,.5); }
+    .price-card.featured::before {
+      content: ""; position: absolute; inset: -1px; border-radius: var(--radius); z-index: -1;
+      background: radial-gradient(circle at 50% 0%, rgba(249,115,22,.4), transparent 60%); filter: blur(16px);
+    }
+    .price-tier { font-size: 15px; font-weight: 600; color: var(--accent); letter-spacing: .04em; }
+    .price-badge {
+      position: absolute; top: 24px; right: 28px; font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em; color: #1a0f00;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      padding: 5px 12px; border-radius: 999px;
+    }
+    .price-amount { font-size: 52px; font-weight: 800; letter-spacing: -.03em; margin: 14px 0 4px; }
+    .price-amount small { font-size: 17px; font-weight: 500; color: var(--muted); }
+    .price-desc { color: var(--muted); font-size: 15px; margin-bottom: 26px; }
+    .price-features { list-style: none; display: grid; gap: 13px; margin-bottom: 30px; }
+    .price-features li { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; color: #d4d4d8; }
+    .price-features svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--accent); margin-top: 1px; }
+
+    /* ---------- Footer ---------- */
+    .footer { border-top: 1px solid var(--border); padding: 54px 0 40px; background: #030304; }
+    .footer-top { display: flex; flex-wrap: wrap; gap: 40px; justify-content: space-between; margin-bottom: 40px; }
     .footer-brand { max-width: 300px; }
     .footer-brand .brand { display: inline-block; margin-bottom: 14px; }
-    .footer-brand p { color: var(--muted); font-size: 15px; line-height: 1.6; }
-    .footer-cols {
-      display: flex;
-      gap: 64px;
-      flex-wrap: wrap;
-    }
-    .footer-col h4 {
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--muted-dim);
-      margin-bottom: 16px;
-    }
+    .footer-brand p { color: var(--muted); font-size: 15px; }
+    .footer-cols { display: flex; gap: 60px; flex-wrap: wrap; }
+    .footer-col h4 { font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted-dim); margin-bottom: 16px; }
     .footer-col ul { list-style: none; display: grid; gap: 11px; }
-    .footer-col a {
-      color: var(--muted);
-      font-size: 15px;
-      transition: color .2s var(--ease);
-    }
+    .footer-col a { color: var(--muted); font-size: 15px; transition: color .2s var(--ease); }
     .footer-col a:hover { color: var(--accent); }
-    .footer-bottom {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      justify-content: space-between;
-      align-items: center;
-      padding-top: 30px;
-      border-top: 1px solid var(--border);
-      color: var(--muted-dim);
-      font-size: 14px;
-    }
+    .footer-bottom { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center;
+      padding-top: 28px; border-top: 1px solid var(--border); color: var(--muted-dim); font-size: 14px; }
 
-    /* ===================== Reveal animation ===================== */
-    .reveal {
-      opacity: 0;
-      transform: translateY(24px);
-      transition: opacity .7s var(--ease), transform .7s var(--ease);
-    }
+    /* ---------- Reveal ---------- */
+    .reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
     .reveal.in { opacity: 1; transform: none; }
 
-    /* ===================== Responsive ===================== */
-    @media (max-width: 860px) {
+    /* ---------- Responsive ---------- */
+    @media (max-width: 900px) {
       .nav-links { display: none; }
       .nav-toggle { display: flex; }
       .nav-links.open {
-        display: flex;
-        position: absolute;
-        top: 72px; left: 0; right: 0;
-        flex-direction: column;
-        gap: 4px;
-        padding: 16px 24px 24px;
-        background: rgba(9,9,11,.96);
-        backdrop-filter: blur(16px);
+        display: flex; position: absolute; top: 70px; left: 0; right: 0; flex-direction: column; gap: 4px;
+        padding: 16px 24px 24px; background: rgba(5,5,8,.97); backdrop-filter: blur(16px);
         border-bottom: 1px solid var(--border);
       }
       .nav-links.open a { padding: 12px 0; font-size: 17px; }
-      .grid-2, .grid-3 { grid-template-columns: 1fr; }
-      .hero { padding: 90px 0 80px; }
-      .section { padding: 80px 0; }
-      .footer-top { flex-direction: column; }
+      .split { grid-template-columns: 1fr; gap: 40px; }
+      .split.reverse .split-visual { order: 0; }
+      .steps { grid-template-columns: 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; }
+      .section { padding: 88px 0; }
     }
-
     @media (prefers-reduced-motion: reduce) {
-      .blob { animation: none !important; }
       .reveal { transition: none; opacity: 1; transform: none; }
       html { scroll-behavior: auto; }
     }
@@ -552,180 +352,219 @@
 </head>
 <body>
 
-  <!-- ===================== Nav ===================== -->
+  <!-- ===== Nav ===== -->
   <header class="nav" id="nav">
     <div class="container nav-inner">
       <a href="index.html" class="brand">OMRZ<span>.AI</span></a>
       <nav>
         <ul class="nav-links" id="navLinks">
-          <li><a href="#producten">Producten</a></li>
-          <li><a href="pricing.html">Prijzen</a></li>
+          <li><a href="#review-bot">Review Bot</a></li>
+          <li><a href="#stempelkaart">Stempelkaart</a></li>
+          <li><a href="#prijzen">Prijzen</a></li>
           <li><a href="contact.html">Contact</a></li>
         </ul>
       </nav>
       <div class="nav-right">
         <a href="contact.html" class="btn btn-primary">Aanmelden</a>
-        <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false">
-          <span></span><span></span><span></span>
-        </button>
+        <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
       </div>
     </div>
   </header>
 
-  <!-- ===================== Hero ===================== -->
+  <!-- ===== Hero ===== -->
   <section class="hero">
-    <div class="blobs" aria-hidden="true">
-      <div class="blob blob-1"></div>
-      <div class="blob blob-2"></div>
-      <div class="blob blob-3"></div>
-    </div>
-    <div class="container">
-      <span class="badge reveal"><span class="sparkle">✦</span> AI-oplossingen voor het Nederlandse MKB</span>
-      <h1 class="reveal">Laat AI jouw<br /><span class="grad">bedrijf groeien</span></h1>
-      <p class="hero-sub reveal">Automatiseer je klantcommunicatie en klantenbinding met slimme AI. Gebouwd voor horeca, beauty en retail — professioneel, betaalbaar en direct inzetbaar.</p>
-      <div class="hero-actions reveal">
+    <canvas id="hero-canvas"></canvas>
+    <div class="hero-inner">
+      <span class="badge">✦ AI-oplossingen voor het Nederlandse MKB</span>
+      <h1>De toekomst van klantloyaliteit</h1>
+      <p class="hero-sub">AI die jouw reviews beantwoordt en klanten terugbrengt. Volledig geautomatiseerd, altijd professioneel.</p>
+      <div class="hero-actions">
         <a href="contact.html" class="btn btn-primary">Start gratis</a>
-        <a href="#producten" class="btn btn-ghost">Bekijk demo →</a>
+        <a href="#review-bot" class="btn btn-ghost">Bekijk demo →</a>
       </div>
+    </div>
+    <div class="scroll-hint">
+      Scroll
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
     </div>
   </section>
 
-  <!-- ===================== Producten ===================== -->
-  <section class="section" id="producten">
+  <!-- ===== Review Bot showcase ===== -->
+  <section class="section" id="review-bot">
     <div class="container">
-      <div class="section-head">
-        <span class="eyebrow reveal">Onze producten</span>
-        <h2 class="section-title reveal">Twee slimme tools, één doel</h2>
-        <p class="section-sub reveal">Bespaar tijd en bind klanten aan je — volledig geautomatiseerd, altijd professioneel.</p>
-      </div>
-
-      <div class="grid-2">
-        <!-- AI Review Bot -->
-        <article class="product-card glow-orange reveal">
-          <div class="card-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-              <path d="m9 10 1.5 1.5L14 8"/>
-            </svg>
+      <div class="split">
+        <div class="split-visual reveal">
+          <div class="browser">
+            <div class="browser-bar">
+              <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+              <span class="browser-url">business.google.com/reviews</span>
+            </div>
+            <div class="browser-body" id="reviewStage">
+              <div class="review-card" id="rvCard">
+                <div class="review-head">
+                  <div class="review-avatar" id="rvAvatar">SL</div>
+                  <div>
+                    <div class="review-name" id="rvName">Sanne L.</div>
+                    <div class="review-stars" id="rvStars">★★★★★</div>
+                  </div>
+                </div>
+                <div class="review-text" id="rvText">Geweldige service! Echt tevreden.</div>
+              </div>
+              <div class="ai-reply" id="aiReply">
+                <div class="ai-badge">AI</div>
+                <div style="flex:1">
+                  <div class="ai-label">OMRZ.AI antwoordt automatisch</div>
+                  <div class="ai-bubble"><span id="aiText"></span><span class="caret" id="aiCaret"></span></div>
+                </div>
+              </div>
+            </div>
           </div>
-          <h3>AI Review Bot</h3>
-          <p>Beantwoordt jouw Google reviews automatisch in je eigen tone-of-voice. Binnen enkele minuten, dag en nacht.</p>
-          <ul class="feature-list">
-            <li>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-              Automatische, persoonlijke antwoorden
-            </li>
-            <li>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-              Herkent toon: positief, neutraal of kritiek
-            </li>
-            <li>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-              Jij houdt volledige controle & goedkeuring
-            </li>
+        </div>
+        <div class="split-copy reveal">
+          <span class="eyebrow">AI Review Bot</span>
+          <h2>Elke review beantwoord, in jouw stem</h2>
+          <p>De Review Bot leest je Google reviews en schrijft binnen seconden een passend antwoord — of het nu lof of kritiek is.</p>
+          <ul class="benefit-list">
+            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Herkent de toon: positief, neutraal of kritisch</li>
+            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Antwoordt in jouw eigen tone-of-voice</li>
+            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Dag en nacht actief — jij houdt de controle</li>
           </ul>
-          <div class="price-row">
-            <span class="price">€49<small> /maand</small></span>
-            <span class="price-tag">Maandelijks opzegbaar</span>
-          </div>
-          <a href="review-bot.html" class="btn btn-ghost btn-block">Meer over de Review Bot →</a>
-        </article>
-
-        <!-- Digitale Stempelkaart -->
-        <article class="product-card glow-amber reveal">
-          <div class="card-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="5" width="20" height="14" rx="2"/>
-              <path d="M2 10h20"/>
-              <circle cx="7" cy="15" r="1.4"/>
-              <path d="M13 15h4"/>
-            </svg>
-          </div>
-          <h3>Digitale Stempelkaart</h3>
-          <p>De moderne opvolger van de papieren spaarkaart. Klanten sparen digitaal en komen vanzelf terug.</p>
-          <ul class="feature-list">
-            <li>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-              Geen app nodig — werkt via de telefoon
-            </li>
-            <li>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-              Automatische spaar- en beloningsacties
-            </li>
-            <li>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-              Inzicht in terugkerende klanten
-            </li>
-          </ul>
-          <div class="price-row">
-            <span class="price">€29<small> /maand</small></span>
-            <span class="price-tag">Maandelijks opzegbaar</span>
-          </div>
-          <a href="stempelkaart.html" class="btn btn-ghost btn-block">Meer over de Stempelkaart →</a>
-        </article>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ===================== Waarom OMRZ.AI ===================== -->
+  <!-- ===== Stempelkaart showcase ===== -->
+  <section class="section" id="stempelkaart" style="padding-top:0;">
+    <div class="container">
+      <div class="split reverse">
+        <div class="split-visual reveal">
+          <div class="phone-stage">
+            <div class="phone">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <div class="wallet-top">
+                  <div class="wallet-brand">
+                    <div class="b">OMRZ<span>.AI</span></div>
+                    <div class="wallet-chip"></div>
+                  </div>
+                </div>
+                <div class="wallet-card">
+                  <div class="wallet-title">Koffie Spaarkaart</div>
+                  <div class="wallet-sub">Spaar 10 stempels → gratis koffie</div>
+                  <div class="stamp-grid" id="stampGrid"></div>
+                </div>
+                <div class="wallet-progress" id="walletProgress">0 / 10 stempels</div>
+                <div class="wallet-foot"><div class="wallet-barcode"></div></div>
+
+                <div class="reward-overlay" id="rewardOverlay">
+                  <div class="reward-card">
+                    <div class="reward-emoji">☕</div>
+                    <h4>Gratis koffie!</h4>
+                    <p>Je spaarkaart is vol</p>
+                  </div>
+                </div>
+                <canvas id="confetti-canvas"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="split-copy reveal">
+          <span class="eyebrow">Digitale Stempelkaart</span>
+          <h2>Geen app nodig. Werkt direct via de telefoon.</h2>
+          <p>De moderne opvolger van de papieren spaarkaart. Klanten sparen digitaal in hun wallet en komen vanzelf terug.</p>
+          <ul class="benefit-list">
+            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Direct in Apple Wallet of Google Wallet</li>
+            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Automatische spaar- en beloningsacties</li>
+            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Inzicht in wie je terugkerende klanten zijn</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== How it works ===== -->
   <section class="section" style="padding-top:0;">
     <div class="container">
       <div class="section-head">
-        <span class="eyebrow reveal">Waarom OMRZ.AI</span>
-        <h2 class="section-title reveal">Gebouwd voor de ondernemer</h2>
+        <span class="eyebrow reveal">Hoe het werkt</span>
+        <h2 class="section-title reveal">In drie stappen live</h2>
       </div>
-      <div class="grid-3">
-        <div class="feature reveal">
-          <div class="feature-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-          </div>
-          <h3>Tijdbesparend</h3>
-          <p>Automatiseer terugkerend werk en bespaar uren per week aan reviews en klantacties, zodat jij je op je zaak kunt richten.</p>
+      <div class="steps">
+        <div class="step glass reveal">
+          <span class="step-num">01</span>
+          <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <h3>Meld je aan</h3>
+          <p>Maak in een paar minuten een account aan. Geen technische kennis nodig, wij helpen je op weg.</p>
         </div>
-        <div class="feature reveal">
-          <div class="feature-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.4 5 5.6.7-4 3.9 1 5.4L12 15.4 7 18l1-5.4-4-3.9 5.6-.7z"/></svg>
-          </div>
-          <h3>Professioneel</h3>
-          <p>Elke reactie en elke actie ademt kwaliteit. Een verzorgde online uitstraling waar jouw klanten vertrouwen in hebben.</p>
+        <div class="step glass reveal">
+          <span class="step-num">02</span>
+          <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+          <h3>Koppel & stel in</h3>
+          <p>Verbind je Google-profiel en pas de stijl van je AI-antwoorden en spaarkaart aan naar jouw merk.</p>
         </div>
-        <div class="feature reveal">
-          <div class="feature-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M14.5 9a2.5 2.5 0 0 0-2.5-1.6c-1.4 0-2.5.8-2.5 2 0 2.8 5 1.4 5 4.2 0 1.2-1.1 2-2.5 2A2.5 2.5 0 0 1 9 15M12 6v1.4M12 16.6V18"/></svg>
-          </div>
-          <h3>Betaalbaar</h3>
-          <p>Eerlijke tarieven vanaf €29 per maand. Geen dure contracten of verrassingen — gewoon maandelijks opzegbaar.</p>
+        <div class="step glass reveal">
+          <span class="step-num">03</span>
+          <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg></div>
+          <h3>Laat AI werken</h3>
+          <p>Vanaf nu draait alles automatisch. Jij richt je op je zaak, wij zorgen voor reviews en loyaliteit.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ===================== CTA ===================== -->
-  <section class="cta-wrap">
+  <!-- ===== Pricing ===== -->
+  <section class="section" id="prijzen" style="padding-top:0;">
     <div class="container">
-      <div class="cta reveal">
-        <h2>Klaar om te beginnen?</h2>
-        <p>Zet AI vandaag nog aan het werk voor jouw bedrijf. Binnen enkele minuten actief.</p>
-        <a href="contact.html" class="btn btn-primary">Aanmelden</a>
+      <div class="section-head">
+        <span class="eyebrow reveal">Prijzen</span>
+        <h2 class="section-title reveal">Eén heldere prijs per maand</h2>
+        <p class="section-sub reveal">Maandelijks opzegbaar. Geen verrassingen.</p>
+      </div>
+      <div class="pricing-grid">
+        <div class="price-card glass reveal">
+          <div class="price-tier">Starter</div>
+          <div class="price-amount">€29<small> /maand</small></div>
+          <p class="price-desc">Perfect om te beginnen met één slimme tool.</p>
+          <ul class="price-features">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Digitale stempelkaart</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Onbeperkt aantal klanten</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Basis-inzichten & support</li>
+          </ul>
+          <a href="contact.html" class="btn btn-ghost btn-block">Kies Starter</a>
+        </div>
+        <div class="price-card glass featured reveal">
+          <span class="price-badge">Populair</span>
+          <div class="price-tier">Pro</div>
+          <div class="price-amount">€69<small> /maand</small></div>
+          <p class="price-desc">Alles gecombineerd voor maximale groei.</p>
+          <ul class="price-features">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Digitale stempelkaart</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>AI Review Bot inbegrepen</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Uitgebreide analytics</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Prioriteit-support</li>
+          </ul>
+          <a href="contact.html" class="btn btn-primary btn-block">Kies Pro</a>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ===================== Footer ===================== -->
+  <!-- ===== Footer ===== -->
   <footer class="footer">
     <div class="container">
       <div class="footer-top">
         <div class="footer-brand">
           <a href="index.html" class="brand">OMRZ<span>.AI</span></a>
-          <p>Slimme AI-oplossingen die het Nederlandse MKB laten groeien. Voor horeca, beauty en retail.</p>
+          <p>Slimme AI-oplossingen die het Nederlandse MKB laten groeien.</p>
         </div>
         <div class="footer-cols">
           <div class="footer-col">
             <h4>Producten</h4>
             <ul>
-              <li><a href="review-bot.html">AI Review Bot</a></li>
-              <li><a href="stempelkaart.html">Digitale Stempelkaart</a></li>
-              <li><a href="pricing.html">Prijzen</a></li>
+              <li><a href="#review-bot">AI Review Bot</a></li>
+              <li><a href="#stempelkaart">Digitale Stempelkaart</a></li>
+              <li><a href="#prijzen">Prijzen</a></li>
             </ul>
           </div>
           <div class="footer-col">
@@ -745,47 +584,321 @@
     </div>
   </footer>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script>
-    // Sticky nav border on scroll
-    const nav = document.getElementById('nav');
-    const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 8);
+  (function () {
+    'use strict';
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ---------- Nav ---------- */
+    var nav = document.getElementById('nav');
+    function onScroll() { nav.classList.toggle('scrolled', window.scrollY > 8); }
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
 
-    // Mobile menu
-    const toggle = document.getElementById('navToggle');
-    const links = document.getElementById('navLinks');
-    toggle.addEventListener('click', () => {
-      const open = links.classList.toggle('open');
+    var toggle = document.getElementById('navToggle');
+    var links = document.getElementById('navLinks');
+    toggle.addEventListener('click', function () {
+      var open = links.classList.toggle('open');
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
-    links.addEventListener('click', (e) => {
-      if (e.target.tagName === 'A') {
-        links.classList.remove('open');
-        toggle.setAttribute('aria-expanded', 'false');
-      }
+    links.addEventListener('click', function (e) {
+      if (e.target.tagName === 'A') { links.classList.remove('open'); toggle.setAttribute('aria-expanded', 'false'); }
     });
 
-    // Scroll reveal
-    const items = document.querySelectorAll('.reveal');
-    if ('IntersectionObserver' in window) {
-      const io = new IntersectionObserver((entries) => {
-        entries.forEach((entry, i) => {
-          if (entry.isIntersecting) {
-            const siblings = [...entry.target.parentElement.querySelectorAll('.reveal')];
-            entry.target.style.transitionDelay = Math.min(siblings.indexOf(entry.target), 4) * 90 + 'ms';
-            entry.target.classList.add('in');
-            io.unobserve(entry.target);
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    /* ---------- Reveal ---------- */
+    var reveals = document.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window && !reduceMotion) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) {
+            var sibs = Array.prototype.slice.call(en.target.parentElement.querySelectorAll('.reveal'));
+            en.target.style.transitionDelay = Math.min(sibs.indexOf(en.target), 4) * 90 + 'ms';
+            en.target.classList.add('in');
+            io.unobserve(en.target);
           }
         });
       }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
-      items.forEach((el) => io.observe(el));
+      reveals.forEach(function (el) { io.observe(el); });
     } else {
-      items.forEach((el) => el.classList.add('in'));
+      reveals.forEach(function (el) { el.classList.add('in'); });
     }
 
-    // Year
-    document.getElementById('year').textContent = new Date().getFullYear();
+    /* ================= Hero: Three.js particle sphere ================= */
+    (function heroParticles() {
+      var canvas = document.getElementById('hero-canvas');
+      if (typeof THREE === 'undefined' || !canvas) return;
+
+      var renderer, scene, camera, points, raf;
+      var mouse = { x: 0, y: 0 }, target = { x: 0, y: 0 };
+      var COUNT = 2000;
+
+      try {
+        renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+      } catch (e) { return; }
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(60, 1, 0.1, 100);
+      camera.position.z = 6;
+
+      var positions = new Float32Array(COUNT * 3);
+      var colors = new Float32Array(COUNT * 3);
+      var radius = 3.1;
+      var cOrange = new THREE.Color(0xf97316);
+      var cAmber = new THREE.Color(0xfbbf24);
+
+      for (var i = 0; i < COUNT; i++) {
+        // even distribution on a sphere
+        var u = Math.random(), v = Math.random();
+        var theta = 2 * Math.PI * u;
+        var phi = Math.acos(2 * v - 1);
+        var r = radius * (0.85 + Math.random() * 0.15);
+        var x = r * Math.sin(phi) * Math.cos(theta);
+        var y = r * Math.sin(phi) * Math.sin(theta);
+        var z = r * Math.cos(phi);
+        positions[i * 3] = x; positions[i * 3 + 1] = y; positions[i * 3 + 2] = z;
+        var mix = cOrange.clone().lerp(cAmber, Math.random());
+        colors[i * 3] = mix.r; colors[i * 3 + 1] = mix.g; colors[i * 3 + 2] = mix.b;
+      }
+
+      var geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+      var mat = new THREE.PointsMaterial({
+        size: 0.045, vertexColors: true, transparent: true, opacity: 0.9,
+        blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true
+      });
+
+      points = new THREE.Points(geo, mat);
+      scene.add(points);
+
+      function resize() {
+        var w = canvas.clientWidth, h = canvas.clientHeight;
+        if (!w || !h) return;
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h; camera.updateProjectionMatrix();
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      window.addEventListener('mousemove', function (e) {
+        mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = (e.clientY / window.innerHeight) * 2 - 1;
+      }, { passive: true });
+
+      var running = true;
+      function render() {
+        raf = requestAnimationFrame(render);
+        if (!running) return;
+        points.rotation.y += 0.0016;
+        target.x += (mouse.y * 0.35 - target.x) * 0.04;
+        target.y += (mouse.x * 0.35 - target.y) * 0.04;
+        points.rotation.x = target.x;
+        points.rotation.z = target.y * 0.15;
+        renderer.render(scene, camera);
+      }
+      if (reduceMotion) { resize(); renderer.render(scene, camera); }
+      else render();
+
+      // pause when hero off-screen
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (en) { running = en[0].isIntersecting; })
+          .observe(document.querySelector('.hero'));
+      }
+    })();
+
+    /* ================= Review Bot loop ================= */
+    (function reviewBot() {
+      var stage = document.getElementById('reviewStage');
+      if (!stage) return;
+      var card = document.getElementById('rvCard');
+      var avatar = document.getElementById('rvAvatar');
+      var name = document.getElementById('rvName');
+      var stars = document.getElementById('rvStars');
+      var text = document.getElementById('rvText');
+      var reply = document.getElementById('aiReply');
+      var aiText = document.getElementById('aiText');
+      var caret = document.getElementById('aiCaret');
+
+      var scenes = [
+        { avatar: 'SL', name: 'Sanne L.', rating: 5, review: 'Geweldige service! Echt tevreden.',
+          ai: 'Dank je wel voor je mooie review! We zijn blij dat je tevreden bent en verwelkomen je graag snel weer.' },
+        { avatar: 'TK', name: 'Tarik K.', rating: 2, review: 'Levering duurde te lang.',
+          ai: 'Onze excuses voor het ongemak. We nemen contact met je op om dit persoonlijk voor je op te lossen.' }
+      ];
+
+      var timers = [];
+      function wait(ms) { return new Promise(function (res) { timers.push(setTimeout(res, ms)); }); }
+      function starMarkup(rating) {
+        var s = '';
+        for (var i = 0; i < 5; i++) s += i < rating ? '★' : '<span class="dim">★</span>';
+        return s;
+      }
+      function type(str) {
+        return new Promise(function (res) {
+          var i = 0;
+          (function step() {
+            aiText.textContent = str.slice(0, i);
+            if (i++ <= str.length) timers.push(setTimeout(step, 26));
+            else res();
+          })();
+        });
+      }
+
+      async function run() {
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+          for (var s = 0; s < scenes.length; s++) {
+            var sc = scenes[s];
+            // reset
+            reply.classList.remove('show');
+            card.classList.remove('show');
+            aiText.textContent = '';
+            caret.style.display = 'none';
+            await wait(400);
+
+            avatar.textContent = sc.avatar;
+            name.textContent = sc.name;
+            stars.innerHTML = starMarkup(sc.rating);
+            text.textContent = sc.review;
+            card.classList.add('show');
+
+            await wait(2000);
+            reply.classList.add('show');
+            caret.style.display = 'inline-block';
+            await wait(400);
+            await type(sc.ai);
+            await wait(300);
+            caret.style.display = 'none';
+            await wait(3200);
+          }
+        }
+      }
+      if (reduceMotion) {
+        var sc0 = scenes[0];
+        avatar.textContent = sc0.avatar; name.textContent = sc0.name;
+        stars.innerHTML = starMarkup(sc0.rating); text.textContent = sc0.review;
+        card.classList.add('show'); reply.classList.add('show');
+        aiText.textContent = sc0.ai; caret.style.display = 'none';
+        return;
+      }
+      // start when visible
+      if ('IntersectionObserver' in window) {
+        var started = false;
+        new IntersectionObserver(function (en) {
+          if (en[0].isIntersecting && !started) { started = true; run(); }
+        }, { threshold: 0.3 }).observe(stage);
+      } else { run(); }
+    })();
+
+    /* ================= Stempelkaart loop + confetti ================= */
+    (function stempelkaart() {
+      var grid = document.getElementById('stampGrid');
+      if (!grid) return;
+      var progress = document.getElementById('walletProgress');
+      var overlay = document.getElementById('rewardOverlay');
+      var confettiCanvas = document.getElementById('confetti-canvas');
+      var TOTAL = 10;
+      var checkSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+
+      var cells = [];
+      for (var i = 0; i < TOTAL; i++) {
+        var c = document.createElement('div');
+        c.className = 'stamp';
+        c.innerHTML = checkSvg;
+        grid.appendChild(c);
+        cells.push(c);
+      }
+
+      /* --- confetti --- */
+      var cctx = confettiCanvas.getContext('2d');
+      var pieces = [], confettiRaf = null;
+      function sizeConfetti() {
+        confettiCanvas.width = confettiCanvas.clientWidth;
+        confettiCanvas.height = confettiCanvas.clientHeight;
+      }
+      var confColors = ['#f97316', '#fbbf24', '#e0b155', '#fafafa', '#fb923c'];
+      function burst() {
+        sizeConfetti();
+        pieces = [];
+        var W = confettiCanvas.width;
+        for (var i = 0; i < 90; i++) {
+          pieces.push({
+            x: W / 2 + (Math.random() - 0.5) * 60,
+            y: confettiCanvas.height * 0.35,
+            vx: (Math.random() - 0.5) * 6,
+            vy: -Math.random() * 7 - 2,
+            g: 0.18 + Math.random() * 0.1,
+            size: 4 + Math.random() * 5,
+            rot: Math.random() * Math.PI,
+            vr: (Math.random() - 0.5) * 0.3,
+            color: confColors[(Math.random() * confColors.length) | 0],
+            life: 0
+          });
+        }
+        if (!confettiRaf) confettiRaf = requestAnimationFrame(drawConfetti);
+      }
+      function drawConfetti() {
+        cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+        var alive = false;
+        for (var i = 0; i < pieces.length; i++) {
+          var p = pieces[i];
+          p.vy += p.g; p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.life++;
+          if (p.y < confettiCanvas.height + 20 && p.life < 160) alive = true;
+          cctx.save();
+          cctx.translate(p.x, p.y);
+          cctx.rotate(p.rot);
+          cctx.globalAlpha = Math.max(0, 1 - p.life / 160);
+          cctx.fillStyle = p.color;
+          cctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+          cctx.restore();
+        }
+        if (alive) confettiRaf = requestAnimationFrame(drawConfetti);
+        else { cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height); confettiRaf = null; }
+      }
+
+      var timers = [];
+      function wait(ms) { return new Promise(function (res) { timers.push(setTimeout(res, ms)); }); }
+
+      async function run() {
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+          // reset
+          overlay.classList.remove('show');
+          for (var r = 0; r < TOTAL; r++) cells[r].classList.remove('filled');
+          progress.textContent = '0 / ' + TOTAL + ' stempels';
+          await wait(800);
+
+          for (var i = 0; i < TOTAL; i++) {
+            cells[i].classList.add('filled');
+            progress.textContent = (i + 1) + ' / ' + TOTAL + ' stempels';
+            await wait(1500);
+          }
+          progress.textContent = 'Spaarkaart vol! 🎉';
+          overlay.classList.add('show');
+          if (!reduceMotion) burst();
+          await wait(3000);
+        }
+      }
+
+      if (reduceMotion) {
+        for (var k = 0; k < TOTAL; k++) cells[k].classList.add('filled');
+        progress.textContent = TOTAL + ' / ' + TOTAL + ' stempels';
+        overlay.classList.add('show');
+        return;
+      }
+      if ('IntersectionObserver' in window) {
+        var started = false;
+        new IntersectionObserver(function (en) {
+          if (en[0].isIntersecting && !started) { started = true; run(); }
+        }, { threshold: 0.3 }).observe(grid);
+      } else { run(); }
+    })();
+  })();
   </script>
 </body>
 </html>
