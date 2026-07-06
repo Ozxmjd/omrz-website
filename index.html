@@ -681,19 +681,24 @@
       var root = new THREE.Group();
       scene.add(root);
 
-      // --- Earth sphere: dark, no texture, subtle vertical gradient via vertex colors ---
-      var earthGeo = new THREE.SphereGeometry(RADIUS, 48, 48);
-      var cLow = new THREE.Color(0x050508);   // near-black (poles/bottom)
-      var cHigh = new THREE.Color(0x0a1628);  // dark blue (equator/top)
-      var pos = earthGeo.attributes.position;
-      var eColors = new Float32Array(pos.count * 3);
-      for (var v = 0; v < pos.count; v++) {
-        var t = (pos.getY(v) / RADIUS + 1) / 2; // 0..1 bottom->top
-        var c = cLow.clone().lerp(cHigh, 0.35 + t * 0.65);
-        eColors[v * 3] = c.r; eColors[v * 3 + 1] = c.g; eColors[v * 3 + 2] = c.b;
-      }
-      earthGeo.setAttribute('color', new THREE.BufferAttribute(eColors, 3));
-      var earth = new THREE.Mesh(earthGeo, new THREE.MeshBasicMaterial({ vertexColors: true }));
+      // --- Earth sphere: real NASA night texture (city lights baked in) ---
+      var earthGeo = new THREE.SphereGeometry(RADIUS, 64, 64);
+      var earthMat = new THREE.MeshBasicMaterial({ color: 0x8a8a8a });
+      var earth = new THREE.Mesh(earthGeo, earthMat);
+
+      var loader = new THREE.TextureLoader();
+      loader.setCrossOrigin('anonymous');
+      loader.load(
+        'https://unpkg.com/three-globe/example/img/earth-night.jpg',
+        function (tex) {
+          if ('sRGBEncoding' in THREE) tex.encoding = THREE.sRGBEncoding;
+          tex.anisotropy = renderer.capabilities.getMaxAnisotropy ? renderer.capabilities.getMaxAnisotropy() : 1;
+          earthMat.map = tex;
+          earthMat.color.set(0xffffff);
+          earthMat.needsUpdate = true;
+          renderer.render(scene, camera); // repaint once texture arrives (covers reduced-motion)
+        }
+      );
 
       // --- Atmosphere rim glow (back-side additive) ---
       var atmo = new THREE.Mesh(
@@ -704,37 +709,41 @@
         })
       );
 
-      // --- City lights: thousands of yellow/white points on the surface ---
-      var CITY_COUNT = 4000;
-      var cityPos = new Float32Array(CITY_COUNT * 3);
-      var cityCol = new Float32Array(CITY_COUNT * 3);
-      var cWhite = new THREE.Color(0xffffff);
-      var cWarm = new THREE.Color(0xffd27a);
-      for (var i = 0; i < CITY_COUNT; i++) {
-        // cluster slightly so it reads like landmasses rather than a uniform shell
+      // --- Glowing orange connection arcs between random surface points ---
+      function surfacePoint(r) {
         var u = Math.random(), w = Math.random();
         var theta = 2 * Math.PI * u;
         var phi = Math.acos(2 * w - 1);
-        var jitter = Math.pow(Math.random(), 2); // bias toward brighter clusters
-        var r = RADIUS * 1.002;
-        cityPos[i * 3]     = r * Math.sin(phi) * Math.cos(theta);
-        cityPos[i * 3 + 1] = r * Math.cos(phi);
-        cityPos[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta);
-        var col = cWarm.clone().lerp(cWhite, jitter);
-        var bright = 0.55 + jitter * 0.45;
-        cityCol[i * 3] = col.r * bright; cityCol[i * 3 + 1] = col.g * bright; cityCol[i * 3 + 2] = col.b * bright;
+        return new THREE.Vector3(
+          r * Math.sin(phi) * Math.cos(theta),
+          r * Math.cos(phi),
+          r * Math.sin(phi) * Math.sin(theta)
+        );
       }
-      var cityGeo = new THREE.BufferGeometry();
-      cityGeo.setAttribute('position', new THREE.BufferAttribute(cityPos, 3));
-      cityGeo.setAttribute('color', new THREE.BufferAttribute(cityCol, 3));
-      var cities = new THREE.Points(cityGeo, new THREE.PointsMaterial({
-        size: 0.028, vertexColors: true, transparent: true, opacity: 0.95,
-        blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true
-      }));
+      var arcs = [];
+      var ARC_COUNT = 14;
+      for (var a = 0; a < ARC_COUNT; a++) {
+        var p1 = surfacePoint(RADIUS * 1.005);
+        var p2 = surfacePoint(RADIUS * 1.005);
+        // control point lifted along the midpoint normal -> arc bulges outward
+        var mid = p1.clone().add(p2).multiplyScalar(0.5);
+        if (mid.length() < 0.001) mid.copy(p1); // guard: near-antipodal points
+        var lift = 1.18 + Math.random() * 0.28;
+        mid.normalize().multiplyScalar(RADIUS * lift);
+        var curve = new THREE.QuadraticBezierCurve3(p1, mid, p2);
+        var arcGeo = new THREE.BufferGeometry().setFromPoints(curve.getPoints(48));
+        var arcMat = new THREE.LineBasicMaterial({
+          color: 0xf97316, transparent: true, opacity: 0.25,
+          blending: THREE.AdditiveBlending, depthWrite: false
+        });
+        var line = new THREE.Line(arcGeo, arcMat);
+        arcs.push({ line: line, mat: arcMat, phase: Math.random() * Math.PI * 2, speed: 0.6 + Math.random() * 1.1 });
+      }
 
-      // Earth + atmosphere + cities spin together
+      // Earth + atmosphere + arcs spin together
       var earthGroup = new THREE.Group();
-      earthGroup.add(earth); earthGroup.add(atmo); earthGroup.add(cities);
+      earthGroup.add(earth); earthGroup.add(atmo);
+      for (var ai = 0; ai < arcs.length; ai++) earthGroup.add(arcs[ai].line);
       earthGroup.rotation.z = 0.28; // slight axial tilt
       root.add(earthGroup);
 
@@ -781,12 +790,17 @@
         mouse.y = (e.clientY / window.innerHeight) * 2 - 1;
       }, { passive: true });
 
-      var running = true;
+      var running = true, clock = 0;
       function frame() {
         requestAnimationFrame(frame);
         if (!running) return;
+        clock += 0.016;
         earthGroup.rotation.y += 0.0011;          // slow auto-rotation
         for (var k = 0; k < orbits.length; k++) orbits[k].pivot.rotation.y += orbits[k].speed;
+        // pulse the glowing connection arcs
+        for (var ap = 0; ap < arcs.length; ap++) {
+          arcs[ap].mat.opacity = 0.12 + (Math.sin(clock * arcs[ap].speed + arcs[ap].phase) * 0.5 + 0.5) * 0.5;
+        }
         // mouse tilt on the whole scene
         target.x += (mouse.y * 0.3 - target.x) * 0.045;
         target.y += (mouse.x * 0.4 - target.y) * 0.045;
