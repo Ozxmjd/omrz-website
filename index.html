@@ -118,33 +118,6 @@
     .scroll-hint svg { width: 18px; height: 18px; }
     @keyframes bob { 0%,100%{transform:translate(-50%,0)} 50%{transform:translate(-50%,7px)} }
 
-    /* ---------- Ambient sound toggle ---------- */
-    .sound-toggle {
-      position: fixed; right: 22px; bottom: 22px; z-index: 90;
-      display: inline-flex; align-items: center; gap: 9px;
-      padding: 10px 15px 10px 12px; border-radius: 999px; cursor: pointer;
-      font-family: inherit; font-size: 12.5px; font-weight: 600; letter-spacing: .02em;
-      color: var(--muted); background: rgba(12,12,18,.72); border: 1px solid var(--border);
-      backdrop-filter: saturate(160%) blur(14px); -webkit-backdrop-filter: saturate(160%) blur(14px);
-      transition: color .25s var(--ease), border-color .25s var(--ease),
-                  background .25s var(--ease), transform .25s var(--ease);
-    }
-    .sound-toggle:hover { color: var(--text); border-color: var(--accent); transform: translateY(-2px); }
-    .sound-toggle.playing { color: var(--text); border-color: rgba(249,115,22,.45); }
-    .sound-toggle .eq { display: flex; align-items: flex-end; gap: 2px; height: 15px; width: 16px; }
-    .sound-toggle .eq span {
-      flex: 1; background: var(--accent); border-radius: 2px; height: 30%;
-      transform-origin: bottom;
-    }
-    .sound-toggle.playing .eq span { animation: eq 1s ease-in-out infinite; }
-    .sound-toggle.playing .eq span:nth-child(2) { animation-delay: .2s; }
-    .sound-toggle.playing .eq span:nth-child(3) { animation-delay: .4s; }
-    .sound-toggle .eq span:nth-child(1) { height: 45%; }
-    .sound-toggle .eq span:nth-child(2) { height: 90%; }
-    .sound-toggle .eq span:nth-child(3) { height: 60%; }
-    @keyframes eq { 0%,100% { transform: scaleY(.35); } 50% { transform: scaleY(1); } }
-    @media (max-width: 520px) { .sound-toggle .label { display: none; } .sound-toggle { padding: 11px; } }
-
     /* ---------- Sections ---------- */
     .section { padding: 120px 0; position: relative; }
     .section-head { text-align: center; max-width: 620px; margin: 0 auto 64px; }
@@ -415,12 +388,6 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
     </div>
   </section>
-
-  <!-- ===== Ambient sound toggle ===== -->
-  <button class="sound-toggle" id="soundToggle" type="button" aria-pressed="false" aria-label="Ambient geluid aan/uit">
-    <span class="eq" aria-hidden="true"><span></span><span></span><span></span></span>
-    <span class="label" id="soundLabel">Geluid aan</span>
-  </button>
 
   <!-- ===== Review Bot showcase ===== -->
   <section class="section" id="review-bot">
@@ -853,86 +820,6 @@
         new IntersectionObserver(function (en) { running = en[0].isIntersecting; })
           .observe(document.querySelector('.hero'));
       }
-    })();
-
-    /* ================= Ambient drone (Web Audio API) ================= */
-    (function ambientSound() {
-      var btn = document.getElementById('soundToggle');
-      var label = document.getElementById('soundLabel');
-      if (!btn) return;
-
-      var ctx = null, master = null, lfo = null, voices = [], playing = false;
-      var TARGET_VOL = 0.07; // ~7% — very low
-
-      function build() {
-        var AC = window.AudioContext || window.webkitAudioContext;
-        if (!AC) return false;
-        ctx = new AC();
-
-        master = ctx.createGain();
-        master.gain.value = 0.0001;
-
-        // gentle low-pass so it stays soft and warm
-        var filter = ctx.createBiquadFilter();
-        filter.type = 'lowpass';
-        filter.frequency.value = 620;
-        filter.Q.value = 0.6;
-        master.connect(filter);
-        filter.connect(ctx.destination);
-
-        // layered drone: root + fifth + octave shimmer, slightly detuned
-        var freqs = [55, 82.5, 110, 164.81];
-        var gains = [0.5, 0.32, 0.22, 0.12];
-        for (var i = 0; i < freqs.length; i++) {
-          var osc = ctx.createOscillator();
-          osc.type = i === 3 ? 'triangle' : 'sine';
-          osc.frequency.value = freqs[i];
-          osc.detune.value = (i - 1.5) * 4; // subtle chorus
-          var g = ctx.createGain();
-          g.gain.value = gains[i];
-          osc.connect(g); g.connect(master);
-          osc.start();
-          voices.push(osc);
-        }
-
-        // slow amplitude LFO for a breathing feel
-        lfo = ctx.createOscillator();
-        lfo.type = 'sine';
-        lfo.frequency.value = 0.06;
-        var lfoGain = ctx.createGain();
-        lfoGain.gain.value = 0.02;
-        lfo.connect(lfoGain); lfoGain.connect(master.gain);
-        lfo.start();
-
-        return true;
-      }
-
-      function fade(to) {
-        var now = ctx.currentTime;
-        master.gain.cancelScheduledValues(now);
-        master.gain.setValueAtTime(Math.max(master.gain.value, 0.0001), now);
-        master.gain.exponentialRampToValueAtTime(Math.max(to, 0.0001), now + 1.4);
-      }
-
-      function play() {
-        if (!ctx && !build()) return;
-        if (ctx.state === 'suspended') ctx.resume();
-        fade(TARGET_VOL);
-        playing = true;
-        btn.classList.add('playing');
-        btn.setAttribute('aria-pressed', 'true');
-        if (label) label.textContent = 'Geluid uit';
-      }
-      function pause() {
-        if (!ctx) return;
-        fade(0.0001);
-        playing = false;
-        btn.classList.remove('playing');
-        btn.setAttribute('aria-pressed', 'false');
-        if (label) label.textContent = 'Geluid aan';
-      }
-
-      btn.addEventListener('click', function () { playing ? pause() : play(); });
     })();
 
     /* ================= Review Bot loop ================= */
