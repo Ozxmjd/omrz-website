@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OMRZ.AI · De toekomst van klantloyaliteit</title>
-  <meta name="description" content="AI die jouw reviews beantwoordt en klanten terugbrengt. Digitale stempelkaarten en een AI Review Bot voor het Nederlandse MKB." />
+  <title>OMRZ.AI · Slimmere tools voor slimmere ondernemers</title>
+  <meta name="description" content="AI-tools voor het Nederlandse MKB. Automatisch reviews beantwoorden en digitale stempelkaarten die klanten terugbrengen." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -12,17 +12,14 @@
 
   <style>
     :root {
-      --bg: #050508;
-      --bg-soft: #0c0c12;
-      --text: #fafafa;
-      --accent: #f97316;
-      --accent-2: #fb923c;
-      --gold: #e0b155;
-      --muted: #a1a1aa;
-      --muted-dim: #71717a;
-      --border: #27272e;
-      --glass: rgba(255, 255, 255, .035);
-      --radius: 20px;
+      --bg: #0a0a0a;
+      --text: #ffffff;
+      --muted: #a0a0a0;
+      --pearl: #e8e8e8;
+      --card: rgba(255, 255, 255, .05);
+      --border: rgba(255, 255, 255, .1);
+      --border-strong: rgba(255, 255, 255, .18);
+      --radius: 18px;
       --maxw: 1180px;
       --ease: cubic-bezier(0.22, 1, 0.36, 1);
       --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -31,322 +28,203 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
     body {
-      font-family: var(--font);
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      font-size: 17px;
-      overflow-x: hidden;
-      -webkit-font-smoothing: antialiased;
+      font-family: var(--font); background: var(--bg); color: var(--text);
+      line-height: 1.6; font-size: 17px; overflow-x: hidden; -webkit-font-smoothing: antialiased;
     }
     a { color: inherit; text-decoration: none; }
-
-    .container {
-      width: 100%;
-      max-width: var(--maxw);
-      margin-inline: auto;
-      padding-inline: 24px;
-    }
+    .container { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: 24px; }
 
     /* ---------- Buttons ---------- */
     .btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 8px;
       font-family: inherit; font-size: 15px; font-weight: 600; line-height: 1;
-      padding: 15px 28px; border-radius: 999px; border: 1px solid transparent;
-      cursor: pointer; white-space: nowrap;
-      transition: transform .25s var(--ease), box-shadow .3s var(--ease),
-                  background .25s var(--ease), border-color .25s var(--ease);
+      padding: 14px 24px; border-radius: 10px; border: 1px solid transparent; cursor: pointer; white-space: nowrap;
+      transition: transform .25s var(--ease), background .25s var(--ease), border-color .25s var(--ease), color .25s var(--ease), box-shadow .3s var(--ease);
     }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      color: #1a0f00; box-shadow: 0 8px 30px rgba(249,115,22,.4);
-    }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 44px rgba(249,115,22,.55); }
-    .btn-ghost { background: var(--glass); color: var(--text); border-color: var(--border); }
-    .btn-ghost:hover { transform: translateY(-2px); border-color: var(--accent); background: rgba(249,115,22,.08); }
+    .btn-primary { background: #ffffff; color: #0a0a0a; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(255,255,255,.18); }
+    .btn-ghost { background: transparent; color: var(--text); border-color: var(--border-strong); }
+    .btn-ghost:hover { transform: translateY(-2px); border-color: #fff; background: rgba(255,255,255,.06); }
+    .btn-outline { background: transparent; color: var(--text); border-color: var(--border-strong); }
+    .btn-outline:hover { background: #fff; color: #0a0a0a; border-color: #fff; }
     .btn-block { width: 100%; }
 
     /* ---------- Nav ---------- */
     .nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      background: rgba(5,5,8,.5);
-      backdrop-filter: saturate(160%) blur(16px);
-      -webkit-backdrop-filter: saturate(160%) blur(16px);
-      border-bottom: 1px solid transparent;
-      transition: border-color .3s var(--ease), background .3s var(--ease);
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,10,10,.6);
+      backdrop-filter: saturate(160%) blur(16px); -webkit-backdrop-filter: saturate(160%) blur(16px);
+      border-bottom: 1px solid transparent; transition: border-color .3s var(--ease), background .3s var(--ease);
     }
-    .nav.scrolled { border-color: var(--border); background: rgba(5,5,8,.8); }
-    .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 70px; }
-    .brand { font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
-    .brand span { color: var(--accent); }
-    .nav-links { display: flex; gap: 32px; list-style: none; }
-    .nav-links a { font-size: 15px; font-weight: 500; color: var(--muted); transition: color .2s var(--ease); }
-    .nav-links a:hover { color: var(--text); }
+    .nav.scrolled { border-color: var(--border); background: rgba(10,10,10,.82); }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 66px; }
+    .brand { font-size: 20px; font-weight: 800; letter-spacing: -.02em; color: #fff; }
+    .nav-links { display: flex; gap: 30px; list-style: none; }
+    .nav-links a { font-size: 14.5px; font-weight: 500; color: var(--muted); transition: color .2s var(--ease); }
+    .nav-links a:hover { color: #fff; }
     .nav-right { display: flex; align-items: center; gap: 8px; }
     .nav-toggle { display: none; flex-direction: column; gap: 5px; background: none; border: 0; cursor: pointer; padding: 8px; }
-    .nav-toggle span { width: 22px; height: 2px; background: var(--text); border-radius: 2px; }
+    .nav-toggle span { width: 22px; height: 2px; background: #fff; border-radius: 2px; }
 
     /* ---------- Hero ---------- */
-    .hero { position: relative; height: 100vh; min-height: 640px; display: grid; place-items: center; overflow: hidden; text-align: center; }
-    #hero-canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
-    .hero::after {
-      content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
-      background: radial-gradient(ellipse 70% 60% at 50% 55%, transparent 30%, var(--bg) 92%);
+    .hero { position: relative; padding: 150px 0 70px; text-align: center; overflow: hidden; }
+    .hero::before {
+      content: ""; position: absolute; z-index: 0; pointer-events: none;
+      width: 900px; height: 520px; top: -140px; left: 50%; transform: translateX(-50%);
+      background: radial-gradient(ellipse at center, rgba(255,255,255,.09), transparent 65%); filter: blur(30px);
     }
-    .hero-inner { position: relative; z-index: 2; padding: 0 24px; }
+    .hero .container { position: relative; z-index: 2; }
     .badge {
-      display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 500;
-      color: var(--accent-2); padding: 8px 16px; border-radius: 999px;
-      border: 1px solid var(--border); background: rgba(249,115,22,.06); margin-bottom: 28px;
-      backdrop-filter: blur(8px);
+      display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500;
+      color: var(--pearl); padding: 7px 15px; border-radius: 999px;
+      border: 1px solid var(--border); background: var(--card); margin-bottom: 28px;
     }
     .hero h1 {
-      font-size: clamp(44px, 7.5vw, 82px); font-weight: 800; line-height: 1.03;
-      letter-spacing: -.035em; max-width: 16ch; margin: 0 auto 22px;
-      background: linear-gradient(120deg, #fafafa 0%, #fafafa 40%, var(--accent-2) 70%, var(--accent) 100%);
-      -webkit-background-clip: text; background-clip: text;
-      -webkit-text-fill-color: transparent; color: transparent;
+      font-size: clamp(40px, 6.4vw, 76px); font-weight: 800; line-height: 1.05;
+      letter-spacing: -.04em; max-width: 16ch; margin: 0 auto 22px;
+      background: linear-gradient(180deg, #ffffff 30%, #9a9a9a 130%);
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent;
     }
-    .hero-sub { font-size: clamp(17px, 2.3vw, 20px); color: var(--muted); max-width: 52ch; margin: 0 auto 38px; }
-    .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-    .scroll-hint {
-      position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 2;
-      color: var(--muted-dim); font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
-      display: flex; flex-direction: column; align-items: center; gap: 8px;
-      animation: bob 2.4s var(--ease) infinite;
+    .hero-sub { font-size: clamp(16px, 2.1vw, 19px); color: var(--muted); max-width: 50ch; margin: 0 auto 36px; }
+    .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+    /* ---------- 3D showcase ---------- */
+    .showcase { position: relative; padding: 30px 0 90px; }
+    .showcase-stage {
+      position: relative; height: 520px; max-width: 1000px; margin: 0 auto;
+      -webkit-mask: radial-gradient(120% 100% at 50% 44%, #000 52%, transparent 84%);
+      mask: radial-gradient(120% 100% at 50% 44%, #000 52%, transparent 84%);
     }
-    .scroll-hint svg { width: 18px; height: 18px; }
-    @keyframes bob { 0%,100%{transform:translate(-50%,0)} 50%{transform:translate(-50%,7px)} }
+    .showcase-glow {
+      position: absolute; inset: 0; z-index: 0; pointer-events: none;
+      background: radial-gradient(circle at 50% 44%, rgba(255,255,255,.18), transparent 58%); filter: blur(34px);
+    }
+    #showcase-canvas { position: relative; z-index: 1; width: 100%; height: 100%; display: block; }
+    .showcase-caption { text-align: center; color: var(--muted); font-size: 14px; margin-top: 8px; letter-spacing: .02em; }
 
     /* ---------- Sections ---------- */
-    .section { padding: 120px 0; position: relative; }
-    .section-head { text-align: center; max-width: 620px; margin: 0 auto 64px; }
-    .eyebrow {
-      display: inline-block; font-size: 13px; font-weight: 600; letter-spacing: .12em;
-      text-transform: uppercase; color: var(--accent); margin-bottom: 16px;
-    }
-    .section-title { font-size: clamp(32px, 4.5vw, 46px); font-weight: 800; letter-spacing: -.03em; line-height: 1.08; }
+    .section { padding: 100px 0; position: relative; }
+    .section-head { text-align: center; max-width: 620px; margin: 0 auto 56px; }
+    .eyebrow { display: inline-block; font-size: 12.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--pearl); margin-bottom: 16px; }
+    .section-title { font-size: clamp(30px, 4.4vw, 44px); font-weight: 800; letter-spacing: -.03em; line-height: 1.1; }
     .section-sub { color: var(--muted); font-size: 18px; margin-top: 16px; }
 
-    .split { display: grid; grid-template-columns: 1.05fr .95fr; gap: 60px; align-items: center; }
-    .split.reverse .split-visual { order: 2; }
-    .split-copy h2 { font-size: clamp(30px, 4vw, 42px); font-weight: 800; letter-spacing: -.03em; line-height: 1.1; margin-bottom: 18px; }
-    .split-copy > p { color: var(--muted); font-size: 18px; margin-bottom: 28px; }
-    .benefit-list { list-style: none; display: grid; gap: 16px; }
-    .benefit-list li { display: flex; align-items: flex-start; gap: 12px; font-size: 16px; color: #d4d4d8; }
-    .benefit-list .ic {
-      width: 26px; height: 26px; flex-shrink: 0; border-radius: 8px; display: grid; place-items: center;
-      background: rgba(249,115,22,.12); color: var(--accent);
-    }
-    .benefit-list .ic svg { width: 15px; height: 15px; }
+    .glass { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
 
-    /* ---------- Glass panel base ---------- */
-    .glass {
-      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015));
-      border: 1px solid var(--border);
-      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      border-radius: var(--radius);
+    /* ---------- Linear-style tabs ---------- */
+    .tabs { display: inline-flex; gap: 6px; padding: 6px; border-radius: 14px; background: rgba(255,255,255,.04); border: 1px solid var(--border); margin: 0 auto 44px; }
+    .tabs-wrap { text-align: center; }
+    .tab {
+      font-family: inherit; font-size: 14.5px; font-weight: 600; color: var(--muted);
+      background: transparent; border: 0; cursor: pointer; padding: 11px 22px; border-radius: 10px;
+      transition: background .25s var(--ease), color .25s var(--ease);
     }
+    .tab:hover { color: #fff; }
+    .tab.active { background: rgba(255,255,255,.1); color: #fff; }
 
-    /* ---------- Browser mockup (Review bot) ---------- */
-    .browser {
-      position: relative; border-radius: 16px; overflow: hidden;
-      box-shadow: 0 40px 100px rgba(0,0,0,.6), 0 0 0 1px var(--border);
-      background: #0d0d13;
-    }
-    .browser::before {
-      content: ""; position: absolute; inset: -1px; border-radius: 16px; z-index: -1;
-      background: radial-gradient(circle at 30% 0%, rgba(249,115,22,.35), transparent 60%);
-      filter: blur(20px);
-    }
-    .browser-bar {
-      display: flex; align-items: center; gap: 8px; padding: 13px 16px;
-      background: #15151d; border-bottom: 1px solid var(--border);
-    }
-    .dot { width: 12px; height: 12px; border-radius: 50%; }
-    .dot.r { background: #ff5f57; } .dot.y { background: #febc2e; } .dot.g { background: #28c840; }
-    .browser-url {
-      margin-left: 12px; font-size: 12px; color: var(--muted-dim);
-      background: #0d0d13; border: 1px solid var(--border); border-radius: 8px;
-      padding: 5px 12px; flex: 1; max-width: 320px;
-    }
-    .browser-body { padding: 22px; min-height: 340px; display: flex; flex-direction: column; gap: 16px; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; animation: fadeUp .5s var(--ease); }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 
-    .review-card {
-      border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px;
-      opacity: 0; transform: translateY(14px); transition: opacity .5s var(--ease), transform .5s var(--ease);
-      background: rgba(255,255,255,.02);
-    }
-    .review-card.show { opacity: 1; transform: none; }
-    .review-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-    .review-avatar { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
-      font-size: 13px; font-weight: 700; color: #1a0f00;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
-    .review-name { font-size: 14px; font-weight: 600; }
-    .review-stars { font-size: 13px; letter-spacing: 1px; color: #febc2e; }
-    .review-stars .dim { color: #3a3a45; }
-    .review-text { font-size: 14.5px; color: #e4e4e7; }
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+    .split-copy h3 { font-size: clamp(26px, 3.4vw, 36px); font-weight: 800; letter-spacing: -.03em; margin-bottom: 16px; }
+    .split-copy > p { color: var(--muted); font-size: 17px; margin-bottom: 26px; }
+    .benefit-list { list-style: none; display: grid; gap: 14px; }
+    .benefit-list li { display: flex; align-items: flex-start; gap: 12px; font-size: 15.5px; color: #d4d4d4; }
+    .benefit-list .ic { width: 24px; height: 24px; flex-shrink: 0; border-radius: 7px; display: grid; place-items: center; background: rgba(255,255,255,.08); color: #fff; }
+    .benefit-list .ic svg { width: 14px; height: 14px; }
 
-    .ai-reply {
-      display: flex; gap: 12px; align-items: flex-start;
-      opacity: 0; transform: translateY(10px); transition: opacity .4s var(--ease), transform .4s var(--ease);
+    /* review mockup (monochrome) */
+    .mock {
+      position: relative; border-radius: 16px; overflow: hidden; border: 1px solid var(--border);
+      background: #111113; box-shadow: 0 30px 80px rgba(0,0,0,.5);
     }
-    .ai-reply.show { opacity: 1; transform: none; }
-    .ai-badge {
-      flex-shrink: 0; width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center;
-      background: rgba(249,115,22,.14); color: var(--accent); font-size: 11px; font-weight: 700;
-      border: 1px solid rgba(249,115,22,.3);
-    }
-    .ai-bubble {
-      background: rgba(249,115,22,.07); border: 1px solid rgba(249,115,22,.18);
-      border-radius: 12px; padding: 12px 14px; font-size: 14.5px; color: #f4f4f5; min-height: 20px;
-    }
-    .ai-bubble .caret { display: inline-block; width: 2px; height: 15px; background: var(--accent);
-      margin-left: 1px; vertical-align: -2px; animation: blink 1s step-end infinite; }
+    .mock-bar { display: flex; align-items: center; gap: 7px; padding: 12px 15px; background: #161618; border-bottom: 1px solid var(--border); }
+    .mdot { width: 11px; height: 11px; border-radius: 50%; background: #333; }
+    .mock-url { margin-left: 10px; font-size: 12px; color: #6a6a6a; }
+    .mock-body { padding: 20px; min-height: 300px; display: flex; flex-direction: column; gap: 14px; }
+    .rev { border: 1px solid var(--border); border-radius: 12px; padding: 15px; opacity: 0; transform: translateY(12px); transition: opacity .5s var(--ease), transform .5s var(--ease); }
+    .rev.show { opacity: 1; transform: none; }
+    .rev-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .rev-av { width: 32px; height: 32px; border-radius: 50%; background: #2c2c2e; display: grid; place-items: center; font-size: 13px; font-weight: 700; color: #fff; }
+    .rev-name { font-size: 14px; font-weight: 600; }
+    .rev-stars { font-size: 12px; letter-spacing: 1px; color: var(--pearl); }
+    .rev-text { font-size: 14px; color: #cfcfcf; }
+    .airep { display: flex; gap: 11px; opacity: 0; transform: translateY(10px); transition: opacity .4s var(--ease), transform .4s var(--ease); }
+    .airep.show { opacity: 1; transform: none; }
+    .ai-badge { flex-shrink: 0; width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: rgba(255,255,255,.1); color: #fff; font-size: 11px; font-weight: 700; border: 1px solid var(--border); }
+    .ai-bubble { background: rgba(255,255,255,.04); border: 1px solid var(--border); border-radius: 12px; padding: 11px 13px; font-size: 14px; color: #eaeaea; min-height: 20px; }
+    .ai-label { font-size: 11px; color: #6a6a6a; margin-bottom: 5px; font-weight: 600; }
+    .caret { display: inline-block; width: 2px; height: 14px; background: #fff; margin-left: 1px; vertical-align: -2px; animation: blink 1s step-end infinite; }
     @keyframes blink { 50% { opacity: 0; } }
-    .ai-label { font-size: 11px; color: var(--muted-dim); margin-bottom: 5px; font-weight: 600; letter-spacing: .04em; }
 
-    /* ---------- Phone mockup (Stempelkaart) ---------- */
-    .phone-stage { display: grid; place-items: center; position: relative; }
-    .phone {
-      position: relative; width: 300px; height: 610px; border-radius: 46px;
-      background: #0a0a0f; border: 2px solid #26262e; padding: 12px;
-      box-shadow: 0 40px 100px rgba(0,0,0,.65), inset 0 0 0 6px #000;
-    }
-    .phone::before {
-      content: ""; position: absolute; inset: -30px; border-radius: 60px; z-index: -1;
-      background: radial-gradient(circle at 50% 20%, rgba(224,177,85,.28), transparent 60%);
-      filter: blur(24px);
-    }
-    .phone-notch { position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
-      width: 120px; height: 26px; background: #000; border-radius: 0 0 16px 16px; z-index: 3; }
-    .phone-screen {
-      width: 100%; height: 100%; border-radius: 36px; overflow: hidden; position: relative;
-      background: linear-gradient(180deg, #12100a, #0a0a0f);
-      display: flex; flex-direction: column;
-    }
-    .wallet-top { padding: 46px 22px 18px; }
-    .wallet-brand { display: flex; align-items: center; justify-content: space-between; }
-    .wallet-brand .b { font-size: 15px; font-weight: 800; }
-    .wallet-brand .b span { color: var(--gold); }
-    .wallet-chip { width: 30px; height: 22px; border-radius: 5px;
-      background: linear-gradient(135deg, var(--gold), #a9812f); opacity: .9; }
-    .wallet-card {
-      margin: 8px 22px 0; border-radius: 20px; padding: 22px 20px;
-      background: linear-gradient(155deg, #1c1710, #0e0d0a);
-      border: 1px solid rgba(224,177,85,.25);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
-    }
-    .wallet-title { font-size: 13px; color: var(--gold); font-weight: 600; letter-spacing: .04em; margin-bottom: 3px; }
-    .wallet-sub { font-size: 12px; color: var(--muted-dim); margin-bottom: 20px; }
-    .stamp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px 12px; }
-    .stamp {
-      aspect-ratio: 1; border-radius: 50%; border: 1.5px dashed rgba(224,177,85,.4);
-      display: grid; place-items: center; color: var(--gold);
-      transition: transform .35s var(--ease), background .35s var(--ease), border-color .35s var(--ease);
-    }
-    .stamp svg { width: 16px; height: 16px; opacity: 0; transform: scale(.4); transition: opacity .3s var(--ease), transform .35s var(--ease); }
-    .stamp.filled {
-      background: linear-gradient(135deg, var(--gold), #b8862f);
-      border-color: transparent; border-style: solid; color: #1a1206;
-      transform: scale(1.06);
-    }
+    /* stamp mockup (monochrome) */
+    .wallet { border: 1px solid var(--border); border-radius: 16px; padding: 26px 24px; background: linear-gradient(160deg, #17171a, #111113); box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+    .wallet-title { font-size: 15px; font-weight: 700; }
+    .wallet-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+    .stamp-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .stamp { aspect-ratio: 1; border-radius: 50%; border: 1.5px dashed rgba(255,255,255,.28); display: grid; place-items: center; color: #0a0a0a; transition: transform .35s var(--ease), background .35s var(--ease), border-color .35s var(--ease); }
+    .stamp svg { width: 20px; height: 20px; opacity: 0; transform: scale(.4); transition: opacity .3s var(--ease), transform .35s var(--ease); }
+    .stamp.filled { background: var(--pearl); border-color: transparent; border-style: solid; transform: scale(1.05); }
     .stamp.filled svg { opacity: 1; transform: scale(1); }
-    .wallet-progress { margin: 18px 22px 0; font-size: 12px; color: var(--muted); text-align: center; }
-    .wallet-foot { margin-top: auto; padding: 16px 22px 26px; text-align: center; }
-    .wallet-barcode { height: 44px; border-radius: 8px; background:
-      repeating-linear-gradient(90deg, #e9e9ec 0 2px, transparent 2px 4px, #e9e9ec 4px 5px, transparent 5px 9px);
-      opacity: .85; }
+    .wallet-progress { margin-top: 22px; text-align: center; font-size: 13px; color: var(--muted); }
 
-    .reward-overlay {
-      position: absolute; inset: 0; z-index: 5; display: grid; place-items: center;
-      background: rgba(5,5,8,.7); backdrop-filter: blur(4px);
-      opacity: 0; pointer-events: none; transition: opacity .4s var(--ease);
-    }
-    .reward-overlay.show { opacity: 1; }
-    .reward-card { text-align: center; padding: 26px; transform: scale(.85); transition: transform .5s var(--ease); }
-    .reward-overlay.show .reward-card { transform: scale(1); }
-    .reward-emoji { font-size: 48px; margin-bottom: 10px; }
-    .reward-card h4 { font-size: 24px; font-weight: 800; color: var(--gold); margin-bottom: 6px; }
-    .reward-card p { font-size: 14px; color: var(--muted); }
-    #confetti-canvas { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
-
-    /* ---------- How it works ---------- */
-    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
-    .step { padding: 34px 30px; position: relative; }
-    .step-num {
-      position: absolute; top: 26px; right: 30px; font-size: 46px; font-weight: 800;
-      color: rgba(249,115,22,.14); letter-spacing: -.04em; line-height: 1;
-    }
-    .step-icon {
-      width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center;
-      background: linear-gradient(135deg, rgba(249,115,22,.16), rgba(251,146,60,.05));
-      color: var(--accent-2); margin-bottom: 22px;
-    }
-    .step-icon svg { width: 26px; height: 26px; }
-    .step h3 { font-size: 20px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 10px; }
-    .step p { color: var(--muted); font-size: 15.5px; }
+    /* ---------- Why (feature cards) ---------- */
+    .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+    .feature { padding: 34px 30px; transition: transform .35s var(--ease), border-color .35s var(--ease), background .35s var(--ease); }
+    .feature:hover { transform: translateY(-5px); border-color: var(--border-strong); background: rgba(255,255,255,.07); }
+    .feature-icon { width: 48px; height: 48px; border-radius: 12px; display: grid; place-items: center; background: rgba(255,255,255,.08); color: #fff; margin-bottom: 22px; }
+    .feature-icon svg { width: 24px; height: 24px; }
+    .feature h3 { font-size: 20px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 10px; }
+    .feature p { color: var(--muted); font-size: 15.5px; }
 
     /* ---------- Pricing ---------- */
     .pricing-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; max-width: 820px; margin: 0 auto; }
-    .price-card { padding: 38px 34px; position: relative; transition: transform .35s var(--ease), border-color .35s var(--ease); }
+    .price-card { padding: 38px 34px; position: relative; transition: transform .35s var(--ease); }
     .price-card:hover { transform: translateY(-5px); }
-    .price-card.featured { border-color: rgba(249,115,22,.5); }
-    .price-card.featured::before {
-      content: ""; position: absolute; inset: -1px; border-radius: var(--radius); z-index: -1;
-      background: radial-gradient(circle at 50% 0%, rgba(249,115,22,.4), transparent 60%); filter: blur(16px);
-    }
-    .price-tier { font-size: 15px; font-weight: 600; color: var(--accent); letter-spacing: .04em; }
-    .price-badge {
-      position: absolute; top: 24px; right: 28px; font-size: 11px; font-weight: 700;
-      text-transform: uppercase; letter-spacing: .08em; color: #1a0f00;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      padding: 5px 12px; border-radius: 999px;
-    }
+    .price-card.featured { border-color: var(--border-strong); }
+    .price-card.featured::before { content: ""; position: absolute; inset: -1px; border-radius: var(--radius); z-index: -1; background: radial-gradient(circle at 50% 0%, rgba(255,255,255,.35), transparent 62%); filter: blur(16px); }
+    .price-tier { font-size: 15px; font-weight: 600; color: var(--pearl); letter-spacing: .04em; }
+    .price-badge { position: absolute; top: 24px; right: 28px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #0a0a0a; background: #fff; padding: 5px 12px; border-radius: 999px; }
     .price-amount { font-size: 52px; font-weight: 800; letter-spacing: -.03em; margin: 14px 0 4px; }
     .price-amount small { font-size: 17px; font-weight: 500; color: var(--muted); }
     .price-desc { color: var(--muted); font-size: 15px; margin-bottom: 26px; }
     .price-features { list-style: none; display: grid; gap: 13px; margin-bottom: 30px; }
-    .price-features li { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; color: #d4d4d8; }
-    .price-features svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--accent); margin-top: 1px; }
+    .price-features li { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; color: #d4d4d4; }
+    .price-features svg { width: 18px; height: 18px; flex-shrink: 0; color: #fff; margin-top: 1px; }
 
     /* ---------- Footer ---------- */
-    .footer { border-top: 1px solid var(--border); padding: 54px 0 40px; background: #030304; }
+    .footer { border-top: 1px solid var(--border); padding: 54px 0 40px; }
     .footer-top { display: flex; flex-wrap: wrap; gap: 40px; justify-content: space-between; margin-bottom: 40px; }
     .footer-brand { max-width: 300px; }
     .footer-brand .brand { display: inline-block; margin-bottom: 14px; }
     .footer-brand p { color: var(--muted); font-size: 15px; }
     .footer-cols { display: flex; gap: 60px; flex-wrap: wrap; }
-    .footer-col h4 { font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted-dim); margin-bottom: 16px; }
+    .footer-col h4 { font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #6a6a6a; margin-bottom: 16px; }
     .footer-col ul { list-style: none; display: grid; gap: 11px; }
     .footer-col a { color: var(--muted); font-size: 15px; transition: color .2s var(--ease); }
-    .footer-col a:hover { color: var(--accent); }
-    .footer-bottom { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center;
-      padding-top: 28px; border-top: 1px solid var(--border); color: var(--muted-dim); font-size: 14px; }
+    .footer-col a:hover { color: #fff; }
+    .footer-bottom { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center; padding-top: 28px; border-top: 1px solid var(--border); color: #6a6a6a; font-size: 14px; }
 
     /* ---------- Reveal ---------- */
-    .reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
     .reveal.in { opacity: 1; transform: none; }
 
     /* ---------- Responsive ---------- */
     @media (max-width: 900px) {
       .nav-links { display: none; }
       .nav-toggle { display: flex; }
-      .nav-links.open {
-        display: flex; position: absolute; top: 70px; left: 0; right: 0; flex-direction: column; gap: 4px;
-        padding: 16px 24px 24px; background: rgba(5,5,8,.97); backdrop-filter: blur(16px);
-        border-bottom: 1px solid var(--border);
-      }
+      .nav-links.open { display: flex; position: absolute; top: 66px; left: 0; right: 0; flex-direction: column; gap: 4px; padding: 16px 24px 24px; background: rgba(10,10,10,.97); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
       .nav-links.open a { padding: 12px 0; font-size: 17px; }
       .split { grid-template-columns: 1fr; gap: 40px; }
-      .split.reverse .split-visual { order: 0; }
-      .steps { grid-template-columns: 1fr; }
+      .features { grid-template-columns: 1fr; }
       .pricing-grid { grid-template-columns: 1fr; }
-      .section { padding: 88px 0; }
+      .section { padding: 78px 0; }
+      .showcase-stage { height: 400px; }
     }
     @media (prefers-reduced-motion: reduce) {
       .reveal { transition: none; opacity: 1; transform: none; }
       html { scroll-behavior: auto; }
+      .tab-panel.active { animation: none; }
     }
   </style>
 </head>
@@ -355,17 +233,17 @@
   <!-- ===== Nav ===== -->
   <header class="nav" id="nav">
     <div class="container nav-inner">
-      <a href="index.html" class="brand">OMRZ<span>.AI</span></a>
+      <a href="index.html" class="brand">OMRZ.AI</a>
       <nav>
         <ul class="nav-links" id="navLinks">
-          <li><a href="#review-bot">Review Bot</a></li>
-          <li><a href="#stempelkaart">Stempelkaart</a></li>
+          <li><a href="#showcase">Producten</a></li>
+          <li><a href="stempelkaart.html">Stempelkaart</a></li>
+          <li><a href="#tools">Review Bot</a></li>
           <li><a href="#prijzen">Prijzen</a></li>
-          <li><a href="contact.html">Contact</a></li>
         </ul>
       </nav>
       <div class="nav-right">
-        <a href="aanmelden.html" class="btn btn-primary">Aanmelden</a>
+        <a href="aanmelden.html" class="btn btn-outline">Start gratis</a>
         <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
       </div>
     </div>
@@ -373,142 +251,125 @@
 
   <!-- ===== Hero ===== -->
   <section class="hero">
-    <canvas id="hero-canvas"></canvas>
-    <div class="hero-inner">
-      <span class="badge">✦ AI-oplossingen voor het Nederlandse MKB</span>
-      <h1>De toekomst van klantloyaliteit</h1>
-      <p class="hero-sub">AI die jouw reviews beantwoordt en klanten terugbrengt. Volledig geautomatiseerd, altijd professioneel.</p>
+    <div class="container">
+      <span class="badge">✦ AI-tools voor het Nederlandse MKB</span>
+      <h1>Slimmere tools voor slimmere ondernemers</h1>
+      <p class="hero-sub">Automatiseer je klantcommunicatie en klantenbinding met AI. Gebouwd voor horeca, beauty en retail — verfijnd, snel en direct inzetbaar.</p>
       <div class="hero-actions">
-        <a href="aanmelden.html" class="btn btn-primary">Start gratis</a>
-        <a href="#review-bot" class="btn btn-ghost">Bekijk demo →</a>
+        <a href="aanmelden.html" class="btn btn-primary">Gratis starten</a>
+        <a href="#showcase" class="btn btn-ghost">Bekijk demo</a>
       </div>
-    </div>
-    <div class="scroll-hint">
-      Scroll
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
     </div>
   </section>
 
-  <!-- ===== Review Bot showcase ===== -->
-  <section class="section" id="review-bot">
+  <!-- ===== 3D showcase ===== -->
+  <section class="showcase" id="showcase">
     <div class="container">
-      <div class="split">
-        <div class="split-visual reveal">
-          <div class="browser">
-            <div class="browser-bar">
-              <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
-              <span class="browser-url">business.google.com/reviews</span>
-            </div>
-            <div class="browser-body" id="reviewStage">
-              <div class="review-card" id="rvCard">
-                <div class="review-head">
-                  <div class="review-avatar" id="rvAvatar">SL</div>
-                  <div>
-                    <div class="review-name" id="rvName">Sanne L.</div>
-                    <div class="review-stars" id="rvStars">★★★★★</div>
+      <div class="showcase-stage">
+        <div class="showcase-glow" aria-hidden="true"></div>
+        <canvas id="showcase-canvas"></canvas>
+      </div>
+      <p class="showcase-caption">Één platform, meerdere slimme tools</p>
+    </div>
+  </section>
+
+  <!-- ===== Tabs (Linear style) ===== -->
+  <section class="section" id="tools" style="padding-top:40px;">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow reveal">Producten</span>
+        <h2 class="section-title reveal">Twee tools, één doel</h2>
+        <p class="section-sub reveal">Bespaar tijd en bind klanten aan je — volledig geautomatiseerd.</p>
+      </div>
+
+      <div class="tabs-wrap reveal">
+        <div class="tabs" role="tablist">
+          <button class="tab active" data-tab="review" role="tab" aria-selected="true">AI Review Bot</button>
+          <button class="tab" data-tab="stamp" role="tab" aria-selected="false">Digitale Stempelkaart</button>
+        </div>
+      </div>
+
+      <!-- Panel: Review Bot -->
+      <div class="tab-panel active" id="panel-review">
+        <div class="split">
+          <div class="split-copy">
+            <h3>Elke review beantwoord, in jouw stem</h3>
+            <p>De Review Bot leest je Google reviews en schrijft binnen seconden een passend antwoord — of het nu lof of kritiek is.</p>
+            <ul class="benefit-list">
+              <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Herkent de toon: positief, neutraal of kritisch</li>
+              <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Antwoordt in jouw eigen tone-of-voice</li>
+              <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Dag en nacht actief — jij houdt de controle</li>
+            </ul>
+          </div>
+          <div class="split-visual">
+            <div class="mock">
+              <div class="mock-bar"><span class="mdot"></span><span class="mdot"></span><span class="mdot"></span><span class="mock-url">business.google.com/reviews</span></div>
+              <div class="mock-body" id="reviewStage">
+                <div class="rev" id="rvCard">
+                  <div class="rev-head">
+                    <div class="rev-av" id="rvAvatar">SL</div>
+                    <div><div class="rev-name" id="rvName">Sanne L.</div><div class="rev-stars" id="rvStars">★★★★★</div></div>
                   </div>
+                  <div class="rev-text" id="rvText">Geweldige service! Echt tevreden.</div>
                 </div>
-                <div class="review-text" id="rvText">Geweldige service! Echt tevreden.</div>
-              </div>
-              <div class="ai-reply" id="aiReply">
-                <div class="ai-badge">AI</div>
-                <div style="flex:1">
-                  <div class="ai-label">OMRZ.AI antwoordt automatisch</div>
-                  <div class="ai-bubble"><span id="aiText"></span><span class="caret" id="aiCaret"></span></div>
+                <div class="airep" id="aiReply">
+                  <div class="ai-badge">AI</div>
+                  <div style="flex:1"><div class="ai-label">OMRZ.AI antwoordt automatisch</div><div class="ai-bubble"><span id="aiText"></span><span class="caret" id="aiCaret"></span></div></div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div class="split-copy reveal">
-          <span class="eyebrow">AI Review Bot</span>
-          <h2>Elke review beantwoord, in jouw stem</h2>
-          <p>De Review Bot leest je Google reviews en schrijft binnen seconden een passend antwoord — of het nu lof of kritiek is.</p>
-          <ul class="benefit-list">
-            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Herkent de toon: positief, neutraal of kritisch</li>
-            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Antwoordt in jouw eigen tone-of-voice</li>
-            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Dag en nacht actief — jij houdt de controle</li>
-          </ul>
-        </div>
       </div>
-    </div>
-  </section>
 
-  <!-- ===== Stempelkaart showcase ===== -->
-  <section class="section" id="stempelkaart" style="padding-top:0;">
-    <div class="container">
-      <div class="split reverse">
-        <div class="split-visual reveal">
-          <div class="phone-stage">
-            <div class="phone">
-              <div class="phone-notch"></div>
-              <div class="phone-screen">
-                <div class="wallet-top">
-                  <div class="wallet-brand">
-                    <div class="b">OMRZ<span>.AI</span></div>
-                    <div class="wallet-chip"></div>
-                  </div>
-                </div>
-                <div class="wallet-card">
-                  <div class="wallet-title">Koffie Spaarkaart</div>
-                  <div class="wallet-sub">Spaar 6 stempels → gratis koffie</div>
-                  <div class="stamp-grid" id="stampGrid"></div>
-                </div>
-                <div class="wallet-progress" id="walletProgress">0 / 6 stempels</div>
-                <div class="wallet-foot"><div class="wallet-barcode"></div></div>
-
-                <div class="reward-overlay" id="rewardOverlay">
-                  <div class="reward-card">
-                    <div class="reward-emoji">☕</div>
-                    <h4>Gratis koffie!</h4>
-                    <p>Je spaarkaart is vol</p>
-                  </div>
-                </div>
-                <canvas id="confetti-canvas"></canvas>
-              </div>
+      <!-- Panel: Stempelkaart -->
+      <div class="tab-panel" id="panel-stamp">
+        <div class="split">
+          <div class="split-copy">
+            <h3>Geen app nodig. Werkt direct via de telefoon.</h3>
+            <p>De moderne opvolger van de papieren spaarkaart. Klanten sparen digitaal in hun wallet en komen vanzelf terug.</p>
+            <ul class="benefit-list">
+              <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Direct in Apple Wallet of Google Wallet</li>
+              <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Automatische spaar- en beloningsacties</li>
+              <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Inzicht in wie je terugkerende klanten zijn</li>
+            </ul>
+            <a href="stempelkaart.html" class="btn btn-ghost" style="margin-top:26px;">Meer over Stempelkaart →</a>
+          </div>
+          <div class="split-visual">
+            <div class="wallet">
+              <div class="wallet-title">Koffie Spaarkaart</div>
+              <div class="wallet-sub">Spaar 6 stempels → gratis koffie</div>
+              <div class="stamp-row" id="stampRow"></div>
+              <div class="wallet-progress" id="stampProgress">0 / 6 stempels</div>
             </div>
           </div>
         </div>
-        <div class="split-copy reveal">
-          <span class="eyebrow">Digitale Stempelkaart</span>
-          <h2>Geen app nodig. Werkt direct via de telefoon.</h2>
-          <p>De moderne opvolger van de papieren spaarkaart. Klanten sparen digitaal in hun wallet en komen vanzelf terug.</p>
-          <ul class="benefit-list">
-            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Direct in Apple Wallet of Google Wallet</li>
-            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Automatische spaar- en beloningsacties</li>
-            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Inzicht in wie je terugkerende klanten zijn</li>
-          </ul>
-          <a href="stempelkaart.html" class="btn btn-ghost" style="margin-top:28px;">Meer over Stempelkaart →</a>
-        </div>
       </div>
     </div>
   </section>
 
-  <!-- ===== How it works ===== -->
+  <!-- ===== Why ===== -->
   <section class="section" style="padding-top:0;">
     <div class="container">
       <div class="section-head">
-        <span class="eyebrow reveal">Hoe het werkt</span>
-        <h2 class="section-title reveal">In drie stappen live</h2>
+        <span class="eyebrow reveal">Waarom OMRZ.AI</span>
+        <h2 class="section-title reveal">Gebouwd voor de ondernemer</h2>
       </div>
-      <div class="steps">
-        <div class="step glass reveal">
-          <span class="step-num">01</span>
-          <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
-          <h3>Meld je aan</h3>
-          <p>Maak in een paar minuten een account aan. Geen technische kennis nodig, wij helpen je op weg.</p>
+      <div class="features">
+        <div class="feature glass reveal">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+          <h3>Tijdbesparend</h3>
+          <p>Automatiseer terugkerend werk en bespaar uren per week aan reviews en klantacties, zodat jij je op je zaak kunt richten.</p>
         </div>
-        <div class="step glass reveal">
-          <span class="step-num">02</span>
-          <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
-          <h3>Koppel & stel in</h3>
-          <p>Verbind je Google-profiel en pas de stijl van je AI-antwoorden en spaarkaart aan naar jouw merk.</p>
+        <div class="feature glass reveal">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.4 5 5.6.7-4 3.9 1 5.4L12 15.4 7 18l1-5.4-4-3.9 5.6-.7z"/></svg></div>
+          <h3>Verfijnd</h3>
+          <p>Elke reactie en elke actie ademt kwaliteit. Een strakke, professionele uitstraling waar jouw klanten vertrouwen in hebben.</p>
         </div>
-        <div class="step glass reveal">
-          <span class="step-num">03</span>
-          <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg></div>
-          <h3>Laat AI werken</h3>
-          <p>Vanaf nu draait alles automatisch. Jij richt je op je zaak, wij zorgen voor reviews en loyaliteit.</p>
+        <div class="feature glass reveal">
+          <div class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M14.5 9a2.5 2.5 0 0 0-2.5-1.6c-1.4 0-2.5.8-2.5 2 0 2.8 5 1.4 5 4.2 0 1.2-1.1 2-2.5 2A2.5 2.5 0 0 1 9 15M12 6v1.4M12 16.6V18"/></svg></div>
+          <h3>Betaalbaar</h3>
+          <p>Eerlijke tarieven vanaf €29 per maand. Geen dure contracten of verrassingen — gewoon maandelijks opzegbaar.</p>
         </div>
       </div>
     </div>
@@ -530,9 +391,9 @@
           <ul class="price-features">
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Digitale stempelkaart</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Onbeperkt aantal klanten</li>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Basis-inzichten & support</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Basis-inzichten &amp; support</li>
           </ul>
-          <a href="aanmelden.html?pakket=starter" class="btn btn-ghost btn-block">Kies Starter</a>
+          <a href="aanmelden.html?pakket=starter" class="btn btn-outline btn-block">Kies Starter</a>
         </div>
         <div class="price-card glass featured reveal">
           <span class="price-badge">Populair</span>
@@ -556,15 +417,15 @@
     <div class="container">
       <div class="footer-top">
         <div class="footer-brand">
-          <a href="index.html" class="brand">OMRZ<span>.AI</span></a>
-          <p>Slimme AI-oplossingen die het Nederlandse MKB laten groeien.</p>
+          <a href="index.html" class="brand">OMRZ.AI</a>
+          <p>Slimme AI-tools die het Nederlandse MKB laten groeien.</p>
         </div>
         <div class="footer-cols">
           <div class="footer-col">
             <h4>Producten</h4>
             <ul>
-              <li><a href="#review-bot">AI Review Bot</a></li>
-              <li><a href="#stempelkaart">Digitale Stempelkaart</a></li>
+              <li><a href="#tools">AI Review Bot</a></li>
+              <li><a href="stempelkaart.html">Digitale Stempelkaart</a></li>
               <li><a href="#prijzen">Prijzen</a></li>
             </ul>
           </div>
@@ -606,7 +467,6 @@
     links.addEventListener('click', function (e) {
       if (e.target.tagName === 'A') { links.classList.remove('open'); toggle.setAttribute('aria-expanded', 'false'); }
     });
-
     document.getElementById('year').textContent = new Date().getFullYear();
 
     /* ---------- Reveal ---------- */
@@ -623,392 +483,261 @@
         });
       }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
       reveals.forEach(function (el) { io.observe(el); });
-    } else {
-      reveals.forEach(function (el) { el.classList.add('in'); });
-    }
+    } else { reveals.forEach(function (el) { el.classList.add('in'); }); }
 
-    /* ================= Hero: Three.js dark Earth globe ================= */
-    (function heroGlobe() {
-      var canvas = document.getElementById('hero-canvas');
+    /* ---------- Tabs ---------- */
+    var tabs = document.querySelectorAll('.tab');
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () {
+        tabs.forEach(function (x) { x.classList.remove('active'); x.setAttribute('aria-selected', 'false'); });
+        t.classList.add('active'); t.setAttribute('aria-selected', 'true');
+        document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.remove('active'); });
+        document.getElementById('panel-' + t.getAttribute('data-tab')).classList.add('active');
+      });
+    });
+
+    /* ================= 3D card showcase ================= */
+    (function showcase() {
+      var canvas = document.getElementById('showcase-canvas');
       if (typeof THREE === 'undefined' || !canvas) return;
-
       var renderer;
-      try {
-        renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
-      } catch (e) { return; }
+      try { renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true }); }
+      catch (e) { return; }
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
       var scene = new THREE.Scene();
-      var camera = new THREE.PerspectiveCamera(55, 1, 0.1, 100);
-      camera.position.z = 6.4;
+      var camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+      camera.position.set(0, 0, 6.4);
+      var group = new THREE.Group();
+      scene.add(group);
 
-      var mouse = { x: 0, y: 0 }, target = { x: 0, y: 0 };
-      var RADIUS = 2.4;
-
-      // Root group receives mouse tilt; world group holds everything
-      var root = new THREE.Group();
-      scene.add(root);
-
-      // --- Lighting so the lit material + emissive city lights read clearly ---
-      var dirLight = new THREE.DirectionalLight(0xffffff, 3.0);
-      dirLight.position.set(5, 3, 5);
-      scene.add(dirLight);
-      scene.add(new THREE.AmbientLight(0xffffff, 0.8));
-
-      // --- Earth sphere: real NASA night texture, lit + self-glowing city lights ---
-      var earthGeo = new THREE.SphereGeometry(RADIUS, 64, 64);
-      var earthMat = new THREE.MeshStandardMaterial({
-        color: 0x555555, emissive: 0xffffff, emissiveIntensity: 0.6,
-        roughness: 1.0, metalness: 0.0
-      });
-      var earth = new THREE.Mesh(earthGeo, earthMat);
-
-      var loader = new THREE.TextureLoader();
-      loader.setCrossOrigin('anonymous');
-      loader.load(
-        'https://unpkg.com/three-globe/example/img/earth-night.jpg',
-        function (tex) {
-          if ('sRGBEncoding' in THREE) tex.encoding = THREE.sRGBEncoding;
-          tex.anisotropy = renderer.capabilities.getMaxAnisotropy ? renderer.capabilities.getMaxAnisotropy() : 1;
-          earthMat.map = tex;
-          earthMat.emissiveMap = tex;      // the lights glow by themselves
-          earthMat.color.set(0xffffff);
-          earthMat.needsUpdate = true;
-          renderer.render(scene, camera); // repaint once texture arrives (covers reduced-motion)
+      /* -- canvas texture helpers -- */
+      function rr(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + w, y, x + w, y + h, r);
+        ctx.arcTo(x + w, y + h, x, y + h, r);
+        ctx.arcTo(x, y + h, x, y, r);
+        ctx.arcTo(x, y, x + w, y, r);
+        ctx.closePath();
+      }
+      function wrap(ctx, text, x, y, maxW, lh) {
+        var words = text.split(' '), line = '';
+        for (var i = 0; i < words.length; i++) {
+          var test = line + words[i] + ' ';
+          if (ctx.measureText(test).width > maxW && line) { ctx.fillText(line.trim(), x, y); line = words[i] + ' '; y += lh; }
+          else line = test;
         }
-      );
-
-      // --- Atmosphere: fresnel gradient glow that fades to transparent at the rim ---
-      var atmoMat = new THREE.ShaderMaterial({
-        uniforms: {
-          uColor: { value: new THREE.Color(0x1a3a6b) },
-          uMax: { value: 0.3 }
-        },
-        vertexShader: [
-          'varying vec3 vNormal;',
-          'varying vec3 vView;',
-          'void main() {',
-          '  vNormal = normalize(normalMatrix * normal);',
-          '  vec4 mv = modelViewMatrix * vec4(position, 1.0);',
-          '  vView = normalize(-mv.xyz);',
-          '  gl_Position = projectionMatrix * mv;',
-          '}'
-        ].join('\n'),
-        fragmentShader: [
-          'uniform vec3 uColor;',
-          'uniform float uMax;',
-          'varying vec3 vNormal;',
-          'varying vec3 vView;',
-          'void main() {',
-          '  float rim = 1.0 - abs(dot(vNormal, vView));', // 0 facing camera, 1 at edge
-          '  // peak in the middle of the rim band, fade to 0 at the very outer edge',
-          '  float band = smoothstep(0.2, 0.65, rim) * (1.0 - smoothstep(0.85, 1.0, rim));',
-          '  float alpha = band * uMax;',
-          '  gl_FragColor = vec4(uColor, alpha);',
-          '}'
-        ].join('\n'),
-        side: THREE.BackSide,
-        transparent: true,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending
-      });
-      var atmo = new THREE.Mesh(new THREE.SphereGeometry(RADIUS * 1.12, 64, 64), atmoMat);
-
-      // --- Glowing orange connection arcs between random surface points ---
-      function surfacePoint(r) {
-        var u = Math.random(), w = Math.random();
-        var theta = 2 * Math.PI * u;
-        var phi = Math.acos(2 * w - 1);
-        return new THREE.Vector3(
-          r * Math.sin(phi) * Math.cos(theta),
-          r * Math.cos(phi),
-          r * Math.sin(phi) * Math.sin(theta)
-        );
+        ctx.fillText(line.trim(), x, y); return y;
       }
-      var arcs = [];
-      var ARC_COUNT = 14;
-      for (var a = 0; a < ARC_COUNT; a++) {
-        var p1 = surfacePoint(RADIUS * 1.005);
-        var p2 = surfacePoint(RADIUS * 1.005);
-        // control point lifted along the midpoint normal -> arc bulges outward
-        var mid = p1.clone().add(p2).multiplyScalar(0.5);
-        if (mid.length() < 0.001) mid.copy(p1); // guard: near-antipodal points
-        var lift = 1.18 + Math.random() * 0.28;
-        mid.normalize().multiplyScalar(RADIUS * lift);
-        var curve = new THREE.QuadraticBezierCurve3(p1, mid, p2);
-        var arcGeo = new THREE.BufferGeometry().setFromPoints(curve.getPoints(48));
-        var arcMat = new THREE.LineBasicMaterial({
-          color: 0xf97316, transparent: true, opacity: 0.25,
-          blending: THREE.AdditiveBlending, depthWrite: false
-        });
-        var line = new THREE.Line(arcGeo, arcMat);
-        arcs.push({ line: line, mat: arcMat, phase: Math.random() * Math.PI * 2, speed: 0.6 + Math.random() * 1.1 });
+      function cardBase(ctx, w, h) {
+        ctx.clearRect(0, 0, w, h);
+        rr(ctx, 3, 3, w - 6, h - 6, 24);
+        ctx.fillStyle = '#141416'; ctx.fill();
+        ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.stroke();
       }
 
-      // Earth + atmosphere + arcs spin together
-      var earthGroup = new THREE.Group();
-      earthGroup.add(earth); earthGroup.add(atmo);
-      for (var ai = 0; ai < arcs.length; ai++) earthGroup.add(arcs[ai].line);
-      earthGroup.rotation.z = 0.28; // slight axial tilt
-      root.add(earthGroup);
+      function drawReview(ctx, w, h) {
+        cardBase(ctx, w, h);
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = '#6a6a6a'; ctx.font = '600 15px Inter, sans-serif';
+        ctx.fillText('Google review', 30, 44);
+        // review block
+        rr(ctx, 26, 60, w - 52, 108, 14); ctx.fillStyle = '#1b1b1f'; ctx.fill();
+        ctx.beginPath(); ctx.arc(58, 96, 17, 0, 6.29); ctx.fillStyle = '#2c2c2e'; ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.font = '700 14px Inter, sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('SL', 58, 101); ctx.textAlign = 'left';
+        ctx.fillStyle = '#fff'; ctx.font = '600 16px Inter, sans-serif'; ctx.fillText('Sanne L.', 84, 92);
+        ctx.fillStyle = '#e8e8e8'; ctx.font = '14px Inter, sans-serif'; ctx.fillText('★★★★★', 84, 112);
+        ctx.fillStyle = '#cfcfcf'; ctx.font = '15px Inter, sans-serif';
+        ctx.fillText('Geweldige service, echt tevreden!', 30, 150);
+        // AI reply
+        rr(ctx, 26, 188, 44, 28, 8); ctx.fillStyle = 'rgba(255,255,255,0.1)'; ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.font = '700 13px Inter, sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('AI', 48, 207); ctx.textAlign = 'left';
+        rr(ctx, 82, 184, w - 108, 118, 12); ctx.fillStyle = '#1b1b1f'; ctx.fill();
+        ctx.fillStyle = '#6a6a6a'; ctx.font = '600 12px Inter, sans-serif';
+        ctx.fillText('OMRZ.AI antwoordt automatisch', 98, 206);
+        ctx.fillStyle = '#eaeaea'; ctx.font = '15px Inter, sans-serif';
+        wrap(ctx, 'Dank je wel voor je mooie review! Fijn dat je tevreden bent.', 98, 230, w - 130, 22);
+      }
 
-      // --- Orbiting orange satellites at different radii/heights/speeds ---
-      var orbits = [];
-      var orbitDefs = [
-        { r: 3.35, tilt: 0.35, speed: 0.011, size: 0.10, phase: 0 },
-        { r: 3.75, tilt: -0.6, speed: 0.008, size: 0.075, phase: 1.8 },
-        { r: 4.15, tilt: 1.15, speed: 0.006, size: 0.12, phase: 3.4 },
-        { r: 3.55, tilt: -1.3, speed: 0.0135, size: 0.065, phase: 5.0 }
+      function drawStamp(ctx, w, h) {
+        cardBase(ctx, w, h);
+        ctx.fillStyle = '#fff'; ctx.font = '700 19px Inter, sans-serif'; ctx.textAlign = 'left';
+        ctx.fillText('Koffie Spaarkaart', 30, 52);
+        ctx.fillStyle = '#a0a0a0'; ctx.font = '14px Inter, sans-serif';
+        ctx.fillText('Spaar 6 stempels → gratis koffie', 30, 76);
+        var cx0 = 66, gap = 76, y = 175, r = 27;
+        for (var i = 0; i < 6; i++) {
+          var cx = cx0 + i * gap;
+          if (i < 5) {
+            ctx.beginPath(); ctx.arc(cx, y, r, 0, 6.29); ctx.fillStyle = '#e8e8e8'; ctx.fill();
+            ctx.strokeStyle = '#0a0a0a'; ctx.lineWidth = 3.5; ctx.lineCap = 'round';
+            ctx.beginPath(); ctx.moveTo(cx - 9, y); ctx.lineTo(cx - 2, y + 7); ctx.lineTo(cx + 10, y - 8); ctx.stroke();
+          } else {
+            ctx.beginPath(); ctx.arc(cx, y, r, 0, 6.29); ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+            ctx.lineWidth = 2; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.setLineDash([]);
+          }
+        }
+        ctx.fillStyle = '#a0a0a0'; ctx.font = '15px Inter, sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('5 / 6 stempels', w / 2, 260); ctx.textAlign = 'left';
+      }
+
+      function drawDash(ctx, w, h) {
+        cardBase(ctx, w, h);
+        ctx.fillStyle = '#fff'; ctx.font = '700 19px Inter, sans-serif'; ctx.textAlign = 'left';
+        ctx.fillText('Dashboard', 30, 50);
+        ctx.fillStyle = '#fff'; ctx.font = '800 42px Inter, sans-serif';
+        ctx.fillText('+38%', 30, 108);
+        ctx.fillStyle = '#a0a0a0'; ctx.font = '14px Inter, sans-serif';
+        ctx.fillText('terugkerende klanten', 32, 132);
+        var bars = [0.35, 0.55, 0.45, 0.7, 0.6, 0.9], bx = 40, bw = 44, bgap = 30, base = 300, maxH = 150;
+        for (var i = 0; i < bars.length; i++) {
+          var bh = bars[i] * maxH, x = bx + i * (bw + bgap);
+          var g = ctx.createLinearGradient(0, base - bh, 0, base);
+          g.addColorStop(0, '#ffffff'); g.addColorStop(1, '#4a4a4a');
+          rr(ctx, x, base - bh, bw, bh, 6); ctx.fillStyle = g; ctx.fill();
+        }
+      }
+
+      function makeTex(drawFn) {
+        var c = document.createElement('canvas'); c.width = 512; c.height = 340;
+        drawFn(c.getContext('2d'), 512, 340);
+        var t = new THREE.CanvasTexture(c);
+        if ('sRGBEncoding' in THREE) t.encoding = THREE.sRGBEncoding;
+        t.anisotropy = renderer.capabilities.getMaxAnisotropy ? renderer.capabilities.getMaxAnisotropy() : 1;
+        t.needsUpdate = true;
+        return t;
+      }
+
+      var geo = new THREE.PlaneGeometry(2.3, 1.53);
+      function addCard(tex, x, y, z, ry) {
+        var m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: tex, transparent: true }));
+        m.position.set(x, y, z); m.rotation.y = ry;
+        group.add(m); return m;
+      }
+      var cards = [
+        addCard(makeTex(drawReview), -2.55, 0.16, -1.15, 0.42),
+        addCard(makeTex(drawStamp),   0.00, -0.06, 0.55, 0.00),
+        addCard(makeTex(drawDash),    2.55, 0.16, -1.15, -0.42)
       ];
-      var orangeMat = new THREE.MeshBasicMaterial({ color: 0xf97316 });
-      for (var o = 0; o < orbitDefs.length; o++) {
-        var d = orbitDefs[o];
-        var pivot = new THREE.Group();
-        pivot.rotation.x = d.tilt;              // orbit-plane inclination
-        pivot.rotation.y = Math.random() * 6.28;
-        var sat = new THREE.Mesh(new THREE.SphereGeometry(d.size, 16, 16), orangeMat);
-        sat.position.set(d.r, 0, 0);
-        // faint trail ring so the orbit path is legible
-        var ring = new THREE.Mesh(
-          new THREE.RingGeometry(d.r - 0.006, d.r + 0.006, 96),
-          new THREE.MeshBasicMaterial({ color: 0xf97316, transparent: true, opacity: 0.08,
-            side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false })
-        );
-        ring.rotation.x = Math.PI / 2;
-        pivot.add(sat); pivot.add(ring);
-        pivot.rotation.y += d.phase;
-        root.add(pivot);
-        orbits.push({ pivot: pivot, speed: d.speed });
-      }
+      var baseY = [0.16, -0.06, 0.16];
 
       function resize() {
-        var wd = canvas.clientWidth, ht = canvas.clientHeight;
-        if (!wd || !ht) return;
-        renderer.setSize(wd, ht, false);
-        camera.aspect = wd / ht; camera.updateProjectionMatrix();
+        var w = canvas.clientWidth, h = canvas.clientHeight;
+        if (!w || !h) return;
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h; camera.updateProjectionMatrix();
       }
       resize();
       window.addEventListener('resize', resize);
 
+      var mouse = { x: 0, y: 0 }, tgt = { x: 0, y: 0 };
       window.addEventListener('mousemove', function (e) {
         mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
         mouse.y = (e.clientY / window.innerHeight) * 2 - 1;
       }, { passive: true });
 
-      var running = true, clock = 0;
+      var running = true, t = 0;
       function frame() {
         requestAnimationFrame(frame);
         if (!running) return;
-        clock += 0.016;
-        earthGroup.rotation.y += 0.0011;          // slow auto-rotation
-        for (var k = 0; k < orbits.length; k++) orbits[k].pivot.rotation.y += orbits[k].speed;
-        // pulse the glowing connection arcs
-        for (var ap = 0; ap < arcs.length; ap++) {
-          arcs[ap].mat.opacity = 0.12 + (Math.sin(clock * arcs[ap].speed + arcs[ap].phase) * 0.5 + 0.5) * 0.5;
+        t += 0.016;
+        // gentle carousel sway + mouse tilt
+        tgt.x += (mouse.x * 0.35 - tgt.x) * 0.05;
+        tgt.y += (mouse.y * 0.2 - tgt.y) * 0.05;
+        group.rotation.y = Math.sin(t * 0.35) * 0.3 + tgt.x;
+        group.rotation.x = -0.05 + tgt.y;
+        for (var i = 0; i < cards.length; i++) {
+          cards[i].position.y = baseY[i] + Math.sin(t * 0.8 + i * 1.7) * 0.06;
         }
-        // mouse tilt on the whole scene
-        target.x += (mouse.y * 0.3 - target.x) * 0.045;
-        target.y += (mouse.x * 0.4 - target.y) * 0.045;
-        root.rotation.x = target.x;
-        root.rotation.y = target.y;
         renderer.render(scene, camera);
       }
       if (reduceMotion) { resize(); renderer.render(scene, camera); }
       else frame();
 
-      // pause when hero off-screen
       if ('IntersectionObserver' in window) {
         new IntersectionObserver(function (en) { running = en[0].isIntersecting; })
-          .observe(document.querySelector('.hero'));
+          .observe(document.querySelector('.showcase-stage'));
       }
     })();
 
-    /* ================= Review Bot loop ================= */
-    (function reviewBot() {
+    /* ================= Review Bot loop (tab) ================= */
+    (function reviewLoop() {
       var stage = document.getElementById('reviewStage');
       if (!stage) return;
-      var card = document.getElementById('rvCard');
-      var avatar = document.getElementById('rvAvatar');
-      var name = document.getElementById('rvName');
-      var stars = document.getElementById('rvStars');
-      var text = document.getElementById('rvText');
-      var reply = document.getElementById('aiReply');
-      var aiText = document.getElementById('aiText');
-      var caret = document.getElementById('aiCaret');
-
+      var card = document.getElementById('rvCard'), reply = document.getElementById('aiReply');
+      var aiText = document.getElementById('aiText'), caret = document.getElementById('aiCaret');
+      var text = document.getElementById('rvText'), name = document.getElementById('rvName');
+      var avatar = document.getElementById('rvAvatar'), stars = document.getElementById('rvStars');
       var scenes = [
-        { avatar: 'SL', name: 'Sanne L.', rating: 5, review: 'Geweldige service! Echt tevreden.',
-          ai: 'Dank je wel voor je mooie review! We zijn blij dat je tevreden bent en verwelkomen je graag snel weer.' },
-        { avatar: 'TK', name: 'Tarik K.', rating: 2, review: 'Levering duurde te lang.',
-          ai: 'Onze excuses voor het ongemak. We nemen contact met je op om dit persoonlijk voor je op te lossen.' }
+        { av: 'SL', nm: 'Sanne L.', rating: 5, review: 'Geweldige service! Echt tevreden.',
+          ai: 'Dank je wel voor je mooie review! Fijn dat je tevreden bent en tot snel.' },
+        { av: 'TK', nm: 'Tarik K.', rating: 2, review: 'Levering duurde te lang.',
+          ai: 'Onze excuses voor het ongemak. We nemen contact met je op om dit op te lossen.' }
       ];
-
       var timers = [];
-      function wait(ms) { return new Promise(function (res) { timers.push(setTimeout(res, ms)); }); }
-      function starMarkup(rating) {
-        var s = '';
-        for (var i = 0; i < 5; i++) s += i < rating ? '★' : '<span class="dim">★</span>';
-        return s;
-      }
+      function wait(ms) { return new Promise(function (r) { timers.push(setTimeout(r, ms)); }); }
+      function starM(n) { var s = ''; for (var i = 0; i < 5; i++) s += i < n ? '★' : '☆'; return s; }
       function type(str) {
         return new Promise(function (res) {
           var i = 0;
-          (function step() {
-            aiText.textContent = str.slice(0, i);
-            if (i++ <= str.length) timers.push(setTimeout(step, 26));
-            else res();
-          })();
+          (function step() { aiText.textContent = str.slice(0, i); if (i++ <= str.length) timers.push(setTimeout(step, 26)); else res(); })();
         });
       }
-
       async function run() {
-        // eslint-disable-next-line no-constant-condition
         while (true) {
           for (var s = 0; s < scenes.length; s++) {
             var sc = scenes[s];
-            // reset
-            reply.classList.remove('show');
-            card.classList.remove('show');
-            aiText.textContent = '';
-            caret.style.display = 'none';
+            reply.classList.remove('show'); card.classList.remove('show');
+            aiText.textContent = ''; caret.style.display = 'none';
             await wait(400);
-
-            avatar.textContent = sc.avatar;
-            name.textContent = sc.name;
-            stars.innerHTML = starMarkup(sc.rating);
-            text.textContent = sc.review;
+            avatar.textContent = sc.av; name.textContent = sc.nm; stars.textContent = starM(sc.rating); text.textContent = sc.review;
             card.classList.add('show');
-
-            await wait(2000);
-            reply.classList.add('show');
-            caret.style.display = 'inline-block';
-            await wait(400);
-            await type(sc.ai);
-            await wait(300);
+            await wait(1600);
+            reply.classList.add('show'); caret.style.display = 'inline-block';
+            await wait(400); await type(sc.ai); await wait(300);
             caret.style.display = 'none';
             await wait(3200);
           }
         }
       }
       if (reduceMotion) {
-        var sc0 = scenes[0];
-        avatar.textContent = sc0.avatar; name.textContent = sc0.name;
-        stars.innerHTML = starMarkup(sc0.rating); text.textContent = sc0.review;
-        card.classList.add('show'); reply.classList.add('show');
-        aiText.textContent = sc0.ai; caret.style.display = 'none';
+        var s0 = scenes[0]; avatar.textContent = s0.av; name.textContent = s0.nm; stars.textContent = starM(s0.rating);
+        text.textContent = s0.review; card.classList.add('show'); reply.classList.add('show'); aiText.textContent = s0.ai; caret.style.display = 'none';
         return;
       }
-      // start when visible
-      if ('IntersectionObserver' in window) {
-        var started = false;
-        new IntersectionObserver(function (en) {
-          if (en[0].isIntersecting && !started) { started = true; run(); }
-        }, { threshold: 0.3 }).observe(stage);
-      } else { run(); }
+      run();
     })();
 
-    /* ================= Stempelkaart loop + confetti ================= */
-    (function stempelkaart() {
-      var grid = document.getElementById('stampGrid');
-      if (!grid) return;
-      var progress = document.getElementById('walletProgress');
-      var overlay = document.getElementById('rewardOverlay');
-      var confettiCanvas = document.getElementById('confetti-canvas');
+    /* ================= Stamp loop (tab) ================= */
+    (function stampLoop() {
+      var row = document.getElementById('stampRow');
+      if (!row) return;
+      var progress = document.getElementById('stampProgress');
       var TOTAL = 6;
-      var checkSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
-
+      var check = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
       var cells = [];
-      for (var i = 0; i < TOTAL; i++) {
-        var c = document.createElement('div');
-        c.className = 'stamp';
-        c.innerHTML = checkSvg;
-        grid.appendChild(c);
-        cells.push(c);
-      }
-
-      /* --- confetti --- */
-      var cctx = confettiCanvas.getContext('2d');
-      var pieces = [], confettiRaf = null;
-      function sizeConfetti() {
-        confettiCanvas.width = confettiCanvas.clientWidth;
-        confettiCanvas.height = confettiCanvas.clientHeight;
-      }
-      var confColors = ['#f97316', '#fbbf24', '#e0b155', '#fafafa', '#fb923c'];
-      function burst() {
-        sizeConfetti();
-        pieces = [];
-        var W = confettiCanvas.width;
-        for (var i = 0; i < 90; i++) {
-          pieces.push({
-            x: W / 2 + (Math.random() - 0.5) * 60,
-            y: confettiCanvas.height * 0.35,
-            vx: (Math.random() - 0.5) * 6,
-            vy: -Math.random() * 7 - 2,
-            g: 0.18 + Math.random() * 0.1,
-            size: 4 + Math.random() * 5,
-            rot: Math.random() * Math.PI,
-            vr: (Math.random() - 0.5) * 0.3,
-            color: confColors[(Math.random() * confColors.length) | 0],
-            life: 0
-          });
-        }
-        if (!confettiRaf) confettiRaf = requestAnimationFrame(drawConfetti);
-      }
-      function drawConfetti() {
-        cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-        var alive = false;
-        for (var i = 0; i < pieces.length; i++) {
-          var p = pieces[i];
-          p.vy += p.g; p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.life++;
-          if (p.y < confettiCanvas.height + 20 && p.life < 160) alive = true;
-          cctx.save();
-          cctx.translate(p.x, p.y);
-          cctx.rotate(p.rot);
-          cctx.globalAlpha = Math.max(0, 1 - p.life / 160);
-          cctx.fillStyle = p.color;
-          cctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
-          cctx.restore();
-        }
-        if (alive) confettiRaf = requestAnimationFrame(drawConfetti);
-        else { cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height); confettiRaf = null; }
-      }
-
+      for (var i = 0; i < TOTAL; i++) { var c = document.createElement('div'); c.className = 'stamp'; c.innerHTML = check; row.appendChild(c); cells.push(c); }
       var timers = [];
-      function wait(ms) { return new Promise(function (res) { timers.push(setTimeout(res, ms)); }); }
-
+      function wait(ms) { return new Promise(function (r) { timers.push(setTimeout(r, ms)); }); }
       async function run() {
-        // eslint-disable-next-line no-constant-condition
         while (true) {
-          // reset
-          overlay.classList.remove('show');
           for (var r = 0; r < TOTAL; r++) cells[r].classList.remove('filled');
           progress.textContent = '0 / ' + TOTAL + ' stempels';
-          await wait(800);
-
+          await wait(700);
           for (var i = 0; i < TOTAL; i++) {
             cells[i].classList.add('filled');
             progress.textContent = (i + 1) + ' / ' + TOTAL + ' stempels';
             await wait(800);
           }
-          progress.textContent = 'Spaarkaart vol! 🎉';
-          overlay.classList.add('show');
-          if (!reduceMotion) burst();
-          await wait(3000);
+          progress.textContent = 'Spaarkaart vol! Gratis koffie';
+          await wait(2600);
         }
       }
-
-      if (reduceMotion) {
-        for (var k = 0; k < TOTAL; k++) cells[k].classList.add('filled');
-        progress.textContent = TOTAL + ' / ' + TOTAL + ' stempels';
-        overlay.classList.add('show');
-        return;
-      }
-      if ('IntersectionObserver' in window) {
-        var started = false;
-        new IntersectionObserver(function (en) {
-          if (en[0].isIntersecting && !started) { started = true; run(); }
-        }, { threshold: 0.3 }).observe(grid);
-      } else { run(); }
+      if (reduceMotion) { for (var k = 0; k < TOTAL; k++) cells[k].classList.add('filled'); progress.textContent = TOTAL + ' / ' + TOTAL + ' stempels'; return; }
+      run();
     })();
   })();
   </script>
