@@ -3,140 +3,526 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Digitale Stempelkaart · OMRZ-AI</title>
-  <meta name="description" content="De moderne digitale stempelkaart voor het MKB. Laat klanten digitaal sparen zonder app. Vanaf €29 per maand." />
+  <title>Digitale Stempelkaart · OMRZ.AI</title>
+  <meta name="description" content="De digitale stempelkaart van OMRZ.AI. Klanten sparen zonder app, direct via de telefoon, en komen vanzelf terug." />
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #050508;
+      --bg-soft: #0c0c12;
+      --text: #fafafa;
+      --accent: #f97316;
+      --accent-2: #fb923c;
+      --gold: #e0b155;
+      --muted: #a1a1aa;
+      --muted-dim: #71717a;
+      --border: #27272e;
+      --glass: rgba(255, 255, 255, .035);
+      --radius: 20px;
+      --maxw: 1180px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      font-size: 17px;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    .container { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: 24px; }
+
+    /* ---------- Buttons ---------- */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      font-family: inherit; font-size: 15px; font-weight: 600; line-height: 1;
+      padding: 15px 28px; border-radius: 999px; border: 1px solid transparent;
+      cursor: pointer; white-space: nowrap;
+      transition: transform .25s var(--ease), box-shadow .3s var(--ease),
+                  background .25s var(--ease), border-color .25s var(--ease);
+    }
+    .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #1a0f00; box-shadow: 0 8px 30px rgba(249,115,22,.4); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 44px rgba(249,115,22,.55); }
+    .btn-ghost { background: var(--glass); color: var(--text); border-color: var(--border); }
+    .btn-ghost:hover { transform: translateY(-2px); border-color: var(--accent); background: rgba(249,115,22,.08); }
+    .btn-block { width: 100%; }
+    .btn-lg { padding: 17px 32px; font-size: 16px; }
+
+    /* ---------- Nav ---------- */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(5,5,8,.5);
+      backdrop-filter: saturate(160%) blur(16px); -webkit-backdrop-filter: saturate(160%) blur(16px);
+      border-bottom: 1px solid transparent;
+      transition: border-color .3s var(--ease), background .3s var(--ease);
+    }
+    .nav.scrolled { border-color: var(--border); background: rgba(5,5,8,.8); }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 70px; }
+    .brand { font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
+    .brand span { color: var(--accent); }
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a { font-size: 15px; font-weight: 500; color: var(--muted); transition: color .2s var(--ease); }
+    .nav-links a:hover, .nav-links a.active { color: var(--text); }
+    .nav-right { display: flex; align-items: center; gap: 8px; }
+    .nav-toggle { display: none; flex-direction: column; gap: 5px; background: none; border: 0; cursor: pointer; padding: 8px; }
+    .nav-toggle span { width: 22px; height: 2px; background: var(--text); border-radius: 2px; }
+
+    /* ---------- Hero ---------- */
+    .hero { position: relative; padding: 140px 0 90px; overflow: hidden; text-align: center; }
+    .hero::before {
+      content: ""; position: absolute; z-index: 0; pointer-events: none;
+      width: 760px; height: 760px; top: -280px; left: 50%; transform: translateX(-50%);
+      background: radial-gradient(circle, rgba(249,115,22,.20), transparent 62%); filter: blur(40px);
+    }
+    .hero .container { position: relative; z-index: 2; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 500;
+      color: var(--accent-2); padding: 8px 16px; border-radius: 999px;
+      border: 1px solid var(--border); background: rgba(249,115,22,.06); margin-bottom: 26px;
+    }
+    .hero h1 {
+      font-size: clamp(38px, 6.5vw, 72px); font-weight: 800; line-height: 1.05;
+      letter-spacing: -.035em; max-width: 16ch; margin: 0 auto 20px;
+      background: linear-gradient(120deg, #fafafa 0%, #fafafa 45%, var(--accent-2) 78%, var(--accent) 100%);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent; color: transparent;
+    }
+    .hero-sub { font-size: clamp(17px, 2.3vw, 20px); color: var(--muted); max-width: 52ch; margin: 0 auto 34px; }
+
+    /* ---------- Animated scene ---------- */
+    .scene-wrap {
+      position: relative; margin: 30px auto 0; max-width: 900px;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
+      overflow: hidden;
+    }
+    .scene-wrap::after { content: ""; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 -40px 60px rgba(5,5,8,.6); }
+    .scene { display: block; width: 100%; height: auto; }
+
+    .floor { stroke: #1c1c24; stroke-width: 3; }
+
+    .shop-body { fill: #12121a; stroke: var(--border); stroke-width: 2; }
+    .shop-roof { fill: var(--accent); }
+    .shop-door { fill: #0a0a10; stroke: var(--border); stroke-width: 1.5; }
+    .shop-window { fill: rgba(249,115,22,.18); stroke: rgba(249,115,22,.4); stroke-width: 1.5; }
+    .shop-sign { fill: var(--gold); font: 700 13px var(--font); }
+
+    .reg-body { fill: #14141d; stroke: var(--border); stroke-width: 2; }
+    .reg-screen { fill: rgba(249,115,22,.14); stroke: rgba(249,115,22,.45); stroke-width: 1.5; }
+    .reg-base { fill: #0d0d14; stroke: var(--border); stroke-width: 2; }
+
+    .dude-move { animation: walkPath 8s var(--ease) infinite; }
+    .dude-stretch { transform-box: fill-box; transform-origin: 50% 100%; animation: stretch 8s var(--ease) infinite; }
+    .limb { stroke: var(--accent-2); stroke-width: 6; stroke-linecap: round; transform-box: fill-box; transform-origin: 0% 0%; }
+    .body-line { stroke: var(--accent-2); stroke-width: 8; stroke-linecap: round; }
+    .head { fill: #12121a; stroke: var(--accent-2); stroke-width: 5; }
+    .eye { fill: var(--accent-2); }
+    .mouth-neutral { stroke: var(--accent-2); stroke-width: 2.5; stroke-linecap: round; fill: none; }
+    .mouth-smile { stroke: var(--accent-2); stroke-width: 3; stroke-linecap: round; fill: none; opacity: 0; animation: smile 8s var(--ease) infinite; }
+
+    .leg-l { animation: legL 8s linear infinite; }
+    .leg-r { animation: legR 8s linear infinite; }
+    .arm-l { animation: armL 8s linear infinite; }
+    .arm-r { animation: armR 8s var(--ease) infinite; }
+
+    .phone { opacity: 0; animation: phoneShow 8s var(--ease) infinite; }
+    .phone-body { fill: #0a0a10; stroke: var(--gold); stroke-width: 2; }
+    .phone-screen { fill: #14110a; }
+    .phone-dot { fill: var(--gold); }
+
+    .rope {
+      stroke: var(--accent); stroke-width: 4; stroke-linecap: round; fill: none;
+      transform-box: fill-box; transform-origin: 0% 50%;
+      opacity: 0; animation: rope 8s var(--ease) infinite;
+    }
+
+    .stamp-label { opacity: 0; animation: stampLabel 8s var(--ease) infinite; }
+    .stamp-badge { fill: #0d1f12; stroke: #22c55e; stroke-width: 2; }
+    .stamp-check { stroke: #22c55e; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+    .stamp-text { fill: #4ade80; font: 700 15px var(--font); }
+
+    @keyframes walkPath {
+      0%    { transform: translateX(120px); }
+      25%   { transform: translateX(392px); }
+      37.5% { transform: translateX(392px); }
+      50%   { transform: translateX(392px); }
+      68.75%{ transform: translateX(660px); }
+      75%   { transform: translateX(636px); }
+      81.25%{ transform: translateX(520px); }
+      85%   { transform: translateX(92px); }
+      88.5% { transform: translateX(120px); }
+      100%  { transform: translateX(120px); }
+    }
+    @keyframes stretch {
+      0%,68.75% { transform: scaleX(1) scaleY(1); }
+      74%       { transform: scaleX(1.28) scaleY(.9); }
+      81.25%    { transform: scaleX(1.18) scaleY(.94); }
+      85%       { transform: scaleX(.86) scaleY(1.12); }
+      88.5%     { transform: scaleX(1) scaleY(1); }
+      100%      { transform: scaleX(1) scaleY(1); }
+    }
+    @keyframes legL {
+      0%{transform:rotate(-10deg)} 4%{transform:rotate(14deg)} 8%{transform:rotate(-32deg)}
+      12%{transform:rotate(14deg)} 16%{transform:rotate(-32deg)} 20%{transform:rotate(14deg)}
+      25%{transform:rotate(-10deg)} 50%{transform:rotate(-10deg)}
+      53%{transform:rotate(14deg)} 56%{transform:rotate(-32deg)} 59%{transform:rotate(14deg)}
+      62%{transform:rotate(-32deg)} 65%{transform:rotate(14deg)} 68.75%{transform:rotate(-10deg)}
+      100%{transform:rotate(-10deg)}
+    }
+    @keyframes legR {
+      0%{transform:rotate(10deg)} 4%{transform:rotate(-14deg)} 8%{transform:rotate(32deg)}
+      12%{transform:rotate(-14deg)} 16%{transform:rotate(32deg)} 20%{transform:rotate(-14deg)}
+      25%{transform:rotate(10deg)} 50%{transform:rotate(10deg)}
+      53%{transform:rotate(-14deg)} 56%{transform:rotate(32deg)} 59%{transform:rotate(-14deg)}
+      62%{transform:rotate(32deg)} 65%{transform:rotate(-14deg)} 68.75%{transform:rotate(10deg)}
+      100%{transform:rotate(10deg)}
+    }
+    @keyframes armL {
+      0%{transform:rotate(8deg)} 4%{transform:rotate(-10deg)} 8%{transform:rotate(26deg)}
+      12%{transform:rotate(-10deg)} 16%{transform:rotate(26deg)} 20%{transform:rotate(-10deg)}
+      25%{transform:rotate(8deg)} 50%{transform:rotate(8deg)}
+      53%{transform:rotate(-10deg)} 56%{transform:rotate(26deg)} 59%{transform:rotate(-10deg)}
+      62%{transform:rotate(26deg)} 65%{transform:rotate(-10deg)} 68.75%{transform:rotate(8deg)}
+      85%{transform:rotate(-42deg)} 92%{transform:rotate(-42deg)} 100%{transform:rotate(8deg)}
+    }
+    @keyframes armR {
+      0%{transform:rotate(-8deg)} 4%{transform:rotate(-26deg)} 8%{transform:rotate(10deg)}
+      12%{transform:rotate(-26deg)} 16%{transform:rotate(10deg)} 20%{transform:rotate(-26deg)}
+      25%{transform:rotate(-8deg)}
+      28%{transform:rotate(-158deg)} 37.5%{transform:rotate(-158deg)}
+      41%{transform:rotate(-8deg)} 50%{transform:rotate(-8deg)}
+      53%{transform:rotate(-26deg)} 56%{transform:rotate(10deg)} 59%{transform:rotate(-26deg)}
+      62%{transform:rotate(10deg)} 65%{transform:rotate(-26deg)} 68.75%{transform:rotate(-8deg)}
+      85%{transform:rotate(42deg)} 92%{transform:rotate(42deg)} 100%{transform:rotate(-8deg)}
+    }
+    @keyframes phoneShow {
+      0%,25%{opacity:0} 28%{opacity:1} 40%{opacity:1} 43%{opacity:0} 100%{opacity:0}
+    }
+    @keyframes stampLabel {
+      0%,37.5%{opacity:0; transform:translateY(6px)}
+      41%{opacity:1; transform:translateY(0)}
+      50%{opacity:1; transform:translateY(0)}
+      55%{opacity:0; transform:translateY(-6px)} 100%{opacity:0}
+    }
+    @keyframes smile {
+      0%,80%{opacity:0} 82%{opacity:1} 100%{opacity:1}
+    }
+    @keyframes rope {
+      0%,68.75%{opacity:0; transform:scaleX(0) scaleY(1)}
+      69.5%{opacity:1; transform:scaleX(102) scaleY(1)}
+      75%{opacity:1; transform:scaleX(96) scaleY(1.4)}
+      81.25%{opacity:1; transform:scaleX(72) scaleY(1)}
+      85%{opacity:.5; transform:scaleX(8) scaleY(1)}
+      88%{opacity:0; transform:scaleX(0) scaleY(1)} 100%{opacity:0; transform:scaleX(0)}
+    }
+
+    .scene-title {
+      position: absolute; top: 26px; left: 0; right: 0; z-index: 3; pointer-events: none; text-align: center;
+      font-size: clamp(24px, 4vw, 44px); font-weight: 800; letter-spacing: -.03em;
+      color: var(--text); text-shadow: 0 4px 30px rgba(5,5,8,.9), 0 2px 10px rgba(5,5,8,.9);
+    }
+
+    /* ---------- Sections ---------- */
+    .section { padding: 100px 0; position: relative; }
+    .section-head { text-align: center; max-width: 640px; margin: 0 auto 60px; }
+    .eyebrow { display: inline-block; font-size: 13px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+    .section-title { font-size: clamp(30px, 4.5vw, 44px); font-weight: 800; letter-spacing: -.03em; line-height: 1.1; }
+    .section-sub { color: var(--muted); font-size: 18px; margin-top: 16px; }
+
+    .glass {
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015));
+      border: 1px solid var(--border);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-radius: var(--radius);
+    }
+
+    .intro-card { padding: 46px; text-align: center; max-width: 820px; margin: 0 auto; }
+    .intro-card h2 { font-size: clamp(26px, 3.6vw, 36px); font-weight: 800; letter-spacing: -.03em; margin-bottom: 16px; }
+    .intro-card p { color: var(--muted); font-size: 18px; max-width: 60ch; margin: 0 auto; }
+
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+    .step { padding: 34px 30px; position: relative; }
+    .step-num { position: absolute; top: 26px; right: 30px; font-size: 46px; font-weight: 800; color: rgba(249,115,22,.14); letter-spacing: -.04em; line-height: 1; }
+    .step-icon { width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; background: linear-gradient(135deg, rgba(249,115,22,.16), rgba(251,146,60,.05)); color: var(--accent-2); margin-bottom: 22px; }
+    .step-icon svg { width: 26px; height: 26px; }
+    .step h3 { font-size: 20px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 10px; }
+    .step p { color: var(--muted); font-size: 15.5px; }
+
+    .benefits { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+    .benefit-col { padding: 38px 34px; }
+    .benefit-col .col-eyebrow { display: inline-flex; align-items: center; gap: 9px; font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin-bottom: 22px; }
+    .benefit-col .col-eyebrow svg { width: 18px; height: 18px; }
+    .benefit-col h3 { font-size: 22px; font-weight: 800; letter-spacing: -.02em; margin-bottom: 20px; }
+    .benefit-list { list-style: none; display: grid; gap: 15px; }
+    .benefit-list li { display: flex; align-items: flex-start; gap: 12px; font-size: 15.5px; color: #d4d4d8; }
+    .benefit-list .ic { width: 24px; height: 24px; flex-shrink: 0; border-radius: 7px; display: grid; place-items: center; background: rgba(249,115,22,.12); color: var(--accent); }
+    .benefit-list .ic svg { width: 14px; height: 14px; }
+
+    .price-wrap { max-width: 460px; margin: 0 auto; }
+    .price-card { padding: 44px 38px; text-align: center; position: relative; border-color: rgba(249,115,22,.5); }
+    .price-card::before { content: ""; position: absolute; inset: -1px; border-radius: var(--radius); z-index: -1; background: radial-gradient(circle at 50% 0%, rgba(249,115,22,.4), transparent 60%); filter: blur(18px); }
+    .price-tier { font-size: 15px; font-weight: 600; color: var(--accent); letter-spacing: .04em; }
+    .price-amount { font-size: 60px; font-weight: 800; letter-spacing: -.03em; margin: 12px 0 4px; }
+    .price-amount small { font-size: 18px; font-weight: 500; color: var(--muted); }
+    .price-desc { color: var(--muted); font-size: 15.5px; margin-bottom: 28px; }
+    .price-features { list-style: none; display: grid; gap: 13px; margin-bottom: 32px; text-align: left; }
+    .price-features li { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; color: #d4d4d8; }
+    .price-features svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--accent); margin-top: 1px; }
+
+    .cta-wrap { padding: 20px 0 110px; }
+    .cta { position: relative; text-align: center; padding: 74px 40px; border-radius: 28px; overflow: hidden; border: 1px solid var(--border);
+      background: radial-gradient(ellipse 80% 120% at 50% -20%, rgba(249,115,22,.5), transparent 60%), linear-gradient(160deg, #1c1206, #050508 70%); }
+    .cta h2 { font-size: clamp(28px, 4.5vw, 44px); font-weight: 800; letter-spacing: -.03em; margin-bottom: 14px; position: relative; }
+    .cta p { color: var(--muted); font-size: 18px; max-width: 46ch; margin: 0 auto 30px; position: relative; }
+
+    .footer { border-top: 1px solid var(--border); padding: 54px 0 40px; background: #030304; }
+    .footer-top { display: flex; flex-wrap: wrap; gap: 40px; justify-content: space-between; margin-bottom: 40px; }
+    .footer-brand { max-width: 300px; }
+    .footer-brand .brand { display: inline-block; margin-bottom: 14px; }
+    .footer-brand p { color: var(--muted); font-size: 15px; }
+    .footer-cols { display: flex; gap: 60px; flex-wrap: wrap; }
+    .footer-col h4 { font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted-dim); margin-bottom: 16px; }
+    .footer-col ul { list-style: none; display: grid; gap: 11px; }
+    .footer-col a { color: var(--muted); font-size: 15px; transition: color .2s var(--ease); }
+    .footer-col a:hover { color: var(--accent); }
+    .footer-bottom { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center; padding-top: 28px; border-top: 1px solid var(--border); color: var(--muted-dim); font-size: 14px; }
+
+    .reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+    .reveal.in { opacity: 1; transform: none; }
+
+    @media (max-width: 900px) {
+      .nav-links { display: none; }
+      .nav-toggle { display: flex; }
+      .nav-links.open { display: flex; position: absolute; top: 70px; left: 0; right: 0; flex-direction: column; gap: 4px; padding: 16px 24px 24px; background: rgba(5,5,8,.97); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
+      .nav-links.open a { padding: 12px 0; font-size: 17px; }
+      .steps { grid-template-columns: 1fr; }
+      .benefits { grid-template-columns: 1fr; }
+      .section { padding: 74px 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { transition: none; opacity: 1; transform: none; }
+      html { scroll-behavior: auto; }
+      .dude-move, .dude-stretch, .leg-l, .leg-r, .arm-l, .arm-r,
+      .phone, .rope, .stamp-label, .mouth-smile { animation: none !important; }
+      .dude-move { transform: translateX(392px); }
+      .arm-r { transform: rotate(-158deg); }
+      .phone { opacity: 1; }
+    }
+  </style>
 </head>
 <body>
 
-  <!-- ===== Navbar ===== -->
-  <header class="nav">
+  <!-- ===== Nav ===== -->
+  <header class="nav" id="nav">
     <div class="container nav-inner">
-      <a href="index.html" class="brand"><span class="dot"></span>OMRZ<span>-AI</span></a>
+      <a href="index.html" class="brand">OMRZ<span>.AI</span></a>
       <nav>
-        <ul class="nav-links">
-          <li><a href="index.html">Home</a></li>
+        <ul class="nav-links" id="navLinks">
+          <li><a href="index.html#review-bot">Review Bot</a></li>
           <li><a href="stempelkaart.html" class="active">Stempelkaart</a></li>
-          <li><a href="review-bot.html">Review Bot</a></li>
-          <li><a href="pricing.html">Prijzen</a></li>
+          <li><a href="index.html#prijzen">Prijzen</a></li>
           <li><a href="contact.html">Contact</a></li>
         </ul>
       </nav>
-      <div class="nav-cta">
-        <a href="contact.html" class="btn btn-primary">Aanmelden</a>
-        <button class="nav-toggle" aria-label="Menu"><span></span><span></span><span></span></button>
+      <div class="nav-right">
+        <a href="aanmelden.html?pakket=starter" class="btn btn-primary">Aanmelden</a>
+        <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
       </div>
     </div>
   </header>
 
-  <!-- ===== Page header ===== -->
-  <section class="page-header">
+  <!-- ===== Hero ===== -->
+  <section class="hero">
     <div class="container">
-      <span class="eyebrow reveal">Digitale Stempelkaart</span>
-      <h1 class="reveal" data-delay="1">Klanten die terugkomen,<br><span class="gold">volledig digitaal</span></h1>
-      <p class="reveal" data-delay="2">De moderne opvolger van de papieren spaarkaart. Geen app, geen gedoe — je klanten sparen digitaal en jij ziet precies wie je vaste gasten zijn.</p>
-      <div class="hero-actions reveal" data-delay="3" style="justify-content:center;margin-top:30px;">
-        <a href="contact.html" class="btn btn-primary">Aanmelden vanaf €29/maand</a>
-        <a href="#hoe" class="btn btn-ghost">Hoe werkt het?</a>
+      <span class="badge">✦ Digitale Stempelkaart</span>
+      <h1>Klanten komen vanzelf terug</h1>
+      <p class="hero-sub">De moderne spaarkaart die klanten in hun telefoon bewaren — geen app, geen gedoe. Ze sparen, worden beloond en komen weer langs.</p>
+
+      <div class="scene-wrap">
+        <div class="scene-title">Klanten komen vanzelf terug</div>
+        <svg class="scene" viewBox="0 0 800 340" role="img" aria-label="Animatie: een klant haalt een stempel bij de kassa en wordt door een elastisch touwtje terug naar de winkel getrokken">
+          <!-- floor -->
+          <line class="floor" x1="20" y1="300" x2="780" y2="300" />
+
+          <!-- shop (left) -->
+          <g class="shop">
+            <rect class="shop-body" x="48" y="150" width="150" height="150" rx="6" />
+            <polygon class="shop-roof" points="40,150 206,150 175,120 71,120" />
+            <rect class="shop-window" x="70" y="176" width="46" height="40" rx="4" />
+            <rect class="shop-door" x="132" y="210" width="46" height="90" rx="4" />
+            <text class="shop-sign" x="123" y="141" text-anchor="middle">CAFÉ</text>
+          </g>
+
+          <!-- register (center) -->
+          <g class="register">
+            <rect class="reg-base" x="360" y="256" width="90" height="44" rx="5" />
+            <rect class="reg-body" x="372" y="212" width="66" height="52" rx="5" />
+            <rect class="reg-screen" x="382" y="222" width="46" height="26" rx="3" />
+          </g>
+
+          <!-- floating "stamp received" label above the register -->
+          <g class="stamp-label" transform="translate(360,150)">
+            <rect class="stamp-badge" x="-16" y="-58" width="200" height="42" rx="21" />
+            <path class="stamp-check" d="M -4 -37 l 7 7 l 13 -14" />
+            <text class="stamp-text" x="30" y="-32">Stempel ontvangen! ✓</text>
+          </g>
+
+          <!-- elastic rope: anchored at the shop door, reaches toward the walker -->
+          <line class="rope" x1="178" y1="250" x2="183" y2="250" />
+
+          <!-- character -->
+          <g class="dude-move">
+            <g class="dude-stretch">
+              <g class="dude">
+                <!-- legs: vertical from hip (0,238) downward, rotate around hip -->
+                <line class="limb leg-l" x1="0" y1="238" x2="0" y2="292" />
+                <line class="limb leg-r" x1="0" y1="238" x2="0" y2="292" />
+                <!-- body -->
+                <line class="body-line" x1="0" y1="238" x2="0" y2="176" />
+                <!-- arms: vertical from shoulder (0,186) downward, rotate around shoulder -->
+                <line class="limb arm-l" x1="0" y1="186" x2="0" y2="230" />
+                <line class="limb arm-r" x1="0" y1="186" x2="0" y2="230" />
+                <!-- head -->
+                <circle class="head" cx="0" cy="150" r="22" />
+                <circle class="eye" cx="-7" cy="147" r="2.6" />
+                <circle class="eye" cx="7" cy="147" r="2.6" />
+                <path class="mouth-neutral" d="M -7 159 L 7 159" />
+                <path class="mouth-smile" d="M -8 156 Q 0 166 8 156" />
+                <!-- phone in the raised hand -->
+                <g class="phone" transform="translate(-34,104)">
+                  <rect class="phone-body" x="0" y="0" width="30" height="50" rx="6" />
+                  <rect class="phone-screen" x="4" y="6" width="22" height="38" rx="3" />
+                  <circle class="phone-dot" cx="9"  cy="13" r="2.4" />
+                  <circle class="phone-dot" cx="17" cy="13" r="2.4" />
+                  <circle class="phone-dot" cx="9"  cy="22" r="2.4" />
+                  <circle class="phone-dot" cx="17" cy="22" r="2.4" />
+                  <circle class="phone-dot" cx="9"  cy="31" r="2.4" />
+                  <circle class="phone-dot" cx="17" cy="31" r="2.4" />
+                </g>
+              </g>
+            </g>
+          </g>
+        </svg>
       </div>
     </div>
   </section>
 
-  <!-- ===== Hoe het werkt ===== -->
-  <section class="section" id="hoe">
+  <!-- ===== 1. Wat is het ===== -->
+  <section class="section" style="padding-top:40px;">
     <div class="container">
-      <div class="section-head text-center">
-        <span class="eyebrow reveal">Hoe het werkt</span>
-        <h2 class="section-title reveal" data-delay="1">In 3 stappen live</h2>
-      </div>
-      <div class="grid grid-3 steps">
-        <div class="step card reveal">
-          <div class="step-num">1</div>
-          <h3>Stel je kaart in</h3>
-          <p>Kies je spaardoel — bijvoorbeeld "10 koffies = 1 gratis". Voeg je logo en huisstijl toe. Klaar in enkele minuten.</p>
-        </div>
-        <div class="step card reveal" data-delay="1">
-          <div class="step-num">2</div>
-          <h3>Klant scant de QR</h3>
-          <p>Bij elk bezoek scant je klant een QR-code of tikt op de telefoon. De stempel komt er direct digitaal bij — geen app nodig.</p>
-        </div>
-        <div class="step card reveal" data-delay="2">
-          <div class="step-num">3</div>
-          <h3>Beloon & bind</h3>
-          <p>Is de kaart vol? De klant krijgt automatisch een melding en verzilvert de beloning. Zo komen ze steeds terug.</p>
-        </div>
+      <div class="intro-card glass reveal">
+        <span class="eyebrow">Wat is het?</span>
+        <h2>De digitale stempelkaart</h2>
+        <p>De vertrouwde papieren spaarkaart, maar dan digitaal. Je klant bewaart de kaart in de wallet op de telefoon en verzamelt bij elk bezoek een stempel. Vol? Dan volgt automatisch de beloning. Geen losse kaartjes meer die kwijtraken — en jij ziet precies wie je vaste klanten zijn.</p>
       </div>
     </div>
   </section>
 
-  <!-- ===== Voordelen ===== -->
+  <!-- ===== 2. Hoe werkt het ===== -->
   <section class="section" style="padding-top:0;">
     <div class="container">
-      <div class="section-head text-center">
+      <div class="section-head">
+        <span class="eyebrow reveal">Hoe werkt het</span>
+        <h2 class="section-title reveal">In drie stappen sparen</h2>
+      </div>
+      <div class="steps">
+        <div class="step glass reveal">
+          <span class="step-num">01</span>
+          <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2.5"/><path d="M11 18h2"/></svg></div>
+          <h3>Klant voegt de kaart toe</h3>
+          <p>Via een QR-code of link zet de klant de stempelkaart in één tik in Apple Wallet of Google Wallet. Geen app-installatie nodig.</p>
+        </div>
+        <div class="step glass reveal">
+          <span class="step-num">02</span>
+          <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+          <h3>Jij geeft een stempel</h3>
+          <p>Bij elk bezoek of aankoop scan je de kaart en voeg je een stempel toe. De telefoon van de klant werkt direct bij.</p>
+        </div>
+        <div class="step glass reveal">
+          <span class="step-num">03</span>
+          <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7S9 2 6.5 3.5 6 7 12 7zM12 7s3-5 5.5-3.5S18 7 12 7z"/></svg></div>
+          <h3>Kaart vol = beloning</h3>
+          <p>Is de kaart vol, dan krijgt de klant automatisch een melding met de beloning. Reden genoeg om weer langs te komen.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 3. Voordelen ===== -->
+  <section class="section" style="padding-top:0;">
+    <div class="container">
+      <div class="section-head">
         <span class="eyebrow reveal">Voordelen</span>
-        <h2 class="section-title reveal" data-delay="1">Waarom digitaal spaart beter</h2>
+        <h2 class="section-title reveal">Goed voor jou én je klant</h2>
       </div>
-      <div class="grid grid-3">
-        <div class="card reveal"><div class="usp-icon">📱</div><h3>Geen app nodig</h3><p>Werkt direct via de telefoon van je klant. Geen download-drempel, dus iedereen doet mee.</p></div>
-        <div class="card reveal" data-delay="1"><div class="usp-icon">🔁</div><h3>Meer herhaalbezoek</h3><p>Klanten die sparen komen aantoonbaar vaker terug. Meer omzet uit je bestaande klanten.</p></div>
-        <div class="card reveal" data-delay="2"><div class="usp-icon">📊</div><h3>Klantinzicht</h3><p>Zie wie je trouwe klanten zijn en hoe vaak ze langskomen — waardevolle data voor je zaak.</p></div>
-        <div class="card reveal"><div class="usp-icon">🌱</div><h3>Duurzaam</h3><p>Geen papieren kaartjes meer die kwijtraken of in de prullenbak belanden. Beter voor het milieu.</p></div>
-        <div class="card reveal" data-delay="1"><div class="usp-icon">🎁</div><h3>Automatische acties</h3><p>Stuur automatisch een verjaardagsbeloning of win-back actie naar klanten die even niet zijn geweest.</p></div>
-        <div class="card reveal" data-delay="2"><div class="usp-icon">🔒</div><h3>AVG-proof</h3><p>Veilig en volgens de Nederlandse privacywetgeving. Jouw klantdata is bij ons in goede handen.</p></div>
+      <div class="benefits">
+        <div class="benefit-col glass reveal">
+          <span class="col-eyebrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M6 21V9l6-4 6 4v12"/><path d="M10 21v-5h4v5"/></svg> Voor de winkelier</span>
+          <h3>Meer terugkerende klanten</h3>
+          <ul class="benefit-list">
+            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Klanten komen vaker terug om vol te sparen</li>
+            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Geen kosten meer voor papieren kaartjes</li>
+            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Inzicht in bezoek- en spaargedrag</li>
+            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Je eigen huisstijl op de kaart</li>
+          </ul>
+        </div>
+        <div class="benefit-col glass reveal">
+          <span class="col-eyebrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg> Voor de klant</span>
+          <h3>Sparen zonder gedoe</h3>
+          <ul class="benefit-list">
+            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Geen app en geen kaartje dat kwijtraakt</li>
+            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Altijd bij de hand in de wallet</li>
+            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Automatisch bericht bij een beloning</li>
+            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Overzicht van gespaarde stempels</li>
+          </ul>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ===== Pricing ===== -->
-  <section class="section" style="padding-top:0;">
+  <!-- ===== 4. Pricing ===== -->
+  <section class="section" id="prijs" style="padding-top:0;">
     <div class="container">
-      <div class="section-head text-center">
+      <div class="section-head">
         <span class="eyebrow reveal">Prijs</span>
-        <h2 class="section-title reveal" data-delay="1">Eén simpel tarief</h2>
-        <p class="section-sub reveal" data-delay="2">Kies maandelijks of bespaar met een jaarabonnement.</p>
+        <h2 class="section-title reveal">Eén heldere prijs per maand</h2>
+        <p class="section-sub reveal">Maandelijks opzegbaar. Geen verrassingen.</p>
       </div>
-      <div class="grid grid-2" style="max-width:760px;margin-inline:auto;">
-        <div class="price-card reveal">
-          <div class="tier">Maandelijks</div>
-          <div class="amount">€29<small> /maand</small></div>
-          <div class="amount-sub">Maandelijks opzegbaar</div>
-          <ul class="feature-list">
-            <li>Onbeperkt digitale stempelkaarten</li>
-            <li>QR-code & telefoon-integratie</li>
-            <li>Automatische beloningsacties</li>
-            <li>Klantinzicht dashboard</li>
-            <li>E-mail support</li>
+      <div class="price-wrap">
+        <div class="price-card glass reveal">
+          <div class="price-tier">Starter</div>
+          <div class="price-amount">€29<small> /maand</small></div>
+          <p class="price-desc">Alles wat je nodig hebt voor een digitale stempelkaart.</p>
+          <ul class="price-features">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Digitale stempelkaart in Apple &amp; Google Wallet</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Onbeperkt aantal klanten</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Eigen huisstijl &amp; beloningen</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Basis-inzichten &amp; support</li>
           </ul>
-          <a href="contact.html" class="btn btn-ghost btn-block">Aanmelden</a>
-        </div>
-        <div class="price-card featured reveal" data-delay="1">
-          <div class="badge-pop">Bespaar 20%</div>
-          <div class="tier">Jaarlijks</div>
-          <div class="amount">€249<small> /jaar</small></div>
-          <div class="amount-sub">Dat is ± €20,75 per maand</div>
-          <ul class="feature-list">
-            <li>Alles uit het maandpakket</li>
-            <li>2 maanden gratis</li>
-            <li>Prioriteit support</li>
-            <li>Gratis onboarding-hulp</li>
-            <li>Vaste prijs, geen verrassingen</li>
-          </ul>
-          <a href="contact.html" class="btn btn-primary btn-block">Aanmelden</a>
+          <a href="aanmelden.html?pakket=starter" class="btn btn-primary btn-block btn-lg">Aanmelden →</a>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ===== CTA ===== -->
-  <section class="section-sm">
+  <!-- ===== 5. CTA ===== -->
+  <section class="cta-wrap">
     <div class="container">
-      <div class="cta-banner reveal">
-        <h2>Start vandaag met digitaal sparen</h2>
-        <p>14 dagen gratis proberen. Binnen 5 minuten ingericht, geen creditcard nodig.</p>
-        <a href="contact.html" class="btn btn-primary">Aanmelden</a>
+      <div class="cta reveal">
+        <h2>Klaar om klanten terug te laten komen?</h2>
+        <p>Zet vandaag nog je digitale stempelkaart op. Binnen enkele minuten actief.</p>
+        <a href="aanmelden.html?pakket=starter" class="btn btn-primary btn-lg">Aanmelden vanaf €29/maand</a>
       </div>
     </div>
   </section>
@@ -144,22 +530,74 @@
   <!-- ===== Footer ===== -->
   <footer class="footer">
     <div class="container">
-      <div class="footer-grid">
-        <div>
-          <a href="index.html" class="brand"><span class="dot"></span>OMRZ<span>-AI</span></a>
-          <p>Slimme AI-oplossingen die het Nederlandse MKB laten groeien. Voor horeca, beauty en retail.</p>
+      <div class="footer-top">
+        <div class="footer-brand">
+          <a href="index.html" class="brand">OMRZ<span>.AI</span></a>
+          <p>Slimme AI-oplossingen die het Nederlandse MKB laten groeien.</p>
         </div>
-        <div><h4>Producten</h4><ul class="footer-links"><li><a href="stempelkaart.html">Digitale Stempelkaart</a></li><li><a href="review-bot.html">AI Review Bot</a></li><li><a href="pricing.html">Prijzen</a></li></ul></div>
-        <div><h4>Bedrijf</h4><ul class="footer-links"><li><a href="index.html">Home</a></li><li><a href="contact.html">Contact</a></li><li><a href="contact.html">Gratis proefperiode</a></li></ul></div>
-        <div><h4>Contact</h4><ul class="footer-links"><li><a href="mailto:info@omrz-ai.nl">info@omrz-ai.nl</a></li><li><a href="tel:+31850000000">085 - 000 00 00</a></li><li><a href="#">Utrecht, Nederland</a></li></ul></div>
+        <div class="footer-cols">
+          <div class="footer-col">
+            <h4>Producten</h4>
+            <ul>
+              <li><a href="index.html#review-bot">AI Review Bot</a></li>
+              <li><a href="stempelkaart.html">Digitale Stempelkaart</a></li>
+              <li><a href="index.html#prijzen">Prijzen</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4>Bedrijf</h4>
+            <ul>
+              <li><a href="index.html">Home</a></li>
+              <li><a href="contact.html">Contact</a></li>
+              <li><a href="mailto:info@omrzai.nl">info@omrzai.nl</a></li>
+            </ul>
+          </div>
+        </div>
       </div>
       <div class="footer-bottom">
-        <span>© <span data-year>2026</span> OMRZ-AI · Alle rechten voorbehouden</span>
-        <div class="socials"><a href="#">LinkedIn</a><a href="#">Instagram</a><a href="#">Privacy</a></div>
+        <span>© <span id="year">2026</span> OMRZ.AI · Alle rechten voorbehouden</span>
+        <a href="mailto:info@omrzai.nl">info@omrzai.nl</a>
       </div>
     </div>
   </footer>
 
-  <script src="js/main.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    var nav = document.getElementById('nav');
+    function onScroll() { nav.classList.toggle('scrolled', window.scrollY > 8); }
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    var toggle = document.getElementById('navToggle');
+    var links = document.getElementById('navLinks');
+    toggle.addEventListener('click', function () {
+      var open = links.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    links.addEventListener('click', function (e) {
+      if (e.target.tagName === 'A') { links.classList.remove('open'); toggle.setAttribute('aria-expanded', 'false'); }
+    });
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    var reveals = document.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (en) {
+          if (en.isIntersecting) {
+            var sibs = Array.prototype.slice.call(en.target.parentElement.querySelectorAll('.reveal'));
+            en.target.style.transitionDelay = Math.min(sibs.indexOf(en.target), 4) * 90 + 'ms';
+            en.target.classList.add('in');
+            io.unobserve(en.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+      reveals.forEach(function (el) { io.observe(el); });
+    } else {
+      reveals.forEach(function (el) { el.classList.add('in'); });
+    }
+  })();
+  </script>
 </body>
 </html>
