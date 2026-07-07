@@ -161,16 +161,44 @@
     .caret { display: inline-block; width: 2px; height: 14px; background: #fff; margin-left: 1px; vertical-align: -2px; animation: blink 1s step-end infinite; }
     @keyframes blink { 50% { opacity: 0; } }
 
-    /* stamp mockup (monochrome) */
-    .wallet { border: 1px solid var(--border); border-radius: 16px; padding: 26px 24px; background: linear-gradient(160deg, #17171a, #111113); box-shadow: 0 30px 80px rgba(0,0,0,.5); }
-    .wallet-title { font-size: 15px; font-weight: 700; }
-    .wallet-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
-    .stamp-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    /* stamp mockup — iPhone frame + Apple Wallet card (monochrome) */
+    .phone-stage { display: grid; place-items: center; }
+    .phone {
+      position: relative; width: 284px; max-width: 100%; aspect-ratio: 284 / 580;
+      border-radius: 46px; background: #050506; border: 1px solid rgba(255,255,255,.14);
+      padding: 12px; box-shadow: 0 40px 90px rgba(0,0,0,.6), inset 0 0 0 4px #000;
+    }
+    .phone-notch { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: 118px; height: 26px; background: #000; border-radius: 0 0 16px 16px; z-index: 3; }
+    .phone-screen {
+      position: relative; width: 100%; height: 100%; border-radius: 36px; overflow: hidden;
+      background: radial-gradient(120% 80% at 50% 0%, #17171b, #0a0a0a 72%);
+      display: flex; flex-direction: column; padding: 48px 16px 20px;
+    }
+    .wallet-card {
+      border-radius: 20px; padding: 20px 18px;
+      background: linear-gradient(155deg, #26262b 0%, #161619 55%, #101012 100%);
+      border: 1px solid rgba(255,255,255,.12);
+      box-shadow: 0 16px 40px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.1);
+    }
+    .wc-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .wc-brand { font-size: 15px; font-weight: 800; color: #fff; letter-spacing: -.01em; }
+    .wc-chip { width: 30px; height: 22px; border-radius: 5px; background: linear-gradient(135deg, #f0f0f0, #9a9a9a); opacity: .9; }
+    .wc-label { font-size: 13px; font-weight: 600; color: var(--pearl); }
+    .wc-sub { font-size: 11.5px; color: var(--muted); margin-bottom: 20px; }
+    .stamp-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
     .stamp { aspect-ratio: 1; border-radius: 50%; border: 1.5px dashed rgba(255,255,255,.28); display: grid; place-items: center; color: #0a0a0a; transition: transform .35s var(--ease), background .35s var(--ease), border-color .35s var(--ease); }
-    .stamp svg { width: 20px; height: 20px; opacity: 0; transform: scale(.4); transition: opacity .3s var(--ease), transform .35s var(--ease); }
-    .stamp.filled { background: var(--pearl); border-color: transparent; border-style: solid; transform: scale(1.05); }
+    .stamp svg { width: 18px; height: 18px; opacity: 0; transform: scale(.4); transition: opacity .3s var(--ease), transform .35s var(--ease); }
+    .stamp.filled { background: linear-gradient(135deg, #ffffff, #cfcfcf); border-color: transparent; border-style: solid; transform: scale(1.08); }
     .stamp.filled svg { opacity: 1; transform: scale(1); }
-    .wallet-progress { margin-top: 22px; text-align: center; font-size: 13px; color: var(--muted); }
+    .wallet-progress { margin-top: 20px; text-align: center; font-size: 12.5px; color: var(--muted); }
+    .reward { position: absolute; inset: 0; z-index: 4; display: grid; place-items: center; background: rgba(10,10,10,.72); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity .4s var(--ease); }
+    .reward.show { opacity: 1; }
+    .reward-inner { text-align: center; transform: scale(.85); transition: transform .5s var(--ease); }
+    .reward.show .reward-inner { transform: scale(1); }
+    .reward-emoji { font-size: 46px; margin-bottom: 8px; }
+    .reward-title { font-size: 22px; font-weight: 800; color: #fff; }
+    .reward-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .confetti { position: absolute; inset: 0; z-index: 5; pointer-events: none; }
 
     /* ---------- Why (feature cards) ---------- */
     .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
@@ -345,11 +373,30 @@
             <a href="stempelkaart.html" class="btn btn-ghost" style="margin-top:26px;">Meer over Stempelkaart →</a>
           </div>
           <div class="split-visual">
-            <div class="wallet">
-              <div class="wallet-title">Koffie Spaarkaart</div>
-              <div class="wallet-sub">Spaar 6 stempels → gratis koffie</div>
-              <div class="stamp-row" id="stampRow"></div>
-              <div class="wallet-progress" id="stampProgress">0 / 6 stempels</div>
+            <div class="phone-stage">
+              <div class="phone">
+                <div class="phone-notch"></div>
+                <div class="phone-screen">
+                  <div class="wallet-card">
+                    <div class="wc-top">
+                      <span class="wc-brand">Café OMRZ</span>
+                      <span class="wc-chip"></span>
+                    </div>
+                    <div class="wc-label">Koffie Spaarkaart</div>
+                    <div class="wc-sub">Spaar 6 stempels → gratis koffie</div>
+                    <div class="stamp-row" id="stampRow"></div>
+                    <div class="wallet-progress" id="stampProgress">0 / 6 stempels</div>
+                  </div>
+                  <div class="reward" id="stampReward">
+                    <div class="reward-inner">
+                      <div class="reward-emoji">☕</div>
+                      <div class="reward-title">Gratis koffie!</div>
+                      <div class="reward-sub">Je spaarkaart is vol</div>
+                    </div>
+                  </div>
+                  <canvas class="confetti" id="stampConfetti"></canvas>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -732,32 +779,73 @@
       run();
     })();
 
-    /* ================= Stamp loop (tab) ================= */
+    /* ================= Stamp loop + confetti (tab) ================= */
     (function stampLoop() {
       var row = document.getElementById('stampRow');
       if (!row) return;
       var progress = document.getElementById('stampProgress');
+      var reward = document.getElementById('stampReward');
+      var confCanvas = document.getElementById('stampConfetti');
       var TOTAL = 6;
       var check = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
       var cells = [];
       for (var i = 0; i < TOTAL; i++) { var c = document.createElement('div'); c.className = 'stamp'; c.innerHTML = check; row.appendChild(c); cells.push(c); }
+
+      /* confetti (silver/white) */
+      var cctx = confCanvas.getContext('2d'), pieces = [], confRaf = null;
+      var confColors = ['#ffffff', '#e8e8e8', '#bdbdbd', '#9a9a9a'];
+      function sizeConf() { confCanvas.width = confCanvas.clientWidth; confCanvas.height = confCanvas.clientHeight; }
+      function burst() {
+        sizeConf(); pieces = [];
+        var W = confCanvas.width;
+        for (var i = 0; i < 80; i++) {
+          pieces.push({ x: W / 2 + (Math.random() - 0.5) * 80, y: confCanvas.height * 0.42,
+            vx: (Math.random() - 0.5) * 6, vy: -Math.random() * 7 - 2, g: 0.16 + Math.random() * 0.1,
+            size: 4 + Math.random() * 5, rot: Math.random() * Math.PI, vr: (Math.random() - 0.5) * 0.3,
+            color: confColors[(Math.random() * confColors.length) | 0], life: 0 });
+        }
+        if (!confRaf) confRaf = requestAnimationFrame(drawConf);
+      }
+      function drawConf() {
+        cctx.clearRect(0, 0, confCanvas.width, confCanvas.height);
+        var alive = false;
+        for (var i = 0; i < pieces.length; i++) {
+          var p = pieces[i];
+          p.vy += p.g; p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.life++;
+          if (p.y < confCanvas.height + 20 && p.life < 160) alive = true;
+          cctx.save(); cctx.translate(p.x, p.y); cctx.rotate(p.rot);
+          cctx.globalAlpha = Math.max(0, 1 - p.life / 160); cctx.fillStyle = p.color;
+          cctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6); cctx.restore();
+        }
+        if (alive) confRaf = requestAnimationFrame(drawConf);
+        else { cctx.clearRect(0, 0, confCanvas.width, confCanvas.height); confRaf = null; }
+      }
+
       var timers = [];
       function wait(ms) { return new Promise(function (r) { timers.push(setTimeout(r, ms)); }); }
       async function run() {
         while (true) {
+          reward.classList.remove('show');
           for (var r = 0; r < TOTAL; r++) cells[r].classList.remove('filled');
           progress.textContent = '0 / ' + TOTAL + ' stempels';
-          await wait(700);
+          await wait(800);
           for (var i = 0; i < TOTAL; i++) {
             cells[i].classList.add('filled');
             progress.textContent = (i + 1) + ' / ' + TOTAL + ' stempels';
-            await wait(800);
+            await wait(500);
           }
-          progress.textContent = 'Spaarkaart vol! Gratis koffie';
-          await wait(2600);
+          progress.textContent = 'Spaarkaart vol! 🎉';
+          reward.classList.add('show');
+          burst();
+          await wait(3000);
         }
       }
-      if (reduceMotion) { for (var k = 0; k < TOTAL; k++) cells[k].classList.add('filled'); progress.textContent = TOTAL + ' / ' + TOTAL + ' stempels'; return; }
+      if (reduceMotion) {
+        for (var k = 0; k < TOTAL; k++) cells[k].classList.add('filled');
+        progress.textContent = TOTAL + ' / ' + TOTAL + ' stempels';
+        reward.classList.add('show');
+        return;
+      }
       run();
     })();
   })();

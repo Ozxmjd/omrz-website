@@ -12,16 +12,18 @@
 
   <style>
     :root {
-      --bg: #050508;
-      --bg-soft: #0c0c12;
-      --text: #fafafa;
-      --accent: #f97316;
-      --accent-2: #fb923c;
-      --gold: #e0b155;
-      --muted: #a1a1aa;
-      --muted-dim: #71717a;
+      --bg: #0a0a0a;
+      --bg-soft: #101010;
+      --text: #ffffff;
+      --accent: #e8e8e8;
+      --accent-2: #ffffff;
+      --pearl: #e8e8e8;
+      --gold: #bdbdbd;
+      --muted: #a0a0a0;
+      --muted-dim: #6a6a6a;
       --border: #27272e;
-      --glass: rgba(255, 255, 255, .035);
+      --border-strong: rgba(255, 255, 255, .18);
+      --glass: rgba(255, 255, 255, .05);
       --radius: 20px;
       --maxw: 1180px;
       --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -44,23 +46,25 @@
       padding: 15px 28px; border-radius: 999px; border: 1px solid transparent; cursor: pointer; white-space: nowrap;
       transition: transform .25s var(--ease), box-shadow .3s var(--ease), background .25s var(--ease), border-color .25s var(--ease);
     }
-    .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #1a0f00; box-shadow: 0 8px 30px rgba(249,115,22,.4); }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 44px rgba(249,115,22,.55); }
-    .btn-ghost { background: var(--glass); color: var(--text); border-color: var(--border); }
-    .btn-ghost:hover { transform: translateY(-2px); border-color: var(--accent); background: rgba(249,115,22,.08); }
+    .btn-primary { background: #ffffff; color: #0a0a0a; box-shadow: 0 8px 30px rgba(255,255,255,.14); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 44px rgba(255,255,255,.22); }
+    .btn-ghost { background: var(--glass); color: var(--text); border-color: var(--border-strong); }
+    .btn-ghost:hover { transform: translateY(-2px); border-color: #fff; background: rgba(255,255,255,.06); }
+    .btn-outline { background: transparent; color: var(--text); border-color: var(--border-strong); }
+    .btn-outline:hover { transform: translateY(-2px); background: #fff; color: #0a0a0a; border-color: #fff; }
     .btn-block { width: 100%; }
     .btn-lg { padding: 17px 32px; font-size: 16px; }
 
     /* ---------- Nav (same as index.html) ---------- */
     .nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(5,5,8,.5);
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,10,10,.6);
       backdrop-filter: saturate(160%) blur(16px); -webkit-backdrop-filter: saturate(160%) blur(16px);
       border-bottom: 1px solid transparent; transition: border-color .3s var(--ease), background .3s var(--ease);
     }
-    .nav.scrolled { border-color: var(--border); background: rgba(5,5,8,.8); }
+    .nav.scrolled { border-color: var(--border); background: rgba(10,10,10,.82); }
     .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 70px; }
-    .brand { font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
-    .brand span { color: var(--accent); }
+    .brand { font-size: 22px; font-weight: 800; letter-spacing: -.02em; color: #fff; }
+    .brand span { color: var(--pearl); }
     .nav-links { display: flex; gap: 32px; list-style: none; }
     .nav-links a { font-size: 15px; font-weight: 500; color: var(--muted); transition: color .2s var(--ease); }
     .nav-links a:hover, .nav-links a.active { color: var(--text); }
@@ -73,13 +77,13 @@
     .hero::before {
       content: ""; position: absolute; z-index: 0; pointer-events: none;
       width: 760px; height: 760px; top: -280px; left: 50%; transform: translateX(-50%);
-      background: radial-gradient(circle, rgba(249,115,22,.20), transparent 62%); filter: blur(40px);
+      background: radial-gradient(circle, rgba(255,255,255,.14), transparent 62%); filter: blur(40px);
     }
     .hero .container { position: relative; z-index: 2; }
     .badge {
       display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 500;
       color: var(--accent-2); padding: 8px 16px; border-radius: 999px;
-      border: 1px solid var(--border); background: rgba(249,115,22,.06); margin-bottom: 26px;
+      border: 1px solid var(--border); background: rgba(255,255,255,.06); margin-bottom: 26px;
     }
     .hero h1 {
       font-size: clamp(40px, 7vw, 78px); font-weight: 800; line-height: 1.04;
@@ -280,8 +284,8 @@
 
     .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
     .step { padding: 34px 30px; position: relative; }
-    .step-num { position: absolute; top: 26px; right: 30px; font-size: 46px; font-weight: 800; color: rgba(249,115,22,.14); letter-spacing: -.04em; line-height: 1; }
-    .step-icon { width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; background: linear-gradient(135deg, rgba(249,115,22,.16), rgba(251,146,60,.05)); color: var(--accent-2); margin-bottom: 22px; }
+    .step-num { position: absolute; top: 26px; right: 30px; font-size: 46px; font-weight: 800; color: rgba(255,255,255,.14); letter-spacing: -.04em; line-height: 1; }
+    .step-icon { width: 52px; height: 52px; border-radius: 14px; display: grid; place-items: center; background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.03)); color: var(--accent-2); margin-bottom: 22px; }
     .step-icon svg { width: 26px; height: 26px; }
     .step h3 { font-size: 20px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 10px; }
     .step p { color: var(--muted); font-size: 15.5px; }
@@ -293,12 +297,12 @@
     .benefit-col h3 { font-size: 22px; font-weight: 800; letter-spacing: -.02em; margin-bottom: 20px; }
     .benefit-list { list-style: none; display: grid; gap: 15px; }
     .benefit-list li { display: flex; align-items: flex-start; gap: 12px; font-size: 15.5px; color: #d4d4d8; }
-    .benefit-list .ic { width: 24px; height: 24px; flex-shrink: 0; border-radius: 7px; display: grid; place-items: center; background: rgba(249,115,22,.12); color: var(--accent); }
+    .benefit-list .ic { width: 24px; height: 24px; flex-shrink: 0; border-radius: 7px; display: grid; place-items: center; background: rgba(255,255,255,.10); color: var(--accent); }
     .benefit-list .ic svg { width: 14px; height: 14px; }
 
     .price-wrap { max-width: 460px; margin: 0 auto; }
-    .price-card { padding: 44px 38px; text-align: center; position: relative; border-color: rgba(249,115,22,.5); }
-    .price-card::before { content: ""; position: absolute; inset: -1px; border-radius: var(--radius); z-index: -1; background: radial-gradient(circle at 50% 0%, rgba(249,115,22,.4), transparent 60%); filter: blur(18px); }
+    .price-card { padding: 44px 38px; text-align: center; position: relative; border-color: rgba(255,255,255,.4); }
+    .price-card::before { content: ""; position: absolute; inset: -1px; border-radius: var(--radius); z-index: -1; background: radial-gradient(circle at 50% 0%, rgba(255,255,255,.22), transparent 60%); filter: blur(18px); }
     .price-tier { font-size: 15px; font-weight: 600; color: var(--accent); letter-spacing: .04em; }
     .price-amount { font-size: 60px; font-weight: 800; letter-spacing: -.03em; margin: 12px 0 4px; }
     .price-amount small { font-size: 18px; font-weight: 500; color: var(--muted); }
@@ -309,7 +313,7 @@
 
     .cta-wrap { padding: 20px 0 110px; }
     .cta { position: relative; text-align: center; padding: 74px 40px; border-radius: 28px; overflow: hidden; border: 1px solid var(--border);
-      background: radial-gradient(ellipse 80% 120% at 50% -20%, rgba(249,115,22,.5), transparent 60%), linear-gradient(160deg, #1c1206, #050508 70%); }
+      background: radial-gradient(ellipse 80% 120% at 50% -20%, rgba(255,255,255,.16), transparent 60%), linear-gradient(160deg, #1a1a1a, #0a0a0a 70%); }
     .cta h2 { font-size: clamp(28px, 4.5vw, 44px); font-weight: 800; letter-spacing: -.03em; margin-bottom: 14px; position: relative; }
     .cta p { color: var(--muted); font-size: 18px; max-width: 46ch; margin: 0 auto 30px; position: relative; }
 
@@ -322,7 +326,7 @@
     .footer-col h4 { font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted-dim); margin-bottom: 16px; }
     .footer-col ul { list-style: none; display: grid; gap: 11px; }
     .footer-col a { color: var(--muted); font-size: 15px; transition: color .2s var(--ease); }
-    .footer-col a:hover { color: var(--accent); }
+    .footer-col a:hover { color: #fff; }
     .footer-bottom { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center; padding-top: 28px; border-top: 1px solid var(--border); color: var(--muted-dim); font-size: 14px; }
 
     .reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
@@ -355,17 +359,17 @@
   <!-- ===== Nav (same as index.html) ===== -->
   <header class="nav" id="nav">
     <div class="container nav-inner">
-      <a href="index.html" class="brand">OMRZ<span>.AI</span></a>
+      <a href="index.html" class="brand">OMRZ.AI</a>
       <nav>
         <ul class="nav-links" id="navLinks">
-          <li><a href="index.html#review-bot">Review Bot</a></li>
+          <li><a href="index.html#showcase">Producten</a></li>
           <li><a href="stempelkaart.html" class="active">Stempelkaart</a></li>
+          <li><a href="index.html#tools">Review Bot</a></li>
           <li><a href="index.html#prijzen">Prijzen</a></li>
-          <li><a href="contact.html">Contact</a></li>
         </ul>
       </nav>
       <div class="nav-right">
-        <a href="aanmelden.html?pakket=starter" class="btn btn-primary">Aanmelden</a>
+        <a href="aanmelden.html" class="btn btn-outline">Start gratis</a>
         <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
       </div>
     </div>
@@ -606,26 +610,12 @@
     <div class="container">
       <div class="footer-top">
         <div class="footer-brand">
-          <a href="index.html" class="brand">OMRZ<span>.AI</span></a>
-          <p>Slimme AI-oplossingen die het Nederlandse MKB laten groeien.</p>
+          <a href="index.html" class="brand">OMRZ.AI</a>
+          <p>Slimme AI-tools die het Nederlandse MKB laten groeien.</p>
         </div>
         <div class="footer-cols">
-          <div class="footer-col">
-            <h4>Producten</h4>
-            <ul>
-              <li><a href="index.html#review-bot">AI Review Bot</a></li>
-              <li><a href="stempelkaart.html">Digitale Stempelkaart</a></li>
-              <li><a href="index.html#prijzen">Prijzen</a></li>
-            </ul>
-          </div>
-          <div class="footer-col">
-            <h4>Bedrijf</h4>
-            <ul>
-              <li><a href="index.html">Home</a></li>
-              <li><a href="contact.html">Contact</a></li>
-              <li><a href="mailto:info@omrzai.nl">info@omrzai.nl</a></li>
-            </ul>
-          </div>
+          <div class="footer-col"><h4>Producten</h4><ul><li><a href="index.html#tools">AI Review Bot</a></li><li><a href="stempelkaart.html">Digitale Stempelkaart</a></li><li><a href="index.html#prijzen">Prijzen</a></li></ul></div>
+          <div class="footer-col"><h4>Bedrijf</h4><ul><li><a href="index.html">Home</a></li><li><a href="contact.html">Contact</a></li><li><a href="mailto:info@omrzai.nl">info@omrzai.nl</a></li></ul></div>
         </div>
       </div>
       <div class="footer-bottom">
