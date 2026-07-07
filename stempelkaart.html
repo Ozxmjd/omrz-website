@@ -90,137 +90,176 @@
     .hero-sub { font-size: clamp(17px, 2.3vw, 20px); color: var(--muted); max-width: 52ch; margin: 0 auto 34px; }
     .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
 
-    /* ---------- Animated scene ---------- */
+    /* ================= Animated scene — light "screen" ================= */
     .scene-wrap {
-      position: relative; margin: 44px auto 0; max-width: 900px;
-      border: 1px solid var(--border); border-radius: var(--radius);
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01)); overflow: hidden;
+      position: relative; margin: 46px auto 0; max-width: 900px; height: 320px;
+      background: #f8f9fa; border: 1px solid rgba(255,255,255,.10); border-radius: 18px;
+      box-shadow: 0 26px 70px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.5);
+      overflow: hidden;
     }
-    .scene-wrap::after { content: ""; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 -40px 60px rgba(5,5,8,.55); }
-    .scene { display: block; width: 100%; height: auto; }
+    .scene { display: block; width: 100%; height: 100%; }
 
-    .floor { stroke: #1c1c24; stroke-width: 3; }
-    .shop-body { fill: #12121a; stroke: var(--border); stroke-width: 2; }
-    .shop-roof { fill: var(--accent); }
-    .shop-door { fill: #0a0a10; stroke: var(--border); stroke-width: 1.5; }
-    .shop-window { fill: rgba(249,115,22,.18); stroke: rgba(249,115,22,.4); stroke-width: 1.5; }
-    .shop-sign { fill: var(--gold); font: 700 13px var(--font); }
-    .reg-body { fill: #14141d; stroke: var(--border); stroke-width: 2; }
-    .reg-screen { fill: rgba(249,115,22,.14); stroke: rgba(249,115,22,.45); stroke-width: 1.5; }
-    .reg-base { fill: #0d0d14; stroke: var(--border); stroke-width: 2; }
+    /* --- static set pieces (grayscale + orange accents) --- */
+    .floor { fill: #e9ecef; }
+    .floor-edge { stroke: #ced4da; stroke-width: 2; }
+    .floor-line { stroke: #dee2e6; stroke-width: 2; }
 
-    .dude-move { animation: walkPath 8s var(--ease) infinite; }
-    .dude-stretch { transform-box: fill-box; transform-origin: 50% 100%; animation: stretch 8s var(--ease) infinite; }
-    .limb { stroke: var(--accent-2); stroke-width: 6; stroke-linecap: round; transform-box: fill-box; transform-origin: 0% 0%; }
-    .body-line { stroke: var(--accent-2); stroke-width: 8; stroke-linecap: round; }
-    .head { fill: #12121a; stroke: var(--accent-2); stroke-width: 5; }
-    .eye { fill: var(--accent-2); }
-    .mouth-neutral { stroke: var(--accent-2); stroke-width: 2.5; stroke-linecap: round; fill: none; }
-    .mouth-smile { stroke: var(--accent-2); stroke-width: 3; stroke-linecap: round; fill: none; opacity: 0; animation: smile 8s var(--ease) infinite; }
+    .build-front { fill: #ced4da; stroke: #495057; stroke-width: 2; }
+    .build-side  { fill: #adb5bd; stroke: #495057; stroke-width: 2; }
+    .build-roof  { fill: #868e96; stroke: #495057; stroke-width: 2; }
+    .build-dark  { fill: #343a40; }
+    .accent-fill { fill: var(--accent); }
+    .shop-sign   { fill: var(--accent); font: 800 15px var(--font); }
 
-    .leg-l { animation: legL 8s linear infinite; }
-    .leg-r { animation: legR 8s linear infinite; }
-    .arm-l { animation: armL 8s linear infinite; }
-    .arm-r { animation: armR 8s var(--ease) infinite; }
+    .counter-front { fill: #dee2e6; stroke: #495057; stroke-width: 2; }
+    .counter-side  { fill: #adb5bd; stroke: #495057; stroke-width: 2; }
+    .reg-machine   { fill: #868e96; stroke: #495057; stroke-width: 2; }
+    .reg-screen    { fill: var(--accent); opacity: .85; }
 
-    .phone { opacity: 0; animation: phoneShow 8s var(--ease) infinite; }
-    .phone-body { fill: #0a0a10; stroke: var(--gold); stroke-width: 2; }
-    .phone-screen { fill: #14110a; }
-    .phone-dot { fill: var(--gold); }
+    .shadow { fill: rgba(0,0,0,.15); }
 
-    .scan-beam { fill: #4ade80; opacity: 0; transform-box: fill-box; animation: scanBeam 8s var(--ease) infinite; }
+    /* --- figures --- */
+    .cust-stroke { stroke: #343a40; }
+    .emp-stroke  { stroke: #495057; }
+    .limb { stroke-width: 6; stroke-linecap: round; fill: none; transform-box: fill-box; transform-origin: 0% 0%; }
+    .limb-emp { stroke-width: 5; stroke-linecap: round; fill: none; transform-box: fill-box; transform-origin: 0% 0%; }
+    .body-line { stroke-width: 8; stroke-linecap: round; }
+    .body-emp  { stroke-width: 7; stroke-linecap: round; }
+    .head { fill: #f1f3f5; stroke-width: 5; }
+    .head-emp { fill: #f1f3f5; stroke-width: 4; }
+    .face { fill: #343a40; }
+    .face-emp { fill: #495057; }
+    .mouth { stroke: #343a40; stroke-width: 3; stroke-linecap: round; fill: none; }
+    .mouth-emp { stroke: #495057; stroke-width: 2.5; stroke-linecap: round; fill: none; }
+    .emp-smile { opacity: 0; animation: empSmile 10s var(--ease) infinite; }
+    .apron { fill: var(--accent); opacity: .85; }
 
+    /* --- phone with 6 full stamps --- */
+    .phone { opacity: 0; animation: phoneShow 10s var(--ease) infinite; }
+    .phone-body { fill: #16181d; stroke: #343a40; stroke-width: 2; }
+    .phone-screen { fill: #f8f9fa; }
+    .stamp-dot { fill: var(--accent); }
+
+    /* --- coffee cups --- */
+    .cup-body { fill: #f1f3f5; stroke: #343a40; stroke-width: 1.6; }
+    .cup-lid { stroke: #343a40; stroke-width: 2; stroke-linecap: round; }
+    .cup-sleeve { fill: var(--accent); }
+    .cup-steam { stroke: #ced4da; stroke-width: 1.6; stroke-linecap: round; fill: none; }
+    .coffee-give { opacity: 0; animation: coffeeGive 10s var(--ease) infinite; }
+    .coffee-hold { opacity: 0; animation: coffeeHold 10s var(--ease) infinite; }
+
+    /* --- speech bubbles --- */
+    .bubble { transform-box: fill-box; transform-origin: 30% 100%; opacity: 0; }
+    .bubble-cust { animation: bubbleCust 10s var(--ease) infinite; }
+    .bubble-emp  { animation: bubbleEmp 10s var(--ease) infinite; }
+    .bubble-box { fill: #ffffff; stroke: #343a40; stroke-width: 2; }
+    .bubble-text { fill: #212529; font: 700 12.5px var(--font); }
+
+    /* --- elastic rope (orange, 3px) --- */
     .rope {
-      stroke: var(--accent); stroke-width: 4; stroke-linecap: round; fill: none;
-      transform-box: fill-box; transform-origin: 0% 50%; opacity: 0; animation: rope 8s var(--ease) infinite;
+      stroke: var(--accent); stroke-width: 3; stroke-linecap: round; fill: none;
+      transform-box: fill-box; transform-origin: 0% 50%; opacity: 0; animation: rope 10s var(--ease) infinite;
     }
 
-    .scan-label { opacity: 0; animation: scanLabel 8s var(--ease) infinite; }
-    .scan-badge { fill: #0d1f12; stroke: #22c55e; stroke-width: 2; }
-    .scan-check { stroke: #22c55e; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; fill: none; }
-    .scan-text { fill: #4ade80; font: 700 15px var(--font); }
+    /* --- customer motion groups --- */
+    .dude-move { animation: dudeWalk 10s var(--ease) infinite; }
+    .dude-hop { animation: custHop 10s var(--ease) infinite; }
+    .dude-stretch { transform-box: fill-box; transform-origin: 50% 100%; animation: custStretch 10s var(--ease) infinite; }
+    .leg-l-c { animation: legLc 10s linear infinite; }
+    .leg-r-c { animation: legRc 10s linear infinite; }
+    .arm-l-c { animation: armLc 10s linear infinite; }
+    .arm-r-c { animation: armRc 10s var(--ease) infinite; }
+    .emp-arm { animation: empArm 10s var(--ease) infinite; }
 
-    /* 8s master timeline — walk → scan → walk away → rope yank → bounce back + smile */
-    @keyframes walkPath {
-      0%      { transform: translateX(120px); }   /* at shop */
-      31.25%  { transform: translateX(392px); }   /* arrive at register (2.5s) */
-      43.75%  { transform: translateX(392px); }   /* scanning (3.5s) */
-      56.25%  { transform: translateX(392px); }   /* scanned OK (4.5s) */
-      75%     { transform: translateX(660px); }   /* walked away right (6s) */
-      81%     { transform: translateX(636px); }   /* rope taut, tugged */
-      87.5%   { transform: translateX(500px); }   /* yanked back left (7s) */
-      92%     { transform: translateX(92px); }    /* overshoot bounce */
-      95%     { transform: translateX(120px); }   /* settle at shop */
-      100%    { transform: translateX(120px); }
+    /* ================= 10s master timeline ================= */
+    @keyframes dudeWalk {
+      0%    { transform: translateX(800px); opacity: 0; }
+      2%    { transform: translateX(800px); opacity: 1; }   /* fade in at right entrance */
+      20%   { transform: translateX(470px); }               /* arrive at register (2s) */
+      30%   { transform: translateX(470px); }               /* phone up (3s) */
+      50%   { transform: translateX(470px); }               /* talking (5s) */
+      60%   { transform: translateX(470px); }               /* got coffee (6s) */
+      75%   { transform: translateX(760px); }               /* walked right w/ coffee (7.5s) */
+      80%   { transform: translateX(735px); }               /* rope taut, tugged (8s) */
+      85%   { transform: translateX(560px); }               /* yanked back (8.5s) */
+      92%   { transform: translateX(180px); opacity: 1; }   /* bounced to shop (9.2s) */
+      96%   { transform: translateX(180px); opacity: 1; }   /* settle, smiling */
+      98%   { transform: translateX(180px); opacity: 0; }   /* fade out */
+      99.5% { transform: translateX(800px); opacity: 0; }   /* invisible reset */
+      100%  { transform: translateX(800px); opacity: 0; }
     }
-    @keyframes stretch {
-      0%,75%  { transform: scaleX(1) scaleY(1); }
-      81%     { transform: scaleX(1.28) scaleY(.9); }
-      87.5%   { transform: scaleX(1.16) scaleY(.94); }
-      92%     { transform: scaleX(.86) scaleY(1.12); }
-      95%     { transform: scaleX(1) scaleY(1); }
-      100%    { transform: scaleX(1) scaleY(1); }
+    @keyframes custHop {
+      0%,60% { transform: translateY(0); }
+      62% { transform: translateY(-16px); } 64% { transform: translateY(0); }
+      67% { transform: translateY(-15px); } 69% { transform: translateY(0); }
+      72% { transform: translateY(-12px); } 75% { transform: translateY(0); }
+      100% { transform: translateY(0); }
     }
-    @keyframes legL {
-      0%{transform:rotate(-10deg)} 5%{transform:rotate(14deg)} 10%{transform:rotate(-32deg)}
-      15%{transform:rotate(14deg)} 20%{transform:rotate(-32deg)} 25%{transform:rotate(14deg)} 31.25%{transform:rotate(-10deg)}
-      56.25%{transform:rotate(-10deg)}
-      59%{transform:rotate(14deg)} 62%{transform:rotate(-32deg)} 65%{transform:rotate(14deg)}
-      68%{transform:rotate(-32deg)} 71%{transform:rotate(14deg)} 75%{transform:rotate(-10deg)}
-      100%{transform:rotate(-10deg)}
+    @keyframes custStretch {
+      0%,75% { transform: scaleX(1) scaleY(1); }
+      79% { transform: scaleX(1.26) scaleY(.9); }
+      85% { transform: scaleX(1.12) scaleY(.94); }
+      89% { transform: scaleX(.9) scaleY(1.12); }
+      93% { transform: scaleX(1) scaleY(1); } 100% { transform: scaleX(1) scaleY(1); }
     }
-    @keyframes legR {
-      0%{transform:rotate(10deg)} 5%{transform:rotate(-14deg)} 10%{transform:rotate(32deg)}
-      15%{transform:rotate(-14deg)} 20%{transform:rotate(32deg)} 25%{transform:rotate(-14deg)} 31.25%{transform:rotate(10deg)}
-      56.25%{transform:rotate(10deg)}
-      59%{transform:rotate(-14deg)} 62%{transform:rotate(32deg)} 65%{transform:rotate(-14deg)}
-      68%{transform:rotate(32deg)} 71%{transform:rotate(-14deg)} 75%{transform:rotate(10deg)}
-      100%{transform:rotate(10deg)}
+    @keyframes legLc {
+      0%{transform:rotate(-9deg)} 3%{transform:rotate(16deg)} 6%{transform:rotate(-30deg)}
+      9%{transform:rotate(16deg)} 12%{transform:rotate(-30deg)} 15%{transform:rotate(16deg)} 18%{transform:rotate(-30deg)} 20%{transform:rotate(-9deg)}
+      60%{transform:rotate(-9deg)}
+      63%{transform:rotate(16deg)} 66%{transform:rotate(-30deg)} 69%{transform:rotate(16deg)} 72%{transform:rotate(-30deg)} 75%{transform:rotate(-9deg)}
+      100%{transform:rotate(-9deg)}
     }
-    @keyframes armL {
-      0%{transform:rotate(8deg)} 5%{transform:rotate(-10deg)} 10%{transform:rotate(26deg)}
-      15%{transform:rotate(-10deg)} 20%{transform:rotate(26deg)} 25%{transform:rotate(-10deg)} 31.25%{transform:rotate(8deg)}
-      56.25%{transform:rotate(8deg)}
-      59%{transform:rotate(-10deg)} 62%{transform:rotate(26deg)} 65%{transform:rotate(-10deg)}
-      68%{transform:rotate(26deg)} 71%{transform:rotate(-10deg)} 75%{transform:rotate(8deg)}
-      92%{transform:rotate(-40deg)} 95%{transform:rotate(-40deg)} 100%{transform:rotate(8deg)}
+    @keyframes legRc {
+      0%{transform:rotate(9deg)} 3%{transform:rotate(-16deg)} 6%{transform:rotate(30deg)}
+      9%{transform:rotate(-16deg)} 12%{transform:rotate(30deg)} 15%{transform:rotate(-16deg)} 18%{transform:rotate(30deg)} 20%{transform:rotate(9deg)}
+      60%{transform:rotate(9deg)}
+      63%{transform:rotate(-16deg)} 66%{transform:rotate(30deg)} 69%{transform:rotate(-16deg)} 72%{transform:rotate(30deg)} 75%{transform:rotate(9deg)}
+      100%{transform:rotate(9deg)}
     }
-    @keyframes armR {
-      0%{transform:rotate(-8deg)} 5%{transform:rotate(-26deg)} 10%{transform:rotate(10deg)}
-      15%{transform:rotate(-26deg)} 20%{transform:rotate(10deg)} 25%{transform:rotate(-26deg)} 31.25%{transform:rotate(-8deg)}
-      34%{transform:rotate(-158deg)} 54%{transform:rotate(-158deg)}   /* phone raised to scan */
-      56.25%{transform:rotate(-8deg)}
-      59%{transform:rotate(-26deg)} 62%{transform:rotate(10deg)} 65%{transform:rotate(-26deg)}
-      68%{transform:rotate(10deg)} 71%{transform:rotate(-26deg)} 75%{transform:rotate(-8deg)}
-      92%{transform:rotate(40deg)} 95%{transform:rotate(40deg)} 100%{transform:rotate(-8deg)}
+    @keyframes armLc {
+      0%{transform:rotate(8deg)} 3%{transform:rotate(-12deg)} 6%{transform:rotate(24deg)}
+      9%{transform:rotate(-12deg)} 12%{transform:rotate(24deg)} 15%{transform:rotate(-12deg)} 18%{transform:rotate(24deg)} 20%{transform:rotate(8deg)}
+      60%{transform:rotate(8deg)}
+      63%{transform:rotate(-12deg)} 66%{transform:rotate(24deg)} 69%{transform:rotate(-12deg)} 72%{transform:rotate(24deg)} 75%{transform:rotate(8deg)}
+      92%{transform:rotate(-38deg)} 96%{transform:rotate(-38deg)} 100%{transform:rotate(8deg)}
     }
-    @keyframes phoneShow { 0%,31.25%{opacity:0} 33%{opacity:1} 54%{opacity:1} 56%{opacity:0} 100%{opacity:0} }
-    @keyframes scanBeam {
-      0%,33%{opacity:0; transform:translateY(0)}
-      35%{opacity:.9; transform:translateY(0)}
-      44%{opacity:.9; transform:translateY(20px)}
-      46%{opacity:0; transform:translateY(20px)} 100%{opacity:0}
+    @keyframes armRc {
+      0%{transform:rotate(-8deg)} 3%{transform:rotate(-24deg)} 6%{transform:rotate(12deg)}
+      9%{transform:rotate(-24deg)} 12%{transform:rotate(12deg)} 15%{transform:rotate(-24deg)} 18%{transform:rotate(12deg)} 20%{transform:rotate(-8deg)}
+      22%{transform:rotate(-150deg)} 29%{transform:rotate(-150deg)}   /* phone raised */
+      33%{transform:rotate(-8deg)} 50%{transform:rotate(-8deg)}
+      54%{transform:rotate(-42deg)} 60%{transform:rotate(-42deg)}     /* holds coffee */
+      75%{transform:rotate(-42deg)} 85%{transform:rotate(-42deg)} 92%{transform:rotate(-30deg)} 100%{transform:rotate(-8deg)}
     }
-    @keyframes scanLabel {
-      0%,45%{opacity:0; transform:translateY(6px)}
-      48%{opacity:1; transform:translateY(0)}
-      56%{opacity:1; transform:translateY(0)}
-      60%{opacity:0; transform:translateY(-6px)} 100%{opacity:0}
+    @keyframes phoneShow { 0%,20%{opacity:0} 22%{opacity:1} 29%{opacity:1} 31%{opacity:0} 100%{opacity:0} }
+    @keyframes empSmile { 0%,30%{opacity:0} 33%{opacity:1} 63%{opacity:1} 66%{opacity:0} 100%{opacity:0} }
+    @keyframes empArm {
+      0%,50%{transform:rotate(6deg)} 53%{transform:rotate(-68deg)} 60%{transform:rotate(-68deg)} 64%{transform:rotate(6deg)} 100%{transform:rotate(6deg)}
     }
-    @keyframes smile { 0%,86%{opacity:0} 88%{opacity:1} 100%{opacity:1} }
+    @keyframes coffeeGive {
+      0%,50%{opacity:0; transform:translateX(0)}
+      53%{opacity:1; transform:translateX(6px)}
+      60%{opacity:1; transform:translateX(40px)}
+      62%{opacity:0; transform:translateX(40px)} 100%{opacity:0}
+    }
+    @keyframes coffeeHold { 0%,58%{opacity:0} 61%{opacity:1} 96%{opacity:1} 98%{opacity:0} 100%{opacity:0} }
+    @keyframes bubbleCust {
+      0%,30%{opacity:0; transform:scale(.8)}
+      33%{opacity:1; transform:scale(1)} 49%{opacity:1; transform:scale(1)}
+      51%{opacity:0; transform:scale(.9)} 100%{opacity:0; transform:scale(.9)}
+    }
+    @keyframes bubbleEmp {
+      0%,32%{opacity:0; transform:scale(.8)}
+      35%{opacity:1; transform:scale(1)} 49%{opacity:1; transform:scale(1)}
+      51%{opacity:0; transform:scale(.9)} 100%{opacity:0; transform:scale(.9)}
+    }
     @keyframes rope {
       0%,75%{opacity:0; transform:scaleX(0) scaleY(1)}
-      76%{opacity:1; transform:scaleX(102) scaleY(1)}
-      81%{opacity:1; transform:scaleX(96) scaleY(1.4)}
-      87.5%{opacity:1; transform:scaleX(68) scaleY(1)}
-      92%{opacity:.5; transform:scaleX(8) scaleY(1)}
-      95%{opacity:0; transform:scaleX(0)} 100%{opacity:0; transform:scaleX(0)}
-    }
-
-    .scene-title {
-      position: absolute; top: 24px; left: 0; right: 0; z-index: 3; pointer-events: none; text-align: center;
-      font-size: clamp(22px, 3.6vw, 40px); font-weight: 800; letter-spacing: -.03em;
-      color: var(--text); text-shadow: 0 4px 30px rgba(5,5,8,.9), 0 2px 10px rgba(5,5,8,.9);
+      76.5%{opacity:1; transform:scaleX(112) scaleY(1)}
+      80%{opacity:1; transform:scaleX(106) scaleY(1.6)}
+      85%{opacity:1; transform:scaleX(62) scaleY(1)}
+      90%{opacity:.5; transform:scaleX(10) scaleY(1)}
+      93%{opacity:0; transform:scaleX(0)} 100%{opacity:0; transform:scaleX(0)}
     }
 
     /* ---------- Sections ---------- */
@@ -301,11 +340,13 @@
     @media (prefers-reduced-motion: reduce) {
       .reveal { transition: none; opacity: 1; transform: none; }
       html { scroll-behavior: auto; }
-      .dude-move, .dude-stretch, .leg-l, .leg-r, .arm-l, .arm-r,
-      .phone, .rope, .scan-beam, .scan-label, .mouth-smile { animation: none !important; }
-      .dude-move { transform: translateX(392px); }
-      .arm-r { transform: rotate(-158deg); }
+      .dude-move, .dude-hop, .dude-stretch, .leg-l-c, .leg-r-c, .arm-l-c, .arm-r-c,
+      .phone, .rope, .coffee-give, .coffee-hold, .emp-arm, .emp-smile, .bubble-cust, .bubble-emp { animation: none !important; }
+      .dude-move { transform: translateX(470px); opacity: 1; }
+      .arm-r-c { transform: rotate(-150deg); }
       .phone { opacity: 1; }
+      .emp-smile { opacity: 1; }
+      .rope, .coffee-give, .coffee-hold, .bubble-cust, .bubble-emp { opacity: 0; }
     }
   </style>
 </head>
@@ -342,66 +383,106 @@
       </div>
 
       <div class="scene-wrap">
-        <div class="scene-title">Klanten komen vanzelf terug</div>
-        <svg class="scene" viewBox="0 0 800 340" role="img" aria-label="Animatie: een klant loopt naar de kassa, scant de telefoon, loopt weg en wordt door een elastisch touwtje terug naar de winkel getrokken">
-          <!-- floor -->
-          <line class="floor" x1="20" y1="300" x2="780" y2="300" />
+        <svg class="scene" viewBox="0 0 900 320" preserveAspectRatio="xMidYMid meet" role="img"
+             aria-label="Animatie: een klant loopt naar de kassa, laat een volle stempelkaart zien, krijgt een gratis koffie van de medewerker, loopt weg en wordt door een elastisch touwtje terug naar de winkel getrokken">
 
-          <!-- shop (left) -->
+          <!-- perspective floor -->
+          <polygon class="floor" points="170,200 730,200 872,300 28,300" />
+          <line class="floor-edge" x1="170" y1="200" x2="730" y2="200" />
+          <line class="floor-line" x1="120" y1="250" x2="780" y2="250" />
+
+          <!-- shop (left) with depth -->
           <g class="shop">
-            <rect class="shop-body" x="48" y="150" width="150" height="150" rx="6" />
-            <polygon class="shop-roof" points="40,150 206,150 175,120 71,120" />
-            <rect class="shop-window" x="70" y="176" width="46" height="40" rx="4" />
-            <rect class="shop-door" x="132" y="210" width="46" height="90" rx="4" />
-            <text class="shop-sign" x="123" y="141" text-anchor="middle">CAFÉ</text>
+            <polygon class="build-roof" points="58,120 182,120 214,102 90,102" />
+            <polygon class="build-side" points="182,120 214,102 214,232 182,250" />
+            <rect class="build-front" x="66" y="120" width="116" height="130" rx="3" />
+            <rect class="accent-fill" x="66" y="150" width="116" height="13" />
+            <rect class="build-dark" x="98" y="196" width="34" height="54" rx="2" />
+            <rect class="build-front" x="142" y="176" width="28" height="26" rx="2" />
+            <text class="shop-sign" x="124" y="141" text-anchor="middle">CAFÉ</text>
           </g>
 
-          <!-- register (center) with scan beam -->
+          <!-- employee behind the counter (drawn before counter so it occludes the legs) -->
+          <g class="employee">
+            <line class="limb-emp emp-stroke" x1="405" y1="168" x2="386" y2="208" />
+            <g class="emp-arm"><line class="limb-emp emp-stroke" x1="405" y1="168" x2="405" y2="206" /></g>
+            <line class="body-emp emp-stroke" x1="405" y1="158" x2="405" y2="214" />
+            <rect class="apron" x="396" y="180" width="18" height="34" rx="3" />
+            <circle class="head-emp emp-stroke" cx="405" cy="140" r="17" />
+            <circle class="face-emp" cx="399" cy="138" r="2.3" />
+            <circle class="face-emp" cx="411" cy="138" r="2.3" />
+            <path class="mouth-emp" d="M 399 148 L 411 148" />
+            <path class="mouth-emp emp-smile" d="M 398 146 Q 405 154 412 146" />
+          </g>
+
+          <!-- coffee handed over from employee to customer -->
+          <g class="coffee-give" transform="translate(424,182)">
+            <path class="cup-body" d="M1 4 h16 l-2 17 a2 2 0 0 1 -2 1.7 h-8 a2 2 0 0 1 -2 -1.7 z" />
+            <rect class="cup-sleeve" x="1.6" y="9" width="13.8" height="7" />
+            <line class="cup-lid" x1="0.5" y1="4" x2="17.5" y2="4" />
+            <path class="cup-steam" d="M6 1 q2 -2 0 -4 M11 1 q2 -2 0 -4" />
+          </g>
+
+          <!-- counter / register (center) with depth -->
           <g class="register">
-            <rect class="reg-base" x="360" y="256" width="90" height="44" rx="5" />
-            <rect class="reg-body" x="372" y="212" width="66" height="52" rx="5" />
-            <rect class="reg-screen" x="382" y="222" width="46" height="26" rx="3" />
-            <rect class="scan-beam" x="382" y="223" width="46" height="3" rx="1.5" />
+            <polygon class="counter-side" points="450,216 476,204 476,278 450,290" />
+            <rect class="counter-front" x="352" y="216" width="98" height="74" rx="3" />
+            <rect class="reg-machine" x="360" y="184" width="44" height="34" rx="3" />
+            <rect class="reg-screen" x="367" y="191" width="30" height="20" rx="2" />
           </g>
 
-          <!-- "Gescand" confirmation label above the register -->
-          <g class="scan-label" transform="translate(360,150)">
-            <rect class="scan-badge" x="-6" y="-58" width="150" height="42" rx="21" />
-            <path class="scan-check" d="M 6 -37 l 7 7 l 13 -14" />
-            <text class="scan-text" x="38" y="-32">Gescand! ✓</text>
+          <!-- speech bubbles -->
+          <g class="bubble bubble-emp">
+            <rect class="bubble-box" x="150" y="24" width="196" height="40" rx="14" />
+            <path class="bubble-box" d="M250 63 l6 16 l14 -16 z" />
+            <text class="bubble-text" x="248" y="49" text-anchor="middle">Gefeliciteerd! Gratis koffie! ☕</text>
+          </g>
+          <g class="bubble bubble-cust">
+            <rect class="bubble-box" x="470" y="20" width="210" height="40" rx="14" />
+            <path class="bubble-box" d="M560 59 l-6 16 l-14 -16 z" />
+            <text class="bubble-text" x="575" y="45" text-anchor="middle">Ik heb alle 6 stempels! 🎉</text>
           </g>
 
-          <!-- elastic rope: anchored at the shop door, reaches toward the walker -->
-          <line class="rope" x1="178" y1="250" x2="183" y2="250" />
+          <!-- elastic rope: anchored at the shop door, snaps out toward the walker -->
+          <line class="rope" x1="170" y1="222" x2="175" y2="222" />
 
-          <!-- character -->
+          <!-- customer (walks / celebrates / gets pulled back) -->
           <g class="dude-move">
-            <g class="dude-stretch">
-              <g class="dude">
-                <!-- legs: vertical from hip (0,238) downward, rotate around hip -->
-                <line class="limb leg-l" x1="0" y1="238" x2="0" y2="292" />
-                <line class="limb leg-r" x1="0" y1="238" x2="0" y2="292" />
-                <!-- body -->
-                <line class="body-line" x1="0" y1="238" x2="0" y2="176" />
-                <!-- arms: vertical from shoulder (0,186) downward, rotate around shoulder -->
-                <line class="limb arm-l" x1="0" y1="186" x2="0" y2="230" />
-                <line class="limb arm-r" x1="0" y1="186" x2="0" y2="230" />
-                <!-- head -->
-                <circle class="head" cx="0" cy="150" r="22" />
-                <circle class="eye" cx="-7" cy="147" r="2.6" />
-                <circle class="eye" cx="7" cy="147" r="2.6" />
-                <path class="mouth-neutral" d="M -7 159 L 7 159" />
-                <path class="mouth-smile" d="M -8 156 Q 0 166 8 156" />
-                <!-- phone in the raised hand (shown while scanning) -->
-                <g class="phone" transform="translate(-34,104)">
-                  <rect class="phone-body" x="0" y="0" width="30" height="50" rx="6" />
-                  <rect class="phone-screen" x="4" y="6" width="22" height="38" rx="3" />
-                  <circle class="phone-dot" cx="9"  cy="13" r="2.4" />
-                  <circle class="phone-dot" cx="17" cy="13" r="2.4" />
-                  <circle class="phone-dot" cx="9"  cy="22" r="2.4" />
-                  <circle class="phone-dot" cx="17" cy="22" r="2.4" />
-                  <circle class="phone-dot" cx="9"  cy="31" r="2.4" />
-                  <circle class="phone-dot" cx="17" cy="31" r="2.4" />
+            <ellipse class="shadow" cx="0" cy="296" rx="24" ry="6" />
+            <g class="dude-hop">
+              <g class="dude-stretch">
+                <g class="dude">
+                  <!-- legs -->
+                  <line class="limb cust-stroke leg-l-c" x1="0" y1="238" x2="0" y2="290" />
+                  <line class="limb cust-stroke leg-r-c" x1="0" y1="238" x2="0" y2="290" />
+                  <!-- body -->
+                  <line class="body-line cust-stroke" x1="0" y1="238" x2="0" y2="172" />
+                  <!-- arms -->
+                  <line class="limb cust-stroke arm-l-c" x1="0" y1="182" x2="0" y2="226" />
+                  <line class="limb cust-stroke arm-r-c" x1="0" y1="182" x2="0" y2="226" />
+                  <!-- head + happy face -->
+                  <circle class="head cust-stroke" cx="0" cy="148" r="20" />
+                  <circle class="face" cx="-7" cy="145" r="2.6" />
+                  <circle class="face" cx="7" cy="145" r="2.6" />
+                  <path class="mouth" d="M -8 153 Q 0 163 8 153" />
+                  <!-- phone with 6 full stamps (shown while at register) -->
+                  <g class="phone" transform="translate(-36,100)">
+                    <rect class="phone-body" x="0" y="0" width="32" height="52" rx="6" />
+                    <rect class="phone-screen" x="4" y="6" width="24" height="40" rx="3" />
+                    <circle class="stamp-dot" cx="10" cy="14" r="2.7" />
+                    <circle class="stamp-dot" cx="22" cy="14" r="2.7" />
+                    <circle class="stamp-dot" cx="10" cy="26" r="2.7" />
+                    <circle class="stamp-dot" cx="22" cy="26" r="2.7" />
+                    <circle class="stamp-dot" cx="10" cy="38" r="2.7" />
+                    <circle class="stamp-dot" cx="22" cy="38" r="2.7" />
+                  </g>
+                  <!-- coffee held after receiving it -->
+                  <g class="coffee-hold" transform="translate(14,138)">
+                    <path class="cup-body" d="M1 4 h16 l-2 17 a2 2 0 0 1 -2 1.7 h-8 a2 2 0 0 1 -2 -1.7 z" />
+                    <rect class="cup-sleeve" x="1.6" y="9" width="13.8" height="7" />
+                    <line class="cup-lid" x1="0.5" y1="4" x2="17.5" y2="4" />
+                    <path class="cup-steam" d="M6 1 q2 -2 0 -4 M11 1 q2 -2 0 -4" />
+                  </g>
                 </g>
               </g>
             </g>
