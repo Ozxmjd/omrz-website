@@ -31,26 +31,18 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
     body {
-      font-family: var(--font);
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      font-size: 17px;
-      overflow-x: hidden;
-      -webkit-font-smoothing: antialiased;
+      font-family: var(--font); background: var(--bg); color: var(--text);
+      line-height: 1.6; font-size: 17px; overflow-x: hidden; -webkit-font-smoothing: antialiased;
     }
     a { color: inherit; text-decoration: none; }
-
     .container { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: 24px; }
 
     /* ---------- Buttons ---------- */
     .btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 8px;
       font-family: inherit; font-size: 15px; font-weight: 600; line-height: 1;
-      padding: 15px 28px; border-radius: 999px; border: 1px solid transparent;
-      cursor: pointer; white-space: nowrap;
-      transition: transform .25s var(--ease), box-shadow .3s var(--ease),
-                  background .25s var(--ease), border-color .25s var(--ease);
+      padding: 15px 28px; border-radius: 999px; border: 1px solid transparent; cursor: pointer; white-space: nowrap;
+      transition: transform .25s var(--ease), box-shadow .3s var(--ease), background .25s var(--ease), border-color .25s var(--ease);
     }
     .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #1a0f00; box-shadow: 0 8px 30px rgba(249,115,22,.4); }
     .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 44px rgba(249,115,22,.55); }
@@ -59,13 +51,11 @@
     .btn-block { width: 100%; }
     .btn-lg { padding: 17px 32px; font-size: 16px; }
 
-    /* ---------- Nav ---------- */
+    /* ---------- Nav (same as index.html) ---------- */
     .nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      background: rgba(5,5,8,.5);
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(5,5,8,.5);
       backdrop-filter: saturate(160%) blur(16px); -webkit-backdrop-filter: saturate(160%) blur(16px);
-      border-bottom: 1px solid transparent;
-      transition: border-color .3s var(--ease), background .3s var(--ease);
+      border-bottom: 1px solid transparent; transition: border-color .3s var(--ease), background .3s var(--ease);
     }
     .nav.scrolled { border-color: var(--border); background: rgba(5,5,8,.8); }
     .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 70px; }
@@ -92,32 +82,29 @@
       border: 1px solid var(--border); background: rgba(249,115,22,.06); margin-bottom: 26px;
     }
     .hero h1 {
-      font-size: clamp(38px, 6.5vw, 72px); font-weight: 800; line-height: 1.05;
-      letter-spacing: -.035em; max-width: 16ch; margin: 0 auto 20px;
+      font-size: clamp(40px, 7vw, 78px); font-weight: 800; line-height: 1.04;
+      letter-spacing: -.035em; max-width: 15ch; margin: 0 auto 20px;
       background: linear-gradient(120deg, #fafafa 0%, #fafafa 45%, var(--accent-2) 78%, var(--accent) 100%);
-      -webkit-background-clip: text; background-clip: text;
-      -webkit-text-fill-color: transparent; color: transparent;
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent;
     }
     .hero-sub { font-size: clamp(17px, 2.3vw, 20px); color: var(--muted); max-width: 52ch; margin: 0 auto 34px; }
+    .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
 
     /* ---------- Animated scene ---------- */
     .scene-wrap {
-      position: relative; margin: 30px auto 0; max-width: 900px;
+      position: relative; margin: 44px auto 0; max-width: 900px;
       border: 1px solid var(--border); border-radius: var(--radius);
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
-      overflow: hidden;
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01)); overflow: hidden;
     }
-    .scene-wrap::after { content: ""; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 -40px 60px rgba(5,5,8,.6); }
+    .scene-wrap::after { content: ""; position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 -40px 60px rgba(5,5,8,.55); }
     .scene { display: block; width: 100%; height: auto; }
 
     .floor { stroke: #1c1c24; stroke-width: 3; }
-
     .shop-body { fill: #12121a; stroke: var(--border); stroke-width: 2; }
     .shop-roof { fill: var(--accent); }
     .shop-door { fill: #0a0a10; stroke: var(--border); stroke-width: 1.5; }
     .shop-window { fill: rgba(249,115,22,.18); stroke: rgba(249,115,22,.4); stroke-width: 1.5; }
     .shop-sign { fill: var(--gold); font: 700 13px var(--font); }
-
     .reg-body { fill: #14141d; stroke: var(--border); stroke-width: 2; }
     .reg-screen { fill: rgba(249,115,22,.14); stroke: rgba(249,115,22,.45); stroke-width: 1.5; }
     .reg-base { fill: #0d0d14; stroke: var(--border); stroke-width: 2; }
@@ -141,95 +128,98 @@
     .phone-screen { fill: #14110a; }
     .phone-dot { fill: var(--gold); }
 
+    .scan-beam { fill: #4ade80; opacity: 0; transform-box: fill-box; animation: scanBeam 8s var(--ease) infinite; }
+
     .rope {
       stroke: var(--accent); stroke-width: 4; stroke-linecap: round; fill: none;
-      transform-box: fill-box; transform-origin: 0% 50%;
-      opacity: 0; animation: rope 8s var(--ease) infinite;
+      transform-box: fill-box; transform-origin: 0% 50%; opacity: 0; animation: rope 8s var(--ease) infinite;
     }
 
-    .stamp-label { opacity: 0; animation: stampLabel 8s var(--ease) infinite; }
-    .stamp-badge { fill: #0d1f12; stroke: #22c55e; stroke-width: 2; }
-    .stamp-check { stroke: #22c55e; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; fill: none; }
-    .stamp-text { fill: #4ade80; font: 700 15px var(--font); }
+    .scan-label { opacity: 0; animation: scanLabel 8s var(--ease) infinite; }
+    .scan-badge { fill: #0d1f12; stroke: #22c55e; stroke-width: 2; }
+    .scan-check { stroke: #22c55e; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+    .scan-text { fill: #4ade80; font: 700 15px var(--font); }
 
+    /* 8s master timeline — walk → scan → walk away → rope yank → bounce back + smile */
     @keyframes walkPath {
-      0%    { transform: translateX(120px); }
-      25%   { transform: translateX(392px); }
-      37.5% { transform: translateX(392px); }
-      50%   { transform: translateX(392px); }
-      68.75%{ transform: translateX(660px); }
-      75%   { transform: translateX(636px); }
-      81.25%{ transform: translateX(520px); }
-      85%   { transform: translateX(92px); }
-      88.5% { transform: translateX(120px); }
-      100%  { transform: translateX(120px); }
+      0%      { transform: translateX(120px); }   /* at shop */
+      31.25%  { transform: translateX(392px); }   /* arrive at register (2.5s) */
+      43.75%  { transform: translateX(392px); }   /* scanning (3.5s) */
+      56.25%  { transform: translateX(392px); }   /* scanned OK (4.5s) */
+      75%     { transform: translateX(660px); }   /* walked away right (6s) */
+      81%     { transform: translateX(636px); }   /* rope taut, tugged */
+      87.5%   { transform: translateX(500px); }   /* yanked back left (7s) */
+      92%     { transform: translateX(92px); }    /* overshoot bounce */
+      95%     { transform: translateX(120px); }   /* settle at shop */
+      100%    { transform: translateX(120px); }
     }
     @keyframes stretch {
-      0%,68.75% { transform: scaleX(1) scaleY(1); }
-      74%       { transform: scaleX(1.28) scaleY(.9); }
-      81.25%    { transform: scaleX(1.18) scaleY(.94); }
-      85%       { transform: scaleX(.86) scaleY(1.12); }
-      88.5%     { transform: scaleX(1) scaleY(1); }
-      100%      { transform: scaleX(1) scaleY(1); }
+      0%,75%  { transform: scaleX(1) scaleY(1); }
+      81%     { transform: scaleX(1.28) scaleY(.9); }
+      87.5%   { transform: scaleX(1.16) scaleY(.94); }
+      92%     { transform: scaleX(.86) scaleY(1.12); }
+      95%     { transform: scaleX(1) scaleY(1); }
+      100%    { transform: scaleX(1) scaleY(1); }
     }
     @keyframes legL {
-      0%{transform:rotate(-10deg)} 4%{transform:rotate(14deg)} 8%{transform:rotate(-32deg)}
-      12%{transform:rotate(14deg)} 16%{transform:rotate(-32deg)} 20%{transform:rotate(14deg)}
-      25%{transform:rotate(-10deg)} 50%{transform:rotate(-10deg)}
-      53%{transform:rotate(14deg)} 56%{transform:rotate(-32deg)} 59%{transform:rotate(14deg)}
-      62%{transform:rotate(-32deg)} 65%{transform:rotate(14deg)} 68.75%{transform:rotate(-10deg)}
+      0%{transform:rotate(-10deg)} 5%{transform:rotate(14deg)} 10%{transform:rotate(-32deg)}
+      15%{transform:rotate(14deg)} 20%{transform:rotate(-32deg)} 25%{transform:rotate(14deg)} 31.25%{transform:rotate(-10deg)}
+      56.25%{transform:rotate(-10deg)}
+      59%{transform:rotate(14deg)} 62%{transform:rotate(-32deg)} 65%{transform:rotate(14deg)}
+      68%{transform:rotate(-32deg)} 71%{transform:rotate(14deg)} 75%{transform:rotate(-10deg)}
       100%{transform:rotate(-10deg)}
     }
     @keyframes legR {
-      0%{transform:rotate(10deg)} 4%{transform:rotate(-14deg)} 8%{transform:rotate(32deg)}
-      12%{transform:rotate(-14deg)} 16%{transform:rotate(32deg)} 20%{transform:rotate(-14deg)}
-      25%{transform:rotate(10deg)} 50%{transform:rotate(10deg)}
-      53%{transform:rotate(-14deg)} 56%{transform:rotate(32deg)} 59%{transform:rotate(-14deg)}
-      62%{transform:rotate(32deg)} 65%{transform:rotate(-14deg)} 68.75%{transform:rotate(10deg)}
+      0%{transform:rotate(10deg)} 5%{transform:rotate(-14deg)} 10%{transform:rotate(32deg)}
+      15%{transform:rotate(-14deg)} 20%{transform:rotate(32deg)} 25%{transform:rotate(-14deg)} 31.25%{transform:rotate(10deg)}
+      56.25%{transform:rotate(10deg)}
+      59%{transform:rotate(-14deg)} 62%{transform:rotate(32deg)} 65%{transform:rotate(-14deg)}
+      68%{transform:rotate(32deg)} 71%{transform:rotate(-14deg)} 75%{transform:rotate(10deg)}
       100%{transform:rotate(10deg)}
     }
     @keyframes armL {
-      0%{transform:rotate(8deg)} 4%{transform:rotate(-10deg)} 8%{transform:rotate(26deg)}
-      12%{transform:rotate(-10deg)} 16%{transform:rotate(26deg)} 20%{transform:rotate(-10deg)}
-      25%{transform:rotate(8deg)} 50%{transform:rotate(8deg)}
-      53%{transform:rotate(-10deg)} 56%{transform:rotate(26deg)} 59%{transform:rotate(-10deg)}
-      62%{transform:rotate(26deg)} 65%{transform:rotate(-10deg)} 68.75%{transform:rotate(8deg)}
-      85%{transform:rotate(-42deg)} 92%{transform:rotate(-42deg)} 100%{transform:rotate(8deg)}
+      0%{transform:rotate(8deg)} 5%{transform:rotate(-10deg)} 10%{transform:rotate(26deg)}
+      15%{transform:rotate(-10deg)} 20%{transform:rotate(26deg)} 25%{transform:rotate(-10deg)} 31.25%{transform:rotate(8deg)}
+      56.25%{transform:rotate(8deg)}
+      59%{transform:rotate(-10deg)} 62%{transform:rotate(26deg)} 65%{transform:rotate(-10deg)}
+      68%{transform:rotate(26deg)} 71%{transform:rotate(-10deg)} 75%{transform:rotate(8deg)}
+      92%{transform:rotate(-40deg)} 95%{transform:rotate(-40deg)} 100%{transform:rotate(8deg)}
     }
     @keyframes armR {
-      0%{transform:rotate(-8deg)} 4%{transform:rotate(-26deg)} 8%{transform:rotate(10deg)}
-      12%{transform:rotate(-26deg)} 16%{transform:rotate(10deg)} 20%{transform:rotate(-26deg)}
-      25%{transform:rotate(-8deg)}
-      28%{transform:rotate(-158deg)} 37.5%{transform:rotate(-158deg)}
-      41%{transform:rotate(-8deg)} 50%{transform:rotate(-8deg)}
-      53%{transform:rotate(-26deg)} 56%{transform:rotate(10deg)} 59%{transform:rotate(-26deg)}
-      62%{transform:rotate(10deg)} 65%{transform:rotate(-26deg)} 68.75%{transform:rotate(-8deg)}
-      85%{transform:rotate(42deg)} 92%{transform:rotate(42deg)} 100%{transform:rotate(-8deg)}
+      0%{transform:rotate(-8deg)} 5%{transform:rotate(-26deg)} 10%{transform:rotate(10deg)}
+      15%{transform:rotate(-26deg)} 20%{transform:rotate(10deg)} 25%{transform:rotate(-26deg)} 31.25%{transform:rotate(-8deg)}
+      34%{transform:rotate(-158deg)} 54%{transform:rotate(-158deg)}   /* phone raised to scan */
+      56.25%{transform:rotate(-8deg)}
+      59%{transform:rotate(-26deg)} 62%{transform:rotate(10deg)} 65%{transform:rotate(-26deg)}
+      68%{transform:rotate(10deg)} 71%{transform:rotate(-26deg)} 75%{transform:rotate(-8deg)}
+      92%{transform:rotate(40deg)} 95%{transform:rotate(40deg)} 100%{transform:rotate(-8deg)}
     }
-    @keyframes phoneShow {
-      0%,25%{opacity:0} 28%{opacity:1} 40%{opacity:1} 43%{opacity:0} 100%{opacity:0}
+    @keyframes phoneShow { 0%,31.25%{opacity:0} 33%{opacity:1} 54%{opacity:1} 56%{opacity:0} 100%{opacity:0} }
+    @keyframes scanBeam {
+      0%,33%{opacity:0; transform:translateY(0)}
+      35%{opacity:.9; transform:translateY(0)}
+      44%{opacity:.9; transform:translateY(20px)}
+      46%{opacity:0; transform:translateY(20px)} 100%{opacity:0}
     }
-    @keyframes stampLabel {
-      0%,37.5%{opacity:0; transform:translateY(6px)}
-      41%{opacity:1; transform:translateY(0)}
-      50%{opacity:1; transform:translateY(0)}
-      55%{opacity:0; transform:translateY(-6px)} 100%{opacity:0}
+    @keyframes scanLabel {
+      0%,45%{opacity:0; transform:translateY(6px)}
+      48%{opacity:1; transform:translateY(0)}
+      56%{opacity:1; transform:translateY(0)}
+      60%{opacity:0; transform:translateY(-6px)} 100%{opacity:0}
     }
-    @keyframes smile {
-      0%,80%{opacity:0} 82%{opacity:1} 100%{opacity:1}
-    }
+    @keyframes smile { 0%,86%{opacity:0} 88%{opacity:1} 100%{opacity:1} }
     @keyframes rope {
-      0%,68.75%{opacity:0; transform:scaleX(0) scaleY(1)}
-      69.5%{opacity:1; transform:scaleX(102) scaleY(1)}
-      75%{opacity:1; transform:scaleX(96) scaleY(1.4)}
-      81.25%{opacity:1; transform:scaleX(72) scaleY(1)}
-      85%{opacity:.5; transform:scaleX(8) scaleY(1)}
-      88%{opacity:0; transform:scaleX(0) scaleY(1)} 100%{opacity:0; transform:scaleX(0)}
+      0%,75%{opacity:0; transform:scaleX(0) scaleY(1)}
+      76%{opacity:1; transform:scaleX(102) scaleY(1)}
+      81%{opacity:1; transform:scaleX(96) scaleY(1.4)}
+      87.5%{opacity:1; transform:scaleX(68) scaleY(1)}
+      92%{opacity:.5; transform:scaleX(8) scaleY(1)}
+      95%{opacity:0; transform:scaleX(0)} 100%{opacity:0; transform:scaleX(0)}
     }
 
     .scene-title {
-      position: absolute; top: 26px; left: 0; right: 0; z-index: 3; pointer-events: none; text-align: center;
-      font-size: clamp(24px, 4vw, 44px); font-weight: 800; letter-spacing: -.03em;
+      position: absolute; top: 24px; left: 0; right: 0; z-index: 3; pointer-events: none; text-align: center;
+      font-size: clamp(22px, 3.6vw, 40px); font-weight: 800; letter-spacing: -.03em;
       color: var(--text); text-shadow: 0 4px 30px rgba(5,5,8,.9), 0 2px 10px rgba(5,5,8,.9);
     }
 
@@ -242,9 +232,7 @@
 
     .glass {
       background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015));
-      border: 1px solid var(--border);
-      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      border-radius: var(--radius);
+      border: 1px solid var(--border); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: var(--radius);
     }
 
     .intro-card { padding: 46px; text-align: center; max-width: 820px; margin: 0 auto; }
@@ -314,7 +302,7 @@
       .reveal { transition: none; opacity: 1; transform: none; }
       html { scroll-behavior: auto; }
       .dude-move, .dude-stretch, .leg-l, .leg-r, .arm-l, .arm-r,
-      .phone, .rope, .stamp-label, .mouth-smile { animation: none !important; }
+      .phone, .rope, .scan-beam, .scan-label, .mouth-smile { animation: none !important; }
       .dude-move { transform: translateX(392px); }
       .arm-r { transform: rotate(-158deg); }
       .phone { opacity: 1; }
@@ -323,7 +311,7 @@
 </head>
 <body>
 
-  <!-- ===== Nav ===== -->
+  <!-- ===== Nav (same as index.html) ===== -->
   <header class="nav" id="nav">
     <div class="container nav-inner">
       <a href="index.html" class="brand">OMRZ<span>.AI</span></a>
@@ -347,11 +335,15 @@
     <div class="container">
       <span class="badge">✦ Digitale Stempelkaart</span>
       <h1>Klanten komen vanzelf terug</h1>
-      <p class="hero-sub">De moderne spaarkaart die klanten in hun telefoon bewaren — geen app, geen gedoe. Ze sparen, worden beloond en komen weer langs.</p>
+      <p class="hero-sub">De moderne spaarkaart die klanten in hun telefoon bewaren — geen app, geen gedoe. Ze scannen, sparen en komen weer langs.</p>
+      <div class="hero-actions">
+        <a href="aanmelden.html?pakket=starter" class="btn btn-primary">Aanmelden vanaf €29/maand</a>
+        <a href="#hoe" class="btn btn-ghost">Hoe werkt het?</a>
+      </div>
 
       <div class="scene-wrap">
         <div class="scene-title">Klanten komen vanzelf terug</div>
-        <svg class="scene" viewBox="0 0 800 340" role="img" aria-label="Animatie: een klant haalt een stempel bij de kassa en wordt door een elastisch touwtje terug naar de winkel getrokken">
+        <svg class="scene" viewBox="0 0 800 340" role="img" aria-label="Animatie: een klant loopt naar de kassa, scant de telefoon, loopt weg en wordt door een elastisch touwtje terug naar de winkel getrokken">
           <!-- floor -->
           <line class="floor" x1="20" y1="300" x2="780" y2="300" />
 
@@ -364,18 +356,19 @@
             <text class="shop-sign" x="123" y="141" text-anchor="middle">CAFÉ</text>
           </g>
 
-          <!-- register (center) -->
+          <!-- register (center) with scan beam -->
           <g class="register">
             <rect class="reg-base" x="360" y="256" width="90" height="44" rx="5" />
             <rect class="reg-body" x="372" y="212" width="66" height="52" rx="5" />
             <rect class="reg-screen" x="382" y="222" width="46" height="26" rx="3" />
+            <rect class="scan-beam" x="382" y="223" width="46" height="3" rx="1.5" />
           </g>
 
-          <!-- floating "stamp received" label above the register -->
-          <g class="stamp-label" transform="translate(360,150)">
-            <rect class="stamp-badge" x="-16" y="-58" width="200" height="42" rx="21" />
-            <path class="stamp-check" d="M -4 -37 l 7 7 l 13 -14" />
-            <text class="stamp-text" x="30" y="-32">Stempel ontvangen! ✓</text>
+          <!-- "Gescand" confirmation label above the register -->
+          <g class="scan-label" transform="translate(360,150)">
+            <rect class="scan-badge" x="-6" y="-58" width="150" height="42" rx="21" />
+            <path class="scan-check" d="M 6 -37 l 7 7 l 13 -14" />
+            <text class="scan-text" x="38" y="-32">Gescand! ✓</text>
           </g>
 
           <!-- elastic rope: anchored at the shop door, reaches toward the walker -->
@@ -399,7 +392,7 @@
                 <circle class="eye" cx="7" cy="147" r="2.6" />
                 <path class="mouth-neutral" d="M -7 159 L 7 159" />
                 <path class="mouth-smile" d="M -8 156 Q 0 166 8 156" />
-                <!-- phone in the raised hand -->
+                <!-- phone in the raised hand (shown while scanning) -->
                 <g class="phone" transform="translate(-34,104)">
                   <rect class="phone-body" x="0" y="0" width="30" height="50" rx="6" />
                   <rect class="phone-screen" x="4" y="6" width="22" height="38" rx="3" />
@@ -430,7 +423,7 @@
   </section>
 
   <!-- ===== 2. Hoe werkt het ===== -->
-  <section class="section" style="padding-top:0;">
+  <section class="section" id="hoe" style="padding-top:0;">
     <div class="container">
       <div class="section-head">
         <span class="eyebrow reveal">Hoe werkt het</span>
@@ -445,9 +438,9 @@
         </div>
         <div class="step glass reveal">
           <span class="step-num">02</span>
-          <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
-          <h3>Jij geeft een stempel</h3>
-          <p>Bij elk bezoek of aankoop scan je de kaart en voeg je een stempel toe. De telefoon van de klant werkt direct bij.</p>
+          <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2"/><path d="M4 12h16"/></svg></div>
+          <h3>Jij scant de kaart</h3>
+          <p>Bij elk bezoek of aankoop scan je de telefoon van de klant en voeg je een stempel toe. De kaart werkt direct bij.</p>
         </div>
         <div class="step glass reveal">
           <span class="step-num">03</span>
@@ -527,7 +520,7 @@
     </div>
   </section>
 
-  <!-- ===== Footer ===== -->
+  <!-- ===== Footer (same as index.html) ===== -->
   <footer class="footer">
     <div class="container">
       <div class="footer-top">

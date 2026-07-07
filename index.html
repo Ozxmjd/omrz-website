@@ -239,7 +239,7 @@
     }
     .wallet-title { font-size: 13px; color: var(--gold); font-weight: 600; letter-spacing: .04em; margin-bottom: 3px; }
     .wallet-sub { font-size: 12px; color: var(--muted-dim); margin-bottom: 20px; }
-    .stamp-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px 10px; }
+    .stamp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px 12px; }
     .stamp {
       aspect-ratio: 1; border-radius: 50%; border: 1.5px dashed rgba(224,177,85,.4);
       display: grid; place-items: center; color: var(--gold);
@@ -451,10 +451,10 @@
                 </div>
                 <div class="wallet-card">
                   <div class="wallet-title">Koffie Spaarkaart</div>
-                  <div class="wallet-sub">Spaar 10 stempels → gratis koffie</div>
+                  <div class="wallet-sub">Spaar 6 stempels → gratis koffie</div>
                   <div class="stamp-grid" id="stampGrid"></div>
                 </div>
-                <div class="wallet-progress" id="walletProgress">0 / 10 stempels</div>
+                <div class="wallet-progress" id="walletProgress">0 / 6 stempels</div>
                 <div class="wallet-foot"><div class="wallet-barcode"></div></div>
 
                 <div class="reward-overlay" id="rewardOverlay">
@@ -913,7 +913,7 @@
       var progress = document.getElementById('walletProgress');
       var overlay = document.getElementById('rewardOverlay');
       var confettiCanvas = document.getElementById('confetti-canvas');
-      var TOTAL = 10;
+      var TOTAL = 6;
       var checkSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
 
       var cells = [];
@@ -987,7 +987,7 @@
           for (var i = 0; i < TOTAL; i++) {
             cells[i].classList.add('filled');
             progress.textContent = (i + 1) + ' / ' + TOTAL + ' stempels';
-            await wait(1500);
+            await wait(800);
           }
           progress.textContent = 'Spaarkaart vol! 🎉';
           overlay.classList.add('show');
