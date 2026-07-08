@@ -132,6 +132,17 @@
     .stamp-mini i { display: block; aspect-ratio: 1; border-radius: 50%; background: linear-gradient(135deg, #f5c542, #c9922e); box-shadow: inset 0 0 0 1px rgba(255,255,255,.15); }
     .s-wallet { border-color: rgba(245,197,66,.35); background: linear-gradient(160deg, rgba(40,32,10,.95), rgba(20,20,20,.92)); }
 
+    @keyframes stampFill {
+      0% { transform: scale(0); opacity: 0; background: transparent; }
+      60% { transform: scale(1.2); }
+      100% { transform: scale(1); opacity: 1; background: #d97706; }
+    }
+    @keyframes rewardShow {
+      0%, 80% { opacity: 0; transform: scale(0.8); }
+      85%, 95% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; }
+    }
+
     .s-dash { border-color: rgba(34,197,94,.3); }
     .dash-svg { width: 100%; height: 40px; display: block; margin: 6px 0; }
     .sc-stat { font-size: 20px; font-weight: 800; color: #22c55e; }
@@ -371,18 +382,31 @@
       </div>
       <!-- 2. Telefoon met stempelkaart -->
       <div class="screen s-wallet" style="top:40%; animation-delay:-1.67s;">
-        <div style="width:118px;margin:0 auto;background:#050506;border:1px solid rgba(255,255,255,.16);border-radius:20px;padding:6px;box-shadow:0 8px 20px rgba(0,0,0,.5);">
-          <div style="position:relative;background:radial-gradient(120% 80% at 50% 0%, #17171b, #0a0a0a 72%);border-radius:15px;padding:16px 8px 10px;">
-            <div style="position:absolute;top:5px;left:50%;transform:translateX(-50%);width:42px;height:8px;background:#000;border-radius:0 0 7px 7px;"></div>
-            <div style="background:linear-gradient(155deg,#26262b,#101012);border:1px solid rgba(255,255,255,.12);border-radius:11px;padding:9px 8px;">
-              <div style="font-size:10px;font-weight:800;color:#fff;margin-bottom:7px;">Café OMRZ</div>
-              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">
-                <span style="aspect-ratio:1;border-radius:50%;background:linear-gradient(135deg,#f5c542,#c9922e);box-shadow:inset 0 0 0 1px rgba(255,255,255,.15);"></span>
-                <span style="aspect-ratio:1;border-radius:50%;background:linear-gradient(135deg,#f5c542,#c9922e);box-shadow:inset 0 0 0 1px rgba(255,255,255,.15);"></span>
-                <span style="aspect-ratio:1;border-radius:50%;border:1.5px dashed rgba(255,255,255,.28);"></span>
-                <span style="aspect-ratio:1;border-radius:50%;border:1.5px dashed rgba(255,255,255,.28);"></span>
-                <span style="aspect-ratio:1;border-radius:50%;border:1.5px dashed rgba(255,255,255,.28);"></span>
-                <span style="aspect-ratio:1;border-radius:50%;border:1.5px dashed rgba(255,255,255,.28);"></span>
+        <div style="width:132px;margin:0 auto;background:#050506;border:1px solid rgba(255,255,255,.16);border-radius:22px;padding:6px;box-shadow:0 10px 24px rgba(0,0,0,.55);">
+          <div style="position:relative;background:radial-gradient(120% 80% at 50% 0%, #17171b, #050506 72%);border-radius:17px;padding:18px 9px 14px;">
+            <div style="position:absolute;top:6px;left:50%;transform:translateX(-50%);width:46px;height:9px;background:#000;border-radius:0 0 8px 8px;"></div>
+            <div style="border-radius:13px;padding:11px 10px;background:linear-gradient(155deg,#1a1a2e 0%,#16213e 100%);border:1px solid rgba(255,255,255,.1);box-shadow:0 6px 16px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.08);">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:11px;">
+                <div style="display:flex;align-items:center;gap:5px;">
+                  <span style="width:17px;height:17px;border-radius:5px;background:rgba(255,255,255,.1);display:grid;place-items:center;font-size:10px;flex-shrink:0;">☕</span>
+                  <span style="font-size:10px;font-weight:800;color:#fff;letter-spacing:-.01em;">Café OMRZ</span>
+                </div>
+                <span style="font-size:8px;color:#9aa3b8;margin-top:2px;">Stempelkaart</span>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;">
+                <span style="aspect-ratio:1;border-radius:50%;background:transparent;border:2px solid #555;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);animation:stampFill 0.4s ease forwards;animation-delay:0.5s;"></span>
+                <span style="aspect-ratio:1;border-radius:50%;background:transparent;border:2px solid #555;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);animation:stampFill 0.4s ease forwards;animation-delay:1.3s;"></span>
+                <span style="aspect-ratio:1;border-radius:50%;background:transparent;border:2px solid #555;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);animation:stampFill 0.4s ease forwards;animation-delay:2.1s;"></span>
+                <span style="aspect-ratio:1;border-radius:50%;background:transparent;border:2px solid #555;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);animation:stampFill 0.4s ease forwards;animation-delay:2.9s;"></span>
+                <span style="aspect-ratio:1;border-radius:50%;background:transparent;border:2px solid #555;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);animation:stampFill 0.4s ease forwards;animation-delay:3.7s;"></span>
+                <span style="aspect-ratio:1;border-radius:50%;background:transparent;border:2px solid #555;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);animation:stampFill 0.4s ease forwards;animation-delay:4.5s;"></span>
+              </div>
+            </div>
+            <div style="width:36px;height:3px;border-radius:3px;background:rgba(255,255,255,.35);margin:12px auto 0;"></div>
+            <div style="position:absolute;inset:0;border-radius:17px;display:grid;place-items:center;background:rgba(8,8,14,.82);opacity:0;animation:rewardShow 2s ease 5.5s forwards;">
+              <div style="text-align:center;">
+                <div style="font-size:26px;">🎉</div>
+                <div style="color:#fff;font-weight:800;font-size:11px;margin-top:3px;">Gratis koffie!</div>
               </div>
             </div>
           </div>
@@ -500,18 +524,31 @@
       </div>
       <!-- 10. herhaal 2 -->
       <div class="screen s-wallet" style="top:44%; animation-delay:-15s;">
-        <div style="width:118px;margin:0 auto;background:#050506;border:1px solid rgba(255,255,255,.16);border-radius:20px;padding:6px;box-shadow:0 8px 20px rgba(0,0,0,.5);">
-          <div style="position:relative;background:radial-gradient(120% 80% at 50% 0%, #17171b, #0a0a0a 72%);border-radius:15px;padding:16px 8px 10px;">
-            <div style="position:absolute;top:5px;left:50%;transform:translateX(-50%);width:42px;height:8px;background:#000;border-radius:0 0 7px 7px;"></div>
-            <div style="background:linear-gradient(155deg,#26262b,#101012);border:1px solid rgba(255,255,255,.12);border-radius:11px;padding:9px 8px;">
-              <div style="font-size:10px;font-weight:800;color:#fff;margin-bottom:7px;">Café OMRZ</div>
-              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;">
-                <span style="aspect-ratio:1;border-radius:50%;background:linear-gradient(135deg,#f5c542,#c9922e);box-shadow:inset 0 0 0 1px rgba(255,255,255,.15);"></span>
-                <span style="aspect-ratio:1;border-radius:50%;background:linear-gradient(135deg,#f5c542,#c9922e);box-shadow:inset 0 0 0 1px rgba(255,255,255,.15);"></span>
-                <span style="aspect-ratio:1;border-radius:50%;border:1.5px dashed rgba(255,255,255,.28);"></span>
-                <span style="aspect-ratio:1;border-radius:50%;border:1.5px dashed rgba(255,255,255,.28);"></span>
-                <span style="aspect-ratio:1;border-radius:50%;border:1.5px dashed rgba(255,255,255,.28);"></span>
-                <span style="aspect-ratio:1;border-radius:50%;border:1.5px dashed rgba(255,255,255,.28);"></span>
+        <div style="width:132px;margin:0 auto;background:#050506;border:1px solid rgba(255,255,255,.16);border-radius:22px;padding:6px;box-shadow:0 10px 24px rgba(0,0,0,.55);">
+          <div style="position:relative;background:radial-gradient(120% 80% at 50% 0%, #17171b, #050506 72%);border-radius:17px;padding:18px 9px 14px;">
+            <div style="position:absolute;top:6px;left:50%;transform:translateX(-50%);width:46px;height:9px;background:#000;border-radius:0 0 8px 8px;"></div>
+            <div style="border-radius:13px;padding:11px 10px;background:linear-gradient(155deg,#1a1a2e 0%,#16213e 100%);border:1px solid rgba(255,255,255,.1);box-shadow:0 6px 16px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.08);">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:11px;">
+                <div style="display:flex;align-items:center;gap:5px;">
+                  <span style="width:17px;height:17px;border-radius:5px;background:rgba(255,255,255,.1);display:grid;place-items:center;font-size:10px;flex-shrink:0;">☕</span>
+                  <span style="font-size:10px;font-weight:800;color:#fff;letter-spacing:-.01em;">Café OMRZ</span>
+                </div>
+                <span style="font-size:8px;color:#9aa3b8;margin-top:2px;">Stempelkaart</span>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px;">
+                <span style="aspect-ratio:1;border-radius:50%;background:transparent;border:2px solid #555;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);animation:stampFill 0.4s ease forwards;animation-delay:0.5s;"></span>
+                <span style="aspect-ratio:1;border-radius:50%;background:transparent;border:2px solid #555;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);animation:stampFill 0.4s ease forwards;animation-delay:1.3s;"></span>
+                <span style="aspect-ratio:1;border-radius:50%;background:transparent;border:2px solid #555;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);animation:stampFill 0.4s ease forwards;animation-delay:2.1s;"></span>
+                <span style="aspect-ratio:1;border-radius:50%;background:transparent;border:2px solid #555;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);animation:stampFill 0.4s ease forwards;animation-delay:2.9s;"></span>
+                <span style="aspect-ratio:1;border-radius:50%;background:transparent;border:2px solid #555;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);animation:stampFill 0.4s ease forwards;animation-delay:3.7s;"></span>
+                <span style="aspect-ratio:1;border-radius:50%;background:transparent;border:2px solid #555;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);animation:stampFill 0.4s ease forwards;animation-delay:4.5s;"></span>
+              </div>
+            </div>
+            <div style="width:36px;height:3px;border-radius:3px;background:rgba(255,255,255,.35);margin:12px auto 0;"></div>
+            <div style="position:absolute;inset:0;border-radius:17px;display:grid;place-items:center;background:rgba(8,8,14,.82);opacity:0;animation:rewardShow 2s ease 5.5s forwards;">
+              <div style="text-align:center;">
+                <div style="font-size:26px;">🎉</div>
+                <div style="color:#fff;font-weight:800;font-size:11px;margin-top:3px;">Gratis koffie!</div>
               </div>
             </div>
           </div>
