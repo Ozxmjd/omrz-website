@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inloggen · OMRZ.AI</title>
+  <meta name="description" content="Log in op je OMRZ.AI winkelier portaal en beheer je digitale stempelkaart." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --text: #ffffff;
+      --muted: #a0a0a0;
+      --pearl: #e8e8e8;
+      --card: rgba(255, 255, 255, .05);
+      --border: rgba(255, 255, 255, .1);
+      --border-strong: rgba(255, 255, 255, .18);
+      --radius: 18px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: var(--font); background: var(--bg); color: var(--text);
+      line-height: 1.6; font-size: 17px; min-height: 100vh; overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      display: flex; flex-direction: column;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    /* Subtiele achtergrond-gloed */
+    body::before {
+      content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background:
+        radial-gradient(700px 460px at 78% -10%, rgba(255,255,255,.06), transparent 60%),
+        radial-gradient(680px 460px at 10% 8%, rgba(255,255,255,.04), transparent 60%);
+    }
+
+    .topbar { padding: 26px 24px; }
+    .brand { font-size: 20px; font-weight: 800; letter-spacing: -.02em; color: #fff; }
+
+    .auth-wrap {
+      flex: 1; display: flex; align-items: center; justify-content: center;
+      padding: 20px 24px 60px;
+    }
+    .auth-card {
+      width: 100%; max-width: 420px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 40px 36px;
+      backdrop-filter: blur(20px) saturate(160%); -webkit-backdrop-filter: blur(20px) saturate(160%);
+      box-shadow: 0 30px 80px rgba(0,0,0,.5);
+    }
+    .auth-badge {
+      display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 500;
+      color: var(--pearl); padding: 6px 13px; border-radius: 999px;
+      border: 1px solid var(--border); background: rgba(20,20,20,.6); margin-bottom: 20px;
+    }
+    .auth-card h1 {
+      font-size: 27px; font-weight: 800; letter-spacing: -.03em; margin-bottom: 8px; line-height: 1.1;
+    }
+    .auth-sub { color: var(--muted); font-size: 15px; margin-bottom: 28px; }
+
+    .field { margin-bottom: 18px; }
+    .field label {
+      display: block; font-size: 13px; font-weight: 600; color: var(--pearl);
+      margin-bottom: 8px; letter-spacing: .01em;
+    }
+    .field input {
+      width: 100%; font-family: inherit; font-size: 15px; color: #fff;
+      background: rgba(255,255,255,.04); border: 1px solid var(--border-strong);
+      border-radius: 12px; padding: 14px 16px; transition: border-color .25s var(--ease), background .25s var(--ease);
+    }
+    .field input::placeholder { color: #6a6a6a; }
+    .field input:focus {
+      outline: none; border-color: #fff; background: rgba(255,255,255,.07);
+    }
+
+    .row-between { display: flex; justify-content: flex-end; margin: -6px 0 22px; }
+    .link-muted { color: var(--muted); font-size: 13.5px; font-weight: 500; transition: color .2s var(--ease); }
+    .link-muted:hover { color: #fff; }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      font-family: inherit; font-size: 15px; font-weight: 600; line-height: 1;
+      padding: 15px 24px; border-radius: 12px; border: 1px solid transparent; cursor: pointer; white-space: nowrap;
+      transition: transform .25s var(--ease), background .25s var(--ease), box-shadow .3s var(--ease), opacity .2s var(--ease);
+    }
+    .btn-primary { background: #ffffff; color: #0a0a0a; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(255,255,255,.18); }
+    .btn-primary:disabled { opacity: .55; cursor: default; transform: none; box-shadow: none; }
+    .btn-block { width: 100%; }
+
+    .auth-msg {
+      display: none; font-size: 14px; padding: 12px 14px; border-radius: 11px; margin-bottom: 20px;
+    }
+    .auth-msg.error { display: block; color: #ffb4b4; background: rgba(255,80,80,.08); border: 1px solid rgba(255,80,80,.25); }
+    .auth-msg.ok { display: block; color: #b4ffcf; background: rgba(80,255,140,.08); border: 1px solid rgba(80,255,140,.25); }
+
+    .auth-alt {
+      text-align: center; color: var(--muted); font-size: 14.5px; margin-top: 26px;
+      padding-top: 22px; border-top: 1px solid var(--border);
+    }
+    .auth-alt a { color: #fff; font-weight: 600; }
+    .auth-alt a:hover { text-decoration: underline; }
+
+    .spinner {
+      width: 16px; height: 16px; border-radius: 50%;
+      border: 2px solid rgba(10,10,10,.3); border-top-color: #0a0a0a;
+      animation: spin .7s linear infinite; display: none;
+    }
+    .btn.loading .spinner { display: inline-block; }
+    .btn.loading .btn-label { opacity: .7; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 480px) {
+      .auth-card { padding: 32px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <a href="index.html" class="brand">OMRZ.AI</a>
+  </div>
+
+  <main class="auth-wrap">
+    <div class="auth-card">
+      <span class="auth-badge">Winkelier portaal</span>
+      <h1>Welkom terug</h1>
+      <p class="auth-sub">Log in om je stempelkaart te beheren.</p>
+
+      <div class="auth-msg" id="authMsg"></div>
+
+      <form id="loginForm" novalidate>
+        <div class="field">
+          <label for="email">E-mailadres</label>
+          <input type="email" id="email" name="email" placeholder="jij@zaak.nl" autocomplete="email" required />
+        </div>
+
+        <div class="field">
+          <label for="password">Wachtwoord</label>
+          <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required />
+        </div>
+
+        <div class="row-between">
+          <a href="#" class="link-muted" id="forgotLink">Wachtwoord vergeten?</a>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="submitBtn">
+          <span class="spinner"></span>
+          <span class="btn-label">Inloggen</span>
+        </button>
+      </form>
+
+      <p class="auth-alt">Nog geen account? <a href="aanmelden.html">Registreer hier</a></p>
+    </div>
+  </main>
+
+  <script>
+    const API_BASE = 'https://ai-review-bot-production.up.railway.app';
+
+    const form = document.getElementById('loginForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const msg = document.getElementById('authMsg');
+
+    function showMsg(text, type) {
+      msg.textContent = text;
+      msg.className = 'auth-msg ' + type;
+    }
+    function clearMsg() { msg.className = 'auth-msg'; msg.textContent = ''; }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      clearMsg();
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!email || !password) {
+        showMsg('Vul je e-mailadres en wachtwoord in.', 'error');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.classList.add('loading');
+
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          showMsg(data.error || data.message || 'Inloggen mislukt. Controleer je gegevens.', 'error');
+          submitBtn.disabled = false;
+          submitBtn.classList.remove('loading');
+          return;
+        }
+
+        // Bewaar sessie-gegevens voor het dashboard
+        if (data.token) localStorage.setItem('omrz_token', data.token);
+        if (data.card_id) localStorage.setItem('omrz_card_id', data.card_id);
+        if (data.card && data.card.id) localStorage.setItem('omrz_card_id', data.card.id);
+        localStorage.setItem('omrz_email', email);
+
+        showMsg('Ingelogd! Je wordt doorgestuurd…', 'ok');
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        showMsg('Kan geen verbinding maken met de server. Probeer het later opnieuw.', 'error');
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('loading');
+      }
+    });
+
+    document.getElementById('forgotLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      if (!email) {
+        showMsg('Vul eerst je e-mailadres in, dan sturen we een herstel-link.', 'error');
+        return;
+      }
+      showMsg('Als dit e-mailadres bekend is, ontvang je zo een herstel-link.', 'ok');
+    });
+  </script>
+</body>
+</html>

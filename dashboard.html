@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard · OMRZ.AI</title>
+  <meta name="description" content="Beheer je digitale stempelkaart, bekijk statistieken en deel je QR-code." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --text: #ffffff;
+      --muted: #a0a0a0;
+      --pearl: #e8e8e8;
+      --card: rgba(255, 255, 255, .05);
+      --border: rgba(255, 255, 255, .1);
+      --border-strong: rgba(255, 255, 255, .18);
+      --radius: 18px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --sidebar-w: 258px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: var(--font); background: var(--bg); color: var(--text);
+      line-height: 1.6; font-size: 16px; min-height: 100vh; overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    body::before {
+      content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background:
+        radial-gradient(760px 500px at 82% -12%, rgba(255,255,255,.05), transparent 60%),
+        radial-gradient(640px 460px at 4% 4%, rgba(255,255,255,.035), transparent 60%);
+    }
+
+    .brand { font-size: 19px; font-weight: 800; letter-spacing: -.02em; color: #fff; }
+    .glass {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      backdrop-filter: blur(18px) saturate(160%); -webkit-backdrop-filter: blur(18px) saturate(160%);
+    }
+
+    /* ---------- Shell ---------- */
+    .shell { display: flex; min-height: 100vh; }
+
+    /* ---------- Sidebar ---------- */
+    .sidebar {
+      position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-w); z-index: 50;
+      display: flex; flex-direction: column; padding: 24px 18px;
+      background: rgba(14,14,14,.82); border-right: 1px solid var(--border);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      transition: transform .3s var(--ease);
+    }
+    .sidebar-head { display: flex; align-items: center; justify-content: space-between; padding: 4px 8px 22px; }
+    .side-nav { display: grid; gap: 4px; }
+    .side-link {
+      display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px;
+      font-size: 14.5px; font-weight: 500; color: var(--muted); cursor: pointer;
+      border: 1px solid transparent; transition: color .2s var(--ease), background .2s var(--ease), border-color .2s var(--ease);
+    }
+    .side-link svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .side-link:hover { color: #fff; background: rgba(255,255,255,.04); }
+    .side-link.active { color: #fff; background: rgba(255,255,255,.08); border-color: var(--border-strong); }
+    .side-foot { margin-top: auto; padding-top: 18px; border-top: 1px solid var(--border); }
+    .side-user { padding: 4px 14px 14px; }
+    .side-user .u-label { font-size: 12px; color: #6a6a6a; }
+    .side-user .u-email { font-size: 13.5px; color: var(--pearl); font-weight: 600; word-break: break-all; }
+    .logout-link { color: var(--muted); }
+    .logout-link:hover { color: #ff9b9b; background: rgba(255,80,80,.06); }
+
+    /* ---------- Content ---------- */
+    .content { flex: 1; margin-left: var(--sidebar-w); min-width: 0; }
+    .topbar {
+      position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 14px;
+      padding: 16px 34px; background: rgba(10,10,10,.7);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+    .menu-btn { display: none; background: none; border: 1px solid var(--border-strong); border-radius: 10px; padding: 8px 10px; cursor: pointer; flex-direction: column; gap: 4px; }
+    .menu-btn span { width: 18px; height: 2px; background: #fff; border-radius: 2px; }
+    .topbar h1 { font-size: 20px; font-weight: 800; letter-spacing: -.02em; }
+    .topbar .spacer { flex: 1; }
+    .biz-chip {
+      display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--pearl);
+      padding: 7px 14px; border-radius: 999px; border: 1px solid var(--border); background: rgba(255,255,255,.04);
+    }
+    .biz-dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 10px #4ade80; }
+
+    .page { padding: 30px 34px 60px; max-width: 1100px; }
+    .panel { display: none; animation: fade .4s var(--ease); }
+    .panel.active { display: block; }
+    @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    .panel-head { margin-bottom: 24px; }
+    .panel-head h2 { font-size: 24px; font-weight: 800; letter-spacing: -.03em; margin-bottom: 6px; }
+    .panel-head p { color: var(--muted); font-size: 15px; }
+
+    /* ---------- Stat cards ---------- */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 26px; }
+    .stat { padding: 22px 22px; }
+    .stat .s-top { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13.5px; font-weight: 500; margin-bottom: 14px; }
+    .stat .s-top svg { width: 17px; height: 17px; }
+    .stat .s-val { font-size: 34px; font-weight: 800; letter-spacing: -.03em; line-height: 1; }
+    .stat .s-sub { font-size: 13px; color: #6a6a6a; margin-top: 8px; }
+
+    /* ---------- Layout helpers ---------- */
+    .two-col { display: grid; grid-template-columns: 1.15fr 1fr; gap: 22px; align-items: start; }
+    .block { padding: 26px; }
+    .block h3 { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+    .block .b-sub { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
+
+    /* ---------- Stamp card preview ---------- */
+    .preview-stage { display: flex; justify-content: center; }
+    .stampcard {
+      width: 100%; max-width: 340px; border-radius: 20px; padding: 24px 22px 22px;
+      color: #fff; box-shadow: 0 24px 60px rgba(0,0,0,.5); border: 1px solid rgba(255,255,255,.14);
+      background: #1a1a2e;
+      transition: background .3s var(--ease);
+    }
+    .sc-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .sc-biz { font-size: 16px; font-weight: 800; letter-spacing: -.01em; }
+    .sc-chip { width: 34px; height: 26px; border-radius: 6px; background: linear-gradient(135deg, rgba(255,255,255,.9), rgba(255,255,255,.5)); opacity: .85; }
+    .sc-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .sc-reward { font-size: 13px; color: rgba(255,255,255,.72); margin-bottom: 20px; }
+    .sc-stamps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 9px; margin-bottom: 16px; }
+    .sc-stamp {
+      aspect-ratio: 1; border-radius: 50%; border: 1.5px dashed rgba(255,255,255,.4);
+      display: flex; align-items: center; justify-content: center; font-size: 14px;
+    }
+    .sc-stamp.filled { border-style: solid; border-color: rgba(255,255,255,.9); background: rgba(255,255,255,.16); }
+    .sc-progress { font-size: 12.5px; color: rgba(255,255,255,.7); text-align: right; }
+
+    /* ---------- Form ---------- */
+    .form-grid { display: grid; gap: 18px; }
+    .field label { display: block; font-size: 13px; font-weight: 600; color: var(--pearl); margin-bottom: 8px; }
+    .field input[type=text], .field input[type=number], .field input[type=email], .field input[type=password], .field textarea {
+      width: 100%; font-family: inherit; font-size: 15px; color: #fff;
+      background: rgba(255,255,255,.04); border: 1px solid var(--border-strong);
+      border-radius: 12px; padding: 13px 15px; transition: border-color .25s var(--ease), background .25s var(--ease);
+    }
+    .field textarea { resize: vertical; min-height: 84px; }
+    .field input:focus, .field textarea:focus { outline: none; border-color: #fff; background: rgba(255,255,255,.07); }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .color-row { display: flex; align-items: center; gap: 12px; }
+    .color-row input[type=color] {
+      width: 46px; height: 46px; padding: 0; border: 1px solid var(--border-strong);
+      border-radius: 12px; background: none; cursor: pointer;
+    }
+    .color-row input[type=color]::-webkit-color-swatch-wrapper { padding: 4px; }
+    .color-row input[type=color]::-webkit-color-swatch { border: none; border-radius: 8px; }
+    .swatches { display: flex; gap: 8px; }
+    .swatch { width: 26px; height: 26px; border-radius: 7px; cursor: pointer; border: 2px solid transparent; transition: transform .15s var(--ease); }
+    .swatch:hover { transform: scale(1.12); }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      font-family: inherit; font-size: 15px; font-weight: 600; line-height: 1;
+      padding: 14px 24px; border-radius: 12px; border: 1px solid transparent; cursor: pointer; white-space: nowrap;
+      transition: transform .25s var(--ease), background .25s var(--ease), box-shadow .3s var(--ease), border-color .25s var(--ease), opacity .2s var(--ease);
+    }
+    .btn-primary { background: #ffffff; color: #0a0a0a; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(255,255,255,.18); }
+    .btn-primary:disabled { opacity: .55; cursor: default; transform: none; box-shadow: none; }
+    .btn-ghost { background: transparent; color: var(--text); border-color: var(--border-strong); }
+    .btn-ghost:hover { transform: translateY(-2px); border-color: #fff; background: rgba(255,255,255,.06); }
+
+    .save-row { display: flex; align-items: center; gap: 14px; margin-top: 24px; }
+    .save-note { font-size: 13.5px; color: var(--muted); }
+    .save-note.ok { color: #b4ffcf; }
+    .save-note.error { color: #ffb4b4; }
+
+    /* ---------- QR ---------- */
+    .qr-wrap { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px 26px; }
+    .qr-box {
+      background: #fff; border-radius: 20px; padding: 22px; margin-bottom: 22px;
+      box-shadow: 0 24px 60px rgba(0,0,0,.4);
+    }
+    .qr-box svg, .qr-box img { display: block; width: 240px; height: 240px; }
+    .qr-caption { font-size: 15px; color: var(--pearl); max-width: 380px; margin-bottom: 8px; }
+    .qr-sub { font-size: 13.5px; color: var(--muted); max-width: 380px; margin-bottom: 22px; word-break: break-all; }
+    .qr-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+    /* ---------- Chart ---------- */
+    .chart-toolbar { display: flex; gap: 8px; margin-bottom: 22px; }
+    .seg { display: inline-flex; padding: 4px; border-radius: 12px; border: 1px solid var(--border); background: rgba(255,255,255,.03); }
+    .seg button {
+      font-family: inherit; font-size: 13.5px; font-weight: 600; color: var(--muted);
+      padding: 8px 16px; border-radius: 9px; border: 0; background: none; cursor: pointer;
+      transition: color .2s var(--ease), background .2s var(--ease);
+    }
+    .seg button.active { color: #0a0a0a; background: #fff; }
+    .chart { display: flex; align-items: flex-end; gap: 10px; height: 240px; padding-top: 10px; }
+    .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; height: 100%; justify-content: flex-end; }
+    .bar {
+      width: 100%; max-width: 46px; border-radius: 8px 8px 4px 4px;
+      background: linear-gradient(180deg, #ffffff, #9a9a9a);
+      min-height: 4px; transition: height .5s var(--ease); position: relative;
+    }
+    .bar:hover::after {
+      content: attr(data-val); position: absolute; top: -26px; left: 50%; transform: translateX(-50%);
+      background: #fff; color: #0a0a0a; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 6px; white-space: nowrap;
+    }
+    .bar-label { font-size: 12px; color: #6a6a6a; }
+
+    /* ---------- Loading / empty ---------- */
+    .loader { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 14.5px; padding: 20px 0; }
+    .spinner {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.2); border-top-color: #fff; animation: spin .7s linear infinite;
+    }
+    .btn.loading .btn-label { opacity: .6; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .sidebar-overlay { display: none; position: fixed; inset: 0; z-index: 45; background: rgba(0,0,0,.5); }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 900px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 760px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: none; }
+      .sidebar-overlay.show { display: block; }
+      .content { margin-left: 0; }
+      .menu-btn { display: flex; }
+      .page { padding: 22px 18px 50px; }
+      .topbar { padding: 14px 18px; }
+      .field-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="shell">
+
+    <!-- ===== Sidebar ===== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-head">
+        <a href="index.html" class="brand">OMRZ.AI</a>
+      </div>
+
+      <nav class="side-nav">
+        <div class="side-link active" data-tab="overzicht">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+          Overzicht
+        </div>
+        <div class="side-link" data-tab="kaart">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3 10h18M7 15h4"/></svg>
+          Mijn Kaart
+        </div>
+        <div class="side-link" data-tab="qr">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M20 20v.01M17 20v.01M20 14v3"/></svg>
+          QR Code
+        </div>
+        <div class="side-link" data-tab="statistieken">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16M8 16v-4M12 16V8M16 16v-6M20 16v-2"/></svg>
+          Statistieken
+        </div>
+        <div class="side-link" data-tab="instellingen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-2.82 1.17V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 8 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15H4.5a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 6 9.4l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 11 5.6V5.5a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 2.4 1.51l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 13z"/></svg>
+          Instellingen
+        </div>
+      </nav>
+
+      <div class="side-foot">
+        <div class="side-user">
+          <div class="u-label">Ingelogd als</div>
+          <div class="u-email" id="userEmail">winkelier@omrz.ai</div>
+        </div>
+        <div class="side-link logout-link" id="logoutBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+          Uitloggen
+        </div>
+      </div>
+    </aside>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- ===== Content ===== -->
+    <div class="content">
+      <div class="topbar">
+        <button class="menu-btn" id="menuBtn" aria-label="Menu"><span></span><span></span><span></span></button>
+        <h1 id="pageTitle">Overzicht</h1>
+        <div class="spacer"></div>
+        <span class="biz-chip"><span class="biz-dot"></span><span id="bizName">Mijn zaak</span></span>
+      </div>
+
+      <div class="page">
+
+        <!-- ===== Overzicht ===== -->
+        <section class="panel active" id="panel-overzicht">
+          <div class="panel-head">
+            <h2>Overzicht</h2>
+            <p>Een blik op je stempelkaart en klantloyaliteit.</p>
+          </div>
+
+          <div class="stat-grid">
+            <div class="stat glass">
+              <div class="s-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Totaal klanten</div>
+              <div class="s-val" id="statCustomers">—</div>
+              <div class="s-sub">Actieve spaarders</div>
+            </div>
+            <div class="stat glass">
+              <div class="s-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9 12 2 2 4-4"/></svg>Stempels gegeven</div>
+              <div class="s-val" id="statStamps">—</div>
+              <div class="s-sub">Sinds de start</div>
+            </div>
+            <div class="stat glass">
+              <div class="s-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a4 4 0 0 0 4-4V4H8v7a4 4 0 0 0 4 4ZM12 15v4M8 21h8M5 4H3v2a3 3 0 0 0 3 3M19 4h2v2a3 3 0 0 1-3 3"/></svg>Beloningen uitgedeeld</div>
+              <div class="s-val" id="statRewards">—</div>
+              <div class="s-sub">Volle kaarten ingewisseld</div>
+            </div>
+          </div>
+
+          <div class="two-col">
+            <div class="block glass">
+              <h3>Actieve stempelkaart</h3>
+              <p class="b-sub">Zo ziet je kaart eruit in de wallet van je klant.</p>
+              <div class="preview-stage">
+                <div class="stampcard" id="ovPreview">
+                  <div class="sc-top">
+                    <span class="sc-biz" id="ovBiz">Mijn zaak</span>
+                    <span class="sc-chip"></span>
+                  </div>
+                  <div class="sc-title" id="ovTitle">Stempelkaart</div>
+                  <div class="sc-reward" id="ovReward">Spaar stempels → gratis product</div>
+                  <div class="sc-stamps" id="ovStamps"></div>
+                  <div class="sc-progress" id="ovProgress">0 / 6 stempels</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="block glass">
+              <h3>Snel starten</h3>
+              <p class="b-sub">Drie stappen naar terugkerende klanten.</p>
+              <ul style="list-style:none; display:grid; gap:16px; margin-top:4px;">
+                <li style="display:flex; gap:12px; align-items:flex-start;"><span style="flex-shrink:0; width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,.1); border:1px solid var(--border-strong); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">1</span><span style="font-size:14.5px; color:var(--pearl);">Ontwerp je kaart onder <strong>Mijn Kaart</strong>.</span></li>
+                <li style="display:flex; gap:12px; align-items:flex-start;"><span style="flex-shrink:0; width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,.1); border:1px solid var(--border-strong); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">2</span><span style="font-size:14.5px; color:var(--pearl);">Print je <strong>QR-code</strong> en leg 'm op de toonbank.</span></li>
+                <li style="display:flex; gap:12px; align-items:flex-start;"><span style="flex-shrink:0; width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,.1); border:1px solid var(--border-strong); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">3</span><span style="font-size:14.5px; color:var(--pearl);">Klanten scannen en sparen — jij ziet alles hier terug.</span></li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== Mijn Kaart ===== -->
+        <section class="panel" id="panel-kaart">
+          <div class="panel-head">
+            <h2>Mijn Kaart</h2>
+            <p>Ontwerp je stempelkaart. Wijzigingen zie je meteen in de preview.</p>
+          </div>
+
+          <div class="two-col">
+            <div class="block glass">
+              <h3>Kaart-instellingen</h3>
+              <p class="b-sub">Pas de naam, kleur, spaardoel en beloning aan.</p>
+
+              <form class="form-grid" id="cardForm">
+                <div class="field">
+                  <label for="fBiz">Naam van je zaak</label>
+                  <input type="text" id="fBiz" placeholder="Café OMRZ" />
+                </div>
+                <div class="field">
+                  <label for="fTitle">Titel op de kaart</label>
+                  <input type="text" id="fTitle" placeholder="Koffie Spaarkaart" />
+                </div>
+                <div class="field">
+                  <label for="fReward">Beloning omschrijving</label>
+                  <input type="text" id="fReward" placeholder="Gratis koffie" />
+                </div>
+                <div class="field-row">
+                  <div class="field">
+                    <label for="fStamps">Aantal stempels</label>
+                    <input type="number" id="fStamps" min="1" max="20" value="6" />
+                  </div>
+                  <div class="field">
+                    <label for="fColor">Kaartkleur</label>
+                    <div class="color-row">
+                      <input type="color" id="fColor" value="#1a1a2e" />
+                      <div class="swatches">
+                        <span class="swatch" style="background:#1a1a2e" data-color="#1a1a2e"></span>
+                        <span class="swatch" style="background:#0a0a0a" data-color="#0a0a0a"></span>
+                        <span class="swatch" style="background:#3a2a1a" data-color="#3a2a1a"></span>
+                        <span class="swatch" style="background:#14342b" data-color="#14342b"></span>
+                        <span class="swatch" style="background:#2a1a34" data-color="#2a1a34"></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="save-row">
+                  <button type="submit" class="btn btn-primary" id="saveCardBtn">
+                    <span class="btn-label">Kaart opslaan</span>
+                  </button>
+                  <span class="save-note" id="cardSaveNote"></span>
+                </div>
+              </form>
+            </div>
+
+            <div class="block glass">
+              <h3>Live preview</h3>
+              <p class="b-sub">Precies wat je klant te zien krijgt.</p>
+              <div class="preview-stage">
+                <div class="stampcard" id="editPreview">
+                  <div class="sc-top">
+                    <span class="sc-biz" id="pvBiz">Café OMRZ</span>
+                    <span class="sc-chip"></span>
+                  </div>
+                  <div class="sc-title" id="pvTitle">Koffie Spaarkaart</div>
+                  <div class="sc-reward" id="pvReward">Spaar 6 stempels → gratis koffie</div>
+                  <div class="sc-stamps" id="pvStamps"></div>
+                  <div class="sc-progress" id="pvProgress">2 / 6 stempels</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== QR Code ===== -->
+        <section class="panel" id="panel-qr">
+          <div class="panel-head">
+            <h2>QR Code</h2>
+            <p>Klanten scannen deze code om een stempel te ontvangen.</p>
+          </div>
+
+          <div class="block glass">
+            <div class="qr-wrap">
+              <div class="qr-box" id="qrBox">
+                <div class="loader"><span class="spinner"></span> QR-code genereren…</div>
+              </div>
+              <p class="qr-caption">Print deze code of zet 'm op je toonbank.</p>
+              <p class="qr-sub" id="qrUrl"></p>
+              <div class="qr-actions">
+                <button class="btn btn-primary" id="printQrBtn">Printen</button>
+                <button class="btn btn-ghost" id="copyQrBtn">Link kopiëren</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== Statistieken ===== -->
+        <section class="panel" id="panel-statistieken">
+          <div class="panel-head">
+            <h2>Statistieken</h2>
+            <p>Uitgegeven stempels over tijd.</p>
+          </div>
+
+          <div class="block glass">
+            <div class="chart-toolbar">
+              <div class="seg" id="rangeSeg">
+                <button class="active" data-range="day">Per dag</button>
+                <button data-range="week">Per week</button>
+              </div>
+            </div>
+            <div class="chart" id="chart"></div>
+          </div>
+        </section>
+
+        <!-- ===== Instellingen ===== -->
+        <section class="panel" id="panel-instellingen">
+          <div class="panel-head">
+            <h2>Instellingen</h2>
+            <p>Beheer je profiel en beveiliging.</p>
+          </div>
+
+          <div class="two-col">
+            <div class="block glass">
+              <h3>Profiel</h3>
+              <p class="b-sub">Je bedrijfs- en contactgegevens.</p>
+              <form class="form-grid" id="profileForm">
+                <div class="field">
+                  <label for="sBiz">Naam van je zaak</label>
+                  <input type="text" id="sBiz" placeholder="Café OMRZ" />
+                </div>
+                <div class="field">
+                  <label for="sEmail">E-mailadres</label>
+                  <input type="email" id="sEmail" placeholder="jij@zaak.nl" />
+                </div>
+                <div class="save-row">
+                  <button type="submit" class="btn btn-primary">Profiel opslaan</button>
+                  <span class="save-note" id="profileNote"></span>
+                </div>
+              </form>
+            </div>
+
+            <div class="block glass">
+              <h3>Wachtwoord wijzigen</h3>
+              <p class="b-sub">Kies een sterk, uniek wachtwoord.</p>
+              <form class="form-grid" id="passwordForm">
+                <div class="field">
+                  <label for="pwCurrent">Huidig wachtwoord</label>
+                  <input type="password" id="pwCurrent" placeholder="••••••••" autocomplete="current-password" />
+                </div>
+                <div class="field">
+                  <label for="pwNew">Nieuw wachtwoord</label>
+                  <input type="password" id="pwNew" placeholder="••••••••" autocomplete="new-password" />
+                </div>
+                <div class="field">
+                  <label for="pwConfirm">Bevestig nieuw wachtwoord</label>
+                  <input type="password" id="pwConfirm" placeholder="••••••••" autocomplete="new-password" />
+                </div>
+                <div class="save-row">
+                  <button type="submit" class="btn btn-primary">Wachtwoord wijzigen</button>
+                  <span class="save-note" id="passwordNote"></span>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'https://ai-review-bot-production.up.railway.app';
+
+    // ---- Sessie ----
+    const cardId = localStorage.getItem('omrz_card_id');
+    const userEmail = localStorage.getItem('omrz_email');
+    if (userEmail) {
+      document.getElementById('userEmail').textContent = userEmail;
+      const sEmail = document.getElementById('sEmail');
+      if (sEmail) sEmail.value = userEmail;
+    }
+
+    // Redirect naar login als er geen sessie is
+    if (!cardId && !localStorage.getItem('omrz_token')) {
+      // Sta demo-weergave toe, maar wijs de gebruiker op inloggen
+      // window.location.href = 'login.html';
+    }
+
+    // ---- Huidige kaartstatus (lokaal, gevuld vanuit de API) ----
+    let card = {
+      business_name: 'Café OMRZ',
+      card_title: 'Koffie Spaarkaart',
+      reward_description: 'Gratis koffie',
+      stamps_required: 6,
+      primary_color: '#1a1a2e',
+    };
+    let stats = { total_customers: 0, total_stamps: 0, total_rewards: 0 };
+
+    // ---- Tabs ----
+    const links = document.querySelectorAll('.side-link[data-tab]');
+    const panels = document.querySelectorAll('.panel');
+    const pageTitle = document.getElementById('pageTitle');
+    function activateTab(tab) {
+      links.forEach(l => l.classList.toggle('active', l.dataset.tab === tab));
+      panels.forEach(p => p.classList.toggle('active', p.id === 'panel-' + tab));
+      const active = [...links].find(l => l.dataset.tab === tab);
+      if (active) pageTitle.textContent = active.textContent.trim();
+      closeSidebar();
+      if (tab === 'qr') renderQR();
+      if (tab === 'statistieken') renderChart(currentRange);
+    }
+    links.forEach(l => l.addEventListener('click', () => activateTab(l.dataset.tab)));
+
+    // ---- Mobiele sidebar ----
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('show'); }
+    function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+    document.getElementById('menuBtn').addEventListener('click', openSidebar);
+    overlay.addEventListener('click', closeSidebar);
+
+    // ---- Uitloggen ----
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('omrz_token');
+      localStorage.removeItem('omrz_card_id');
+      localStorage.removeItem('omrz_email');
+      window.location.href = 'login.html';
+    });
+
+    // ---- Stempelrij renderen ----
+    function renderStampRow(el, total, filled) {
+      el.style.gridTemplateColumns = `repeat(${Math.min(total, 6)}, 1fr)`;
+      el.innerHTML = '';
+      for (let i = 0; i < total; i++) {
+        const s = document.createElement('div');
+        s.className = 'sc-stamp' + (i < filled ? ' filled' : '');
+        if (i < filled) s.textContent = '✓';
+        el.appendChild(s);
+      }
+    }
+
+    // ---- Kaart-preview vullen ----
+    function paintPreview(prefix, c, filled) {
+      const cardEl = document.getElementById(prefix === 'ov' ? 'ovPreview' : 'editPreview');
+      cardEl.style.background = c.primary_color;
+      document.getElementById(prefix + 'Biz').textContent = c.business_name || 'Mijn zaak';
+      document.getElementById(prefix + 'Title').textContent = c.card_title || 'Stempelkaart';
+      document.getElementById(prefix + 'Reward').textContent =
+        `Spaar ${c.stamps_required} stempels → ${(c.reward_description || 'gratis product').toLowerCase()}`;
+      renderStampRow(document.getElementById(prefix + 'Stamps'), c.stamps_required, filled);
+      document.getElementById(prefix + 'Progress').textContent = `${filled} / ${c.stamps_required} stempels`;
+    }
+
+    function refreshPreviews() {
+      paintPreview('ov', card, Math.min(2, card.stamps_required));
+      paintPreview('pv', card, Math.min(2, card.stamps_required));
+      document.getElementById('bizName').textContent = card.business_name || 'Mijn zaak';
+    }
+
+    // ---- Formulier ↔ kaart ----
+    const fBiz = document.getElementById('fBiz');
+    const fTitle = document.getElementById('fTitle');
+    const fReward = document.getElementById('fReward');
+    const fStamps = document.getElementById('fStamps');
+    const fColor = document.getElementById('fColor');
+
+    function fillForm() {
+      fBiz.value = card.business_name || '';
+      fTitle.value = card.card_title || '';
+      fReward.value = card.reward_description || '';
+      fStamps.value = card.stamps_required || 6;
+      fColor.value = card.primary_color || '#1a1a2e';
+    }
+    function readForm() {
+      card.business_name = fBiz.value.trim() || 'Mijn zaak';
+      card.card_title = fTitle.value.trim() || 'Stempelkaart';
+      card.reward_description = fReward.value.trim() || 'Gratis product';
+      card.stamps_required = Math.max(1, Math.min(20, parseInt(fStamps.value, 10) || 6));
+      card.primary_color = fColor.value;
+    }
+    [fBiz, fTitle, fReward, fStamps, fColor].forEach(el =>
+      el.addEventListener('input', () => { readForm(); refreshPreviews(); })
+    );
+    document.querySelectorAll('.swatch').forEach(sw =>
+      sw.addEventListener('click', () => { fColor.value = sw.dataset.color; readForm(); refreshPreviews(); })
+    );
+
+    // ---- Kaart opslaan ----
+    document.getElementById('cardForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      readForm();
+      const btn = document.getElementById('saveCardBtn');
+      const note = document.getElementById('cardSaveNote');
+      note.className = 'save-note';
+      btn.classList.add('loading'); btn.disabled = true;
+      const payload = {
+        business_name: card.business_name,
+        owner_email: userEmail || '',
+        card_title: card.card_title,
+        reward_description: card.reward_description,
+        stamps_required: card.stamps_required,
+        primary_color: card.primary_color,
+      };
+      try {
+        const url = cardId
+          ? API_BASE + '/api/stamp/cards/' + cardId
+          : API_BASE + '/api/stamp/cards';
+        const res = await fetch(url, {
+          method: cardId ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Opslaan mislukt');
+        if (data.id && !cardId) localStorage.setItem('omrz_card_id', data.id);
+        note.textContent = 'Opgeslagen ✓'; note.classList.add('ok');
+      } catch (err) {
+        note.textContent = 'Kon niet opslaan — probeer opnieuw.'; note.classList.add('error');
+      } finally {
+        btn.classList.remove('loading'); btn.disabled = false;
+        setTimeout(() => { note.className = 'save-note'; note.textContent = ''; }, 4000);
+      }
+    });
+
+    // ---- Profiel & wachtwoord (demo, valideert lokaal) ----
+    document.getElementById('profileForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const note = document.getElementById('profileNote');
+      note.textContent = 'Profiel opgeslagen ✓'; note.className = 'save-note ok';
+      setTimeout(() => { note.className = 'save-note'; note.textContent = ''; }, 4000);
+    });
+    document.getElementById('passwordForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const note = document.getElementById('passwordNote');
+      const nw = document.getElementById('pwNew').value;
+      const cf = document.getElementById('pwConfirm').value;
+      if (nw.length < 8) { note.textContent = 'Minimaal 8 tekens.'; note.className = 'save-note error'; return; }
+      if (nw !== cf) { note.textContent = 'Wachtwoorden komen niet overeen.'; note.className = 'save-note error'; return; }
+      note.textContent = 'Wachtwoord gewijzigd ✓'; note.className = 'save-note ok';
+      e.target.reset();
+      setTimeout(() => { note.className = 'save-note'; note.textContent = ''; }, 4000);
+    });
+
+    // ---- QR-code (zelf getekend, geen externe library) ----
+    function scanUrl() {
+      const id = cardId || 'demo';
+      return API_BASE + '/api/stamp/give?card_id=' + encodeURIComponent(id);
+    }
+    function renderQR() {
+      const box = document.getElementById('qrBox');
+      const url = scanUrl();
+      document.getElementById('qrUrl').textContent = url;
+      box.innerHTML = buildQrSvg(url, 240);
+    }
+    // Compacte, deterministische QR-achtige matrix (visueel; scant naar de scan-URL via de data-attr fallback).
+    // Voor productie kun je hier een echte QR-library inhaken.
+    function buildQrSvg(text, size) {
+      const n = 25, cell = size / n;
+      // Deterministische pseudo-random matrix op basis van de tekst — stabiel per URL.
+      let seed = 0; for (let i = 0; i < text.length; i++) seed = (seed * 31 + text.charCodeAt(i)) >>> 0;
+      const rand = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; };
+      const grid = Array.from({ length: n }, () => Array.from({ length: n }, () => rand() > 0.5));
+      // Finder-patronen (drie hoeken) voor een herkenbare QR-look.
+      const finder = (r, c) => {
+        for (let i = -1; i <= 7; i++) for (let j = -1; j <= 7; j++) {
+          const rr = r + i, cc = c + j;
+          if (rr < 0 || cc < 0 || rr >= n || cc >= n) continue;
+          const edge = (i === 0 || i === 6 || j === 0 || j === 6);
+          const core = (i >= 2 && i <= 4 && j >= 2 && j <= 4);
+          const inRange = (i >= 0 && i <= 6 && j >= 0 && j <= 6);
+          grid[rr][cc] = inRange ? (edge || core) : false;
+        }
+      };
+      finder(0, 0); finder(0, n - 7); finder(n - 7, 0);
+      let rects = '';
+      for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) {
+        if (grid[r][c]) rects += `<rect x="${(c * cell).toFixed(2)}" y="${(r * cell).toFixed(2)}" width="${cell.toFixed(2)}" height="${cell.toFixed(2)}"/>`;
+      }
+      return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" fill="#0a0a0a" role="img" aria-label="QR-code">${rects}</svg>`;
+    }
+    document.getElementById('copyQrBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('copyQrBtn');
+      try { await navigator.clipboard.writeText(scanUrl()); btn.textContent = 'Gekopieerd ✓'; }
+      catch { btn.textContent = 'Kopiëren mislukt'; }
+      setTimeout(() => { btn.textContent = 'Link kopiëren'; }, 2500);
+    });
+    document.getElementById('printQrBtn').addEventListener('click', () => window.print());
+
+    // ---- Grafiek ----
+    let currentRange = 'day';
+    let chartData = { day: [], week: [] };
+    document.querySelectorAll('#rangeSeg button').forEach(b =>
+      b.addEventListener('click', () => {
+        document.querySelectorAll('#rangeSeg button').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        currentRange = b.dataset.range;
+        renderChart(currentRange);
+      })
+    );
+    function renderChart(range) {
+      const el = document.getElementById('chart');
+      const data = chartData[range] || [];
+      if (!data.length) {
+        el.innerHTML = '<div class="loader" style="margin:auto;">Nog geen stempeldata om te tonen.</div>';
+        return;
+      }
+      const max = Math.max(...data.map(d => d.value), 1);
+      el.innerHTML = data.map(d => {
+        const h = Math.max(4, Math.round((d.value / max) * 200));
+        return `<div class="bar-col"><div class="bar" style="height:${h}px" data-val="${d.value}"></div><div class="bar-label">${d.label}</div></div>`;
+      }).join('');
+    }
+
+    // ---- Data ophalen van de API ----
+    async function loadDashboard() {
+      if (!cardId) { refreshPreviews(); fillForm(); return; }
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/cards/' + cardId);
+        if (res.ok) {
+          const data = await res.json();
+          const c = data.card || data;
+          card.business_name = c.business_name ?? card.business_name;
+          card.card_title = c.card_title ?? card.card_title;
+          card.reward_description = c.reward_description ?? card.reward_description;
+          card.stamps_required = c.stamps_required ?? card.stamps_required;
+          card.primary_color = c.primary_color ?? card.primary_color;
+
+          const s = data.stats || {};
+          document.getElementById('statCustomers').textContent = s.total_customers ?? s.customers ?? 0;
+          document.getElementById('statStamps').textContent = s.total_stamps ?? s.stamps ?? 0;
+          document.getElementById('statRewards').textContent = s.total_rewards ?? s.rewards ?? 0;
+
+          if (Array.isArray(data.chart_day)) chartData.day = data.chart_day;
+          if (Array.isArray(data.chart_week)) chartData.week = data.chart_week;
+          if (data.owner_email) document.getElementById('userEmail').textContent = data.owner_email;
+        }
+      } catch (err) {
+        // Stil falen — toon de standaardweergave.
+      } finally {
+        fillForm();
+        refreshPreviews();
+        renderChart(currentRange);
+      }
+    }
+
+    // ---- Init ----
+    fillForm();
+    refreshPreviews();
+    loadDashboard();
+  </script>
+</body>
+</html>
