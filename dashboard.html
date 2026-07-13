@@ -181,7 +181,7 @@
       background: #fff; border-radius: 20px; padding: 22px; margin-bottom: 22px;
       box-shadow: 0 24px 60px rgba(0,0,0,.4);
     }
-    .qr-box svg, .qr-box img { display: block; width: 240px; height: 240px; }
+    .qr-box svg, .qr-box img, .qr-box canvas { display: block; width: 256px; height: 256px; }
     .qr-caption { font-size: 15px; color: var(--pearl); max-width: 380px; margin-bottom: 8px; }
     .qr-sub { font-size: 13.5px; color: var(--muted); max-width: 380px; margin-bottom: 22px; word-break: break-all; }
     .qr-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
@@ -234,6 +234,7 @@
       .field-row { grid-template-columns: 1fr; }
     }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
@@ -689,42 +690,27 @@
       setTimeout(() => { note.className = 'save-note'; note.textContent = ''; }, 4000);
     });
 
-    // ---- QR-code (zelf getekend, geen externe library) ----
+    // ---- QR-code (echte, scanbare QR via qrcodejs) ----
     function scanUrl() {
       const id = cardId || 'demo';
-      return API_BASE + '/api/stamp/give?card_id=' + encodeURIComponent(id);
+      return API_BASE + '/stamp/scan?card=' + encodeURIComponent(id);
     }
+    let qrRendered = false;
     function renderQR() {
       const box = document.getElementById('qrBox');
       const url = scanUrl();
       document.getElementById('qrUrl').textContent = url;
-      box.innerHTML = buildQrSvg(url, 240);
-    }
-    // Compacte, deterministische QR-achtige matrix (visueel; scant naar de scan-URL via de data-attr fallback).
-    // Voor productie kun je hier een echte QR-library inhaken.
-    function buildQrSvg(text, size) {
-      const n = 25, cell = size / n;
-      // Deterministische pseudo-random matrix op basis van de tekst — stabiel per URL.
-      let seed = 0; for (let i = 0; i < text.length; i++) seed = (seed * 31 + text.charCodeAt(i)) >>> 0;
-      const rand = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; };
-      const grid = Array.from({ length: n }, () => Array.from({ length: n }, () => rand() > 0.5));
-      // Finder-patronen (drie hoeken) voor een herkenbare QR-look.
-      const finder = (r, c) => {
-        for (let i = -1; i <= 7; i++) for (let j = -1; j <= 7; j++) {
-          const rr = r + i, cc = c + j;
-          if (rr < 0 || cc < 0 || rr >= n || cc >= n) continue;
-          const edge = (i === 0 || i === 6 || j === 0 || j === 6);
-          const core = (i >= 2 && i <= 4 && j >= 2 && j <= 4);
-          const inRange = (i >= 0 && i <= 6 && j >= 0 && j <= 6);
-          grid[rr][cc] = inRange ? (edge || core) : false;
-        }
-      };
-      finder(0, 0); finder(0, n - 7); finder(n - 7, 0);
-      let rects = '';
-      for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) {
-        if (grid[r][c]) rects += `<rect x="${(c * cell).toFixed(2)}" y="${(r * cell).toFixed(2)}" width="${cell.toFixed(2)}" height="${cell.toFixed(2)}"/>`;
-      }
-      return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" fill="#0a0a0a" role="img" aria-label="QR-code">${rects}</svg>`;
+      if (qrRendered) return;
+      box.innerHTML = '';
+      new QRCode(box, {
+        text: url,
+        width: 256,
+        height: 256,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+      qrRendered = true;
     }
     document.getElementById('copyQrBtn').addEventListener('click', async () => {
       const btn = document.getElementById('copyQrBtn');
@@ -794,6 +780,7 @@
     // ---- Init ----
     fillForm();
     refreshPreviews();
+    renderQR();
     loadDashboard();
   </script>
 </body>
