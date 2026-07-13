@@ -126,13 +126,15 @@
     .sc-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
     .sc-biz { font-size: 16px; font-weight: 800; letter-spacing: -.01em; }
     .sc-chip { width: 34px; height: 26px; border-radius: 6px; background: linear-gradient(135deg, rgba(255,255,255,.9), rgba(255,255,255,.5)); opacity: .85; }
+    .sc-hi { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
     .sc-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
     .sc-reward { font-size: 13px; color: rgba(255,255,255,.72); margin-bottom: 20px; }
     .sc-stamps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 9px; margin-bottom: 16px; }
     .sc-stamp {
       aspect-ratio: 1; border-radius: 50%; border: 1.5px dashed rgba(255,255,255,.4);
-      display: flex; align-items: center; justify-content: center; font-size: 14px;
+      display: flex; align-items: center; justify-content: center; font-size: 15px;
     }
+    .sc-stamp.empty { color: rgba(255,255,255,.32); }
     .sc-stamp.filled { border-style: solid; border-color: rgba(255,255,255,.9); background: rgba(255,255,255,.16); }
     .sc-progress { font-size: 12.5px; color: rgba(255,255,255,.7); text-align: right; }
 
@@ -154,9 +156,31 @@
     }
     .color-row input[type=color]::-webkit-color-swatch-wrapper { padding: 4px; }
     .color-row input[type=color]::-webkit-color-swatch { border: none; border-radius: 8px; }
-    .swatches { display: flex; gap: 8px; }
-    .swatch { width: 26px; height: 26px; border-radius: 7px; cursor: pointer; border: 2px solid transparent; transition: transform .15s var(--ease); }
+    .swatches { display: flex; gap: 8px; flex-wrap: wrap; }
+    .swatch { width: 30px; height: 30px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: transform .15s var(--ease), border-color .15s var(--ease); }
     .swatch:hover { transform: scale(1.12); }
+    .swatch.active { border-color: #fff; }
+
+    /* ---------- Range slider ---------- */
+    .range { -webkit-appearance: none; appearance: none; width: 100%; height: 6px; border-radius: 999px;
+      background: rgba(255,255,255,.14); outline: none; margin: 8px 0; }
+    .range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px;
+      border-radius: 50%; background: #fff; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,.5); }
+    .range::-moz-range-thumb { width: 20px; height: 20px; border: none; border-radius: 50%; background: #fff;
+      cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,.5); }
+    .range-val { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 24px;
+      padding: 0 8px; margin-left: 8px; border-radius: 999px; background: rgba(255,255,255,.1);
+      font-size: 13px; font-weight: 700; color: #fff; }
+
+    /* ---------- Stamp style picker ---------- */
+    .stamp-styles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .stamp-style { font-family: inherit; font-size: 14px; font-weight: 600; color: var(--pearl);
+      background: rgba(255,255,255,.04); border: 1px solid var(--border-strong); border-radius: 12px;
+      padding: 12px 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: border-color .2s var(--ease), background .2s var(--ease); }
+    .stamp-style .em { font-size: 17px; }
+    .stamp-style:hover { background: rgba(255,255,255,.07); }
+    .stamp-style.active { border-color: #fff; background: rgba(255,255,255,.1); }
 
     .btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 8px;
@@ -328,6 +352,7 @@
                     <span class="sc-biz" id="ovBiz">Mijn zaak</span>
                     <span class="sc-chip"></span>
                   </div>
+                  <div class="sc-hi" id="ovHi">Hi daar! 👋</div>
                   <div class="sc-title" id="ovTitle">Stempelkaart</div>
                   <div class="sc-reward" id="ovReward">Spaar stempels → gratis product</div>
                   <div class="sc-stamps" id="ovStamps"></div>
@@ -357,39 +382,65 @@
 
           <div class="two-col">
             <div class="block glass">
+              <h3>Live preview</h3>
+              <p class="b-sub">Precies wat je klant in de wallet te zien krijgt.</p>
+              <div class="preview-stage">
+                <div class="stampcard" id="editPreview">
+                  <div class="sc-top">
+                    <span class="sc-biz" id="pvBiz">Café OMRZ</span>
+                    <span class="sc-chip"></span>
+                  </div>
+                  <div class="sc-hi" id="pvHi">Hi daar! 👋</div>
+                  <div class="sc-title" id="pvTitle">Koffie Spaarkaart</div>
+                  <div class="sc-reward" id="pvReward">Spaar 6 stempels → gratis koffie</div>
+                  <div class="sc-stamps" id="pvStamps"></div>
+                  <div class="sc-progress" id="pvProgress">0 / 6 stempels</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="block glass">
               <h3>Kaart-instellingen</h3>
               <p class="b-sub">Pas de naam, kleur, spaardoel en beloning aan.</p>
 
               <form class="form-grid" id="cardForm">
                 <div class="field">
-                  <label for="fBiz">Naam van je zaak</label>
+                  <label for="fBiz">Bedrijfsnaam</label>
                   <input type="text" id="fBiz" placeholder="Café OMRZ" />
                 </div>
                 <div class="field">
-                  <label for="fTitle">Titel op de kaart</label>
-                  <input type="text" id="fTitle" placeholder="Koffie Spaarkaart" />
+                  <label for="fTitle">Kaart titel</label>
+                  <input type="text" id="fTitle" placeholder="Stempelkaart" />
                 </div>
                 <div class="field">
                   <label for="fReward">Beloning omschrijving</label>
                   <input type="text" id="fReward" placeholder="Gratis koffie" />
                 </div>
-                <div class="field-row">
-                  <div class="field">
-                    <label for="fStamps">Aantal stempels</label>
-                    <input type="number" id="fStamps" min="1" max="20" value="6" />
-                  </div>
-                  <div class="field">
-                    <label for="fColor">Kaartkleur</label>
-                    <div class="color-row">
-                      <input type="color" id="fColor" value="#1a1a2e" />
-                      <div class="swatches">
-                        <span class="swatch" style="background:#1a1a2e" data-color="#1a1a2e"></span>
-                        <span class="swatch" style="background:#0a0a0a" data-color="#0a0a0a"></span>
-                        <span class="swatch" style="background:#3a2a1a" data-color="#3a2a1a"></span>
-                        <span class="swatch" style="background:#14342b" data-color="#14342b"></span>
-                        <span class="swatch" style="background:#2a1a34" data-color="#2a1a34"></span>
-                      </div>
+                <div class="field">
+                  <label for="fStamps">Aantal stempels <span class="range-val" id="fStampsVal">6</span></label>
+                  <input type="range" class="range" id="fStamps" min="5" max="15" value="6" />
+                </div>
+                <div class="field">
+                  <label for="fColor">Kaart kleur</label>
+                  <div class="color-row">
+                    <input type="color" id="fColor" value="#1a1a2e" />
+                    <div class="swatches">
+                      <span class="swatch" style="background:#1a1a2e" data-color="#1a1a2e" title="Donker navy"></span>
+                      <span class="swatch" style="background:#2d1b69" data-color="#2d1b69" title="Donker paars"></span>
+                      <span class="swatch" style="background:#1a2e1a" data-color="#1a2e1a" title="Donker groen"></span>
+                      <span class="swatch" style="background:#2e1a1a" data-color="#2e1a1a" title="Donker rood"></span>
+                      <span class="swatch" style="background:#0a0a0a" data-color="#0a0a0a" title="Zwart"></span>
+                      <span class="swatch" style="background:#1a1a3e" data-color="#1a1a3e" title="Donker blauw"></span>
                     </div>
+                  </div>
+                </div>
+                <div class="field">
+                  <label>Stempel stijl</label>
+                  <div class="stamp-styles" id="stampStyles">
+                    <button type="button" class="stamp-style active" data-icon="⭐"><span class="em">⭐</span>Ster</button>
+                    <button type="button" class="stamp-style" data-icon="☕"><span class="em">☕</span>Koffie</button>
+                    <button type="button" class="stamp-style" data-icon="❤️"><span class="em">❤️</span>Hart</button>
+                    <button type="button" class="stamp-style" data-icon="✓"><span class="em">✓</span>Vinkje</button>
                   </div>
                 </div>
 
@@ -400,23 +451,6 @@
                   <span class="save-note" id="cardSaveNote"></span>
                 </div>
               </form>
-            </div>
-
-            <div class="block glass">
-              <h3>Live preview</h3>
-              <p class="b-sub">Precies wat je klant te zien krijgt.</p>
-              <div class="preview-stage">
-                <div class="stampcard" id="editPreview">
-                  <div class="sc-top">
-                    <span class="sc-biz" id="pvBiz">Café OMRZ</span>
-                    <span class="sc-chip"></span>
-                  </div>
-                  <div class="sc-title" id="pvTitle">Koffie Spaarkaart</div>
-                  <div class="sc-reward" id="pvReward">Spaar 6 stempels → gratis koffie</div>
-                  <div class="sc-stamps" id="pvStamps"></div>
-                  <div class="sc-progress" id="pvProgress">2 / 6 stempels</div>
-                </div>
-              </div>
             </div>
           </div>
         </section>
@@ -542,6 +576,7 @@
       reward_description: 'Gratis koffie',
       stamps_required: 6,
       primary_color: '#1a1a2e',
+      stamp_style: '⭐',
     };
     let stats = { total_customers: 0, total_stamps: 0, total_rewards: 0 };
 
@@ -577,13 +612,14 @@
     });
 
     // ---- Stempelrij renderen ----
-    function renderStampRow(el, total, filled) {
+    function renderStampRow(el, total, filled, icon) {
       el.style.gridTemplateColumns = `repeat(${Math.min(total, 6)}, 1fr)`;
       el.innerHTML = '';
       for (let i = 0; i < total; i++) {
         const s = document.createElement('div');
-        s.className = 'sc-stamp' + (i < filled ? ' filled' : '');
-        if (i < filled) s.textContent = '✓';
+        const isFilled = i < filled;
+        s.className = 'sc-stamp' + (isFilled ? ' filled' : ' empty');
+        s.textContent = icon || '⭐';
         el.appendChild(s);
       }
     }
@@ -593,16 +629,20 @@
       const cardEl = document.getElementById(prefix === 'ov' ? 'ovPreview' : 'editPreview');
       cardEl.style.background = c.primary_color;
       document.getElementById(prefix + 'Biz').textContent = c.business_name || 'Mijn zaak';
+      // Klantnaam-plaatshouder — in de wallet van de klant staat hier hun eigen naam.
+      const hi = document.getElementById(prefix + 'Hi');
+      if (hi) hi.textContent = 'Hi daar! 👋';
       document.getElementById(prefix + 'Title').textContent = c.card_title || 'Stempelkaart';
       document.getElementById(prefix + 'Reward').textContent =
         `Spaar ${c.stamps_required} stempels → ${(c.reward_description || 'gratis product').toLowerCase()}`;
-      renderStampRow(document.getElementById(prefix + 'Stamps'), c.stamps_required, filled);
+      renderStampRow(document.getElementById(prefix + 'Stamps'), c.stamps_required, filled, c.stamp_style);
       document.getElementById(prefix + 'Progress').textContent = `${filled} / ${c.stamps_required} stempels`;
     }
 
     function refreshPreviews() {
+      // Overzicht toont een voorbeeld met wat gespaarde stempels; de customizer-preview toont een lege kaart.
       paintPreview('ov', card, Math.min(2, card.stamps_required));
-      paintPreview('pv', card, Math.min(2, card.stamps_required));
+      paintPreview('pv', card, 0);
       document.getElementById('bizName').textContent = card.business_name || 'Mijn zaak';
     }
 
@@ -611,27 +651,41 @@
     const fTitle = document.getElementById('fTitle');
     const fReward = document.getElementById('fReward');
     const fStamps = document.getElementById('fStamps');
+    const fStampsVal = document.getElementById('fStampsVal');
     const fColor = document.getElementById('fColor');
+    const swatchEls = document.querySelectorAll('.swatch');
+    const styleEls = document.querySelectorAll('.stamp-style');
 
+    function syncControls() {
+      fStampsVal.textContent = card.stamps_required;
+      swatchEls.forEach(sw =>
+        sw.classList.toggle('active', sw.dataset.color.toLowerCase() === (card.primary_color || '').toLowerCase()));
+      styleEls.forEach(st => st.classList.toggle('active', st.dataset.icon === card.stamp_style));
+    }
     function fillForm() {
       fBiz.value = card.business_name || '';
       fTitle.value = card.card_title || '';
       fReward.value = card.reward_description || '';
-      fStamps.value = card.stamps_required || 6;
+      fStamps.value = Math.max(5, Math.min(15, card.stamps_required || 6));
       fColor.value = card.primary_color || '#1a1a2e';
+      syncControls();
     }
     function readForm() {
       card.business_name = fBiz.value.trim() || 'Mijn zaak';
       card.card_title = fTitle.value.trim() || 'Stempelkaart';
       card.reward_description = fReward.value.trim() || 'Gratis product';
-      card.stamps_required = Math.max(1, Math.min(20, parseInt(fStamps.value, 10) || 6));
+      card.stamps_required = Math.max(5, Math.min(15, parseInt(fStamps.value, 10) || 6));
       card.primary_color = fColor.value;
+      syncControls();
     }
     [fBiz, fTitle, fReward, fStamps, fColor].forEach(el =>
       el.addEventListener('input', () => { readForm(); refreshPreviews(); })
     );
-    document.querySelectorAll('.swatch').forEach(sw =>
+    swatchEls.forEach(sw =>
       sw.addEventListener('click', () => { fColor.value = sw.dataset.color; readForm(); refreshPreviews(); })
+    );
+    styleEls.forEach(st =>
+      st.addEventListener('click', () => { card.stamp_style = st.dataset.icon; syncControls(); refreshPreviews(); })
     );
 
     // ---- Kaart opslaan ----
@@ -649,14 +703,18 @@
         reward_description: card.reward_description,
         stamps_required: card.stamps_required,
         primary_color: card.primary_color,
+        stamp_style: card.stamp_style,
       };
       try {
         const url = cardId
           ? API_BASE + '/api/stamp/cards/' + cardId
           : API_BASE + '/api/stamp/cards';
+        const token = localStorage.getItem('omrz_token');
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = 'Bearer ' + token;
         const res = await fetch(url, {
           method: cardId ? 'PUT' : 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify(payload),
         });
         const data = await res.json().catch(() => ({}));
@@ -758,6 +816,7 @@
           card.reward_description = c.reward_description ?? card.reward_description;
           card.stamps_required = c.stamps_required ?? card.stamps_required;
           card.primary_color = c.primary_color ?? card.primary_color;
+          card.stamp_style = c.stamp_style ?? card.stamp_style;
 
           const s = data.stats || {};
           document.getElementById('statCustomers').textContent = s.total_customers ?? s.customers ?? 0;
