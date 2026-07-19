@@ -257,6 +257,26 @@
     }
     @keyframes rewardPop { from { transform: scale(.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
+    /* Keuze-interface: hoeveel stempels geven */
+    .stamp-choice { width: 100%; display: flex; flex-direction: column; align-items: center; }
+    .choice-card {
+      width: 100%; text-align: center; padding: 26px 22px; border-radius: 22px; margin-bottom: 14px;
+      background: rgba(255,255,255,.04); border: 1px solid var(--border-strong);
+    }
+    .choice-name { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 2px; }
+    .choice-current { font-size: 14.5px; color: var(--muted); margin-bottom: 22px; }
+    .choice-label { font-size: 13px; font-weight: 600; color: var(--pearl); margin-bottom: 12px; }
+    .amount-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .amount-btn {
+      font-family: inherit; font-size: 22px; font-weight: 800; color: var(--pearl); cursor: pointer;
+      background: rgba(255,255,255,.04); border: 2px solid var(--border-strong); border-radius: 16px;
+      padding: 18px 0; transition: border-color .18s var(--ease), background .18s var(--ease), color .18s var(--ease);
+    }
+    .amount-btn:hover { background: rgba(255,255,255,.08); }
+    .amount-btn.active { border-color: #fff; background: #fff; color: #0a0a0a; }
+    .give-btn { background: #16a34a; color: #fff; border: none; }
+    .give-btn:hover { background: #15803d; }
+
     /* ---------- Chart ---------- */
     .chart-toolbar { display: flex; gap: 8px; margin-bottom: 22px; }
     .seg { display: inline-flex; padding: 4px; border-radius: 12px; border: 1px solid var(--border); background: rgba(255,255,255,.03); }
@@ -536,6 +556,24 @@
             </button>
             <button class="btn btn-ghost scan-btn" id="stopCamBtn" hidden>Camera sluiten</button>
 
+            <!-- Keuze: hoeveel stempels geven -->
+            <div class="stamp-choice" id="stampChoice" hidden>
+              <div class="choice-card">
+                <p class="choice-name" id="choiceName">Klant</p>
+                <p class="choice-current" id="choiceCurrent">— stempels</p>
+                <div class="choice-label">Hoeveel stempels geven?</div>
+                <div class="amount-row" id="amountRow">
+                  <button type="button" class="amount-btn active" data-amount="1">1</button>
+                  <button type="button" class="amount-btn" data-amount="2">2</button>
+                  <button type="button" class="amount-btn" data-amount="3">3</button>
+                </div>
+              </div>
+              <button class="btn scan-btn give-btn" id="giveStampBtn">
+                <span class="btn-label" id="giveBtnLabel">Geef 1 stempel</span>
+              </button>
+              <button class="btn btn-ghost scan-btn" id="cancelGiveBtn">Annuleren</button>
+            </div>
+
             <!-- Bevestiging -->
             <div class="stamp-result" id="stampResult" hidden>
               <div class="reward-banner" id="rewardBanner" hidden></div>
@@ -686,7 +724,7 @@
       closeSidebar();
       if (tab === 'qr') renderQR();
       if (tab === 'statistieken') renderChart(currentRange);
-      if (tab !== 'stempel') stopScanner(); // camera vrijgeven bij verlaten van de scan-tab
+      if (tab !== 'stempel') { stopScanner(); resetScanFlow(); } // camera vrijgeven + flow resetten bij verlaten van de scan-tab
     }
     links.forEach(l => l.addEventListener('click', () => activateTab(l.dataset.tab)));
 
@@ -944,30 +982,85 @@
       scanRAF = requestAnimationFrame(scanTick);
     }
 
+    // Keuze-interface elementen
+    const stampChoice = document.getElementById('stampChoice');
+    const choiceName = document.getElementById('choiceName');
+    const choiceCurrent = document.getElementById('choiceCurrent');
+    const amountBtns = document.querySelectorAll('#amountRow .amount-btn');
+    const giveStampBtn = document.getElementById('giveStampBtn');
+    const giveBtnLabel = document.getElementById('giveBtnLabel');
+    const cancelGiveBtn = document.getElementById('cancelGiveBtn');
+    let scannedQr = null, chosenAmount = 1, holderName = 'Klant';
+
+    function authHeaders() {
+      const token = localStorage.getItem('omrz_token');
+      const h = { 'Content-Type': 'application/json' };
+      if (token) h['Authorization'] = 'Bearer ' + token;
+      return h;
+    }
+
+    // Stap 1: QR gedetecteerd → géén automatische stempel, alleen klantgegevens ophalen en keuze tonen.
     async function onQrDetected(qrData) {
       scanBusy = true;
-      setScanStatus('QR gescand — stempel toekennen…');
+      scannedQr = qrData;
       stopScanner();
+      openCamBtn.hidden = true;
+      setScanStatus('QR gescand — klantgegevens ophalen…');
+      let holder = {};
       try {
-        const token = localStorage.getItem('omrz_token');
-        const headers = { 'Content-Type': 'application/json' };
-        if (token) headers['Authorization'] = 'Bearer ' + token;
+        const res = await fetch(API_BASE + '/api/stamp/holder/' + encodeURIComponent(qrData), { headers: authHeaders() });
+        if (res.ok) holder = (await res.json().catch(() => ({}))) || {};
+      } catch (err) { /* offline/onbekend — toon keuze met onbekende stand */ }
+      showChoice(holder);
+    }
+
+    function showChoice(holder) {
+      const h = holder.holder || holder || {};
+      holderName = h.customer_name || h.name || h.customer || holder.customer_name || holder.name || 'Klant';
+      const current = h.stamps ?? h.current_stamps ?? h.stamp_count ?? holder.stamps ?? null;
+      const required = h.stamps_required ?? holder.stamps_required ?? card.stamps_required;
+      choiceName.textContent = holderName;
+      choiceCurrent.textContent = current == null
+        ? `Spaardoel: ${required} stempels`
+        : `Huidige stempels: ${current}/${required}`;
+      chosenAmount = 1;
+      updateAmountUI();
+      setScanStatus('');
+      stampResult.hidden = true;
+      stampChoice.hidden = false;
+    }
+
+    function updateAmountUI() {
+      amountBtns.forEach(b => b.classList.toggle('active', parseInt(b.dataset.amount, 10) === chosenAmount));
+      giveBtnLabel.textContent = `Geef ${chosenAmount} stempel${chosenAmount > 1 ? 's' : ''}`;
+    }
+    amountBtns.forEach(b =>
+      b.addEventListener('click', () => { chosenAmount = parseInt(b.dataset.amount, 10) || 1; updateAmountUI(); })
+    );
+
+    // Stap 2: pas na bevestiging → POST met de gekozen hoeveelheid.
+    async function giveStamps() {
+      giveStampBtn.disabled = true; giveStampBtn.classList.add('loading');
+      setScanStatus('Stempel toekennen…');
+      try {
         const res = await fetch(API_BASE + '/api/stamp/give', {
           method: 'POST',
-          headers,
-          body: JSON.stringify({ card_id: cardId, customer_qr_code: qrData }),
+          headers: authHeaders(),
+          body: JSON.stringify({ card_id: cardId, customer_qr_code: scannedQr, amount: chosenAmount }),
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.error || data.message || 'Stempel geven mislukt');
+        stampChoice.hidden = true;
         showStampResult(data);
       } catch (err) {
-        setScanStatus(err.message || 'Er ging iets mis. Probeer opnieuw te scannen.', true);
-        openCamBtn.hidden = false;
+        setScanStatus(err.message || 'Er ging iets mis. Probeer opnieuw.', true);
+      } finally {
+        giveStampBtn.disabled = false; giveStampBtn.classList.remove('loading');
       }
     }
 
     function showStampResult(data) {
-      const name = data.customer_name || data.name || data.customer || 'je klant';
+      const name = data.customer_name || data.name || data.customer || holderName || 'je klant';
       const stamps = data.stamps ?? data.current_stamps ?? data.stamp_count ?? '?';
       const required = data.stamps_required ?? data.required ?? card.stamps_required;
       const rewardText = (data.reward_description || card.reward_description || 'je beloning').toLowerCase();
@@ -986,9 +1079,18 @@
       stampResult.hidden = false;
     }
 
+    function resetScanFlow() {
+      stampChoice.hidden = true;
+      stampResult.hidden = true;
+      scannedQr = null;
+      setScanStatus('');
+    }
+
     openCamBtn.addEventListener('click', startScanner);
     stopCamBtn.addEventListener('click', () => { stopScanner(); setScanStatus(''); });
-    scanAgainBtn.addEventListener('click', () => { stampResult.hidden = true; startScanner(); });
+    giveStampBtn.addEventListener('click', giveStamps);
+    cancelGiveBtn.addEventListener('click', () => { resetScanFlow(); startScanner(); });
+    scanAgainBtn.addEventListener('click', () => { resetScanFlow(); startScanner(); });
     // Camera vrijgeven wanneer de pagina/tab wordt verlaten
     window.addEventListener('pagehide', stopScanner);
 
