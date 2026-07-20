@@ -136,6 +136,8 @@
     }
     .sc-stamp.empty { color: rgba(255,255,255,.32); }
     .sc-stamp.filled { border-style: solid; border-color: rgba(255,255,255,.9); background: rgba(255,255,255,.16); }
+    /* Nog toe te voegen stempels (preview in de teller-stap) */
+    .sc-stamp.pending { border-style: solid; border-color: #6ee7a0; background: rgba(22,163,74,.35); color: #fff; }
     .sc-progress { font-size: 12.5px; color: rgba(255,255,255,.7); text-align: right; }
 
     /* ---------- Form ---------- */
@@ -237,45 +239,73 @@
     .scan-status { min-height: 20px; margin: 14px 0 4px; font-size: 14px; color: var(--muted); text-align: center; }
     .scan-status.error { color: #ff8f8f; }
     .scan-btn { width: 100%; margin-top: 8px; padding: 16px 20px; font-size: 16px; }
+    .scan-view, .customer-view { width: 100%; display: flex; flex-direction: column; align-items: center; }
 
-    /* Bevestiging */
+    /* STAP 1 · bevroren "QR gevonden" toestand */
+    .scan-stage.found { border-color: #16a34a; box-shadow: 0 0 0 4px rgba(22,163,74,.45), 0 24px 60px rgba(0,0,0,.5); }
+    .scan-stage.found video { filter: brightness(.7) saturate(1.1); }
+    .scan-found {
+      position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); display: none;
+      padding: 10px 20px; border-radius: 999px; background: #16a34a; color: #fff;
+      font-size: 16px; font-weight: 800; white-space: nowrap; box-shadow: 0 8px 24px rgba(0,0,0,.4);
+      animation: rewardPop .3s var(--ease);
+    }
+    .scan-stage.found .scan-found { display: block; }
+    .scan-stage.found .scan-frame span { border-color: #16a34a; }
+
+    /* STAP 2 · klantkaart + teller */
+    .cust-name { font-size: 26px; font-weight: 800; color: #fff; text-align: center; margin-bottom: 16px; letter-spacing: -.01em; }
+    .customer-view .stampcard { margin-bottom: 22px; }
+    .counter { display: flex; align-items: center; justify-content: center; gap: 22px; margin-bottom: 12px; }
+    .counter-btn {
+      width: 64px; height: 64px; border-radius: 50%; font-size: 34px; font-weight: 700; line-height: 1;
+      color: #fff; background: rgba(255,255,255,.06); border: 2px solid var(--border-strong); cursor: pointer;
+      display: flex; align-items: center; justify-content: center; transition: background .15s var(--ease), transform .1s var(--ease);
+    }
+    .counter-btn:hover { background: rgba(255,255,255,.12); }
+    .counter-btn:active { transform: scale(.94); }
+    .counter-btn:disabled { opacity: .3; cursor: not-allowed; }
+    .counter-mid { min-width: 92px; text-align: center; }
+    .counter-num { font-size: 48px; font-weight: 800; color: #fff; line-height: 1; }
+    .counter-cap { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .add-preview { font-size: 15px; color: var(--pearl); text-align: center; margin-bottom: 10px; }
+    .reward-hint {
+      width: 100%; text-align: center; padding: 14px 18px; border-radius: 14px; margin-bottom: 12px;
+      background: rgba(22,163,74,.14); border: 1px solid rgba(22,163,74,.5); color: #6ee7a0;
+      font-size: 16px; font-weight: 800; animation: rewardPop .3s var(--ease);
+    }
+    .cust-error, .redeem-error { font-size: 14px; color: #ff8f8f; text-align: center; margin-bottom: 8px; }
+
+    /* Knoppen */
+    .give-btn, .redeem-btn { background: #16a34a; color: #fff; border: none; }
+    .give-btn:hover, .redeem-btn:hover { background: #15803d; }
+    .cancel-btn { background: transparent; color: #ff8f8f; border: 1px solid rgba(255,143,143,.4); }
+    .cancel-btn:hover { background: rgba(255,143,143,.1); }
+
+    /* STAP 3 + 4 · bevestiging & beloning */
     .stamp-result { width: 100%; display: flex; flex-direction: column; align-items: center; }
     .result-card {
       width: 100%; text-align: center; padding: 30px 24px; border-radius: 22px;
       background: #fff; color: #0a0a0a; box-shadow: 0 24px 60px rgba(0,0,0,.4); margin-bottom: 14px;
     }
+    .result-card.success { animation: successPop .45s var(--ease); }
+    @keyframes successPop { 0% { transform: scale(.85); opacity: 0; } 60% { transform: scale(1.03); } 100% { transform: scale(1); opacity: 1; } }
     .result-check {
-      width: 64px; height: 64px; margin: 0 auto 16px; border-radius: 50%;
-      background: #0a0a0a; color: #fff; font-size: 34px; display: flex; align-items: center; justify-content: center;
+      width: 68px; height: 68px; margin: 0 auto 16px; border-radius: 50%;
+      background: #16a34a; color: #fff; font-size: 38px; display: flex; align-items: center; justify-content: center;
+      animation: checkPop .5s .1s both var(--ease);
     }
-    .result-title { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+    @keyframes checkPop { from { transform: scale(0) rotate(-30deg); } to { transform: scale(1) rotate(0); } }
+    .result-title { font-size: 21px; font-weight: 800; margin-bottom: 6px; }
     .result-sub { font-size: 15px; color: #444; }
+    .reward-block { width: 100%; display: flex; flex-direction: column; align-items: center; }
     .reward-banner {
-      width: 100%; text-align: center; padding: 24px 20px; border-radius: 22px; margin-bottom: 14px;
-      background: #fff; color: #0a0a0a; border: 3px solid #0a0a0a; font-size: 19px; font-weight: 800;
+      width: 100%; text-align: center; padding: 24px 20px; border-radius: 22px; margin-bottom: 12px;
+      background: #16a34a; color: #fff; font-size: 19px; font-weight: 800;
       line-height: 1.35; animation: rewardPop .4s var(--ease);
     }
+    .reward-banner.redeemed { background: #fff; color: #0a0a0a; border: 3px solid #16a34a; }
     @keyframes rewardPop { from { transform: scale(.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-    /* Keuze-interface: hoeveel stempels geven */
-    .stamp-choice { width: 100%; display: flex; flex-direction: column; align-items: center; }
-    .choice-card {
-      width: 100%; text-align: center; padding: 26px 22px; border-radius: 22px; margin-bottom: 14px;
-      background: rgba(255,255,255,.04); border: 1px solid var(--border-strong);
-    }
-    .choice-name { font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 2px; }
-    .choice-current { font-size: 14.5px; color: var(--muted); margin-bottom: 22px; }
-    .choice-label { font-size: 13px; font-weight: 600; color: var(--pearl); margin-bottom: 12px; }
-    .amount-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-    .amount-btn {
-      font-family: inherit; font-size: 22px; font-weight: 800; color: var(--pearl); cursor: pointer;
-      background: rgba(255,255,255,.04); border: 2px solid var(--border-strong); border-radius: 16px;
-      padding: 18px 0; transition: border-color .18s var(--ease), background .18s var(--ease), color .18s var(--ease);
-    }
-    .amount-btn:hover { background: rgba(255,255,255,.08); }
-    .amount-btn.active { border-color: #fff; background: #fff; color: #0a0a0a; }
-    .give-btn { background: #16a34a; color: #fff; border: none; }
-    .give-btn:hover { background: #15803d; }
 
     /* ---------- Chart ---------- */
     .chart-toolbar { display: flex; gap: 8px; margin-bottom: 22px; }
@@ -535,54 +565,81 @@
           </div>
 
           <div class="scan-wrap">
-            <!-- Camera / scanner -->
-            <div class="scan-stage" id="scanStage">
-              <div class="scan-idle" id="scanIdle">
-                <div class="scan-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+
+            <!-- STAP 1 · Scannen -->
+            <div class="scan-view" id="scanView">
+              <div class="scan-stage" id="scanStage">
+                <div class="scan-idle" id="scanIdle">
+                  <div class="scan-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                  </div>
+                  <p class="scan-hint">Richt de camera op de QR-code in de wallet van je klant.</p>
                 </div>
-                <p class="scan-hint">Richt de camera op de QR-code in de wallet van je klant.</p>
+                <video id="scanVideo" playsinline muted></video>
+                <div class="scan-frame" id="scanFrame"><span></span><span></span><span></span><span></span></div>
+                <div class="scan-found" id="scanFound">✓ QR Gevonden!</div>
+                <canvas id="scanCanvas" hidden></canvas>
               </div>
-              <video id="scanVideo" playsinline muted></video>
-              <div class="scan-frame" id="scanFrame"><span></span><span></span><span></span><span></span></div>
-              <canvas id="scanCanvas" hidden></canvas>
-            </div>
 
-            <p class="scan-status" id="scanStatus"></p>
+              <p class="scan-status" id="scanStatus"></p>
 
-            <button class="btn btn-primary scan-btn" id="openCamBtn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-              <span class="btn-label">Open Camera</span>
-            </button>
-            <button class="btn btn-ghost scan-btn" id="stopCamBtn" hidden>Camera sluiten</button>
-
-            <!-- Keuze: hoeveel stempels geven -->
-            <div class="stamp-choice" id="stampChoice" hidden>
-              <div class="choice-card">
-                <p class="choice-name" id="choiceName">Klant</p>
-                <p class="choice-current" id="choiceCurrent">— stempels</p>
-                <div class="choice-label">Hoeveel stempels geven?</div>
-                <div class="amount-row" id="amountRow">
-                  <button type="button" class="amount-btn active" data-amount="1">1</button>
-                  <button type="button" class="amount-btn" data-amount="2">2</button>
-                  <button type="button" class="amount-btn" data-amount="3">3</button>
-                </div>
-              </div>
-              <button class="btn scan-btn give-btn" id="giveStampBtn">
-                <span class="btn-label" id="giveBtnLabel">Geef 1 stempel</span>
+              <button class="btn btn-primary scan-btn" id="openCamBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                <span class="btn-label">Open Camera</span>
               </button>
-              <button class="btn btn-ghost scan-btn" id="cancelGiveBtn">Annuleren</button>
+              <button class="btn btn-ghost scan-btn" id="stopCamBtn" hidden>Camera sluiten</button>
             </div>
 
-            <!-- Bevestiging -->
+            <!-- STAP 2 · Klantkaart + teller -->
+            <div class="customer-view" id="customerView" hidden>
+              <p class="cust-name" id="custName">Klant</p>
+
+              <div class="stampcard" id="custCard">
+                <div class="sc-top">
+                  <span class="sc-biz" id="custBiz">Mijn zaak</span>
+                  <span class="sc-chip"></span>
+                </div>
+                <div class="sc-hi" id="custHi">Hi daar! 👋</div>
+                <div class="sc-title" id="custTitle">Stempelkaart</div>
+                <div class="sc-reward" id="custReward">Spaar stempels → gratis product</div>
+                <div class="sc-stamps" id="custStamps"></div>
+                <div class="sc-progress" id="custProgress">0 / 6 stempels</div>
+              </div>
+
+              <div class="counter">
+                <button type="button" class="counter-btn" id="minusBtn" aria-label="Minder">−</button>
+                <div class="counter-mid">
+                  <div class="counter-num" id="counterNum">1</div>
+                  <div class="counter-cap">stempels</div>
+                </div>
+                <button type="button" class="counter-btn" id="plusBtn" aria-label="Meer">+</button>
+              </div>
+
+              <p class="add-preview" id="addPreview">Na toevoegen: 1/6 stempels</p>
+              <div class="reward-hint" id="rewardHint" hidden>🎉 Klant ontvangt beloning!</div>
+              <p class="cust-error" id="custError" hidden></p>
+
+              <button class="btn scan-btn give-btn" id="confirmBtn">
+                <span class="btn-label" id="confirmLabel">Bevestig 1 stempel</span>
+              </button>
+              <button class="btn scan-btn cancel-btn" id="cancelBtn">Annuleren</button>
+            </div>
+
+            <!-- STAP 3 + 4 · Bevestiging & beloning -->
             <div class="stamp-result" id="stampResult" hidden>
-              <div class="reward-banner" id="rewardBanner" hidden></div>
-              <div class="result-card" id="resultCard">
-                <div class="result-check">✓</div>
+              <div class="result-card success" id="resultCard">
+                <div class="result-check" id="resultCheck">✓</div>
                 <p class="result-title" id="resultTitle">Stempel gegeven!</p>
                 <p class="result-sub" id="resultSub"></p>
               </div>
-              <button class="btn btn-primary scan-btn" id="scanAgainBtn">Volgende klant scannen</button>
+
+              <div class="reward-block" id="rewardBlock" hidden>
+                <div class="reward-banner" id="rewardBanner"></div>
+                <button class="btn scan-btn redeem-btn" id="redeemBtn">Beloning uitreiken</button>
+                <p class="redeem-error" id="redeemError" hidden></p>
+              </div>
+
+              <button class="btn btn-primary scan-btn" id="nextBtn">Volgende klant</button>
             </div>
           </div>
         </section>
@@ -911,33 +968,95 @@
     });
     document.getElementById('printQrBtn').addEventListener('click', () => window.print());
 
-    // ---- Geef Stempel (QR-scanner) ----
+    // ---- Geef Stempel (QR-scanner, meerstaps flow) ----
+    // Elementen
+    const scanView = document.getElementById('scanView');
     const scanVideo = document.getElementById('scanVideo');
     const scanCanvas = document.getElementById('scanCanvas');
     const scanStage = document.getElementById('scanStage');
     const scanStatus = document.getElementById('scanStatus');
     const openCamBtn = document.getElementById('openCamBtn');
     const stopCamBtn = document.getElementById('stopCamBtn');
+    // Klantkaart-view
+    const customerView = document.getElementById('customerView');
+    const custName = document.getElementById('custName');
+    const custCard = document.getElementById('custCard');
+    const custBiz = document.getElementById('custBiz');
+    const custHi = document.getElementById('custHi');
+    const custTitle = document.getElementById('custTitle');
+    const custReward = document.getElementById('custReward');
+    const custStamps = document.getElementById('custStamps');
+    const custProgress = document.getElementById('custProgress');
+    const minusBtn = document.getElementById('minusBtn');
+    const plusBtn = document.getElementById('plusBtn');
+    const counterNum = document.getElementById('counterNum');
+    const addPreview = document.getElementById('addPreview');
+    const rewardHint = document.getElementById('rewardHint');
+    const custError = document.getElementById('custError');
+    const confirmBtn = document.getElementById('confirmBtn');
+    const confirmLabel = document.getElementById('confirmLabel');
+    const cancelBtn = document.getElementById('cancelBtn');
+    // Resultaat-view
     const stampResult = document.getElementById('stampResult');
-    const rewardBanner = document.getElementById('rewardBanner');
     const resultTitle = document.getElementById('resultTitle');
     const resultSub = document.getElementById('resultSub');
-    const scanAgainBtn = document.getElementById('scanAgainBtn');
-    let mediaStream = null, scanRAF = null, scanBusy = false;
+    const rewardBlock = document.getElementById('rewardBlock');
+    const rewardBanner = document.getElementById('rewardBanner');
+    const redeemBtn = document.getElementById('redeemBtn');
+    const redeemError = document.getElementById('redeemError');
+    const nextBtn = document.getElementById('nextBtn');
 
+    // State
+    let mediaStream = null, scanRAF = null, scanBusy = false;
+    let scannedQr = null;          // ruwe QR-waarde = customer_qr_code
+    let holderName = 'Klant';
+    let currentStamps = 0;         // huidige stand van de klant
+    let stampsRequired = 6;        // uit de kaartinstelling (niet hardcoded)
+    let selectedAmount = 1;        // gekozen aantal toe te voegen stempels
+    let newCount = 0;              // stand na toevoegen (uit API-respons)
+
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+    function authHeaders() {
+      const token = localStorage.getItem('omrz_token');
+      const h = { 'Content-Type': 'application/json' };
+      if (token) h['Authorization'] = 'Bearer ' + token;
+      return h;
+    }
     function setScanStatus(msg, isError) {
       scanStatus.textContent = msg || '';
       scanStatus.classList.toggle('error', !!isError);
     }
+    // De gescande QR kan een kale id of een URL zijn; haal het holder-id eruit (geen volledige URL als param).
+    function extractHolderId(qr) {
+      if (!qr) return qr;
+      try {
+        const u = new URL(qr);
+        for (const key of ['holder_id', 'holder', 'h', 'customer', 'id', 'card']) {
+          const v = u.searchParams.get(key);
+          if (v) return v;
+        }
+        const seg = u.pathname.split('/').filter(Boolean).pop();
+        if (seg) return seg;
+      } catch (e) { /* geen URL — gebruik de ruwe waarde */ }
+      return qr;
+    }
 
+    // ===== STAP 1 · Scannen =====
     async function startScanner() {
+      // Terug naar de camera-view
+      customerView.hidden = true;
+      stampResult.hidden = true;
+      scanView.hidden = false;
+      scanStage.classList.remove('found');
+      scanBusy = false;
+
       if (!('mediaDevices' in navigator) || !navigator.mediaDevices.getUserMedia) {
         setScanStatus('Camera wordt niet ondersteund door deze browser.', true); return;
       }
       if (typeof jsQR === 'undefined') {
         setScanStatus('QR-scanner kon niet laden. Controleer je verbinding.', true); return;
       }
-      stampResult.hidden = true;
       setScanStatus('Camera starten…');
       try {
         mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -949,7 +1068,6 @@
         openCamBtn.hidden = true;
         stopCamBtn.hidden = false;
         setScanStatus('Camera actief — richt op de QR-code van je klant.');
-        scanBusy = false;
         scanRAF = requestAnimationFrame(scanTick);
       } catch (err) {
         setScanStatus('Geen toegang tot de camera. Sta cameratoegang toe en probeer opnieuw.', true);
@@ -982,115 +1100,195 @@
       scanRAF = requestAnimationFrame(scanTick);
     }
 
-    // Keuze-interface elementen
-    const stampChoice = document.getElementById('stampChoice');
-    const choiceName = document.getElementById('choiceName');
-    const choiceCurrent = document.getElementById('choiceCurrent');
-    const amountBtns = document.querySelectorAll('#amountRow .amount-btn');
-    const giveStampBtn = document.getElementById('giveStampBtn');
-    const giveBtnLabel = document.getElementById('giveBtnLabel');
-    const cancelGiveBtn = document.getElementById('cancelGiveBtn');
-    let scannedQr = null, chosenAmount = 1, holderName = 'Klant';
-
-    function authHeaders() {
-      const token = localStorage.getItem('omrz_token');
-      const h = { 'Content-Type': 'application/json' };
-      if (token) h['Authorization'] = 'Bearer ' + token;
-      return h;
-    }
-
-    // Stap 1: QR gedetecteerd → géén automatische stempel, alleen klantgegevens ophalen en keuze tonen.
+    // QR gevonden → camera bevriezen (foto-effect), groene rand + "QR Gevonden!", daarna data ophalen.
     async function onQrDetected(qrData) {
       scanBusy = true;
       scannedQr = qrData;
-      stopScanner();
-      openCamBtn.hidden = true;
-      setScanStatus('QR gescand — klantgegevens ophalen…');
-      let holder = {};
-      try {
-        const res = await fetch(API_BASE + '/api/stamp/holder/' + encodeURIComponent(qrData), { headers: authHeaders() });
-        if (res.ok) holder = (await res.json().catch(() => ({}))) || {};
-      } catch (err) { /* offline/onbekend — toon keuze met onbekende stand */ }
-      showChoice(holder);
-    }
-
-    function showChoice(holder) {
-      const h = holder.holder || holder || {};
-      holderName = h.customer_name || h.name || h.customer || holder.customer_name || holder.name || 'Klant';
-      const current = h.stamps ?? h.current_stamps ?? h.stamp_count ?? holder.stamps ?? null;
-      const required = h.stamps_required ?? holder.stamps_required ?? card.stamps_required;
-      choiceName.textContent = holderName;
-      choiceCurrent.textContent = current == null
-        ? `Spaardoel: ${required} stempels`
-        : `Huidige stempels: ${current}/${required}`;
-      chosenAmount = 1;
-      updateAmountUI();
+      if (scanRAF) { cancelAnimationFrame(scanRAF); scanRAF = null; }
+      scanVideo.pause();                 // bevries het beeld
+      scanStage.classList.add('found');  // groene rand + badge
       setScanStatus('');
+
+      // Minimale toon-tijd voor de bevestiging, parallel aan het ophalen van kaart- en klantdata.
+      const [ , cardData, holderData ] = await Promise.all([ wait(700), fetchCard(), fetchHolder(qrData) ]);
+
+      // stamps_required uit de kaartinstelling (fallback op wat we al weten)
+      const c = (cardData && (cardData.card || cardData)) || {};
+      stampsRequired = Number(c.stamps_required ?? card.stamps_required) || 6;
+      card.stamps_required = stampsRequired;
+      if (c.business_name) card.business_name = c.business_name;
+      if (c.card_title) card.card_title = c.card_title;
+      if (c.reward_description) card.reward_description = c.reward_description;
+      if (c.primary_color) card.primary_color = c.primary_color;
+      if (c.stamp_style) card.stamp_style = c.stamp_style;
+
+      // Klantdata
+      const h = (holderData && (holderData.holder || holderData)) || {};
+      holderName = h.customer_name || h.name || h.customer || 'Klant';
+      currentStamps = Number(h.stamps ?? h.current_stamps ?? h.stamp_count ?? 0) || 0;
+
+      stopScanner();                     // camera verdwijnt in stap 2
+      scanStage.classList.remove('found');
+      showCustomerView();
+    }
+
+    async function fetchCard() {
+      if (!cardId) return null;
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/cards/' + cardId, { headers: authHeaders() });
+        return res.ok ? (await res.json().catch(() => null)) : null;
+      } catch (e) { return null; }
+    }
+    async function fetchHolder(qrData) {
+      const holderId = extractHolderId(qrData);
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/holder/' + encodeURIComponent(holderId), { headers: authHeaders() });
+        return res.ok ? (await res.json().catch(() => null)) : null;
+      } catch (e) { return null; }
+    }
+
+    // ===== STAP 2 · Klantkaart + teller =====
+    function showCustomerView() {
+      scanView.hidden = true;
       stampResult.hidden = true;
-      stampChoice.hidden = false;
+      customerView.hidden = false;
+      custError.hidden = true;
+      selectedAmount = 1;
+
+      custName.textContent = holderName;
+      custCard.style.background = card.primary_color || '#1a1a2e';
+      custBiz.textContent = card.business_name || 'Mijn zaak';
+      custHi.textContent = `Hi ${holderName}! 👋`;
+      custTitle.textContent = card.card_title || 'Stempelkaart';
+      custReward.textContent =
+        `Spaar ${stampsRequired} stempels → ${(card.reward_description || 'gratis product').toLowerCase()}`;
+      updateCustomerUI();
     }
 
-    function updateAmountUI() {
-      amountBtns.forEach(b => b.classList.toggle('active', parseInt(b.dataset.amount, 10) === chosenAmount));
-      giveBtnLabel.textContent = `Geef ${chosenAmount} stempel${chosenAmount > 1 ? 's' : ''}`;
-    }
-    amountBtns.forEach(b =>
-      b.addEventListener('click', () => { chosenAmount = parseInt(b.dataset.amount, 10) || 1; updateAmountUI(); })
-    );
+    function maxAddable() { return Math.max(1, stampsRequired - currentStamps); }
 
-    // Stap 2: pas na bevestiging → POST met de gekozen hoeveelheid.
-    async function giveStamps() {
-      giveStampBtn.disabled = true; giveStampBtn.classList.add('loading');
-      setScanStatus('Stempel toekennen…');
+    function renderCustomerStamps() {
+      const projected = currentStamps + selectedAmount;
+      const icon = card.stamp_style || '⭐';
+      custStamps.style.gridTemplateColumns = `repeat(${Math.min(stampsRequired, 6)}, 1fr)`;
+      custStamps.innerHTML = '';
+      for (let i = 0; i < stampsRequired; i++) {
+        const s = document.createElement('div');
+        let cls = 'sc-stamp empty';
+        if (i < currentStamps) cls = 'sc-stamp filled';
+        else if (i < projected) cls = 'sc-stamp pending';
+        s.className = cls;
+        s.textContent = icon;
+        custStamps.appendChild(s);
+      }
+    }
+
+    function updateCustomerUI() {
+      const maxAdd = maxAddable();
+      if (selectedAmount > maxAdd) selectedAmount = maxAdd;
+      if (selectedAmount < 1) selectedAmount = 1;
+      const projected = currentStamps + selectedAmount;
+
+      counterNum.textContent = selectedAmount;
+      minusBtn.disabled = selectedAmount <= 1;
+      plusBtn.disabled = selectedAmount >= maxAdd;
+      addPreview.textContent = `Na toevoegen: ${projected}/${stampsRequired} stempels`;
+      rewardHint.hidden = projected < stampsRequired;
+      confirmLabel.textContent = `Bevestig ${selectedAmount} stempel${selectedAmount > 1 ? 's' : ''}`;
+      custProgress.textContent = `${currentStamps} / ${stampsRequired} stempels`;
+      renderCustomerStamps();
+    }
+
+    minusBtn.addEventListener('click', () => { selectedAmount--; updateCustomerUI(); });
+    plusBtn.addEventListener('click', () => { selectedAmount++; updateCustomerUI(); });
+    cancelBtn.addEventListener('click', () => { startScanner(); });
+
+    // Bevestigen → POST /api/stamp/give met de gekozen hoeveelheid.
+    async function confirmGive() {
+      confirmBtn.disabled = true; confirmBtn.classList.add('loading');
+      custError.hidden = true;
       try {
         const res = await fetch(API_BASE + '/api/stamp/give', {
           method: 'POST',
           headers: authHeaders(),
-          body: JSON.stringify({ card_id: cardId, customer_qr_code: scannedQr, amount: chosenAmount }),
+          body: JSON.stringify({ card_id: cardId, customer_qr_code: scannedQr, amount: selectedAmount }),
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.error || data.message || 'Stempel geven mislukt');
-        stampChoice.hidden = true;
-        showStampResult(data);
+        newCount = Number(data.stamps ?? data.current_stamps ?? data.stamp_count ?? (currentStamps + selectedAmount));
+        showResult();
       } catch (err) {
-        setScanStatus(err.message || 'Er ging iets mis. Probeer opnieuw.', true);
+        custError.textContent = err.message || 'Er ging iets mis. Probeer opnieuw.';
+        custError.hidden = false;
       } finally {
-        giveStampBtn.disabled = false; giveStampBtn.classList.remove('loading');
+        confirmBtn.disabled = false; confirmBtn.classList.remove('loading');
       }
     }
+    confirmBtn.addEventListener('click', confirmGive);
 
-    function showStampResult(data) {
-      const name = data.customer_name || data.name || data.customer || holderName || 'je klant';
-      const stamps = data.stamps ?? data.current_stamps ?? data.stamp_count ?? '?';
-      const required = data.stamps_required ?? data.required ?? card.stamps_required;
-      const rewardText = (data.reward_description || card.reward_description || 'je beloning').toLowerCase();
-      const earned = data.reward_earned ?? data.reward_ready ?? data.reward
-        ?? (typeof stamps === 'number' && typeof required === 'number' && stamps >= required);
-
-      resultTitle.textContent = `Stempel gegeven aan ${name}!`;
-      resultSub.textContent = `Nu heeft die ${stamps}/${required} stempels`;
-      if (earned) {
-        rewardBanner.textContent = `🎉 ${name} heeft recht op ${rewardText}!`;
-        rewardBanner.hidden = false;
-      } else {
-        rewardBanner.hidden = true;
-      }
-      setScanStatus('');
+    // ===== STAP 3 (beloning) + STAP 4 (bevestiging) =====
+    function showResult() {
+      customerView.hidden = true;
+      scanView.hidden = true;
       stampResult.hidden = false;
+
+      resultTitle.textContent = `Stempel gegeven aan ${holderName}!`;
+      resultSub.textContent = `Nu heeft die ${newCount}/${stampsRequired} stempels`;
+
+      // Reward-check op basis van stamps_required uit de kaart.
+      if (newCount >= stampsRequired) {
+        const rewardText = (card.reward_description || 'de beloning').toLowerCase();
+        rewardBanner.textContent = `🎉 ${holderName} heeft recht op ${rewardText}!`;
+        rewardBanner.classList.remove('redeemed');
+        redeemBtn.hidden = false;
+        redeemError.hidden = true;
+        rewardBlock.hidden = false;
+      } else {
+        rewardBlock.hidden = true;
+      }
     }
 
+    // Beloning uitreiken → reset stempels naar 0 via POST /api/stamp/redeem.
+    async function redeemReward() {
+      redeemBtn.disabled = true; redeemBtn.classList.add('loading');
+      redeemError.hidden = true;
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/redeem', {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({ card_id: cardId, customer_qr_code: scannedQr }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || data.message || 'Beloning uitreiken mislukt');
+        currentStamps = 0; newCount = 0;
+        rewardBanner.textContent = '✅ Beloning uitgedeeld! Stempels gereset naar 0';
+        rewardBanner.classList.add('redeemed');
+        redeemBtn.hidden = true;
+        resultSub.textContent = `Nu heeft die 0/${stampsRequired} stempels`;
+      } catch (err) {
+        redeemError.textContent = err.message || 'Er ging iets mis. Probeer opnieuw.';
+        redeemError.hidden = false;
+      } finally {
+        redeemBtn.disabled = false; redeemBtn.classList.remove('loading');
+      }
+    }
+    redeemBtn.addEventListener('click', redeemReward);
+
+    // ===== Navigatie / reset =====
     function resetScanFlow() {
-      stampChoice.hidden = true;
+      customerView.hidden = true;
       stampResult.hidden = true;
+      rewardBlock.hidden = true;
+      scanView.hidden = false;
+      scanStage.classList.remove('found');
       scannedQr = null;
+      selectedAmount = 1;
       setScanStatus('');
     }
 
     openCamBtn.addEventListener('click', startScanner);
     stopCamBtn.addEventListener('click', () => { stopScanner(); setScanStatus(''); });
-    giveStampBtn.addEventListener('click', giveStamps);
-    cancelGiveBtn.addEventListener('click', () => { resetScanFlow(); startScanner(); });
-    scanAgainBtn.addEventListener('click', () => { resetScanFlow(); startScanner(); });
+    nextBtn.addEventListener('click', () => { startScanner(); });
     // Camera vrijgeven wanneer de pagina/tab wordt verlaten
     window.addEventListener('pagehide', stopScanner);
 
