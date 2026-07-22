@@ -57,7 +57,8 @@
     }
     .nav.scrolled { border-color: var(--border); background: rgba(10,10,10,.82); }
     .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 66px; }
-    .brand { font-size: 20px; font-weight: 800; letter-spacing: -.02em; color: #fff; }
+    .brand { font-size: 20px; font-weight: 800; letter-spacing: -.02em; color: #fff; display: inline-flex; align-items: center; gap: 10px; }
+    .brand-logo { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
     .nav-links { display: flex; gap: 30px; list-style: none; }
     .nav-links a { font-size: 14.5px; font-weight: 500; color: var(--muted); transition: color .2s var(--ease); }
     .nav-links a:hover { color: #fff; }
@@ -298,7 +299,7 @@
     .footer { border-top: 1px solid var(--border); padding: 54px 0 40px; }
     .footer-top { display: flex; flex-wrap: wrap; gap: 40px; justify-content: space-between; margin-bottom: 40px; }
     .footer-brand { max-width: 300px; }
-    .footer-brand .brand { display: inline-block; margin-bottom: 14px; }
+    .footer-brand .brand { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 14px; }
     .footer-brand p { color: var(--muted); font-size: 15px; }
     .footer-cols { display: flex; gap: 60px; flex-wrap: wrap; }
     .footer-col h4 { font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #6a6a6a; margin-bottom: 16px; }
@@ -342,7 +343,7 @@
   <!-- ===== Nav ===== -->
   <header class="nav" id="nav">
     <div class="container nav-inner">
-      <a href="index.html" class="brand">OMRZ Digital</a>
+      <a href="index.html" class="brand"><img class="brand-logo" src="images/logo.png" alt="OMRZ Digital logo" />OMRZ Digital</a>
       <nav>
         <ul class="nav-links" id="navLinks">
           <li><a href="#showcase">Producten</a></li>
@@ -764,7 +765,7 @@
     <div class="container">
       <div class="footer-top">
         <div class="footer-brand">
-          <a href="index.html" class="brand">OMRZ Digital</a>
+          <a href="index.html" class="brand"><img class="brand-logo" src="images/logo.png" alt="OMRZ Digital logo" />OMRZ Digital</a>
           <p>Slimme AI-tools die het Nederlandse MKB laten groeien.</p>
         </div>
         <div class="footer-cols">
