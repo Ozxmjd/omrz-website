@@ -330,6 +330,44 @@
     }
     .bar-label { font-size: 12px; color: #6a6a6a; }
 
+    /* ---------- Klanten ---------- */
+    .cust-search { position: relative; margin-bottom: 22px; }
+    .cust-search svg { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--muted); pointer-events: none; }
+    .cust-search input {
+      width: 100%; font-family: inherit; font-size: 15px; color: #fff;
+      background: rgba(255,255,255,.04); border: 1px solid var(--border-strong);
+      border-radius: 12px; padding: 13px 15px 13px 44px; transition: border-color .25s var(--ease), background .25s var(--ease);
+    }
+    .cust-search input:focus { outline: none; border-color: #fff; background: rgba(255,255,255,.07); }
+    .cust-search input::placeholder { color: var(--muted); }
+
+    .cust-list { display: grid; gap: 12px; }
+    .cust-item { display: flex; align-items: center; gap: 16px; padding: 18px 20px; }
+    .cust-avatar {
+      width: 46px; height: 46px; flex-shrink: 0; border-radius: 50%;
+      background: rgba(255,255,255,.08); border: 1px solid var(--border-strong);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; font-weight: 800; color: #fff; letter-spacing: -.02em;
+    }
+    .cust-main { flex: 1; min-width: 0; }
+    .cust-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+    .cust-item .c-name { font-size: 15.5px; font-weight: 700; color: #fff; }
+    .cust-item .c-meta { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+    .c-progress-row { display: flex; align-items: center; gap: 10px; }
+    .c-bar { flex: 1; height: 6px; border-radius: 999px; background: rgba(255,255,255,.1); overflow: hidden; }
+    .c-bar > span { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #bdbdbd, #fff); transition: width .4s var(--ease); }
+    .c-count { font-size: 12.5px; font-weight: 700; color: var(--pearl); white-space: nowrap; }
+
+    .c-badge { font-size: 11px; font-weight: 800; letter-spacing: .02em; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+    .c-badge.new { background: rgba(74,222,128,.14); border: 1px solid rgba(74,222,128,.5); color: #6ee7a0; }
+    .c-badge.almost { background: rgba(251,146,60,.14); border: 1px solid rgba(251,146,60,.5); color: #fdba74; }
+    .c-badge.reward { background: rgba(201,164,92,.16); border: 1px solid rgba(201,164,92,.55); color: #e0c489; }
+
+    .cust-empty { text-align: center; padding: 60px 24px; color: var(--muted); }
+    .cust-empty .ce-icon { width: 54px; height: 54px; margin: 0 auto 16px; color: rgba(255,255,255,.35); }
+    .cust-empty .ce-icon svg { width: 100%; height: 100%; }
+    .cust-empty p { font-size: 15px; }
+
     /* ---------- Loading / empty ---------- */
     .loader { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 14.5px; padding: 20px 0; }
     .spinner {
@@ -385,6 +423,10 @@
         <div class="side-link" data-tab="qr">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M20 20v.01M17 20v.01M20 14v3"/></svg>
           QR Code
+        </div>
+        <div class="side-link" data-tab="klanten">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Klanten
         </div>
         <div class="side-link" data-tab="statistieken">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16M8 16v-4M12 16V8M16 16v-6M20 16v-2"/></svg>
@@ -667,6 +709,31 @@
           </div>
         </section>
 
+        <!-- ===== Klanten ===== -->
+        <section class="panel" id="panel-klanten">
+          <div class="panel-head">
+            <h2>Mijn Klanten</h2>
+            <p>Iedereen die spaart op jouw stempelkaart.</p>
+          </div>
+
+          <div class="stat-grid">
+            <div class="stat glass">
+              <div class="s-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Totaal klanten</div>
+              <div class="s-val" id="custTotal">—</div>
+              <div class="s-sub">Actieve spaarders</div>
+            </div>
+          </div>
+
+          <div class="cust-search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" id="custSearch" placeholder="Zoek op naam…" autocomplete="off" />
+          </div>
+
+          <div id="custListWrap">
+            <div class="loader"><span class="spinner"></span> Klanten laden…</div>
+          </div>
+        </section>
+
         <!-- ===== Statistieken ===== -->
         <section class="panel" id="panel-statistieken">
           <div class="panel-head">
@@ -781,6 +848,7 @@
       if (active) pageTitle.textContent = active.textContent.trim();
       closeSidebar();
       if (tab === 'qr') renderQR();
+      if (tab === 'klanten') loadCustomers();
       if (tab === 'statistieken') renderChart(currentRange);
       if (tab !== 'stempel') { stopScanner(); resetScanFlow(); } // camera vrijgeven + flow resetten bij verlaten van de scan-tab
     }
@@ -1292,6 +1360,124 @@
     nextBtn.addEventListener('click', () => { startScanner(); });
     // Camera vrijgeven wanneer de pagina/tab wordt verlaten
     window.addEventListener('pagehide', stopScanner);
+
+    // ---- Klanten ----
+    let customersLoaded = false;
+    let allCustomers = [];
+    const custSearch = document.getElementById('custSearch');
+    const custListWrap = document.getElementById('custListWrap');
+    const custTotal = document.getElementById('custTotal');
+
+    function customerInitials(name) {
+      const parts = (name || '').trim().split(/\s+/).filter(Boolean);
+      if (!parts.length) return '?';
+      return (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
+    }
+
+    function formatVisitDate(value) {
+      if (!value) return null;
+      const d = new Date(value);
+      if (isNaN(d.getTime())) return null;
+      return d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    // Normaliseer een klant-record uit de API naar één vorm.
+    function normalizeCustomer(raw) {
+      const name = raw.customer_name || raw.name || raw.customer || 'Onbekende klant';
+      const stamps = Number(raw.stamps ?? raw.current_stamps ?? raw.stamp_count ?? 0) || 0;
+      const required = Number(raw.stamps_required ?? raw.required ?? card.stamps_required) || 6;
+      const lastVisitRaw = raw.last_visit ?? raw.last_stamp_at ?? raw.updated_at ?? raw.last_seen ?? null;
+      return {
+        name,
+        stamps: Math.min(stamps, required),
+        required,
+        lastVisitRaw,
+        lastVisit: formatVisitDate(lastVisitRaw),
+        sortKey: lastVisitRaw ? new Date(lastVisitRaw).getTime() : 0,
+      };
+    }
+
+    // Bepaal welke badge de klant krijgt (of geen).
+    function customerBadge(c) {
+      if (c.stamps >= c.required) return { cls: 'reward', label: 'Beloning klaar' };
+      if (c.required - c.stamps <= 1) return { cls: 'almost', label: 'Bijna vol' };
+      if (c.stamps <= 1) return { cls: 'new', label: 'Nieuw' };
+      return null;
+    }
+
+    function customerCardHTML(c) {
+      const pct = c.required ? Math.round((c.stamps / c.required) * 100) : 0;
+      const badge = customerBadge(c);
+      const badgeHTML = badge ? `<span class="c-badge ${badge.cls}">${badge.label}</span>` : '';
+      const visit = c.lastVisit ? `Laatste bezoek: ${c.lastVisit}` : 'Nog geen bezoek geregistreerd';
+      return `
+        <div class="cust-item glass">
+          <div class="cust-avatar">${escapeHtml(customerInitials(c.name))}</div>
+          <div class="cust-main">
+            <div class="cust-top">
+              <span class="c-name">${escapeHtml(c.name)}</span>
+              ${badgeHTML}
+            </div>
+            <div class="c-progress-row">
+              <div class="c-bar"><span style="width:${pct}%"></span></div>
+              <span class="c-count">${c.stamps}/${c.required}</span>
+            </div>
+            <div class="c-meta">${escapeHtml(visit)}</div>
+          </div>
+        </div>`;
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+    }
+
+    function renderCustomers() {
+      const q = (custSearch.value || '').trim().toLowerCase();
+      const filtered = q
+        ? allCustomers.filter(c => c.name.toLowerCase().includes(q))
+        : allCustomers;
+
+      if (!allCustomers.length) {
+        custListWrap.innerHTML = `
+          <div class="cust-empty">
+            <div class="ce-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M20 20v.01M17 20v.01M20 14v3"/></svg></div>
+            <p>Nog geen klanten. Deel je QR-code om te beginnen!</p>
+          </div>`;
+        return;
+      }
+      if (!filtered.length) {
+        custListWrap.innerHTML = `<div class="cust-empty"><p>Geen klanten gevonden voor "${escapeHtml(custSearch.value.trim())}".</p></div>`;
+        return;
+      }
+      custListWrap.innerHTML = `<div class="cust-list">${filtered.map(customerCardHTML).join('')}</div>`;
+    }
+
+    async function loadCustomers() {
+      if (customersLoaded) { renderCustomers(); return; }
+      if (!cardId) {
+        allCustomers = [];
+        customersLoaded = true;
+        custTotal.textContent = '0';
+        renderCustomers();
+        return;
+      }
+      custListWrap.innerHTML = '<div class="loader"><span class="spinner"></span> Klanten laden…</div>';
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/customers/' + encodeURIComponent(cardId), { headers: authHeaders() });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Klanten laden mislukt');
+        const list = Array.isArray(data) ? data : (data.customers || data.holders || []);
+        allCustomers = list.map(normalizeCustomer).sort((a, b) => b.sortKey - a.sortKey);
+        custTotal.textContent = allCustomers.length;
+        customersLoaded = true;
+        renderCustomers();
+      } catch (err) {
+        custTotal.textContent = '—';
+        custListWrap.innerHTML = `<div class="cust-empty"><p>Kon klanten niet laden — probeer het later opnieuw.</p></div>`;
+      }
+    }
+
+    custSearch.addEventListener('input', renderCustomers);
 
     // ---- Grafiek ----
     let currentRange = 'day';
