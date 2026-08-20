@@ -48,6 +48,8 @@
     .nav-links a { font-size: 14.5px; font-weight: 500; color: var(--muted); transition: color .2s var(--ease); }
     .nav-links a:hover, .nav-links a.active { color: #fff; }
     .nav-right { display: flex; align-items: center; gap: 8px; }
+    .nav-login { font-size: 14.5px; font-weight: 500; color: var(--muted); padding: 0 6px; transition: color .2s var(--ease); }
+    .nav-login:hover { color: #fff; }
     .nav-toggle { display: none; flex-direction: column; gap: 5px; background: none; border: 0; cursor: pointer; padding: 8px; }
     .nav-toggle span { width: 22px; height: 2px; background: #fff; border-radius: 2px; }
 
@@ -148,6 +150,7 @@
         </ul>
       </nav>
       <div class="nav-right">
+        <a href="login.html" class="nav-login">Inloggen</a>
         <a href="aanmelden.html" class="btn btn-outline">Start gratis</a>
         <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
       </div>
