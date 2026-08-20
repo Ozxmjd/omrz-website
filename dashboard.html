@@ -377,11 +377,94 @@
     .btn.loading .btn-label { opacity: .6; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* ---------- Kaart editor ---------- */
+    .editor { display: grid; grid-template-columns: 360px 1fr; gap: 28px; align-items: start; }
+    .editor-preview { position: sticky; top: 92px; }
+    .editor-preview .stampcard { margin: 0 auto; }
+    .pv-label { text-align: center; font-size: 12px; color: var(--muted); margin-top: 14px; letter-spacing: .04em; }
+
+    .editor-settings { display: grid; gap: 20px; min-width: 0; }
+    .ed-section { padding: 24px; }
+    .ed-section > h3 { font-size: 16px; font-weight: 700; margin-bottom: 3px; display: flex; align-items: center; gap: 10px; }
+    .ed-section .sec-num { width: 22px; height: 22px; border-radius: 7px; background: rgba(255,255,255,.1); border: 1px solid var(--border-strong); font-size: 12px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; }
+    .ed-section > .b-sub { color: var(--muted); font-size: 13.5px; margin-bottom: 18px; }
+    .field-label-inline { display: block; font-size: 13px; font-weight: 600; color: var(--pearl); margin-bottom: 9px; }
+
+    /* Rich preview */
+    .stampcard.rich { position: relative; overflow: hidden; }
+    .stampcard .sc-bg { position: absolute; inset: 0; background-size: cover; background-position: center; z-index: 0; }
+    .stampcard .sc-shade { position: absolute; inset: 0; z-index: 1; background: linear-gradient(180deg, rgba(0,0,0,.12), rgba(0,0,0,.5)); display: none; }
+    .stampcard.has-photo .sc-shade { display: block; }
+    .stampcard .sc-inner { position: relative; z-index: 2; }
+    .sc-brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .sc-logo { width: 34px; height: 34px; border-radius: 8px; object-fit: cover; background: rgba(255,255,255,.2); flex-shrink: 0; }
+    .sc-stamps .st { width: 100%; aspect-ratio: 1; display: block; }
+    .sc-stamps .st svg { width: 100%; height: 100%; display: block; }
+
+    /* Color pickers */
+    .cp-main { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+    .cp-main input[type=color] { width: 56px; height: 56px; padding: 0; border: 1px solid var(--border-strong); border-radius: 14px; background: none; cursor: pointer; flex-shrink: 0; }
+    .cp-main input[type=color]::-webkit-color-swatch-wrapper { padding: 4px; }
+    .cp-main input[type=color]::-webkit-color-swatch { border: none; border-radius: 10px; }
+    .cp-main input[type=color]::-moz-color-swatch { border: none; border-radius: 10px; }
+    .cp-hex-label { font-size: 12px; color: var(--muted); }
+    .cp-hex { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 14.5px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: .05em; }
+    .preset-grid { display: flex; flex-wrap: wrap; gap: 9px; }
+    .preset { width: 34px; height: 34px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform .15s var(--ease), border-color .15s var(--ease); box-shadow: inset 0 0 0 1px rgba(255,255,255,.14); }
+    .preset:hover { transform: scale(1.12); }
+    .preset.active { border-color: #fff; }
+
+    /* Segmented tabs */
+    .ed-tabs, .toggle-row { display: inline-flex; padding: 4px; border-radius: 12px; border: 1px solid var(--border); background: rgba(255,255,255,.03); margin-bottom: 18px; }
+    .ed-tabs button, .toggle-row button { font-family: inherit; font-size: 13.5px; font-weight: 600; color: var(--muted); padding: 8px 18px; border-radius: 9px; border: 0; background: none; cursor: pointer; transition: color .2s var(--ease), background .2s var(--ease); }
+    .ed-tabs button.active, .toggle-row button.active { color: #0a0a0a; background: #fff; }
+    .toggle-row { margin-bottom: 0; }
+    .ed-tabpane { display: none; }
+    .ed-tabpane.active { display: block; }
+
+    /* Upload */
+    .uploader { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .upload-prev { width: 66px; height: 66px; border-radius: 12px; border: 1px solid var(--border-strong); background-color: rgba(255,255,255,.05); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; color: var(--muted); font-size: 24px; flex-shrink: 0; overflow: hidden; }
+    .upload-prev.bg { width: 112px; height: 66px; }
+    .upload-main { flex: 1; min-width: 170px; }
+    .upload-hint { font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+    .btn-upload { position: relative; overflow: hidden; }
+    .btn-upload input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; font-size: 0; }
+    .upload-status { font-size: 12.5px; margin-top: 8px; min-height: 16px; }
+    .upload-status.ok { color: #b4ffcf; }
+    .upload-status.error { color: #ffb4b4; }
+
+    /* Theme presets */
+    .theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .theme-btn { padding: 0; border: 1px solid var(--border-strong); border-radius: 12px; overflow: hidden; cursor: pointer; background: none; font-family: inherit; transition: transform .15s var(--ease), border-color .15s var(--ease); }
+    .theme-btn:hover { transform: translateY(-2px); }
+    .theme-btn.active { border-color: #fff; }
+    .theme-swatch { height: 46px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .theme-name { display: block; font-size: 12.5px; font-weight: 600; color: var(--pearl); padding: 8px 6px; text-align: center; background: rgba(255,255,255,.03); }
+
+    /* Shapes */
+    .shape-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px; }
+    .shape-btn { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.04); border: 1px solid var(--border-strong); border-radius: 12px; cursor: pointer; color: var(--pearl); transition: border-color .2s var(--ease), background .2s var(--ease); }
+    .shape-btn svg { width: 26px; height: 26px; }
+    .shape-btn:hover { background: rgba(255,255,255,.08); }
+    .shape-btn.active { border-color: #fff; background: rgba(255,255,255,.1); }
+
+    /* Checkbox */
+    .check-row { display: flex; align-items: center; gap: 10px; margin-top: 14px; font-size: 13.5px; color: var(--pearl); cursor: pointer; }
+    .check-row input { width: 18px; height: 18px; accent-color: #fff; cursor: pointer; flex-shrink: 0; }
+
+    /* Save bar */
+    .save-bar { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 16px 20px; position: sticky; bottom: 16px; }
+    .save-bar .btn { padding: 15px 30px; font-size: 15.5px; }
+
     .sidebar-overlay { display: none; position: fixed; inset: 0; z-index: 45; background: rgba(0,0,0,.5); }
 
     /* ---------- Responsive ---------- */
     @media (max-width: 900px) {
       .two-col { grid-template-columns: 1fr; }
+      .editor { grid-template-columns: 1fr; }
+      .editor-preview { position: static; max-width: 360px; margin: 0 auto; }
+      .theme-grid { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 760px) {
       .sidebar { transform: translateX(-100%); }
@@ -525,78 +608,164 @@
             <p>Ontwerp je stempelkaart. Wijzigingen zie je meteen in de preview.</p>
           </div>
 
-          <div class="two-col">
-            <div class="block glass">
-              <h3>Live preview</h3>
-              <p class="b-sub">Precies wat je klant in de wallet te zien krijgt.</p>
-              <div class="preview-stage">
-                <div class="stampcard" id="editPreview">
+          <div class="editor">
+
+            <!-- ===== Live preview (sticky) ===== -->
+            <div class="editor-preview">
+              <div class="stampcard rich" id="editPreview">
+                <div class="sc-bg" id="pvBg"></div>
+                <div class="sc-shade"></div>
+                <div class="sc-inner">
                   <div class="sc-top">
-                    <span class="sc-biz" id="pvBiz">Café OMRZ</span>
-                    <span class="sc-chip"></span>
+                    <div class="sc-brand">
+                      <img class="sc-logo" id="pvLogo" alt="Logo" hidden />
+                      <span class="sc-biz" id="pvBiz">Café OMRZ</span>
+                    </div>
+                    <span class="sc-chip" id="pvChip"></span>
                   </div>
-                  <div class="sc-hi" id="pvHi">Hi daar! 👋</div>
+                  <div class="sc-hi" id="pvHi">Hi Sara! 👋</div>
                   <div class="sc-title" id="pvTitle">Koffie Spaarkaart</div>
                   <div class="sc-reward" id="pvReward">Spaar 6 stempels → gratis koffie</div>
                   <div class="sc-stamps" id="pvStamps"></div>
-                  <div class="sc-progress" id="pvProgress">0 / 6 stempels</div>
+                  <div class="sc-progress" id="pvProgress">3 / 6 stempels</div>
                 </div>
               </div>
+              <p class="pv-label">Live preview — zo ziet je klant de kaart</p>
             </div>
 
-            <div class="block glass">
-              <h3>Kaart-instellingen</h3>
-              <p class="b-sub">Pas de naam, kleur, spaardoel en beloning aan.</p>
+            <!-- ===== Instellingen ===== -->
+            <form class="editor-settings" id="cardForm">
 
-              <form class="form-grid" id="cardForm">
-                <div class="field">
-                  <label for="fBiz">Bedrijfsnaam</label>
-                  <input type="text" id="fBiz" placeholder="Café OMRZ" />
+              <!-- 1 · Basis -->
+              <section class="ed-section glass">
+                <h3><span class="sec-num">1</span> Basis</h3>
+                <p class="b-sub">De kern van je stempelkaart.</p>
+                <div class="form-grid">
+                  <div class="field">
+                    <label for="fBiz">Bedrijfsnaam</label>
+                    <input type="text" id="fBiz" placeholder="Café OMRZ" />
+                  </div>
+                  <div class="field">
+                    <label for="fTitle">Kaart titel</label>
+                    <input type="text" id="fTitle" placeholder="Stempelkaart" />
+                  </div>
+                  <div class="field">
+                    <label for="fReward">Beloning omschrijving</label>
+                    <input type="text" id="fReward" placeholder="Gratis koffie" />
+                  </div>
+                  <div class="field">
+                    <label for="fStamps">Aantal stempels <span class="range-val" id="fStampsVal">6</span></label>
+                    <input type="range" class="range" id="fStamps" min="4" max="12" value="6" />
+                  </div>
                 </div>
-                <div class="field">
-                  <label for="fTitle">Kaart titel</label>
-                  <input type="text" id="fTitle" placeholder="Stempelkaart" />
+              </section>
+
+              <!-- 2 · Logo -->
+              <section class="ed-section glass">
+                <h3><span class="sec-num">2</span> Logo</h3>
+                <p class="b-sub">Je logo verschijnt linksboven op de kaart.</p>
+                <div class="uploader">
+                  <div class="upload-prev" id="logoPrev">🏪</div>
+                  <div class="upload-main">
+                    <label class="btn btn-ghost btn-upload">
+                      <span class="btn-label">Logo uploaden</span>
+                      <input type="file" id="logoFile" accept="image/png,image/jpeg" />
+                    </label>
+                    <div class="upload-hint">Aanbevolen: vierkant, min. 200×200px (png/jpg)</div>
+                    <div class="upload-status" id="logoStatus"></div>
+                  </div>
                 </div>
-                <div class="field">
-                  <label for="fReward">Beloning omschrijving</label>
-                  <input type="text" id="fReward" placeholder="Gratis koffie" />
+              </section>
+
+              <!-- 3 · Achtergrond -->
+              <section class="ed-section glass">
+                <h3><span class="sec-num">3</span> Achtergrond</h3>
+                <p class="b-sub">Kies een kleur of upload een foto.</p>
+                <div class="ed-tabs" id="bgTabs">
+                  <button type="button" data-bg="color" class="active">Kleur</button>
+                  <button type="button" data-bg="photo">Foto</button>
                 </div>
-                <div class="field">
-                  <label for="fStamps">Aantal stempels <span class="range-val" id="fStampsVal">6</span></label>
-                  <input type="range" class="range" id="fStamps" min="5" max="15" value="6" />
+
+                <div class="ed-tabpane active" id="bgPaneColor">
+                  <div class="cp-main">
+                    <input type="color" id="primaryColor" value="#1a1a2e" aria-label="Achtergrondkleur" />
+                    <div>
+                      <div class="cp-hex-label">Gekozen kleur</div>
+                      <div class="cp-hex" id="primaryHex">#1A1A2E</div>
+                    </div>
+                  </div>
+                  <div class="preset-grid" id="primaryPresets"></div>
                 </div>
-                <div class="field">
-                  <label for="fColor">Kaart kleur</label>
-                  <div class="color-row">
-                    <input type="color" id="fColor" value="#1a1a2e" />
-                    <div class="swatches">
-                      <span class="swatch" style="background:#1a1a2e" data-color="#1a1a2e" title="Donker navy"></span>
-                      <span class="swatch" style="background:#2d1b69" data-color="#2d1b69" title="Donker paars"></span>
-                      <span class="swatch" style="background:#1a2e1a" data-color="#1a2e1a" title="Donker groen"></span>
-                      <span class="swatch" style="background:#2e1a1a" data-color="#2e1a1a" title="Donker rood"></span>
-                      <span class="swatch" style="background:#0a0a0a" data-color="#0a0a0a" title="Zwart"></span>
-                      <span class="swatch" style="background:#1a1a3e" data-color="#1a1a3e" title="Donker blauw"></span>
+
+                <div class="ed-tabpane" id="bgPanePhoto">
+                  <div class="uploader">
+                    <div class="upload-prev bg" id="bgPrev">🖼️</div>
+                    <div class="upload-main">
+                      <label class="btn btn-ghost btn-upload">
+                        <span class="btn-label">Foto uploaden</span>
+                        <input type="file" id="bgFile" accept="image/png,image/jpeg" />
+                      </label>
+                      <div class="upload-hint">Aanbevolen: 1024×640px (png/jpg)</div>
+                      <div class="upload-status" id="bgStatus"></div>
                     </div>
                   </div>
                 </div>
-                <div class="field">
-                  <label>Stempel stijl</label>
-                  <div class="stamp-styles" id="stampStyles">
-                    <button type="button" class="stamp-style active" data-icon="⭐"><span class="em">⭐</span>Ster</button>
-                    <button type="button" class="stamp-style" data-icon="☕"><span class="em">☕</span>Koffie</button>
-                    <button type="button" class="stamp-style" data-icon="❤️"><span class="em">❤️</span>Hart</button>
-                    <button type="button" class="stamp-style" data-icon="✓"><span class="em">✓</span>Vinkje</button>
-                  </div>
-                </div>
+              </section>
 
-                <div class="save-row">
-                  <button type="submit" class="btn btn-primary" id="saveCardBtn">
-                    <span class="btn-label">Kaart opslaan</span>
-                  </button>
-                  <span class="save-note" id="cardSaveNote"></span>
+              <!-- 4 · Thema stijlen -->
+              <section class="ed-section glass">
+                <h3><span class="sec-num">4</span> Thema stijlen</h3>
+                <p class="b-sub">Een complete look in één klik.</p>
+                <div class="theme-grid" id="themeGrid"></div>
+              </section>
+
+              <!-- 5 · Stempel stijl -->
+              <section class="ed-section glass">
+                <h3><span class="sec-num">5</span> Stempel stijl</h3>
+                <p class="b-sub">Vorm, stijl en kleur van de stempels.</p>
+                <span class="field-label-inline">Vorm</span>
+                <div class="shape-grid" id="shapeGrid"></div>
+                <span class="field-label-inline">Stijl</span>
+                <div class="toggle-row" id="fillToggle" style="margin-bottom:18px;">
+                  <button type="button" data-fill="filled" class="active">Gevuld</button>
+                  <button type="button" data-fill="outline">Outline</button>
                 </div>
-              </form>
-            </div>
+                <span class="field-label-inline">Stempel kleur</span>
+                <div class="cp-main">
+                  <input type="color" id="stampColor" value="#c9a45c" aria-label="Stempelkleur" />
+                  <div><div class="cp-hex-label">Stempel kleur</div><div class="cp-hex" id="stampHex">#C9A45C</div></div>
+                </div>
+                <div class="preset-grid" id="stampPresets"></div>
+              </section>
+
+              <!-- 6 · Tekst & kleuren -->
+              <section class="ed-section glass">
+                <h3><span class="sec-num">6</span> Tekst &amp; kleuren</h3>
+                <p class="b-sub">Tekstkleur en accentkleur van de kaart.</p>
+                <span class="field-label-inline">Tekstkleur</span>
+                <div class="cp-main">
+                  <input type="color" id="textColor" value="#ffffff" aria-label="Tekstkleur" />
+                  <div><div class="cp-hex-label">Tekstkleur</div><div class="cp-hex" id="textHex">#FFFFFF</div></div>
+                </div>
+                <label class="check-row"><input type="checkbox" id="autoContrast" /> Automatisch contrast (zwart/wit op basis van achtergrond)</label>
+
+                <span class="field-label-inline" style="margin-top:20px;">Accentkleur</span>
+                <div class="cp-main">
+                  <input type="color" id="accentColor" value="#c9a45c" aria-label="Accentkleur" />
+                  <div><div class="cp-hex-label">Accentkleur</div><div class="cp-hex" id="accentHex">#C9A45C</div></div>
+                </div>
+                <div class="preset-grid" id="accentPresets"></div>
+              </section>
+
+              <!-- Opslaan -->
+              <div class="save-bar glass">
+                <button type="submit" class="btn btn-primary" id="saveCardBtn">
+                  <span class="btn-label">Wijzigingen opslaan</span>
+                </button>
+                <span class="save-note" id="cardSaveNote"></span>
+              </div>
+
+            </form>
           </div>
         </section>
 
@@ -832,8 +1001,17 @@
       card_title: 'Koffie Spaarkaart',
       reward_description: 'Gratis koffie',
       stamps_required: 6,
+      logo_url: '',
+      background_url: '',
+      background_type: 'color',
+      theme_style: '',
       primary_color: '#1a1a2e',
-      stamp_style: '⭐',
+      text_color: '#ffffff',
+      accent_color: '#c9a45c',
+      stamp_color: '#c9a45c',
+      stamp_shape: 'star',
+      stamp_fill: 'filled',
+      stamp_style: '★',
     };
     let stats = { total_customers: 0, total_stamps: 0, total_rewards: 0 };
 
@@ -899,58 +1077,322 @@
     }
 
     function refreshPreviews() {
-      // Overzicht toont een voorbeeld met wat gespaarde stempels; de customizer-preview toont een lege kaart.
+      // Overzicht toont een voorbeeld met wat gespaarde stempels; de editor-preview heeft z'n eigen renderer.
       paintPreview('ov', card, Math.min(2, card.stamps_required));
-      paintPreview('pv', card, 0);
+      paintEditor();
       document.getElementById('bizName').textContent = card.business_name || 'Mijn zaak';
     }
 
-    // ---- Formulier ↔ kaart ----
+    // ============================================================
+    //  KAART EDITOR
+    // ============================================================
+
+    // ---- Presets ----
+    const BG_PRESETS = [
+      '#1a1a2e', '#0f172a', '#111827', '#2d1b69', '#4c1d95', '#7c2d12',
+      '#065f46', '#0e7490', '#9f1239',
+      'linear-gradient(135deg,#434343,#000000)',
+      'linear-gradient(135deg,#c9a45c,#8a6d2f)',
+      'linear-gradient(135deg,#0f2027,#2c5364)',
+    ];
+    const ACCENT_PRESETS = ['#c9a45c','#ffffff','#f59e0b','#ef4444','#10b981','#3b82f6','#a855f7','#ec4899'];
+    const STAMP_PRESETS  = ['#c9a45c','#ffffff','#fbbf24','#ef4444','#22c55e','#38bdf8','#a78bfa','#f472b6'];
+
+    const THEMES = {
+      klassiek: { label:'Klassiek', primary_color:'#1a1a2e', text_color:'#ffffff', accent_color:'#c9a45c', stamp_color:'#c9a45c', stamp_shape:'star',   stamp_fill:'filled'  },
+      modern:   { label:'Modern',   primary_color:'#0f172a', text_color:'#ffffff', accent_color:'#3b82f6', stamp_color:'#3b82f6', stamp_shape:'circle', stamp_fill:'filled'  },
+      minimal:  { label:'Minimal',  primary_color:'#f4f4f5', text_color:'#0a0a0a', accent_color:'#111827', stamp_color:'#111827', stamp_shape:'square', stamp_fill:'outline' },
+      luxe:     { label:'Luxe',     primary_color:'linear-gradient(135deg,#1a1a1a,#000000)', text_color:'#f5e6c8', accent_color:'#d4af37', stamp_color:'#d4af37', stamp_shape:'star',   stamp_fill:'filled' },
+      warm:     { label:'Warm',     primary_color:'linear-gradient(135deg,#7c2d12,#b45309)', text_color:'#fff7ed', accent_color:'#fbbf24', stamp_color:'#fbbf24', stamp_shape:'heart',  stamp_fill:'filled' },
+      fris:     { label:'Fris',     primary_color:'linear-gradient(135deg,#065f46,#0d9488)', text_color:'#ecfdf5', accent_color:'#a7f3d0', stamp_color:'#ffffff', stamp_shape:'circle', stamp_fill:'filled' },
+    };
+
+    const SHAPE_PATH = {
+      circle: '<circle cx="12" cy="12" r="9"/>',
+      square: '<rect x="3.5" y="3.5" width="17" height="17" rx="4"/>',
+      star:   '<path d="M12 2.6l2.85 5.9 6.5.62-4.9 4.28 1.46 6.36L12 16.9 6.09 20.36l1.46-6.36-4.9-4.28 6.5-.62z"/>',
+      heart:  '<path d="M12 20.6l-1.3-1.2C6 15.1 3 12.4 3 9.1 3 6.6 4.9 4.7 7.3 4.7c1.5 0 2.9.7 3.8 1.9L12 7.7l.9-1.1c.9-1.2 2.3-1.9 3.8-1.9 2.4 0 4.3 1.9 4.3 4.4 0 3.3-3 6-7.7 10.3z"/>',
+    };
+    const SHAPE_GLYPH = { circle:'●', square:'■', star:'★', heart:'♥' };
+    const SHAPES = [
+      { key:'circle', label:'Cirkel' },
+      { key:'star',   label:'Ster' },
+      { key:'heart',  label:'Hart' },
+      { key:'square', label:'Vierkant' },
+    ];
+
+    // ---- Kleur-helpers ----
+    const isHex = (v) => /^#[0-9a-fA-F]{6}$/.test(v || '');
+    const firstHex = (v) => { const m = String(v || '').match(/#[0-9a-fA-F]{6}/); return m ? m[0] : null; };
+    function luminance(hex) {
+      const h = hex.replace('#',''); const r = parseInt(h.slice(0,2),16), g = parseInt(h.slice(2,4),16), b = parseInt(h.slice(4,6),16);
+      return (0.299*r + 0.587*g + 0.114*b) / 255;
+    }
+    function autoTextColor() {
+      if (card.background_type === 'photo' && card.background_url) return '#ffffff';
+      const base = firstHex(card.primary_color) || '#1a1a2e';
+      return luminance(base) > 0.6 ? '#0a0a0a' : '#ffffff';
+    }
+
+    // ---- Element-refs (inputs) ----
     const fBiz = document.getElementById('fBiz');
     const fTitle = document.getElementById('fTitle');
     const fReward = document.getElementById('fReward');
     const fStamps = document.getElementById('fStamps');
     const fStampsVal = document.getElementById('fStampsVal');
-    const fColor = document.getElementById('fColor');
-    const swatchEls = document.querySelectorAll('.swatch');
-    const styleEls = document.querySelectorAll('.stamp-style');
+    const primaryColor = document.getElementById('primaryColor');
+    const primaryHex = document.getElementById('primaryHex');
+    const stampColorInput = document.getElementById('stampColor');
+    const stampHex = document.getElementById('stampHex');
+    const textColorInput = document.getElementById('textColor');
+    const textHex = document.getElementById('textHex');
+    const accentColorInput = document.getElementById('accentColor');
+    const accentHex = document.getElementById('accentHex');
+    const autoContrast = document.getElementById('autoContrast');
+    // Containers
+    const primaryPresets = document.getElementById('primaryPresets');
+    const accentPresets = document.getElementById('accentPresets');
+    const stampPresets = document.getElementById('stampPresets');
+    const shapeGrid = document.getElementById('shapeGrid');
+    const fillToggle = document.getElementById('fillToggle');
+    const themeGrid = document.getElementById('themeGrid');
+    const bgTabs = document.getElementById('bgTabs');
+    const logoPrev = document.getElementById('logoPrev');
+    const bgPrev = document.getElementById('bgPrev');
+    // Preview
+    const pvBg = document.getElementById('pvBg');
+    const pvLogo = document.getElementById('pvLogo');
+    const pvBiz = document.getElementById('pvBiz');
+    const pvChip = document.getElementById('pvChip');
+    const pvHi = document.getElementById('pvHi');
+    const pvTitle = document.getElementById('pvTitle');
+    const pvReward = document.getElementById('pvReward');
+    const pvStamps = document.getElementById('pvStamps');
+    const pvProgress = document.getElementById('pvProgress');
 
-    function syncControls() {
-      fStampsVal.textContent = card.stamps_required;
-      swatchEls.forEach(sw =>
-        sw.classList.toggle('active', sw.dataset.color.toLowerCase() === (card.primary_color || '').toLowerCase()));
-      styleEls.forEach(st => st.classList.toggle('active', st.dataset.icon === card.stamp_style));
+    // ---- Stempel-SVG ----
+    function stampSVG(active) {
+      const path = SHAPE_PATH[card.stamp_shape] || SHAPE_PATH.circle;
+      const col = card.stamp_color || card.accent_color || '#c9a45c';
+      const outline = card.stamp_fill === 'outline';
+      let fill, stroke, opacity = '';
+      if (active) {
+        if (outline) { fill = 'none'; stroke = col; }
+        else { fill = col; stroke = 'none'; }
+      } else {
+        fill = 'none'; stroke = card.text_color || '#ffffff'; opacity = ' opacity="0.3"';
+      }
+      return `<span class="st"><svg viewBox="0 0 24 24" fill="${fill}" stroke="${stroke}" stroke-width="1.8" stroke-linejoin="round"${opacity}>${path}</svg></span>`;
     }
+
+    // ---- Live preview ----
+    function paintEditor() {
+      const c = card;
+      const el = document.getElementById('editPreview');
+      if (!el) return;
+      const photo = c.background_type === 'photo' && !!c.background_url;
+      el.classList.toggle('has-photo', photo);
+      if (photo) { el.style.background = '#111'; pvBg.style.backgroundImage = `url("${c.background_url}")`; }
+      else { el.style.background = c.primary_color || '#1a1a2e'; pvBg.style.backgroundImage = 'none'; }
+
+      const txt = c.text_color || '#ffffff';
+      el.style.color = txt;
+      if (c.logo_url) { pvLogo.src = c.logo_url; pvLogo.hidden = false; } else { pvLogo.hidden = true; }
+      pvBiz.textContent = c.business_name || 'Mijn zaak'; pvBiz.style.color = txt;
+      pvChip.style.background = c.accent_color || 'rgba(255,255,255,.6)';
+      pvHi.textContent = 'Hi Sara! 👋'; pvHi.style.color = txt;
+      pvTitle.textContent = c.card_title || 'Stempelkaart'; pvTitle.style.color = txt;
+      pvReward.textContent = `Spaar ${c.stamps_required} stempels → ${(c.reward_description || 'gratis product').toLowerCase()}`;
+      pvReward.style.color = txt; pvReward.style.opacity = '.8';
+
+      const filled = Math.min(3, c.stamps_required);
+      pvStamps.style.gridTemplateColumns = `repeat(${Math.min(c.stamps_required, 6)}, 1fr)`;
+      let html = ''; for (let i = 0; i < c.stamps_required; i++) html += stampSVG(i < filled);
+      pvStamps.innerHTML = html;
+      pvProgress.textContent = `${filled} / ${c.stamps_required} stempels`;
+      pvProgress.style.color = c.accent_color || txt;
+    }
+
+    // ---- Presets bouwen / markeren ----
+    function buildPresets(container, list, onPick) {
+      container.innerHTML = '';
+      list.forEach(val => {
+        const b = document.createElement('span');
+        b.className = 'preset'; b.style.background = val; b.title = val; b.dataset.val = val;
+        b.addEventListener('click', () => onPick(val));
+        container.appendChild(b);
+      });
+    }
+    function markPresets(container, activeVal) {
+      [...container.children].forEach(ch =>
+        ch.classList.toggle('active', (ch.dataset.val || '').toLowerCase() === (activeVal || '').toLowerCase()));
+    }
+
+    // ---- Setters ----
+    function setPrimary(val) {
+      card.primary_color = val;
+      card.background_type = 'color';
+      if (isHex(val)) primaryColor.value = val;
+      primaryHex.textContent = isHex(val) ? val.toUpperCase() : 'Gradient';
+      markPresets(primaryPresets, val);
+      if (autoContrast.checked) setText(autoTextColor(), true);
+      paintEditor();
+    }
+    function setAccent(val) {
+      card.accent_color = val;
+      if (isHex(val)) accentColorInput.value = val;
+      accentHex.textContent = isHex(val) ? val.toUpperCase() : val;
+      markPresets(accentPresets, val);
+      paintEditor();
+    }
+    function setStampColor(val) {
+      card.stamp_color = val;
+      if (isHex(val)) stampColorInput.value = val;
+      stampHex.textContent = isHex(val) ? val.toUpperCase() : val;
+      markPresets(stampPresets, val);
+      paintEditor();
+    }
+    function setText(val, fromAuto) {
+      card.text_color = val;
+      if (isHex(val)) textColorInput.value = val;
+      textHex.textContent = isHex(val) ? val.toUpperCase() : val;
+      if (!fromAuto) autoContrast.checked = false;
+      paintEditor();
+    }
+    function setShape(shape) {
+      card.stamp_shape = shape;
+      card.stamp_style = SHAPE_GLYPH[shape] || '●';
+      [...shapeGrid.children].forEach(ch => ch.classList.toggle('active', ch.dataset.shape === shape));
+      paintEditor();
+    }
+    function setFill(fill) {
+      card.stamp_fill = fill;
+      [...fillToggle.children].forEach(ch => ch.classList.toggle('active', ch.dataset.fill === fill));
+      paintEditor();
+    }
+
+    // ---- UI opbouwen ----
+    buildPresets(primaryPresets, BG_PRESETS, setPrimary);
+    buildPresets(accentPresets, ACCENT_PRESETS, setAccent);
+    buildPresets(stampPresets, STAMP_PRESETS, setStampColor);
+
+    SHAPES.forEach(s => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'shape-btn'; b.dataset.shape = s.key; b.title = s.label;
+      b.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor">${SHAPE_PATH[s.key]}</svg>`;
+      b.addEventListener('click', () => setShape(s.key));
+      shapeGrid.appendChild(b);
+    });
+
+    Object.keys(THEMES).forEach(key => {
+      const t = THEMES[key];
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'theme-btn'; b.dataset.theme = key;
+      b.innerHTML = `<span class="theme-swatch" style="background:${t.primary_color};color:${t.accent_color}">${SHAPE_GLYPH[t.stamp_shape]}</span><span class="theme-name">${t.label}</span>`;
+      b.addEventListener('click', () => applyTheme(key));
+      themeGrid.appendChild(b);
+    });
+    function applyTheme(key) {
+      const t = THEMES[key]; if (!t) return;
+      card.theme_style = key;
+      autoContrast.checked = false;
+      setPrimary(t.primary_color);
+      setAccent(t.accent_color);
+      setStampColor(t.stamp_color);
+      setText(t.text_color, true);
+      setShape(t.stamp_shape);
+      setFill(t.stamp_fill);
+      switchBgTab('color');
+      [...themeGrid.children].forEach(ch => ch.classList.toggle('active', ch.dataset.theme === key));
+    }
+
+    // ---- Achtergrond-tabs ----
+    function switchBgTab(which) {
+      card.background_type = (which === 'photo' && card.background_url) ? 'photo' : which;
+      [...bgTabs.children].forEach(ch => ch.classList.toggle('active', ch.dataset.bg === which));
+      document.getElementById('bgPaneColor').classList.toggle('active', which === 'color');
+      document.getElementById('bgPanePhoto').classList.toggle('active', which === 'photo');
+      if (autoContrast.checked) setText(autoTextColor(), true);
+      paintEditor();
+    }
+    [...bgTabs.children].forEach(btn => btn.addEventListener('click', () => switchBgTab(btn.dataset.bg)));
+    [...fillToggle.children].forEach(btn => btn.addEventListener('click', () => setFill(btn.dataset.fill)));
+
+    // ---- Color inputs (volledige kleurenwiel) ----
+    primaryColor.addEventListener('input', () => setPrimary(primaryColor.value));
+    accentColorInput.addEventListener('input', () => setAccent(accentColorInput.value));
+    stampColorInput.addEventListener('input', () => setStampColor(stampColorInput.value));
+    textColorInput.addEventListener('input', () => setText(textColorInput.value, false));
+    autoContrast.addEventListener('change', () => { if (autoContrast.checked) setText(autoTextColor(), true); });
+
+    // ---- Tekst-inputs + slider ----
+    fBiz.addEventListener('input', () => { card.business_name = fBiz.value.trim() || 'Mijn zaak'; refreshPreviews(); });
+    fTitle.addEventListener('input', () => { card.card_title = fTitle.value.trim() || 'Stempelkaart'; paintEditor(); });
+    fReward.addEventListener('input', () => { card.reward_description = fReward.value.trim() || 'Gratis product'; paintEditor(); });
+    fStamps.addEventListener('input', () => {
+      card.stamps_required = Math.max(4, Math.min(12, parseInt(fStamps.value, 10) || 6));
+      fStampsVal.textContent = card.stamps_required; refreshPreviews();
+    });
+
+    // ---- Formulier vullen vanuit state ----
     function fillForm() {
       fBiz.value = card.business_name || '';
       fTitle.value = card.card_title || '';
       fReward.value = card.reward_description || '';
-      fStamps.value = Math.max(5, Math.min(15, card.stamps_required || 6));
-      fColor.value = card.primary_color || '#1a1a2e';
-      syncControls();
+      fStamps.value = Math.max(4, Math.min(12, card.stamps_required || 6));
+      fStampsVal.textContent = card.stamps_required;
+
+      autoContrast.checked = false;
+      setPrimary(card.primary_color || '#1a1a2e');
+      setAccent(card.accent_color || '#c9a45c');
+      setStampColor(card.stamp_color || card.accent_color || '#c9a45c');
+      setText(card.text_color || '#ffffff', true);
+      setShape(card.stamp_shape || 'star');
+      setFill(card.stamp_fill || 'filled');
+
+      if (card.logo_url) { logoPrev.style.backgroundImage = `url("${card.logo_url}")`; logoPrev.textContent = ''; }
+      if (card.background_url) { bgPrev.style.backgroundImage = `url("${card.background_url}")`; bgPrev.textContent = ''; }
+      switchBgTab(card.background_type === 'photo' ? 'photo' : 'color');
+
+      [...themeGrid.children].forEach(ch => ch.classList.toggle('active', ch.dataset.theme === card.theme_style));
     }
-    function readForm() {
-      card.business_name = fBiz.value.trim() || 'Mijn zaak';
-      card.card_title = fTitle.value.trim() || 'Stempelkaart';
-      card.reward_description = fReward.value.trim() || 'Gratis product';
-      card.stamps_required = Math.max(5, Math.min(15, parseInt(fStamps.value, 10) || 6));
-      card.primary_color = fColor.value;
-      syncControls();
+
+    // ---- Uploads (logo & achtergrond) ----
+    async function uploadFile(endpoint, file, statusEl, onDone) {
+      if (!file) return;
+      if (!/^image\/(png|jpe?g)$/.test(file.type)) { statusEl.textContent = 'Alleen PNG of JPG.'; statusEl.className = 'upload-status error'; return; }
+      statusEl.textContent = 'Uploaden…'; statusEl.className = 'upload-status';
+      try {
+        const token = localStorage.getItem('omrz_token');
+        const headers = {}; if (token) headers['Authorization'] = 'Bearer ' + token;
+        const fd = new FormData(); fd.append('file', file);
+        const res = await fetch(API_BASE + endpoint, { method: 'POST', headers, body: fd });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || data.message || 'Upload mislukt');
+        const url = data.url || data.logo_url || data.background_url || data.file_url || data.location || data.path;
+        if (!url) throw new Error('Geen URL ontvangen van de server');
+        statusEl.textContent = 'Geüpload ✓'; statusEl.className = 'upload-status ok';
+        onDone(url);
+      } catch (err) {
+        statusEl.textContent = err.message || 'Upload mislukt.'; statusEl.className = 'upload-status error';
+      }
     }
-    [fBiz, fTitle, fReward, fStamps, fColor].forEach(el =>
-      el.addEventListener('input', () => { readForm(); refreshPreviews(); })
-    );
-    swatchEls.forEach(sw =>
-      sw.addEventListener('click', () => { fColor.value = sw.dataset.color; readForm(); refreshPreviews(); })
-    );
-    styleEls.forEach(st =>
-      st.addEventListener('click', () => { card.stamp_style = st.dataset.icon; syncControls(); refreshPreviews(); })
-    );
+    document.getElementById('logoFile').addEventListener('change', (e) => {
+      const file = e.target.files[0]; if (!file) return;
+      logoPrev.style.backgroundImage = `url("${URL.createObjectURL(file)}")`; logoPrev.textContent = '';
+      uploadFile('/api/stamp/upload-logo', file, document.getElementById('logoStatus'), (url) => { card.logo_url = url; paintEditor(); });
+    });
+    document.getElementById('bgFile').addEventListener('change', (e) => {
+      const file = e.target.files[0]; if (!file) return;
+      bgPrev.style.backgroundImage = `url("${URL.createObjectURL(file)}")`; bgPrev.textContent = '';
+      uploadFile('/api/stamp/upload-background', file, document.getElementById('bgStatus'), (url) => {
+        card.background_url = url; card.background_type = 'photo'; switchBgTab('photo'); paintEditor();
+      });
+    });
 
     // ---- Kaart opslaan ----
     document.getElementById('cardForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      readForm();
       const btn = document.getElementById('saveCardBtn');
       const note = document.getElementById('cardSaveNote');
       note.className = 'save-note';
@@ -961,7 +1403,16 @@
         card_title: card.card_title,
         reward_description: card.reward_description,
         stamps_required: card.stamps_required,
+        logo_url: card.logo_url,
+        background_url: card.background_url,
+        background_type: card.background_type,
+        theme_style: card.theme_style,
         primary_color: card.primary_color,
+        text_color: card.text_color,
+        accent_color: card.accent_color,
+        stamp_color: card.stamp_color,
+        stamp_shape: card.stamp_shape,
+        stamp_fill: card.stamp_fill,
         stamp_style: card.stamp_style,
       };
       try {
@@ -1518,6 +1969,15 @@
           card.stamps_required = c.stamps_required ?? card.stamps_required;
           card.primary_color = c.primary_color ?? card.primary_color;
           card.stamp_style = c.stamp_style ?? card.stamp_style;
+          card.logo_url = c.logo_url ?? card.logo_url;
+          card.background_url = c.background_url ?? card.background_url;
+          card.background_type = c.background_type ?? card.background_type;
+          card.theme_style = c.theme_style ?? card.theme_style;
+          card.text_color = c.text_color ?? card.text_color;
+          card.accent_color = c.accent_color ?? card.accent_color;
+          card.stamp_color = c.stamp_color ?? c.accent_color ?? card.stamp_color;
+          card.stamp_shape = c.stamp_shape ?? card.stamp_shape;
+          card.stamp_fill = c.stamp_fill ?? card.stamp_fill;
 
           const s = data.stats || {};
           document.getElementById('statCustomers').textContent = s.total_customers ?? s.customers ?? 0;
