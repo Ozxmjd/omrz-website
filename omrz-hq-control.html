@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin · OMRZ Digital</title>
   <meta name="description" content="Beheerdersportaal voor OMRZ Digital." />
-  <meta name="robots" content="noindex, nofollow" />
+  <meta name="robots" content="noindex, nofollow, noarchive" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -159,7 +159,7 @@
 
     // Al ingelogd? Direct door naar het dashboard.
     if (localStorage.getItem('admin_token')) {
-      window.location.replace('admin-dashboard.html');
+      window.location.replace('omrz-hq-panel.html');
     }
 
     const form = document.getElementById('loginForm');
@@ -204,7 +204,7 @@
         localStorage.setItem('admin_token', data.token || data.admin_token || 'ok');
 
         showMsg('Ingelogd! Je wordt doorgestuurd…', 'ok');
-        window.location.href = 'admin-dashboard.html';
+        window.location.href = 'omrz-hq-panel.html';
       } catch (err) {
         showMsg('Kan geen verbinding maken met de server. Probeer het later opnieuw.', 'error');
         submitBtn.disabled = false;

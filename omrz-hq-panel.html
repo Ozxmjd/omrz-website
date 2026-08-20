@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Dashboard · OMRZ Digital</title>
   <meta name="description" content="Beheerdersdashboard voor OMRZ Digital — winkeliers, statistieken en omzet." />
-  <meta name="robots" content="noindex, nofollow" />
+  <meta name="robots" content="noindex, nofollow, noarchive" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -422,7 +422,7 @@
     // ---- Beveiliging: geen admin-token → terug naar de login ----
     const adminToken = localStorage.getItem('admin_token');
     if (!adminToken) {
-      window.location.replace('admin-login.html');
+      window.location.replace('omrz-hq-control.html');
     }
 
     function adminHeaders() {
@@ -455,7 +455,7 @@
     // ---- Uitloggen ----
     document.getElementById('logoutBtn').addEventListener('click', () => {
       localStorage.removeItem('admin_token');
-      window.location.href = 'admin-login.html';
+      window.location.href = 'omrz-hq-control.html';
     });
 
     // ---- Helpers ----
@@ -518,7 +518,7 @@
         const res = await fetch(API_BASE + '/api/admin/businesses', { headers: adminHeaders() });
         if (res.status === 401 || res.status === 403) {
           localStorage.removeItem('admin_token');
-          window.location.replace('admin-login.html');
+          window.location.replace('omrz-hq-control.html');
           return;
         }
         const data = await res.json().catch(() => ({}));
