@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard · OMRZ Digital</title>
+  <meta name="description" content="Beheerdersdashboard voor OMRZ Digital — winkeliers, statistieken en omzet." />
+  <meta name="robots" content="noindex, nofollow" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --text: #ffffff;
+      --muted: #a0a0a0;
+      --pearl: #e8e8e8;
+      --card: rgba(255, 255, 255, .05);
+      --border: rgba(255, 255, 255, .1);
+      --border-strong: rgba(255, 255, 255, .18);
+      --radius: 18px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --sidebar-w: 258px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: var(--font); background: var(--bg); color: var(--text);
+      line-height: 1.6; font-size: 16px; min-height: 100vh; overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    body::before {
+      content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background:
+        radial-gradient(760px 500px at 82% -12%, rgba(255,255,255,.05), transparent 60%),
+        radial-gradient(640px 460px at 4% 4%, rgba(255,255,255,.035), transparent 60%);
+    }
+
+    .brand { font-size: 19px; font-weight: 800; letter-spacing: -.02em; color: #fff; display: inline-flex; align-items: center; gap: 10px; }
+    .brand-logo { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; object-position: center; flex-shrink: 0; }
+    .glass {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      backdrop-filter: blur(18px) saturate(160%); -webkit-backdrop-filter: blur(18px) saturate(160%);
+    }
+
+    /* ---------- Shell ---------- */
+    .shell { display: flex; min-height: 100vh; }
+
+    /* ---------- Sidebar ---------- */
+    .sidebar {
+      position: fixed; top: 0; left: 0; bottom: 0; width: var(--sidebar-w); z-index: 50;
+      display: flex; flex-direction: column; padding: 24px 18px;
+      background: rgba(14,14,14,.82); border-right: 1px solid var(--border);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      transition: transform .3s var(--ease);
+    }
+    .sidebar-head { display: flex; align-items: center; justify-content: space-between; padding: 4px 8px 10px; }
+    .admin-tag {
+      display: inline-block; margin: 0 8px 18px; padding: 4px 10px; border-radius: 999px;
+      font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+      color: #0a0a0a; background: #fff; align-self: flex-start;
+    }
+    .side-nav { display: grid; gap: 4px; }
+    .side-link {
+      display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px;
+      font-size: 14.5px; font-weight: 500; color: var(--muted); cursor: pointer;
+      border: 1px solid transparent; transition: color .2s var(--ease), background .2s var(--ease), border-color .2s var(--ease);
+    }
+    .side-link svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .side-link:hover { color: #fff; background: rgba(255,255,255,.04); }
+    .side-link.active { color: #fff; background: rgba(255,255,255,.08); border-color: var(--border-strong); }
+    .side-foot { margin-top: auto; padding-top: 18px; border-top: 1px solid var(--border); }
+    .side-user { padding: 4px 14px 14px; }
+    .side-user .u-label { font-size: 12px; color: #6a6a6a; }
+    .side-user .u-email { font-size: 13.5px; color: var(--pearl); font-weight: 600; word-break: break-all; }
+    .logout-link { color: var(--muted); }
+    .logout-link:hover { color: #ff9b9b; background: rgba(255,80,80,.06); }
+
+    /* ---------- Content ---------- */
+    .content { flex: 1; margin-left: var(--sidebar-w); min-width: 0; }
+    .topbar {
+      position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 14px;
+      padding: 16px 34px; background: rgba(10,10,10,.7);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+    .menu-btn { display: none; background: none; border: 1px solid var(--border-strong); border-radius: 10px; padding: 8px 10px; cursor: pointer; flex-direction: column; gap: 4px; }
+    .menu-btn span { width: 18px; height: 2px; background: #fff; border-radius: 2px; }
+    .topbar h1 { font-size: 20px; font-weight: 800; letter-spacing: -.02em; }
+    .topbar .spacer { flex: 1; }
+    .biz-chip {
+      display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--pearl);
+      padding: 7px 14px; border-radius: 999px; border: 1px solid var(--border); background: rgba(255,255,255,.04);
+    }
+    .biz-dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 10px #4ade80; }
+
+    .page { padding: 30px 34px 60px; max-width: 1140px; }
+    .panel { display: none; animation: fade .4s var(--ease); }
+    .panel.active { display: block; }
+    @keyframes fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    .panel-head { margin-bottom: 24px; }
+    .panel-head h2 { font-size: 24px; font-weight: 800; letter-spacing: -.03em; margin-bottom: 6px; }
+    .panel-head p { color: var(--muted); font-size: 15px; }
+
+    /* ---------- Stat cards ---------- */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-bottom: 26px; }
+    .stat { padding: 22px 22px; }
+    .stat .s-top { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13.5px; font-weight: 500; margin-bottom: 14px; }
+    .stat .s-top svg { width: 17px; height: 17px; }
+    .stat .s-val { font-size: 34px; font-weight: 800; letter-spacing: -.03em; line-height: 1; }
+    .stat .s-sub { font-size: 13px; color: #6a6a6a; margin-top: 8px; }
+
+    .block { padding: 26px; }
+    .block h3 { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+    .block .b-sub { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
+    .block + .block { margin-top: 22px; }
+
+    /* ---------- Toolbar / search ---------- */
+    .biz-toolbar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    .biz-search { position: relative; flex: 1; min-width: 220px; }
+    .biz-search svg { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--muted); pointer-events: none; }
+    .biz-search input {
+      width: 100%; font-family: inherit; font-size: 15px; color: #fff;
+      background: rgba(255,255,255,.04); border: 1px solid var(--border-strong);
+      border-radius: 12px; padding: 12px 15px 12px 44px; transition: border-color .25s var(--ease), background .25s var(--ease);
+    }
+    .biz-search input:focus { outline: none; border-color: #fff; background: rgba(255,255,255,.07); }
+    .biz-search input::placeholder { color: var(--muted); }
+
+    /* ---------- Winkeliers-tabel ---------- */
+    .table-wrap { overflow-x: auto; border-radius: var(--radius); }
+    table.biz-table { width: 100%; border-collapse: collapse; min-width: 720px; }
+    .biz-table th {
+      text-align: left; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+      color: var(--muted); padding: 14px 16px; border-bottom: 1px solid var(--border); white-space: nowrap;
+    }
+    .biz-table td { padding: 16px; border-bottom: 1px solid var(--border); font-size: 14.5px; vertical-align: middle; }
+    .biz-table tr:last-child td { border-bottom: 0; }
+    .biz-table tbody tr { transition: background .2s var(--ease); }
+    .biz-table tbody tr:hover { background: rgba(255,255,255,.03); }
+    .biz-name-cell { display: flex; align-items: center; gap: 12px; }
+    .biz-avatar {
+      width: 38px; height: 38px; flex-shrink: 0; border-radius: 10px;
+      background: rgba(255,255,255,.08); border: 1px solid var(--border-strong);
+      display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: #fff;
+    }
+    .biz-name-cell .bn { font-weight: 700; color: #fff; }
+    .biz-name-cell .be { font-size: 12.5px; color: var(--muted); }
+    td.col-email { color: var(--pearl); word-break: break-word; }
+    td.col-num { font-weight: 700; }
+
+    .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; padding: 5px 11px; border-radius: 999px; white-space: nowrap; }
+    .pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .pill.active { color: #6ee7a0; background: rgba(74,222,128,.12); border: 1px solid rgba(74,222,128,.4); }
+    .pill.inactive { color: #ffb4b4; background: rgba(255,80,80,.1); border: 1px solid rgba(255,80,80,.35); }
+    .pill.paid { color: #e0c489; background: rgba(201,164,92,.14); border: 1px solid rgba(201,164,92,.45); }
+    .pill.trial { color: #a5c9ff; background: rgba(96,150,255,.12); border: 1px solid rgba(96,150,255,.4); }
+    .pill.none { color: var(--muted); background: rgba(255,255,255,.05); border: 1px solid var(--border-strong); }
+
+    /* ---------- Charts ---------- */
+    .chart { display: flex; align-items: flex-end; gap: 10px; height: 220px; padding-top: 10px; }
+    .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; height: 100%; justify-content: flex-end; min-width: 0; }
+    .bar {
+      width: 100%; max-width: 46px; border-radius: 8px 8px 4px 4px;
+      background: linear-gradient(180deg, #ffffff, #9a9a9a);
+      min-height: 4px; transition: height .5s var(--ease); position: relative;
+    }
+    .bar.alt { background: linear-gradient(180deg, #cdcdcd, #6a6a6a); }
+    .bar:hover::after {
+      content: attr(data-val); position: absolute; top: -26px; left: 50%; transform: translateX(-50%);
+      background: #fff; color: #0a0a0a; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 6px; white-space: nowrap;
+    }
+    .bar-label { font-size: 11.5px; color: #6a6a6a; text-align: center; white-space: nowrap; }
+
+    /* ---------- Top 5 ---------- */
+    .top-list { display: grid; gap: 12px; }
+    .top-row { display: flex; align-items: center; gap: 14px; }
+    .top-rank { width: 26px; height: 26px; flex-shrink: 0; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; color: #0a0a0a; background: #fff; }
+    .top-row:nth-child(n+4) .top-rank { color: #fff; background: rgba(255,255,255,.14); }
+    .top-main { flex: 1; min-width: 0; }
+    .top-name { font-size: 14.5px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .top-bar { height: 6px; border-radius: 999px; background: rgba(255,255,255,.1); overflow: hidden; margin-top: 6px; }
+    .top-bar > span { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #bdbdbd, #fff); }
+    .top-val { font-size: 14px; font-weight: 800; color: var(--pearl); white-space: nowrap; }
+
+    /* ---------- Form ---------- */
+    .form-grid { display: grid; gap: 18px; max-width: 460px; }
+    .field label { display: block; font-size: 13px; font-weight: 600; color: var(--pearl); margin-bottom: 8px; }
+    .field input {
+      width: 100%; font-family: inherit; font-size: 15px; color: #fff;
+      background: rgba(255,255,255,.04); border: 1px solid var(--border-strong);
+      border-radius: 12px; padding: 13px 15px; transition: border-color .25s var(--ease), background .25s var(--ease);
+    }
+    .field input:focus { outline: none; border-color: #fff; background: rgba(255,255,255,.07); }
+    .field input::placeholder { color: #6a6a6a; }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      font-family: inherit; font-size: 15px; font-weight: 600; line-height: 1;
+      padding: 14px 24px; border-radius: 12px; border: 1px solid transparent; cursor: pointer; white-space: nowrap;
+      transition: transform .25s var(--ease), background .25s var(--ease), box-shadow .3s var(--ease), border-color .25s var(--ease), opacity .2s var(--ease);
+    }
+    .btn-primary { background: #ffffff; color: #0a0a0a; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(255,255,255,.18); }
+    .btn-primary:disabled { opacity: .55; cursor: default; transform: none; box-shadow: none; }
+    .btn-ghost { background: transparent; color: var(--text); border-color: var(--border-strong); }
+    .btn-ghost:hover { transform: translateY(-2px); border-color: #fff; background: rgba(255,255,255,.06); }
+
+    .save-row { display: flex; align-items: center; gap: 14px; margin-top: 6px; }
+    .save-note { font-size: 13.5px; color: var(--muted); }
+    .save-note.ok { color: #b4ffcf; }
+    .save-note.error { color: #ffb4b4; }
+
+    /* ---------- Loading / empty ---------- */
+    .loader { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 14.5px; padding: 20px 4px; }
+    .spinner {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.2); border-top-color: #fff; animation: spin .7s linear infinite;
+    }
+    .btn.loading .btn-label { opacity: .6; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty-state { text-align: center; padding: 50px 24px; color: var(--muted); font-size: 15px; }
+
+    .sidebar-overlay { display: none; position: fixed; inset: 0; z-index: 45; background: rgba(0,0,0,.5); }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 760px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: none; }
+      .sidebar-overlay.show { display: block; }
+      .content { margin-left: 0; }
+      .menu-btn { display: flex; }
+      .page { padding: 22px 18px 50px; }
+      .topbar { padding: 14px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="shell">
+
+    <!-- ===== Sidebar ===== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-head">
+        <a href="index.html" class="brand"><img class="brand-logo" src="images/gold-logo.png" alt="OMRZ Digital logo" />OMRZ Digital</a>
+      </div>
+      <span class="admin-tag">Admin</span>
+
+      <nav class="side-nav">
+        <div class="side-link active" data-tab="overzicht">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+          Overzicht
+        </div>
+        <div class="side-link" data-tab="winkeliers">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9M3 9h18M9 20v-6h6v6"/></svg>
+          Winkeliers
+        </div>
+        <div class="side-link" data-tab="statistieken">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16M8 16v-4M12 16V8M16 16v-6M20 16v-2"/></svg>
+          Statistieken
+        </div>
+        <div class="side-link" data-tab="instellingen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-2.82 1.17V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 8 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15H4.5a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 6 9.4l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 11 5.6V5.5a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 2.4 1.51l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 13z"/></svg>
+          Instellingen
+        </div>
+      </nav>
+
+      <div class="side-foot">
+        <div class="side-user">
+          <div class="u-label">Ingelogd als</div>
+          <div class="u-email">Beheerder</div>
+        </div>
+        <div class="side-link logout-link" id="logoutBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+          Uitloggen
+        </div>
+      </div>
+    </aside>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- ===== Content ===== -->
+    <div class="content">
+      <div class="topbar">
+        <button class="menu-btn" id="menuBtn" aria-label="Menu"><span></span><span></span><span></span></button>
+        <h1 id="pageTitle">Overzicht</h1>
+        <div class="spacer"></div>
+        <span class="biz-chip"><span class="biz-dot"></span>OMRZ Digital</span>
+      </div>
+
+      <div class="page">
+
+        <!-- ===== Overzicht ===== -->
+        <section class="panel active" id="panel-overzicht">
+          <div class="panel-head">
+            <h2>Overzicht</h2>
+            <p>De gezondheid van OMRZ Digital in één oogopslag.</p>
+          </div>
+
+          <div class="stat-grid">
+            <div class="stat glass">
+              <div class="s-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9M3 9h18"/></svg>Totaal winkeliers</div>
+              <div class="s-val" id="statBusinesses">—</div>
+              <div class="s-sub">Betalende klanten</div>
+            </div>
+            <div class="stat glass">
+              <div class="s-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Totaal eindklanten</div>
+              <div class="s-val" id="statCustomers">—</div>
+              <div class="s-sub">Alle stempelkaart houders</div>
+            </div>
+            <div class="stat glass">
+              <div class="s-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9 12 2 2 4-4"/></svg>Stempels uitgedeeld</div>
+              <div class="s-val" id="statStamps">—</div>
+              <div class="s-sub">Over alle winkeliers</div>
+            </div>
+            <div class="stat glass">
+              <div class="s-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Maandelijkse omzet</div>
+              <div class="s-val" id="statRevenue">—</div>
+              <div class="s-sub" id="statRevenueSub">Winkeliers × €29</div>
+            </div>
+          </div>
+
+          <div class="block glass">
+            <h3>Nieuwste winkeliers</h3>
+            <p class="b-sub">De laatst aangemelde zaken.</p>
+            <div id="recentBusinesses"><div class="loader"><span class="spinner"></span> Laden…</div></div>
+          </div>
+        </section>
+
+        <!-- ===== Winkeliers ===== -->
+        <section class="panel" id="panel-winkeliers">
+          <div class="panel-head">
+            <h2>Winkeliers</h2>
+            <p>Alle zaken die zich hebben aangemeld op OMRZ Digital.</p>
+          </div>
+
+          <div class="biz-toolbar">
+            <div class="biz-search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" id="bizSearch" placeholder="Zoek op bedrijfsnaam of e-mail…" autocomplete="off" />
+            </div>
+            <button class="btn btn-ghost" id="refreshBtn">Vernieuwen</button>
+          </div>
+
+          <div class="block glass" style="padding:0; overflow:hidden;">
+            <div id="bizTableWrap">
+              <div class="loader" style="padding:28px;"><span class="spinner"></span> Winkeliers laden…</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ===== Statistieken ===== -->
+        <section class="panel" id="panel-statistieken">
+          <div class="panel-head">
+            <h2>Statistieken</h2>
+            <p>Groei van het platform over tijd.</p>
+          </div>
+
+          <div class="block glass">
+            <h3>Nieuwe winkeliers per maand</h3>
+            <p class="b-sub">Aanmeldingen op basis van registratiedatum.</p>
+            <div class="chart" id="chartBusinesses"><div class="loader">Laden…</div></div>
+          </div>
+
+          <div class="block glass">
+            <h3>Groei eindklanten</h3>
+            <p class="b-sub">Cumulatief aantal stempelkaart houders per maand.</p>
+            <div class="chart" id="chartCustomers"><div class="loader">Laden…</div></div>
+          </div>
+
+          <div class="block glass">
+            <h3>Top 5 winkeliers</h3>
+            <p class="b-sub">Zaken met de meeste eindklanten.</p>
+            <div class="top-list" id="topBusinesses"><div class="loader">Laden…</div></div>
+          </div>
+        </section>
+
+        <!-- ===== Instellingen ===== -->
+        <section class="panel" id="panel-instellingen">
+          <div class="panel-head">
+            <h2>Instellingen</h2>
+            <p>Beheer de toegang tot dit beheerdersportaal.</p>
+          </div>
+
+          <div class="block glass">
+            <h3>Admin wachtwoord wijzigen</h3>
+            <p class="b-sub">Kies een sterk, uniek wachtwoord.</p>
+            <form class="form-grid" id="passwordForm">
+              <div class="field">
+                <label for="pwCurrent">Huidig wachtwoord</label>
+                <input type="password" id="pwCurrent" placeholder="••••••••" autocomplete="current-password" />
+              </div>
+              <div class="field">
+                <label for="pwNew">Nieuw wachtwoord</label>
+                <input type="password" id="pwNew" placeholder="••••••••" autocomplete="new-password" />
+              </div>
+              <div class="field">
+                <label for="pwConfirm">Bevestig nieuw wachtwoord</label>
+                <input type="password" id="pwConfirm" placeholder="••••••••" autocomplete="new-password" />
+              </div>
+              <div class="save-row">
+                <button type="submit" class="btn btn-primary" id="pwBtn"><span class="btn-label">Wachtwoord wijzigen</span></button>
+                <span class="save-note" id="passwordNote"></span>
+              </div>
+            </form>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'https://ai-review-bot-production.up.railway.app';
+    const PRICE_PER_MONTH = 29;
+
+    // ---- Beveiliging: geen admin-token → terug naar de login ----
+    const adminToken = localStorage.getItem('admin_token');
+    if (!adminToken) {
+      window.location.replace('admin-login.html');
+    }
+
+    function adminHeaders() {
+      const h = { 'Content-Type': 'application/json' };
+      if (adminToken) h['Authorization'] = 'Bearer ' + adminToken;
+      return h;
+    }
+
+    // ---- Tabs ----
+    const links = document.querySelectorAll('.side-link[data-tab]');
+    const panels = document.querySelectorAll('.panel');
+    const pageTitle = document.getElementById('pageTitle');
+    function activateTab(tab) {
+      links.forEach(l => l.classList.toggle('active', l.dataset.tab === tab));
+      panels.forEach(p => p.classList.toggle('active', p.id === 'panel-' + tab));
+      const active = [...links].find(l => l.dataset.tab === tab);
+      if (active) pageTitle.textContent = active.textContent.trim();
+      closeSidebar();
+    }
+    links.forEach(l => l.addEventListener('click', () => activateTab(l.dataset.tab)));
+
+    // ---- Mobiele sidebar ----
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('show'); }
+    function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+    document.getElementById('menuBtn').addEventListener('click', openSidebar);
+    overlay.addEventListener('click', closeSidebar);
+
+    // ---- Uitloggen ----
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('admin_token');
+      window.location.href = 'admin-login.html';
+    });
+
+    // ---- Helpers ----
+    function escapeHtml(str) {
+      return String(str == null ? '' : str).replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
+    }
+    function initials(name) {
+      const parts = (name || '').trim().split(/\s+/).filter(Boolean);
+      if (!parts.length) return '?';
+      return (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
+    }
+    function euro(n) { return '€' + Math.round(n).toLocaleString('nl-NL'); }
+    function parseDate(v) { if (!v) return null; const d = new Date(v); return isNaN(d.getTime()) ? null : d; }
+    function formatDate(v) {
+      const d = parseDate(v);
+      return d ? d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+    }
+    const MONTHS = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+
+    // ---- Winkelier-record normaliseren ----
+    function normalizeBusiness(raw) {
+      const name = raw.business_name || raw.name || raw.company || 'Naamloze zaak';
+      const email = raw.email || raw.owner_email || raw.contact_email || '—';
+      const customers = Number(raw.customer_count ?? raw.customers ?? raw.total_customers ?? raw.holders ?? 0) || 0;
+      const stamps = Number(raw.total_stamps ?? raw.stamps ?? raw.stamps_given ?? 0) || 0;
+      const createdRaw = raw.created_at || raw.registered_at || raw.signup_date || raw.created || raw.date_joined || null;
+
+      // Status actief/inactief
+      let active;
+      if (typeof raw.active === 'boolean') active = raw.active;
+      else if (typeof raw.is_active === 'boolean') active = raw.is_active;
+      else if (raw.status) active = String(raw.status).toLowerCase() === 'active' || String(raw.status).toLowerCase() === 'actief';
+      else active = true;
+
+      // Abonnementstatus
+      const subRaw = (raw.subscription_status || raw.subscription || raw.plan || raw.sub_status || '').toString().toLowerCase();
+      let sub = { cls: 'none', label: 'Geen' };
+      if (['active','paid','betaald','betalend','pro','premium'].includes(subRaw)) sub = { cls: 'paid', label: 'Betalend' };
+      else if (['trial','trialing','proef','trialend'].includes(subRaw)) sub = { cls: 'trial', label: 'Proef' };
+      else if (['canceled','cancelled','geannuleerd','inactive','none','expired'].includes(subRaw)) sub = { cls: 'none', label: subRaw ? 'Geen' : 'Geen' };
+      else if (subRaw) sub = { cls: 'paid', label: subRaw.charAt(0).toUpperCase() + subRaw.slice(1) };
+      else if (active) sub = { cls: 'paid', label: 'Betalend' };
+
+      return {
+        name, email, customers, stamps,
+        createdRaw,
+        created: parseDate(createdRaw),
+        active,
+        sub,
+      };
+    }
+
+    // ---- State ----
+    let businesses = [];
+    let loaded = false;
+
+    // ---- Data laden ----
+    async function loadBusinesses() {
+      try {
+        const res = await fetch(API_BASE + '/api/admin/businesses', { headers: adminHeaders() });
+        if (res.status === 401 || res.status === 403) {
+          localStorage.removeItem('admin_token');
+          window.location.replace('admin-login.html');
+          return;
+        }
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Laden mislukt');
+        const list = Array.isArray(data) ? data : (data.businesses || data.merchants || data.winkeliers || []);
+        businesses = list.map(normalizeBusiness);
+        loaded = true;
+        renderAll();
+      } catch (err) {
+        loaded = true;
+        renderError();
+      }
+    }
+
+    function renderAll() {
+      renderOverview();
+      renderBusinessTable();
+      renderCharts();
+      renderTop();
+    }
+
+    function renderError() {
+      document.getElementById('statBusinesses').textContent = '—';
+      document.getElementById('statCustomers').textContent = '—';
+      document.getElementById('statStamps').textContent = '—';
+      document.getElementById('statRevenue').textContent = '—';
+      const errHTML = '<div class="empty-state">Kon de gegevens niet laden. Controleer je verbinding en probeer opnieuw.</div>';
+      document.getElementById('recentBusinesses').innerHTML = errHTML;
+      document.getElementById('bizTableWrap').innerHTML = errHTML;
+    }
+
+    // ---- Overzicht ----
+    function renderOverview() {
+      const totalBiz = businesses.length;
+      const totalCust = businesses.reduce((s, b) => s + b.customers, 0);
+      const totalStamps = businesses.reduce((s, b) => s + b.stamps, 0);
+      const payingBiz = businesses.filter(b => b.active).length;
+      const revenue = payingBiz * PRICE_PER_MONTH;
+
+      document.getElementById('statBusinesses').textContent = totalBiz.toLocaleString('nl-NL');
+      document.getElementById('statCustomers').textContent = totalCust.toLocaleString('nl-NL');
+      document.getElementById('statStamps').textContent = totalStamps.toLocaleString('nl-NL');
+      document.getElementById('statRevenue').textContent = euro(revenue);
+      document.getElementById('statRevenueSub').textContent = `${payingBiz} actieve winkeliers × €${PRICE_PER_MONTH}`;
+
+      // Nieuwste 5 winkeliers
+      const recent = [...businesses]
+        .sort((a, b) => (b.created ? b.created.getTime() : 0) - (a.created ? a.created.getTime() : 0))
+        .slice(0, 5);
+      const wrap = document.getElementById('recentBusinesses');
+      if (!recent.length) { wrap.innerHTML = '<div class="empty-state">Nog geen winkeliers aangemeld.</div>'; return; }
+      wrap.innerHTML = `<div class="top-list">${recent.map(b => `
+        <div class="top-row">
+          <div class="biz-avatar">${escapeHtml(initials(b.name))}</div>
+          <div class="top-main">
+            <div class="top-name">${escapeHtml(b.name)}</div>
+            <div class="bar-label" style="text-align:left;margin-top:2px;color:var(--muted);">${escapeHtml(b.email)}</div>
+          </div>
+          <span class="top-val">${formatDate(b.createdRaw)}</span>
+        </div>`).join('')}</div>`;
+    }
+
+    // ---- Winkeliers-tabel ----
+    const bizSearch = document.getElementById('bizSearch');
+    function renderBusinessTable() {
+      const q = (bizSearch.value || '').trim().toLowerCase();
+      const rows = q
+        ? businesses.filter(b => b.name.toLowerCase().includes(q) || b.email.toLowerCase().includes(q))
+        : businesses;
+      const wrap = document.getElementById('bizTableWrap');
+
+      if (!businesses.length) { wrap.innerHTML = '<div class="empty-state">Nog geen winkeliers aangemeld.</div>'; return; }
+      if (!rows.length) { wrap.innerHTML = `<div class="empty-state">Geen winkeliers gevonden voor "${escapeHtml(bizSearch.value.trim())}".</div>`; return; }
+
+      const body = rows.map(b => `
+        <tr>
+          <td>
+            <div class="biz-name-cell">
+              <div class="biz-avatar">${escapeHtml(initials(b.name))}</div>
+              <div><div class="bn">${escapeHtml(b.name)}</div></div>
+            </div>
+          </td>
+          <td class="col-email">${escapeHtml(b.email)}</td>
+          <td class="col-num">${b.customers.toLocaleString('nl-NL')}</td>
+          <td>${formatDate(b.createdRaw)}</td>
+          <td><span class="pill ${b.active ? 'active' : 'inactive'}">${b.active ? 'Actief' : 'Inactief'}</span></td>
+          <td><span class="pill ${b.sub.cls}">${escapeHtml(b.sub.label)}</span></td>
+        </tr>`).join('');
+
+      wrap.innerHTML = `
+        <div class="table-wrap">
+          <table class="biz-table">
+            <thead>
+              <tr>
+                <th>Bedrijfsnaam</th>
+                <th>E-mail</th>
+                <th>Klanten</th>
+                <th>Registratie</th>
+                <th>Status</th>
+                <th>Abonnement</th>
+              </tr>
+            </thead>
+            <tbody>${body}</tbody>
+          </table>
+        </div>`;
+    }
+    bizSearch.addEventListener('input', renderBusinessTable);
+    document.getElementById('refreshBtn').addEventListener('click', () => {
+      document.getElementById('bizTableWrap').innerHTML = '<div class="loader" style="padding:28px;"><span class="spinner"></span> Vernieuwen…</div>';
+      loadBusinesses();
+    });
+
+    // ---- Charts ----
+    function monthKey(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); }
+    function monthLabel(key) { const [y, m] = key.split('-'); return MONTHS[Number(m) - 1] + " '" + y.slice(2); }
+
+    // Bouw een oplopende reeks van de laatste N maanden (tot en met de nieuwste registratie).
+    function lastMonths(n) {
+      const dated = businesses.map(b => b.created).filter(Boolean);
+      const end = dated.length ? new Date(Math.max(...dated.map(d => d.getTime()))) : new Date(2000, 0, 1);
+      const keys = [];
+      const cur = new Date(end.getFullYear(), end.getMonth(), 1);
+      for (let i = n - 1; i >= 0; i--) {
+        const d = new Date(cur.getFullYear(), cur.getMonth() - i, 1);
+        keys.push(monthKey(d));
+      }
+      return keys;
+    }
+
+    function renderBars(el, series, altClass) {
+      if (!series.length || series.every(s => s.value === 0)) {
+        el.innerHTML = '<div class="loader" style="margin:auto;">Nog geen data om te tonen.</div>';
+        return;
+      }
+      const max = Math.max(...series.map(s => s.value), 1);
+      el.innerHTML = series.map(s => {
+        const h = Math.max(4, Math.round((s.value / max) * 190));
+        return `<div class="bar-col"><div class="bar ${altClass || ''}" style="height:${h}px" data-val="${s.value}"></div><div class="bar-label">${s.label}</div></div>`;
+      }).join('');
+    }
+
+    function renderCharts() {
+      const keys = lastMonths(6);
+
+      // Nieuwe winkeliers per maand
+      const perMonth = {};
+      keys.forEach(k => perMonth[k] = 0);
+      businesses.forEach(b => { if (b.created) { const k = monthKey(b.created); if (k in perMonth) perMonth[k]++; } });
+      renderBars(document.getElementById('chartBusinesses'),
+        keys.map(k => ({ label: monthLabel(k), value: perMonth[k] })));
+
+      // Groei eindklanten — cumulatief aantal klanten van winkeliers die t/m die maand zijn aangesloten
+      const custPerMonth = {};
+      keys.forEach(k => custPerMonth[k] = 0);
+      businesses.forEach(b => { if (b.created) { const k = monthKey(b.created); if (k in custPerMonth) custPerMonth[k] += b.customers; } });
+      let running = 0;
+      // startwaarde: klanten van winkeliers die vóór het venster aansloten
+      const firstKey = keys[0];
+      businesses.forEach(b => { if (b.created && monthKey(b.created) < firstKey) running += b.customers; });
+      const cumulative = keys.map(k => { running += custPerMonth[k]; return { label: monthLabel(k), value: running }; });
+      renderBars(document.getElementById('chartCustomers'), cumulative, 'alt');
+    }
+
+    // ---- Top 5 ----
+    function renderTop() {
+      const top = [...businesses].sort((a, b) => b.customers - a.customers).slice(0, 5);
+      const el = document.getElementById('topBusinesses');
+      if (!top.length || top.every(t => t.customers === 0)) {
+        el.innerHTML = '<div class="empty-state">Nog geen klantdata beschikbaar.</div>';
+        return;
+      }
+      const max = Math.max(...top.map(t => t.customers), 1);
+      el.innerHTML = top.map((b, i) => `
+        <div class="top-row">
+          <span class="top-rank">${i + 1}</span>
+          <div class="top-main">
+            <div class="top-name">${escapeHtml(b.name)}</div>
+            <div class="top-bar"><span style="width:${Math.round((b.customers / max) * 100)}%"></span></div>
+          </div>
+          <span class="top-val">${b.customers.toLocaleString('nl-NL')}</span>
+        </div>`).join('');
+    }
+
+    // ---- Wachtwoord wijzigen ----
+    document.getElementById('passwordForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const note = document.getElementById('passwordNote');
+      const btn = document.getElementById('pwBtn');
+      const current = document.getElementById('pwCurrent').value;
+      const nw = document.getElementById('pwNew').value;
+      const cf = document.getElementById('pwConfirm').value;
+
+      note.className = 'save-note';
+      if (nw.length < 8) { note.textContent = 'Minimaal 8 tekens.'; note.className = 'save-note error'; return; }
+      if (nw !== cf) { note.textContent = 'Wachtwoorden komen niet overeen.'; note.className = 'save-note error'; return; }
+
+      btn.classList.add('loading'); btn.disabled = true;
+      try {
+        const res = await fetch(API_BASE + '/api/admin/password', {
+          method: 'POST',
+          headers: adminHeaders(),
+          body: JSON.stringify({ current_password: current, new_password: nw }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || data.message || 'Wijzigen mislukt');
+        note.textContent = 'Wachtwoord gewijzigd ✓'; note.className = 'save-note ok';
+        e.target.reset();
+      } catch (err) {
+        note.textContent = err.message || 'Kon het wachtwoord niet wijzigen.'; note.className = 'save-note error';
+      } finally {
+        btn.classList.remove('loading'); btn.disabled = false;
+        setTimeout(() => { note.className = 'save-note'; note.textContent = ''; }, 5000);
+      }
+    });
+
+    // ---- Init ----
+    if (adminToken) loadBusinesses();
+  </script>
+</body>
+</html>
