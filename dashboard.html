@@ -398,8 +398,8 @@
     .stampcard .sc-inner { position: relative; z-index: 2; }
     .sc-brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
     .sc-logo { width: 34px; height: 34px; border-radius: 8px; object-fit: cover; background: rgba(255,255,255,.2); flex-shrink: 0; }
-    .sc-stamps .st { width: 100%; aspect-ratio: 1; display: block; }
-    .sc-stamps .st svg { width: 100%; height: 100%; display: block; }
+    .sc-stamps .st { width: 100%; aspect-ratio: 1; display: block; position: relative; }
+    .sc-stamps .st > svg { width: 100%; height: 100%; display: block; }
 
     /* Color pickers */
     .cp-main { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
@@ -426,7 +426,8 @@
     .font-btn.active { border-color: #fff; background: rgba(255,255,255,.1); }
 
     /* Logo-stempel (afbeelding in vorm-masker) */
-    .sc-stamps .st-img { width: 100%; height: 100%; display: block; background-size: cover; background-position: center; }
+    .sc-stamps .st-img { position: absolute; inset: 0; background-size: cover; background-position: center; }
+    .sc-stamps .st-outline { position: absolute; inset: 0; width: 100%; height: 100%; }
 
     /* Segmented tabs */
     .ed-tabs, .toggle-row { display: inline-flex; padding: 4px; border-radius: 12px; border: 1px solid var(--border); background: rgba(255,255,255,.03); margin-bottom: 18px; }
@@ -750,32 +751,38 @@
                   <button type="button" data-fill="outline">Outline</button>
                 </div>
 
-                <span class="field-label-inline">Vulling</span>
-                <div class="toggle-row" id="stampTypeToggle" style="margin-bottom:14px;">
-                  <button type="button" data-stamptype="shape" class="active">Kleur</button>
-                  <button type="button" data-stamptype="logo" id="stampTypeLogoBtn" hidden>Mijn logo</button>
-                </div>
-                <div class="uploader" style="margin-bottom:18px;">
-                  <div class="upload-prev" id="stampLogoPrev">🖼️</div>
-                  <div class="upload-main">
-                    <label class="btn btn-ghost btn-upload">
-                      <span class="btn-label">Stempel-afbeelding uploaden</span>
-                      <input type="file" id="stampLogoFile" accept="image/png,image/jpeg" />
-                    </label>
-                    <div class="upload-hint">Los van je logo — de vorm werkt als masker en de afbeelding vult elke verdiende stempel.</div>
-                    <div class="upload-status" id="stampLogoStatus"></div>
+                <!-- Vulling: alleen bij Outline (bij Gevuld is de vorm massief gekleurd) -->
+                <div id="fillingGroup" hidden>
+                  <span class="field-label-inline">Vulling</span>
+                  <div class="toggle-row" id="stampTypeToggle" style="margin-bottom:14px;">
+                    <button type="button" data-stamptype="shape" class="active">Kleur</button>
+                    <button type="button" data-stamptype="logo" id="stampTypeLogoBtn" hidden>Mijn logo</button>
+                  </div>
+                  <div class="uploader" style="margin-bottom:18px;">
+                    <div class="upload-prev" id="stampLogoPrev">🖼️</div>
+                    <div class="upload-main">
+                      <label class="btn btn-ghost btn-upload">
+                        <span class="btn-label">Andere afbeelding uploaden</span>
+                        <input type="file" id="stampLogoFile" accept="image/png,image/jpeg" />
+                      </label>
+                      <div class="upload-hint">Een andere afbeelding dan je logo. De vorm werkt als masker en de afbeelding vult elke verdiende stempel.</div>
+                      <div class="upload-status" id="stampLogoStatus"></div>
+                    </div>
                   </div>
                 </div>
 
-                <span class="field-label-inline">Stempel kleur</span>
-                <div class="cp-main">
-                  <input type="color" id="stampColor" value="#c9a45c" aria-label="Stempelkleur" />
-                  <div class="cp-hexwrap">
-                    <span class="cp-hex-label">Hex-code</span>
-                    <input type="text" class="hex-input" id="stampHex" value="#C9A45C" maxlength="7" spellcheck="false" aria-label="Stempel hex-code" />
+                <!-- Stempel kleur: alleen in kleur-modus (niet bij logo-vulling) -->
+                <div id="stampColorField">
+                  <span class="field-label-inline">Stempel kleur</span>
+                  <div class="cp-main">
+                    <input type="color" id="stampColor" value="#c9a45c" aria-label="Stempelkleur" />
+                    <div class="cp-hexwrap">
+                      <span class="cp-hex-label">Hex-code</span>
+                      <input type="text" class="hex-input" id="stampHex" value="#C9A45C" maxlength="7" spellcheck="false" aria-label="Stempel hex-code" />
+                    </div>
                   </div>
+                  <div class="preset-grid" id="stampPresets"></div>
                 </div>
-                <div class="preset-grid" id="stampPresets"></div>
               </section>
 
               <!-- 6 · Lettertype, tekst & kleuren -->
@@ -1235,6 +1242,8 @@
     const stampPresets = document.getElementById('stampPresets');
     const shapeGrid = document.getElementById('shapeGrid');
     const fillToggle = document.getElementById('fillToggle');
+    const fillingGroup = document.getElementById('fillingGroup');
+    const stampColorField = document.getElementById('stampColorField');
     const stampTypeToggle = document.getElementById('stampTypeToggle');
     const stampTypeLogoBtn = document.getElementById('stampTypeLogoBtn');
     const stampLogoPrev = document.getElementById('stampLogoPrev');
@@ -1267,11 +1276,17 @@
       const path = SHAPE_PATH[shape] || SHAPE_PATH.circle;
       const img = stampImageSrc();
 
-      // Logo-als-stempel: verdiende stempel = logo gemaskerd in de vorm; leeg = vage vorm-omtrek.
+      // Logo-als-stempel: de vorm is de outline, het logo vult de binnenkant.
+      //  • verdiend  = vorm-omtrek + logo gemaskerd in die vorm
+      //  • leeg      = alleen de vage vorm-omtrek
       if (card.stamp_type === 'logo' && img) {
         if (active) {
           const mask = shapeMaskUrl(shape);
-          return `<span class="st"><span class="st-img" style="background-image:url('${img}');-webkit-mask:${mask} center/contain no-repeat;mask:${mask} center/contain no-repeat;"></span></span>`;
+          const stroke = card.stamp_color || card.text_color || '#ffffff';
+          return `<span class="st">`
+            + `<span class="st-img" style="background-image:url('${img}');-webkit-mask:${mask} center/contain no-repeat;mask:${mask} center/contain no-repeat;"></span>`
+            + `<svg class="st-outline" viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="1.6" stroke-linejoin="round">${path}</svg>`
+            + `</span>`;
         }
         return `<span class="st"><svg viewBox="0 0 24 24" fill="none" stroke="${card.text_color || '#ffffff'}" stroke-width="1.8" stroke-linejoin="round" opacity="0.3">${path}</svg></span>`;
       }
@@ -1392,6 +1407,7 @@
     function setFill(fill) {
       card.stamp_fill = fill;
       [...fillToggle.children].forEach(ch => ch.classList.toggle('active', ch.dataset.fill === fill));
+      updateStampControls();
       paintEditor();
     }
     function setFont(name) {
@@ -1401,15 +1417,29 @@
     }
     function setStampType(type) {
       card.stamp_type = (type === 'logo') ? 'logo' : 'shape';
-      [...stampTypeToggle.children].forEach(ch => ch.classList.toggle('active', ch.dataset.stamptype === card.stamp_type));
+      updateStampControls();
       paintEditor();
     }
-    // "Mijn logo" alleen tonen wanneer er een logo of stempel-afbeelding beschikbaar is.
-    function updateLogoStampAvailability() {
-      const has = !!(card.logo_url || card.stamp_logo_url);
-      stampTypeLogoBtn.hidden = !has;
-      if (!has && card.stamp_type === 'logo') setStampType('shape');
+    // Centrale zichtbaarheids-logica van sectie 5.
+    //  • Vulling-keuze (Kleur/Mijn logo/afbeelding) bestaat ALLEEN bij Outline.
+    //  • "Mijn logo" verschijnt automatisch zodra er een logo (of stempel-afbeelding) is.
+    //  • Stempel-kleur verbergt zich in logo-modus.
+    function updateStampControls() {
+      const outline = card.stamp_fill === 'outline';
+      const hasLogo = !!(card.logo_url || card.stamp_logo_url);
+
+      // Gevuld = massieve kleurvorm → forceer kleur-modus.
+      if (!outline && card.stamp_type === 'logo') card.stamp_type = 'shape';
+      // Geen logo beschikbaar → val terug op kleur.
+      if (!hasLogo && card.stamp_type === 'logo') card.stamp_type = 'shape';
+
+      fillingGroup.hidden = !outline;                 // vulling-groep alleen bij Outline
+      stampTypeLogoBtn.hidden = !hasLogo;             // "Mijn logo" automatisch beschikbaar
+      [...stampTypeToggle.children].forEach(ch => ch.classList.toggle('active', ch.dataset.stamptype === card.stamp_type));
+      stampColorField.style.display = (card.stamp_type === 'logo') ? 'none' : '';   // kleur verbergen bij logo
     }
+    // Alias voor bestaande aanroepen na een logo-upload.
+    const updateLogoStampAvailability = updateStampControls;
 
     // ---- UI opbouwen ----
     buildPresets(primaryPresets, BG_PRESETS, setPrimary);
