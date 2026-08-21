@@ -110,6 +110,32 @@
     .stat .s-val { font-size: 34px; font-weight: 800; letter-spacing: -.03em; line-height: 1; }
     .stat .s-sub { font-size: 13px; color: #6a6a6a; margin-top: 8px; }
 
+    /* ---------- Snelkoppelingen (Overzicht) ---------- */
+    .quick-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 26px; }
+    .quick-btn {
+      display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-radius: var(--radius);
+      cursor: pointer; text-align: left; font-family: inherit; color: #fff;
+      background: var(--card); border: 1px solid var(--border);
+      transition: transform .2s var(--ease), border-color .2s var(--ease), background .2s var(--ease);
+    }
+    .quick-btn:hover { transform: translateY(-3px); border-color: var(--border-strong); background: rgba(255,255,255,.07); }
+    .quick-btn .qa-ic { width: 44px; height: 44px; flex-shrink: 0; border-radius: 12px; display: grid; place-items: center; background: rgba(255,255,255,.08); border: 1px solid var(--border-strong); }
+    .quick-btn .qa-ic svg { width: 20px; height: 20px; }
+    .quick-btn .qa-tx { display: flex; flex-direction: column; min-width: 0; }
+    .quick-btn .qa-tx strong { font-size: 15px; font-weight: 700; }
+    .quick-btn .qa-tx small { font-size: 12.5px; color: var(--muted); }
+
+    /* ---------- Recente activiteit ---------- */
+    .activity-list { display: grid; gap: 4px; }
+    .activity-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+    .activity-row:last-child { border-bottom: 0; }
+    .activity-av { width: 38px; height: 38px; flex-shrink: 0; border-radius: 50%; background: rgba(255,255,255,.08); border: 1px solid var(--border-strong); display: grid; place-items: center; font-size: 14px; font-weight: 800; color: #fff; }
+    .activity-main { flex: 1; min-width: 0; }
+    .activity-name { font-size: 14.5px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .activity-sub { font-size: 12.5px; color: var(--muted); }
+    .activity-badge { font-size: 12.5px; font-weight: 700; color: var(--pearl); white-space: nowrap; padding: 5px 11px; border-radius: 999px; background: rgba(255,255,255,.06); border: 1px solid var(--border); }
+    .activity-empty { text-align: center; padding: 34px 12px; color: var(--muted); font-size: 14px; }
+
     /* ---------- Layout helpers ---------- */
     .two-col { display: grid; grid-template-columns: 1.15fr 1fr; gap: 22px; align-items: start; }
     .block { padding: 26px; }
@@ -483,6 +509,7 @@
       .editor { grid-template-columns: 1fr; }
       .editor-preview { position: static; max-width: 360px; margin: 0 auto; }
       .theme-grid { grid-template-columns: repeat(2, 1fr); }
+      .quick-actions { grid-template-columns: 1fr; }
     }
     @media (max-width: 760px) {
       .sidebar { transform: translateX(-100%); }
@@ -566,10 +593,27 @@
         <!-- ===== Overzicht ===== -->
         <section class="panel active" id="panel-overzicht">
           <div class="panel-head">
-            <h2>Overzicht</h2>
-            <p>Een blik op je stempelkaart en klantloyaliteit.</p>
+            <h2>Welkom terug, <span id="ovWelcomeName">Mijn zaak</span></h2>
+            <p id="ovToday">—</p>
           </div>
 
+          <!-- Snelkoppelingen -->
+          <div class="quick-actions">
+            <button type="button" class="quick-btn" data-goto="stempel">
+              <span class="qa-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>
+              <span class="qa-tx"><strong>Geef stempel</strong><small>Scan een klant-QR</small></span>
+            </button>
+            <button type="button" class="quick-btn" data-goto="kaart">
+              <span class="qa-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span>
+              <span class="qa-tx"><strong>Bewerk kaart</strong><small>Pas je ontwerp aan</small></span>
+            </button>
+            <button type="button" class="quick-btn" data-goto="qr">
+              <span class="qa-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M20 20v.01M17 20v.01M20 14v3"/></svg></span>
+              <span class="qa-tx"><strong>Bekijk QR</strong><small>Print of deel je code</small></span>
+            </button>
+          </div>
+
+          <!-- Statistieken -->
           <div class="stat-grid">
             <div class="stat glass">
               <div class="s-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Totaal klanten</div>
@@ -577,9 +621,14 @@
               <div class="s-sub">Actieve spaarders</div>
             </div>
             <div class="stat glass">
-              <div class="s-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9 12 2 2 4-4"/></svg>Stempels gegeven</div>
-              <div class="s-val" id="statStamps">—</div>
-              <div class="s-sub">Sinds de start</div>
+              <div class="s-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/></svg>Stempels vandaag</div>
+              <div class="s-val" id="statToday">—</div>
+              <div class="s-sub">Sinds middernacht</div>
+            </div>
+            <div class="stat glass">
+              <div class="s-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 15h2M14 15h2M8 18h8"/></svg>Stempels deze week</div>
+              <div class="s-val" id="statWeek">—</div>
+              <div class="s-sub">Laatste 7 dagen</div>
             </div>
             <div class="stat glass">
               <div class="s-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a4 4 0 0 0 4-4V4H8v7a4 4 0 0 0 4 4ZM12 15v4M8 21h8M5 4H3v2a3 3 0 0 0 3 3M19 4h2v2a3 3 0 0 1-3 3"/></svg>Beloningen uitgedeeld</div>
@@ -614,13 +663,9 @@
             </div>
 
             <div class="block glass">
-              <h3>Snel starten</h3>
-              <p class="b-sub">Drie stappen naar terugkerende klanten.</p>
-              <ul style="list-style:none; display:grid; gap:16px; margin-top:4px;">
-                <li style="display:flex; gap:12px; align-items:flex-start;"><span style="flex-shrink:0; width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,.1); border:1px solid var(--border-strong); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">1</span><span style="font-size:14.5px; color:var(--pearl);">Ontwerp je kaart onder <strong>Mijn Kaart</strong>.</span></li>
-                <li style="display:flex; gap:12px; align-items:flex-start;"><span style="flex-shrink:0; width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,.1); border:1px solid var(--border-strong); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">2</span><span style="font-size:14.5px; color:var(--pearl);">Print je <strong>QR-code</strong> en leg 'm op de toonbank.</span></li>
-                <li style="display:flex; gap:12px; align-items:flex-start;"><span style="flex-shrink:0; width:26px; height:26px; border-radius:50%; background:rgba(255,255,255,.1); border:1px solid var(--border-strong); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">3</span><span style="font-size:14.5px; color:var(--pearl);">Klanten scannen en sparen — jij ziet alles hier terug.</span></li>
-              </ul>
+              <h3>Recente activiteit</h3>
+              <p class="b-sub">De laatste klanten die stempels kregen.</p>
+              <div id="ovActivity"><div class="loader"><span class="spinner"></span> Laden…</div></div>
             </div>
           </div>
         </section>
@@ -1097,11 +1142,82 @@
       closeSidebar();
       if (tab === 'qr') renderQR();
       if (tab === 'klanten') loadCustomers();
-      if (tab === 'overzicht') paintOverview();   // altijd de actuele kaart tonen
+      if (tab === 'overzicht') refreshOverview();   // header, stats, kaart-preview en recente activiteit verversen
       if (tab === 'statistieken') renderChart(currentRange);
       if (tab !== 'stempel') { stopScanner(); resetScanFlow(); } // camera vrijgeven + flow resetten bij verlaten van de scan-tab
     }
     links.forEach(l => l.addEventListener('click', () => activateTab(l.dataset.tab)));
+
+    // ---- Overzicht: snelkoppelingen ----
+    document.querySelectorAll('.quick-btn[data-goto]').forEach(b =>
+      b.addEventListener('click', () => activateTab(b.dataset.goto)));
+
+    // ---- Overzicht: header, statistieken & recente activiteit ----
+    function refreshOverview() {
+      renderOverviewHeader();
+      paintOverview();
+      loadTodayStats();
+      loadRecentActivity();
+    }
+    function renderOverviewHeader() {
+      const nm = document.getElementById('ovWelcomeName');
+      if (nm) nm.textContent = card.business_name || 'Mijn zaak';
+      const td = document.getElementById('ovToday');
+      if (td) {
+        try {
+          const d = new Date().toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+          td.textContent = d.charAt(0).toUpperCase() + d.slice(1);
+        } catch (e) { td.textContent = ''; }
+      }
+    }
+    // Stempels vandaag + deze week (echte data van de backend).
+    async function loadTodayStats() {
+      const todayEl = document.getElementById('statToday');
+      const weekEl = document.getElementById('statWeek');
+      if (!cardId) { if (todayEl) todayEl.textContent = '0'; if (weekEl) weekEl.textContent = '0'; return; }
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/today-stats?card_id=' + encodeURIComponent(cardId), { headers: authHeaders() });
+        const data = await res.json().catch(() => ({}));
+        console.log('[today-stats] →', data);
+        const today = Number(data.today ?? data.stamps_today ?? data.today_stamps ?? data.count ?? data.total ?? 0) || 0;
+        let week = Number(data.week ?? data.this_week ?? data.stamps_week ?? data.week_stamps);
+        if (!Number.isFinite(week)) {
+          // Fallback: som van de week-grafiek als de backend geen week-veld levert.
+          week = (chartData.week || []).reduce((sum, d) => sum + (Number(d.value) || 0), 0) || today;
+        }
+        if (todayEl) todayEl.textContent = today.toLocaleString('nl-NL');
+        if (weekEl) weekEl.textContent = week.toLocaleString('nl-NL');
+      } catch (e) {
+        if (todayEl) todayEl.textContent = '—';
+        if (weekEl) weekEl.textContent = '—';
+      }
+    }
+    // Laatste 5 klanten die stempels kregen (nieuwste eerst).
+    async function loadRecentActivity() {
+      const wrap = document.getElementById('ovActivity');
+      if (!wrap) return;
+      if (!cardId) { wrap.innerHTML = '<div class="activity-empty">Nog geen activiteit.</div>'; return; }
+      wrap.innerHTML = '<div class="loader"><span class="spinner"></span> Laden…</div>';
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/customers/' + encodeURIComponent(cardId), { headers: authHeaders() });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error('Laden mislukt');
+        const list = Array.isArray(data) ? data : (data.customers || data.holders || []);
+        const rows = list.map(normalizeCustomer).sort((a, b) => b.sortKey - a.sortKey).slice(0, 5);
+        if (!rows.length) { wrap.innerHTML = '<div class="activity-empty">Nog geen klanten. Deel je QR-code om te beginnen!</div>'; return; }
+        wrap.innerHTML = '<div class="activity-list">' + rows.map(c => `
+          <div class="activity-row">
+            <div class="activity-av">${escapeHtml(customerInitials(c.name))}</div>
+            <div class="activity-main">
+              <div class="activity-name">${escapeHtml(c.name)}</div>
+              <div class="activity-sub">${c.lastVisit ? 'Laatste bezoek: ' + escapeHtml(c.lastVisit) : 'Nog geen bezoek geregistreerd'}</div>
+            </div>
+            <span class="activity-badge">${c.stamps}/${c.required} stempels</span>
+          </div>`).join('') + '</div>';
+      } catch (e) {
+        wrap.innerHTML = '<div class="activity-empty">Kon de activiteit niet laden.</div>';
+      }
+    }
 
     // ---- Mobiele sidebar ----
     const sidebar = document.getElementById('sidebar');
@@ -2250,7 +2366,7 @@
 
     // ---- Data ophalen van de API ----
     async function loadDashboard() {
-      if (!cardId) { refreshPreviews(); fillForm(); return; }
+      if (!cardId) { fillForm(); refreshPreviews(); refreshOverview(); return; }
       try {
         const res = await fetch(API_BASE + '/api/stamp/cards/' + cardId);
         if (res.ok) {
@@ -2285,7 +2401,6 @@
 
           const s = data.stats || {};
           document.getElementById('statCustomers').textContent = s.total_customers ?? s.customers ?? 0;
-          document.getElementById('statStamps').textContent = s.total_stamps ?? s.stamps ?? 0;
           document.getElementById('statRewards').textContent = s.total_rewards ?? s.rewards ?? 0;
 
           if (Array.isArray(data.chart_day)) chartData.day = data.chart_day;
@@ -2297,6 +2412,7 @@
       } finally {
         fillForm();
         refreshPreviews();
+        refreshOverview();
         renderChart(currentRange);
       }
     }
