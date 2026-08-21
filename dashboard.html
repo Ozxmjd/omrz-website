@@ -639,7 +639,6 @@
                       <img class="sc-logo" id="pvLogo" alt="Logo" hidden />
                       <span class="sc-biz" id="pvBiz">Café OMRZ</span>
                     </div>
-                    <span class="sc-chip" id="pvChip"></span>
                   </div>
                   <div class="sc-hi" id="pvHi">Hi Sara! 👋</div>
                   <div class="sc-title" id="pvTitle">Koffie Spaarkaart</div>
@@ -1260,7 +1259,6 @@
     const pvBg = document.getElementById('pvBg');
     const pvLogo = document.getElementById('pvLogo');
     const pvBiz = document.getElementById('pvBiz');
-    const pvChip = document.getElementById('pvChip');
     const pvHi = document.getElementById('pvHi');
     const pvTitle = document.getElementById('pvTitle');
     const pvReward = document.getElementById('pvReward');
@@ -1340,7 +1338,6 @@
       if (c.logo_url) { pvLogo.src = absoluteUrl(c.logo_url); pvLogo.hidden = false; } else { pvLogo.hidden = true; }
       // Teksten worden EXACT getoond zoals getypt (geen hoofdletter-/kleineletter-conversie).
       pvBiz.textContent = c.business_name || 'Mijn zaak'; pvBiz.style.color = txt;
-      pvChip.style.background = c.accent_color || 'rgba(255,255,255,.6)';
       pvHi.textContent = 'Hi Sara! 👋'; pvHi.style.color = txt;
       pvTitle.textContent = c.card_title || 'Stempelkaart'; pvTitle.style.color = txt;
 
