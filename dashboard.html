@@ -1268,6 +1268,11 @@
       if (sEmail) sEmail.value = userEmail;
     }
 
+    // DEBUG: token-status van deze sessie. Als dit 'false' is, is de 401 verklaard:
+    // login.html heeft geen token onder 'omrz_token' opgeslagen → log opnieuw in.
+    console.log('[auth] omrz_token aanwezig?', !!localStorage.getItem('omrz_token'),
+      '· lengte:', (localStorage.getItem('omrz_token') || '').length, '· omrz_card_id?', !!cardId);
+
     // Redirect naar login als er geen sessie is
     if (!cardId && !localStorage.getItem('omrz_token')) {
       // Sta demo-weergave toe, maar wijs de gebruiker op inloggen

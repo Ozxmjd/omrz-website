@@ -207,10 +207,25 @@
           return;
         }
 
-        // Bewaar sessie-gegevens voor het dashboard
-        if (data.token) localStorage.setItem('omrz_token', data.token);
-        if (data.card_id) localStorage.setItem('omrz_card_id', data.card_id);
-        if (data.card && data.card.id) localStorage.setItem('omrz_card_id', data.card.id);
+        // DEBUG: toon welke velden de login-response bevat, zodat een afwijkende tokennaam meteen zichtbaar is.
+        console.log('[login] response velden:', Object.keys(data), data);
+
+        // Token robuust ophalen — de backend kan 'token', 'access_token', 'jwt' e.d. gebruiken,
+        // eventueel genest. Zonder token faalt elke beschermde call (o.a. vestigingen) met 401.
+        const token = data.token || data.access_token || data.accessToken || data.jwt || data.jwt_token
+          || data.authToken || (data.session && data.session.token)
+          || (data.data && (data.data.token || data.data.access_token))
+          || (data.user && data.user.token);
+        if (token) {
+          localStorage.setItem('omrz_token', token);
+          console.log('[login] token opgeslagen onder omrz_token ✓');
+        } else {
+          console.warn('[login] GEEN token in response gevonden — beschermde endpoints geven 401. Velden:', Object.keys(data));
+        }
+
+        const cardIdVal = data.card_id || data.cardId || (data.card && data.card.id)
+          || (data.data && data.data.card_id);
+        if (cardIdVal) localStorage.setItem('omrz_card_id', cardIdVal);
         localStorage.setItem('omrz_email', email);
 
         showMsg('Ingelogd! Je wordt doorgestuurd…', 'ok');
