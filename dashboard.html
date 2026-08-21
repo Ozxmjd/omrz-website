@@ -1570,6 +1570,10 @@
 
     // ---- Formulier vullen vanuit state ----
     function fillForm() {
+      // BELANGRIJK: setPrimary() hieronder zet background_type op 'color'. Bewaar de gewenste
+      // achtergrond-modus dus vóór die aanroep, anders valt een foto-achtergrond na laden terug op kleur.
+      const wantPhoto = card.background_type === 'photo' && !!card.background_url;
+
       fBiz.value = card.business_name || '';
       fTitle.value = card.card_title || '';
       fReward.value = card.reward_description || '';
@@ -1591,7 +1595,7 @@
       if (card.logo_url) { logoPrev.style.backgroundImage = `url("${absoluteUrl(card.logo_url)}")`; logoPrev.textContent = ''; }
       if (card.background_url) { bgPrev.style.backgroundImage = `url("${absoluteUrl(card.background_url)}")`; bgPrev.textContent = ''; }
       if (card.stamp_logo_url) { stampLogoPrev.style.backgroundImage = `url("${absoluteUrl(card.stamp_logo_url)}")`; stampLogoPrev.textContent = ''; }
-      switchBgTab(card.background_type === 'photo' ? 'photo' : 'color');
+      switchBgTab(wantPhoto ? 'photo' : 'color');   // gebruik de bewaarde modus (niet de door setPrimary overschreven waarde)
       updateLogoStampAvailability();
       setStampType(card.stamp_type || 'shape');
 
@@ -2252,6 +2256,12 @@
         if (res.ok) {
           const data = await res.json();
           const c = data.card || data;
+          // DEBUG: wat geeft de API terug voor de achtergrond-velden?
+          console.log('[loadDashboard] achtergrond uit API →', {
+            background_type: c.background_type,
+            background_url: c.background_url,
+            aanwezig: ('background_type' in c) + ' / ' + ('background_url' in c),
+          });
           card.business_name = c.business_name ?? card.business_name;
           card.card_title = c.card_title ?? card.card_title;
           card.reward_description = c.reward_description ?? card.reward_description;
