@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Algemene voorwaarden · OMRZ Digital</title>
+  <meta name="description" content="Algemene voorwaarden van OMRZ Digital voor winkeliers die een abonnement afnemen op de digitale stempelkaart en AI Review Bot." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    /* ===== Shared theme kit CSS ===== */
+    :root {
+      --bg: #0a0a0a;
+      --text: #ffffff;
+      --muted: #a0a0a0;
+      --pearl: #e8e8e8;
+      --card: rgba(255, 255, 255, .05);
+      --border: rgba(255, 255, 255, .1);
+      --border-strong: rgba(255, 255, 255, .18);
+      --radius: 18px;
+      --maxw: 1180px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; font-size: 17px; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+    .container { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: 24px; }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; font-size: 15px; font-weight: 600; line-height: 1; padding: 14px 24px; border-radius: 10px; border: 1px solid transparent; cursor: pointer; white-space: nowrap; transition: transform .25s var(--ease), background .25s var(--ease), border-color .25s var(--ease), color .25s var(--ease), box-shadow .3s var(--ease); }
+    .btn-outline { background: transparent; color: var(--text); border-color: var(--border-strong); }
+    .btn-outline:hover { background: #fff; color: #0a0a0a; border-color: #fff; }
+
+    .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,10,10,.6); backdrop-filter: saturate(160%) blur(16px); -webkit-backdrop-filter: saturate(160%) blur(16px); border-bottom: 1px solid transparent; transition: border-color .3s var(--ease), background .3s var(--ease); }
+    .nav.scrolled { border-color: var(--border); background: rgba(10,10,10,.82); }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 66px; }
+    .brand { font-size: 20px; font-weight: 800; letter-spacing: -.02em; color: #fff; display: inline-flex; align-items: center; gap: 10px; }
+    .brand-logo { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; object-position: center; flex-shrink: 0; }
+    .nav-links { display: flex; gap: 30px; list-style: none; }
+    .nav-links a { font-size: 14.5px; font-weight: 500; color: var(--muted); transition: color .2s var(--ease); }
+    .nav-links a:hover, .nav-links a.active { color: #fff; }
+    .nav-right { display: flex; align-items: center; gap: 8px; }
+    .nav-login { font-size: 14.5px; font-weight: 500; color: var(--muted); padding: 0 6px; transition: color .2s var(--ease); }
+    .nav-login:hover { color: #fff; }
+    .nav-toggle { display: none; flex-direction: column; gap: 5px; background: none; border: 0; cursor: pointer; padding: 8px; }
+    .nav-toggle span { width: 22px; height: 2px; background: #fff; border-radius: 2px; }
+
+    .footer { border-top: 1px solid var(--border); padding: 54px 0 40px; }
+    .footer-top { display: flex; flex-wrap: wrap; gap: 40px; justify-content: space-between; margin-bottom: 40px; }
+    .footer-brand { max-width: 300px; }
+    .footer-brand .brand { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .footer-brand p { color: var(--muted); font-size: 15px; }
+    .footer-cols { display: flex; gap: 60px; flex-wrap: wrap; }
+    .footer-col h4 { font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #6a6a6a; margin-bottom: 16px; }
+    .footer-col ul { list-style: none; display: grid; gap: 11px; }
+    .footer-col a { color: var(--muted); font-size: 15px; transition: color .2s var(--ease); }
+    .footer-col a:hover { color: #fff; }
+    .footer-bottom { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center; padding-top: 28px; border-top: 1px solid var(--border); color: #6a6a6a; font-size: 14px; }
+    .footer-legal { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
+    .footer-bottom a { color: var(--muted); transition: color .2s var(--ease); }
+    .footer-bottom a:hover { color: #fff; }
+
+    /* ===== Legal page ===== */
+    .legal { padding: 128px 0 90px; }
+    .legal-head { max-width: 780px; margin: 0 auto 44px; }
+    .legal-head .eyebrow { display: inline-block; font-size: 12.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--pearl); margin-bottom: 16px; }
+    .legal-head h1 { font-size: clamp(30px, 5vw, 46px); font-weight: 800; letter-spacing: -.03em; line-height: 1.1; }
+    .legal-head .updated { color: var(--muted); font-size: 14.5px; margin-top: 16px; }
+    .legal-body { max-width: 780px; margin: 0 auto; }
+    .legal-body section { margin-bottom: 36px; scroll-margin-top: 90px; }
+    .legal-body h2 { font-size: 21px; font-weight: 800; letter-spacing: -.02em; margin-bottom: 12px; }
+    .legal-body h2 .num { color: #6a6a6a; font-weight: 700; margin-right: 8px; }
+    .legal-body h3 { font-size: 16px; font-weight: 700; color: var(--pearl); margin: 18px 0 8px; }
+    .legal-body p { color: var(--muted); font-size: 16px; margin-bottom: 12px; }
+    .legal-body ul { color: var(--muted); font-size: 16px; margin: 0 0 12px; padding-left: 4px; display: grid; gap: 9px; list-style: none; }
+    .legal-body ul li { display: flex; gap: 12px; }
+    .legal-body ul li::before { content: "—"; color: #6a6a6a; flex-shrink: 0; }
+    .legal-body a { color: #fff; text-decoration: underline; text-underline-offset: 2px; }
+    .legal-body strong { color: var(--pearl); }
+    .legal-note { max-width: 780px; margin: 8px auto 0; padding: 18px 20px; font-size: 14.5px; color: var(--muted); }
+    .legal-note strong { color: var(--pearl); }
+
+    @media (max-width: 900px) {
+      .nav-links { display: none; }
+      .nav-toggle { display: flex; }
+      .nav-links.open { display: flex; position: absolute; top: 66px; left: 0; right: 0; flex-direction: column; gap: 4px; padding: 16px 24px 24px; background: rgba(10,10,10,.97); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
+      .nav-links.open a { padding: 12px 0; font-size: 17px; }
+      .legal { padding: 104px 0 70px; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  </style>
+</head>
+<body>
+
+  <!-- ===== Navbar ===== -->
+  <header class="nav" id="nav">
+    <div class="container nav-inner">
+      <a href="index.html" class="brand"><img class="brand-logo" src="images/gold-logo.png" alt="OMRZ Digital logo" />OMRZ Digital</a>
+      <nav>
+        <ul class="nav-links" id="navLinks">
+          <li><a href="index.html#showcase">Producten</a></li>
+          <li><a href="stempelkaart.html">Stempelkaart</a></li>
+          <li><a href="index.html#tools">Review Bot</a></li>
+          <li><a href="index.html#prijzen">Prijzen</a></li>
+        </ul>
+      </nav>
+      <div class="nav-right">
+        <a href="login.html" class="nav-login">Inloggen</a>
+        <a href="aanmelden.html" class="btn btn-outline">Start gratis</a>
+        <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== Content ===== -->
+  <main class="legal">
+    <div class="container">
+      <div class="legal-head">
+        <span class="eyebrow">Juridisch</span>
+        <h1>Algemene voorwaarden</h1>
+        <p class="updated">Laatst bijgewerkt: 21 augustus 2026</p>
+      </div>
+
+      <div class="legal-body">
+
+        <section id="definities">
+          <h2><span class="num">1.</span>Definities</h2>
+          <ul>
+            <li><strong>OMRZ Digital</strong>: de aanbieder van de diensten, gevestigd in Nederland, bereikbaar via info@omrzdigital.nl.</li>
+            <li><strong>Winkelier / Klant</strong>: de ondernemer die een abonnement afneemt op een dienst van OMRZ Digital.</li>
+            <li><strong>Dienst</strong>: de door OMRZ Digital aangeboden software, waaronder de digitale stempelkaart en de AI Review Bot.</li>
+            <li><strong>Eindklant</strong>: de klant van de winkelier die gebruikmaakt van bijvoorbeeld de digitale stempelkaart.</li>
+            <li><strong>Abonnement</strong>: de doorlopende overeenkomst op basis waarvan de winkelier tegen betaling gebruik maakt van een dienst.</li>
+          </ul>
+        </section>
+
+        <section id="toepasselijkheid">
+          <h2><span class="num">2.</span>Toepasselijkheid</h2>
+          <p>Deze algemene voorwaarden zijn van toepassing op alle aanbiedingen, abonnementen en overeenkomsten tussen OMRZ Digital en de winkelier. Afwijkingen gelden alleen indien deze schriftelijk zijn overeengekomen. Eventuele inkoop- of andere voorwaarden van de winkelier worden uitdrukkelijk van de hand gewezen.</p>
+        </section>
+
+        <section id="overeenkomst">
+          <h2><span class="num">3.</span>Totstandkoming van de overeenkomst</h2>
+          <p>De overeenkomst komt tot stand op het moment dat de winkelier zich aanmeldt voor een dienst en deze aanmelding door OMRZ Digital wordt bevestigd, of op het moment dat de winkelier daadwerkelijk gebruik gaat maken van de dienst. OMRZ Digital kan een (gratis) proefperiode aanbieden; na afloop daarvan gaat het betaalde abonnement in, tenzij tijdig wordt opgezegd.</p>
+        </section>
+
+        <section id="abonnement">
+          <h2><span class="num">4.</span>Abonnement en duur</h2>
+          <p>Het abonnement wordt aangegaan voor de gekozen periode (bijvoorbeeld per maand) en wordt telkens stilzwijgend verlengd met eenzelfde periode, tenzij tijdig wordt opgezegd conform artikel 6. De winkelier krijgt gedurende de looptijd toegang tot de dienst en eventuele updates.</p>
+        </section>
+
+        <section id="prijzen">
+          <h2><span class="num">5.</span>Prijzen en betaling</h2>
+          <ul>
+            <li>De actuele prijzen staan vermeld op onze website. De digitale stempelkaart is beschikbaar vanaf <strong>€29 per maand</strong> en de AI Review Bot vanaf <strong>€49 per maand</strong>. Alle bedragen zijn exclusief btw, tenzij anders vermeld.</li>
+            <li>Betaling vindt vooraf plaats per de gekozen periode, via de aangeboden betaalmethode.</li>
+            <li>OMRZ Digital mag de prijzen wijzigen. Prijswijzigingen worden ten minste 30 dagen vooraf aangekondigd. Ben je het niet eens met een prijsverhoging, dan kun je het abonnement tegen de ingangsdatum daarvan opzeggen.</li>
+            <li>Bij niet-tijdige betaling kan OMRZ Digital de toegang tot de dienst opschorten nadat een betalingsherinnering is verstuurd.</li>
+          </ul>
+        </section>
+
+        <section id="opzegging">
+          <h2><span class="num">6.</span>Opzegging</h2>
+          <p>De winkelier kan het abonnement op elk moment opzeggen tegen het einde van de lopende betaalperiode, via het dashboard of per e-mail aan info@omrzdigital.nl. Er geldt geen lange opzegtermijn: na opzegging loopt de dienst door tot het einde van de reeds betaalde periode en wordt daarna beëindigd. Reeds betaalde bedragen worden niet gerestitueerd, tenzij dwingend recht anders bepaalt.</p>
+        </section>
+
+        <section id="verplichtingen">
+          <h2><span class="num">7.</span>Verplichtingen en gegevensbescherming</h2>
+          <p>De winkelier gebruikt de dienst op een behoorlijke en rechtmatige wijze en is verantwoordelijk voor het geheimhouden van zijn inloggegevens.</p>
+          <p>Ten aanzien van persoonsgegevens van eindklanten is de <strong>winkelier de verwerkingsverantwoordelijke</strong> en OMRZ Digital de <strong>verwerker</strong>. OMRZ Digital verwerkt deze gegevens uitsluitend namens en in opdracht van de winkelier, op basis van een <strong>verwerkersovereenkomst</strong>. De winkelier zorgt voor een geldige grondslag (waar nodig toestemming van de eindklant) en een eigen privacyverklaring richting zijn klanten. Zie ook ons <a href="privacy.html">privacybeleid</a>.</p>
+        </section>
+
+        <section id="beschikbaarheid">
+          <h2><span class="num">8.</span>Beschikbaarheid en onderhoud</h2>
+          <p>OMRZ Digital spant zich in om de dienst zo goed mogelijk beschikbaar te houden, maar garandeert geen ononderbroken beschikbaarheid. Wij mogen de dienst tijdelijk buiten gebruik stellen voor onderhoud, updates of beveiliging. Waar mogelijk kondigen wij gepland onderhoud vooraf aan.</p>
+        </section>
+
+        <section id="aansprakelijkheid">
+          <h2><span class="num">9.</span>Aansprakelijkheid</h2>
+          <ul>
+            <li>OMRZ Digital is niet aansprakelijk voor indirecte schade, waaronder gevolgschade, gederfde omzet of winst, of verlies van gegevens.</li>
+            <li>De totale aansprakelijkheid van OMRZ Digital is per gebeurtenis beperkt tot het bedrag dat de winkelier in de <strong>drie (3) maanden</strong> voorafgaand aan de schadeveroorzakende gebeurtenis voor de betreffende dienst heeft betaald.</li>
+            <li>De beperkingen in dit artikel gelden niet bij opzet of bewuste roekeloosheid van OMRZ Digital.</li>
+          </ul>
+        </section>
+
+        <section id="ip">
+          <h2><span class="num">10.</span>Intellectueel eigendom</h2>
+          <p>Alle intellectuele eigendomsrechten op de dienst en de bijbehorende software blijven bij OMRZ Digital of haar licentiegevers. De winkelier krijgt een niet-exclusief, niet-overdraagbaar gebruiksrecht voor de duur van het abonnement. Gegevens die de winkelier of zijn eindklanten invoeren, blijven eigendom van de winkelier respectievelijk de eindklant.</p>
+        </section>
+
+        <section id="wijzigingen">
+          <h2><span class="num">11.</span>Wijziging van de voorwaarden</h2>
+          <p>OMRZ Digital mag deze algemene voorwaarden wijzigen. Wezenlijke wijzigingen worden ten minste 30 dagen vooraf bekendgemaakt. Ben je het niet eens met een wijziging, dan kun je het abonnement opzeggen tegen de datum waarop de wijziging ingaat.</p>
+        </section>
+
+        <section id="recht">
+          <h2><span class="num">12.</span>Toepasselijk recht en geschillen</h2>
+          <p>Op deze voorwaarden en alle overeenkomsten met OMRZ Digital is <strong>Nederlands recht</strong> van toepassing. Geschillen die wij niet in onderling overleg kunnen oplossen, worden voorgelegd aan de bevoegde rechter in Nederland.</p>
+        </section>
+
+        <section id="contact">
+          <h2><span class="num">13.</span>Contact</h2>
+          <p>Vragen over deze voorwaarden of over je abonnement?</p>
+          <p><strong>OMRZ Digital</strong><br />
+          E-mail: <a href="mailto:info@omrzdigital.nl">info@omrzdigital.nl</a></p>
+        </section>
+
+      </div>
+
+      <div class="legal-note glass">
+        <p><strong>Let op:</strong> deze algemene voorwaarden zijn opgesteld voor de dienstverlening van OMRZ Digital aan winkeliers. Laat bij twijfel of voor een op maat gemaakte verwerkersovereenkomst juridisch advies inwinnen.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <a href="index.html" class="brand"><img class="brand-logo" src="images/gold-logo.png" alt="OMRZ Digital logo" />OMRZ Digital</a>
+          <p>Slimme AI-tools die het Nederlandse MKB laten groeien.</p>
+        </div>
+        <div class="footer-cols">
+          <div class="footer-col"><h4>Producten</h4><ul><li><a href="index.html#tools">AI Review Bot</a></li><li><a href="stempelkaart.html">Digitale Stempelkaart</a></li><li><a href="index.html#prijzen">Prijzen</a></li></ul></div>
+          <div class="footer-col"><h4>Bedrijf</h4><ul><li><a href="index.html">Home</a></li><li><a href="contact.html">Contact</a></li><li><a href="mailto:info@omrzdigital.nl">info@omrzdigital.nl</a></li></ul></div>
+          <div class="footer-col"><h4>Juridisch</h4><ul><li><a href="privacy.html">Privacybeleid</a></li><li><a href="voorwaarden.html">Algemene voorwaarden</a></li></ul></div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span id="year">2026</span> OMRZ Digital · Alle rechten voorbehouden</span>
+        <div class="footer-legal">
+          <a href="privacy.html">Privacybeleid</a>
+          <a href="voorwaarden.html">Algemene voorwaarden</a>
+          <a href="mailto:info@omrzdigital.nl">info@omrzdigital.nl</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+  (function () {
+    'use strict';
+    var nav = document.getElementById('nav');
+    function onScroll() { nav.classList.toggle('scrolled', window.scrollY > 8); }
+    onScroll(); window.addEventListener('scroll', onScroll, { passive: true });
+    var toggle = document.getElementById('navToggle'), links = document.getElementById('navLinks');
+    toggle.addEventListener('click', function () { var open = links.classList.toggle('open'); toggle.setAttribute('aria-expanded', open ? 'true' : 'false'); });
+    links.addEventListener('click', function (e) { if (e.target.tagName === 'A') { links.classList.remove('open'); toggle.setAttribute('aria-expanded', 'false'); } });
+    var y = document.getElementById('year'); if (y) y.textContent = new Date().getFullYear();
+  })();
+  </script>
+</body>
+</html>

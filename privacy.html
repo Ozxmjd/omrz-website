@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacybeleid · OMRZ Digital</title>
+  <meta name="description" content="Privacybeleid van OMRZ Digital — hoe wij persoonsgegevens verwerken voor de digitale stempelkaart, conform de AVG." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    /* ===== Shared theme kit CSS ===== */
+    :root {
+      --bg: #0a0a0a;
+      --text: #ffffff;
+      --muted: #a0a0a0;
+      --pearl: #e8e8e8;
+      --card: rgba(255, 255, 255, .05);
+      --border: rgba(255, 255, 255, .1);
+      --border-strong: rgba(255, 255, 255, .18);
+      --radius: 18px;
+      --maxw: 1180px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; font-size: 17px; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+    .container { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: 24px; }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; font-size: 15px; font-weight: 600; line-height: 1; padding: 14px 24px; border-radius: 10px; border: 1px solid transparent; cursor: pointer; white-space: nowrap; transition: transform .25s var(--ease), background .25s var(--ease), border-color .25s var(--ease), color .25s var(--ease), box-shadow .3s var(--ease); }
+    .btn-outline { background: transparent; color: var(--text); border-color: var(--border-strong); }
+    .btn-outline:hover { background: #fff; color: #0a0a0a; border-color: #fff; }
+
+    .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,10,10,.6); backdrop-filter: saturate(160%) blur(16px); -webkit-backdrop-filter: saturate(160%) blur(16px); border-bottom: 1px solid transparent; transition: border-color .3s var(--ease), background .3s var(--ease); }
+    .nav.scrolled { border-color: var(--border); background: rgba(10,10,10,.82); }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 66px; }
+    .brand { font-size: 20px; font-weight: 800; letter-spacing: -.02em; color: #fff; display: inline-flex; align-items: center; gap: 10px; }
+    .brand-logo { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; object-position: center; flex-shrink: 0; }
+    .nav-links { display: flex; gap: 30px; list-style: none; }
+    .nav-links a { font-size: 14.5px; font-weight: 500; color: var(--muted); transition: color .2s var(--ease); }
+    .nav-links a:hover, .nav-links a.active { color: #fff; }
+    .nav-right { display: flex; align-items: center; gap: 8px; }
+    .nav-login { font-size: 14.5px; font-weight: 500; color: var(--muted); padding: 0 6px; transition: color .2s var(--ease); }
+    .nav-login:hover { color: #fff; }
+    .nav-toggle { display: none; flex-direction: column; gap: 5px; background: none; border: 0; cursor: pointer; padding: 8px; }
+    .nav-toggle span { width: 22px; height: 2px; background: #fff; border-radius: 2px; }
+
+    .footer { border-top: 1px solid var(--border); padding: 54px 0 40px; }
+    .footer-top { display: flex; flex-wrap: wrap; gap: 40px; justify-content: space-between; margin-bottom: 40px; }
+    .footer-brand { max-width: 300px; }
+    .footer-brand .brand { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .footer-brand p { color: var(--muted); font-size: 15px; }
+    .footer-cols { display: flex; gap: 60px; flex-wrap: wrap; }
+    .footer-col h4 { font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #6a6a6a; margin-bottom: 16px; }
+    .footer-col ul { list-style: none; display: grid; gap: 11px; }
+    .footer-col a { color: var(--muted); font-size: 15px; transition: color .2s var(--ease); }
+    .footer-col a:hover { color: #fff; }
+    .footer-bottom { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center; padding-top: 28px; border-top: 1px solid var(--border); color: #6a6a6a; font-size: 14px; }
+    .footer-legal { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
+    .footer-bottom a { color: var(--muted); transition: color .2s var(--ease); }
+    .footer-bottom a:hover { color: #fff; }
+
+    /* ===== Legal page ===== */
+    .legal { padding: 128px 0 90px; }
+    .legal-head { max-width: 780px; margin: 0 auto 44px; }
+    .legal-head .eyebrow { display: inline-block; font-size: 12.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--pearl); margin-bottom: 16px; }
+    .legal-head h1 { font-size: clamp(30px, 5vw, 46px); font-weight: 800; letter-spacing: -.03em; line-height: 1.1; }
+    .legal-head .updated { color: var(--muted); font-size: 14.5px; margin-top: 16px; }
+    .legal-body { max-width: 780px; margin: 0 auto; }
+    .legal-body section { margin-bottom: 36px; scroll-margin-top: 90px; }
+    .legal-body h2 { font-size: 21px; font-weight: 800; letter-spacing: -.02em; margin-bottom: 12px; }
+    .legal-body h2 .num { color: #6a6a6a; font-weight: 700; margin-right: 8px; }
+    .legal-body h3 { font-size: 16px; font-weight: 700; color: var(--pearl); margin: 18px 0 8px; }
+    .legal-body p { color: var(--muted); font-size: 16px; margin-bottom: 12px; }
+    .legal-body ul { color: var(--muted); font-size: 16px; margin: 0 0 12px; padding-left: 4px; display: grid; gap: 9px; list-style: none; }
+    .legal-body ul li { display: flex; gap: 12px; }
+    .legal-body ul li::before { content: "—"; color: #6a6a6a; flex-shrink: 0; }
+    .legal-body a { color: #fff; text-decoration: underline; text-underline-offset: 2px; }
+    .legal-body strong { color: var(--pearl); }
+    .legal-note { max-width: 780px; margin: 8px auto 0; padding: 18px 20px; font-size: 14.5px; color: var(--muted); }
+    .legal-note strong { color: var(--pearl); }
+
+    @media (max-width: 900px) {
+      .nav-links { display: none; }
+      .nav-toggle { display: flex; }
+      .nav-links.open { display: flex; position: absolute; top: 66px; left: 0; right: 0; flex-direction: column; gap: 4px; padding: 16px 24px 24px; background: rgba(10,10,10,.97); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
+      .nav-links.open a { padding: 12px 0; font-size: 17px; }
+      .legal { padding: 104px 0 70px; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  </style>
+</head>
+<body>
+
+  <!-- ===== Navbar ===== -->
+  <header class="nav" id="nav">
+    <div class="container nav-inner">
+      <a href="index.html" class="brand"><img class="brand-logo" src="images/gold-logo.png" alt="OMRZ Digital logo" />OMRZ Digital</a>
+      <nav>
+        <ul class="nav-links" id="navLinks">
+          <li><a href="index.html#showcase">Producten</a></li>
+          <li><a href="stempelkaart.html">Stempelkaart</a></li>
+          <li><a href="index.html#tools">Review Bot</a></li>
+          <li><a href="index.html#prijzen">Prijzen</a></li>
+        </ul>
+      </nav>
+      <div class="nav-right">
+        <a href="login.html" class="nav-login">Inloggen</a>
+        <a href="aanmelden.html" class="btn btn-outline">Start gratis</a>
+        <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== Content ===== -->
+  <main class="legal">
+    <div class="container">
+      <div class="legal-head">
+        <span class="eyebrow">Juridisch</span>
+        <h1>Privacybeleid</h1>
+        <p class="updated">Laatst bijgewerkt: 21 augustus 2026</p>
+      </div>
+
+      <div class="legal-body">
+
+        <section id="intro">
+          <h2><span class="num">1.</span>Inleiding</h2>
+          <p>Dit privacybeleid legt uit hoe <strong>OMRZ Digital</strong> ("wij", "ons") omgaat met persoonsgegevens bij het aanbieden van de digitale stempelkaart en aanverwante diensten. Wij hechten veel waarde aan jouw privacy en verwerken persoonsgegevens zorgvuldig, in overeenstemming met de Algemene Verordening Gegevensbescherming (AVG/GDPR) en overige toepasselijke wet- en regelgeving.</p>
+          <p>Heb je na het lezen nog vragen? Neem contact op via <a href="mailto:info@omrzdigital.nl">info@omrzdigital.nl</a>.</p>
+        </section>
+
+        <section id="rol">
+          <h2><span class="num">2.</span>Onze rol: verwerker namens de winkelier</h2>
+          <p>Bij de digitale stempelkaart is de <strong>winkelier</strong> (de ondernemer die de stempelkaart aanbiedt aan zijn of haar klanten) de <strong>verwerkingsverantwoordelijke</strong>. De winkelier bepaalt welke gegevens van eindklanten worden verzameld en met welk doel.</p>
+          <p><strong>OMRZ Digital treedt op als verwerker</strong> en verwerkt persoonsgegevens van eindklanten uitsluitend <strong>namens en in opdracht van de winkelier</strong>, op basis van een verwerkersovereenkomst. Wij gebruiken deze gegevens niet voor eigen doeleinden.</p>
+          <p>Voor gegevens van de winkelier zelf (bijvoorbeeld het account en de facturatie) is OMRZ Digital wél zelf verwerkingsverantwoordelijke.</p>
+        </section>
+
+        <section id="gegevens">
+          <h2><span class="num">3.</span>Welke gegevens verzamelen wij</h2>
+          <h3>Van eindklanten (klanten van de winkelier)</h3>
+          <ul>
+            <li><strong>Naam</strong> — om de spaarkaart te personaliseren en te herkennen.</li>
+            <li><strong>E-mailadres</strong> — voor de digitale wallet-kaart en meldingen over gespaarde stempels of beloningen.</li>
+            <li><strong>Telefoonnummer</strong> — optioneel, indien de winkelier dit vraagt voor het versturen van de kaart of meldingen.</li>
+            <li><strong>Spaargegevens</strong> — aantal stempels, bezoeken en ingewisselde beloningen.</li>
+          </ul>
+          <h3>Van winkeliers</h3>
+          <ul>
+            <li><strong>Bedrijfs- en contactgegevens</strong> — naam van de zaak, e-mailadres, telefoonnummer, adres/vestiging(en).</li>
+            <li><strong>Accountgegevens</strong> — inloggegevens (wachtwoord versleuteld opgeslagen).</li>
+            <li><strong>Facturatie- en abonnementsgegevens</strong> — betaalstatus en historie.</li>
+          </ul>
+          <h3>Technische gegevens</h3>
+          <ul>
+            <li>Beperkte, functionele gegevens die nodig zijn om de dienst te laten werken en te beveiligen (zoals sessie-informatie). Wij gebruiken geen tracking- of advertentiecookies.</li>
+          </ul>
+        </section>
+
+        <section id="doel">
+          <h2><span class="num">4.</span>Waarvoor en op welke grondslag</h2>
+          <p>Wij verwerken de gegevens van eindklanten uitsluitend voor het uitvoeren van het <strong>stempelkaart-loyaliteitsprogramma</strong> van de winkelier, waaronder:</p>
+          <ul>
+            <li>het aanmaken en beheren van de digitale spaarkaart;</li>
+            <li>het bijhouden van stempels, bezoeken en beloningen;</li>
+            <li>het versturen van de kaart en relevante meldingen aan de eindklant.</li>
+          </ul>
+          <p>De <strong>grondslagen</strong> hiervoor zijn de uitvoering van de overeenkomst met de winkelier (namens wie wij verwerken) en, waar vereist, de <strong>toestemming</strong> die de eindklant aan de winkelier geeft bij het aanmelden voor de spaarkaart. Voor accountgegevens van de winkelier baseren wij ons op de uitvoering van de overeenkomst en ons gerechtvaardigd belang bij een veilige dienstverlening.</p>
+        </section>
+
+        <section id="bewaren">
+          <h2><span class="num">5.</span>Hoe lang bewaren wij gegevens</h2>
+          <p>Wij bewaren persoonsgegevens niet langer dan noodzakelijk:</p>
+          <ul>
+            <li><strong>Gegevens van eindklanten</strong> worden bewaard zolang de spaarkaart actief is. Wordt de kaart of het account door de winkelier beëindigd, of verzoekt de eindklant om verwijdering, dan verwijderen wij de gegevens binnen een redelijke termijn (in beginsel binnen 30 dagen), tenzij een wettelijke bewaarplicht anders bepaalt.</li>
+            <li><strong>Facturatie- en administratiegegevens</strong> van winkeliers bewaren wij zolang als wettelijk verplicht (voor de fiscale administratie geldt in Nederland een bewaartermijn van 7 jaar).</li>
+          </ul>
+        </section>
+
+        <section id="delen">
+          <h2><span class="num">6.</span>Delen met derden en subverwerkers</h2>
+          <p>Wij verkopen jouw gegevens nooit. Wij delen gegevens alleen met partijen die ons helpen de dienst te leveren (subverwerkers), onder een verwerkersovereenkomst en met passende waarborgen. Onze belangrijkste subverwerker is:</p>
+          <ul>
+            <li><strong>Supabase</strong> — voor het veilig hosten van de database en opslag. De gegevens worden opgeslagen op <strong>servers binnen de Europese Unie (EU)</strong>.</li>
+          </ul>
+          <p>Wanneer gegevens onverhoopt buiten de Europese Economische Ruimte zouden worden verwerkt, zorgen wij voor passende waarborgen zoals de modelcontractbepalingen van de Europese Commissie.</p>
+        </section>
+
+        <section id="beveiliging">
+          <h2><span class="num">7.</span>Beveiliging</h2>
+          <p>Wij nemen passende technische en organisatorische maatregelen om persoonsgegevens te beschermen tegen verlies of onrechtmatige verwerking. Zo worden gegevens <strong>versleuteld verzonden</strong> (via HTTPS/TLS), zijn wachtwoorden <strong>gehasht opgeslagen</strong>, gelden er strikte toegangsrechten en wordt data <strong>veilig opgeslagen op EU-servers via Supabase</strong>. De toegang tot gegevens is beperkt tot personen die dit nodig hebben voor hun werk.</p>
+        </section>
+
+        <section id="rechten">
+          <h2><span class="num">8.</span>Jouw rechten</h2>
+          <p>Als betrokkene heb je op grond van de AVG onder meer de volgende rechten:</p>
+          <ul>
+            <li><strong>Recht op inzage</strong> — opvragen welke gegevens wij van je verwerken.</li>
+            <li><strong>Recht op correctie</strong> — onjuiste of onvolledige gegevens laten aanpassen.</li>
+            <li><strong>Recht op verwijdering</strong> — je gegevens laten wissen ("recht om vergeten te worden").</li>
+            <li><strong>Recht op beperking</strong> — de verwerking (tijdelijk) laten beperken.</li>
+            <li><strong>Recht van bezwaar</strong> — bezwaar maken tegen bepaalde verwerkingen.</li>
+            <li><strong>Recht op dataportabiliteit</strong> — je gegevens in een gangbaar formaat ontvangen.</li>
+            <li><strong>Recht om toestemming in te trekken</strong> — waar de verwerking op toestemming berust.</li>
+          </ul>
+          <p>Omdat wij voor eindklantgegevens optreden als <strong>verwerker namens de winkelier</strong>, kun je je verzoek richten aan de winkelier bij wie je spaart, of aan ons via <a href="mailto:info@omrzdigital.nl">info@omrzdigital.nl</a>. Wij helpen de winkelier om aan je verzoek te voldoen en reageren in beginsel binnen één maand.</p>
+        </section>
+
+        <section id="klacht">
+          <h2><span class="num">9.</span>Klachten</h2>
+          <p>Ben je van mening dat wij niet zorgvuldig met jouw gegevens omgaan? Neem dan eerst contact met ons op. Je hebt daarnaast altijd het recht om een klacht in te dienen bij de <strong>Autoriteit Persoonsgegevens</strong> (autoriteitpersoonsgegevens.nl).</p>
+        </section>
+
+        <section id="wijzigingen">
+          <h2><span class="num">10.</span>Wijzigingen in dit beleid</h2>
+          <p>Wij kunnen dit privacybeleid van tijd tot tijd aanpassen, bijvoorbeeld bij wijzigingen in onze dienst of wet- en regelgeving. De meest recente versie vind je altijd op deze pagina, met bovenaan de datum van de laatste wijziging.</p>
+        </section>
+
+        <section id="contact">
+          <h2><span class="num">11.</span>Contact</h2>
+          <p>Voor vragen over privacy of over de verwerking van jouw gegevens kun je contact opnemen met:</p>
+          <p><strong>OMRZ Digital</strong><br />
+          E-mail: <a href="mailto:info@omrzdigital.nl">info@omrzdigital.nl</a></p>
+        </section>
+
+      </div>
+
+      <div class="legal-note glass">
+        <p><strong>Let op:</strong> dit privacybeleid biedt algemene informatie over onze verwerking van persoonsgegevens. Winkeliers blijven zelf verwerkingsverantwoordelijke voor de gegevens van hun eindklanten en zijn verantwoordelijk voor hun eigen privacyverklaring richting die klanten.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <a href="index.html" class="brand"><img class="brand-logo" src="images/gold-logo.png" alt="OMRZ Digital logo" />OMRZ Digital</a>
+          <p>Slimme AI-tools die het Nederlandse MKB laten groeien.</p>
+        </div>
+        <div class="footer-cols">
+          <div class="footer-col"><h4>Producten</h4><ul><li><a href="index.html#tools">AI Review Bot</a></li><li><a href="stempelkaart.html">Digitale Stempelkaart</a></li><li><a href="index.html#prijzen">Prijzen</a></li></ul></div>
+          <div class="footer-col"><h4>Bedrijf</h4><ul><li><a href="index.html">Home</a></li><li><a href="contact.html">Contact</a></li><li><a href="mailto:info@omrzdigital.nl">info@omrzdigital.nl</a></li></ul></div>
+          <div class="footer-col"><h4>Juridisch</h4><ul><li><a href="privacy.html">Privacybeleid</a></li><li><a href="voorwaarden.html">Algemene voorwaarden</a></li></ul></div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span id="year">2026</span> OMRZ Digital · Alle rechten voorbehouden</span>
+        <div class="footer-legal">
+          <a href="privacy.html">Privacybeleid</a>
+          <a href="voorwaarden.html">Algemene voorwaarden</a>
+          <a href="mailto:info@omrzdigital.nl">info@omrzdigital.nl</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+  (function () {
+    'use strict';
+    var nav = document.getElementById('nav');
+    function onScroll() { nav.classList.toggle('scrolled', window.scrollY > 8); }
+    onScroll(); window.addEventListener('scroll', onScroll, { passive: true });
+    var toggle = document.getElementById('navToggle'), links = document.getElementById('navLinks');
+    toggle.addEventListener('click', function () { var open = links.classList.toggle('open'); toggle.setAttribute('aria-expanded', open ? 'true' : 'false'); });
+    links.addEventListener('click', function (e) { if (e.target.tagName === 'A') { links.classList.remove('open'); toggle.setAttribute('aria-expanded', 'false'); } });
+    var y = document.getElementById('year'); if (y) y.textContent = new Date().getFullYear();
+  })();
+  </script>
+</body>
+</html>
