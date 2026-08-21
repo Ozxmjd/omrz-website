@@ -2625,12 +2625,13 @@
     // ---- Helpers ----
     function normalizeLocation(raw, i) {
       const id = raw.id ?? raw.location_id ?? raw._id ?? raw.uuid ?? ('loc-' + i);
-      const parts = [raw.address, raw.postcode ?? raw.zip, raw.city ?? raw.plaats].filter(Boolean);
+      const postcode = raw.postal_code || raw.postcode || raw.zip || '';
+      const parts = [raw.address, postcode, raw.city ?? raw.plaats].filter(Boolean);
       return {
         id: String(id),
-        name: raw.name || raw.location_name || raw.title || ('Vestiging ' + (i + 1)),
+        name: raw.location_name || raw.name || raw.title || ('Vestiging ' + (i + 1)),
         address: raw.address || '',
-        postcode: raw.postcode || raw.zip || '',
+        postcode: postcode,
         city: raw.city || raw.plaats || '',
         phone: raw.phone || raw.telefoon || '',
         addressLine: parts.join(', '),
@@ -2795,24 +2796,37 @@
       e.preventDefault();
       const btn = document.getElementById('locSaveBtn');
       const note = document.getElementById('locFormNote');
+      // Veldnamen exact zoals de backend ze verwacht (zie werkend curl-commando).
       const payload = {
-        name: document.getElementById('lfName').value.trim(),
+        location_name: document.getElementById('lfName').value.trim(),
         address: document.getElementById('lfAddress').value.trim(),
-        postcode: document.getElementById('lfPostcode').value.trim(),
+        postal_code: document.getElementById('lfPostcode').value.trim(),
         city: document.getElementById('lfCity').value.trim(),
         phone: document.getElementById('lfPhone').value.trim(),
       };
-      if (!payload.name) { note.textContent = 'Naam is verplicht.'; note.className = 'save-note error'; return; }
+      if (!payload.location_name) { note.textContent = 'Naam is verplicht.'; note.className = 'save-note error'; return; }
       note.className = 'save-note'; btn.classList.add('loading'); btn.disabled = true;
       try {
         const url = editingLocId ? API_BASE + '/api/stamp/locations/' + editingLocId : API_BASE + '/api/stamp/locations';
-        const res = await fetch(url, { method: editingLocId ? 'PUT' : 'POST', headers: authHeaders(), body: JSON.stringify(payload) });
-        if (!res.ok) throw new Error();
+        const method = editingLocId ? 'PUT' : 'POST';
+        const headers = authHeaders();
+        const body = JSON.stringify(payload);
+        // DEBUG: precies wat we versturen (token afgekort weergegeven).
+        console.log('[locations save] →', {
+          url, method,
+          headers: { ...headers, Authorization: headers.Authorization ? headers.Authorization.slice(0, 16) + '…' : '(geen)' },
+          body,
+        });
+        const res = await fetch(url, { method, headers, body });
+        const data = await res.json().catch(() => ({}));
+        console.log('[locations save] ← HTTP', res.status, data);
+        if (!res.ok) throw new Error(data.error || data.message || ('HTTP ' + res.status));
         note.textContent = 'Opgeslagen ✓'; note.classList.add('ok');
         await loadLocations();
         setTimeout(() => { locFormWrap.hidden = true; }, 700);
       } catch (err) {
-        note.textContent = 'Kon niet opslaan — probeer opnieuw.'; note.classList.add('error');
+        console.warn('[locations save] mislukt:', err);
+        note.textContent = 'Kon niet opslaan: ' + (err.message || 'onbekende fout'); note.classList.add('error');
       } finally {
         btn.classList.remove('loading'); btn.disabled = false;
       }
