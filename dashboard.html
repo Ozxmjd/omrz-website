@@ -1268,11 +1268,6 @@
       if (sEmail) sEmail.value = userEmail;
     }
 
-    // DEBUG: token-status van deze sessie. Als dit 'false' is, is de 401 verklaard:
-    // login.html heeft geen token onder 'omrz_token' opgeslagen → log opnieuw in.
-    console.log('[auth] omrz_token aanwezig?', !!localStorage.getItem('omrz_token'),
-      '· lengte:', (localStorage.getItem('omrz_token') || '').length, '· omrz_card_id?', !!cardId);
-
     // Redirect naar login als er geen sessie is
     if (!cardId && !localStorage.getItem('omrz_token')) {
       // Sta demo-weergave toe, maar wijs de gebruiker op inloggen
@@ -1370,7 +1365,6 @@
       try {
         const res = await fetch(API_BASE + '/api/stamp/today-stats?card_id=' + encodeURIComponent(cardId) + locQuery('&'), { headers: authHeaders() });
         const data = await res.json().catch(() => ({}));
-        console.log('[today-stats] →', data);
         const today = Number(data.today ?? data.stamps_today ?? data.today_stamps ?? data.count ?? data.total ?? 0) || 0;
         let week = Number(data.week ?? data.this_week ?? data.stamps_week ?? data.week_stamps);
         if (!Number.isFinite(week)) {
@@ -1941,16 +1935,12 @@
         const fd = new FormData(); fd.append('file', file);
         const res = await fetch(API_BASE + endpoint, { method: 'POST', headers, body: fd });
         const data = await res.json().catch(() => ({}));
-        // DEBUG: toon exact wat de server teruggeeft (open de console om de respons-vorm te zien).
-        console.log('[upload]', endpoint, '→ HTTP', res.status, '· respons:', data);
         if (!res.ok) throw new Error(data.error || data.message || ('Upload mislukt (HTTP ' + res.status + ')'));
         const url = extractUploadUrl(data);
         if (!url) throw new Error('Geen URL in respons. Ontvangen velden: ' + (Object.keys(data).join(', ') || '(leeg)'));
-        console.log('[upload]', endpoint, '→ URL gebruikt:', url, '· absoluut:', absoluteUrl(url));
         statusEl.textContent = 'Geüpload ✓'; statusEl.className = 'upload-status ok';
         onDone(url);
       } catch (err) {
-        console.warn('[upload] mislukt:', endpoint, err);
         statusEl.textContent = err.message || 'Upload mislukt.'; statusEl.className = 'upload-status error';
         if (onError) onError();
       }
@@ -2564,12 +2554,6 @@
         if (res.ok) {
           const data = await res.json();
           const c = data.card || data;
-          // DEBUG: wat geeft de API terug voor de achtergrond-velden?
-          console.log('[loadDashboard] achtergrond uit API →', {
-            background_type: c.background_type,
-            background_url: c.background_url,
-            aanwezig: ('background_type' in c) + ' / ' + ('background_url' in c),
-          });
           card.business_name = c.business_name ?? card.business_name;
           card.card_title = c.card_title ?? card.card_title;
           card.reward_description = c.reward_description ?? card.reward_description;
@@ -2657,7 +2641,6 @@
       try {
         const res = await fetch(API_BASE + '/api/stamp/locations', { headers: authHeaders() });
         const data = await res.json().catch(() => ({}));
-        console.log('[locations] →', data);
         if (!res.ok) throw new Error('laden mislukt');
         const list = Array.isArray(data) ? data : (data.locations || data.vestigingen || []);
         locations = list.map(normalizeLocation);
@@ -2814,23 +2797,13 @@
       try {
         const url = editingLocId ? API_BASE + '/api/stamp/locations/' + editingLocId : API_BASE + '/api/stamp/locations';
         const method = editingLocId ? 'PUT' : 'POST';
-        const headers = authHeaders();
-        const body = JSON.stringify(payload);
-        // DEBUG: precies wat we versturen (token afgekort weergegeven).
-        console.log('[locations save] →', {
-          url, method,
-          headers: { ...headers, Authorization: headers.Authorization ? headers.Authorization.slice(0, 16) + '…' : '(geen)' },
-          body,
-        });
-        const res = await fetch(url, { method, headers, body });
+        const res = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(payload) });
         const data = await res.json().catch(() => ({}));
-        console.log('[locations save] ← HTTP', res.status, data);
         if (!res.ok) throw new Error(data.error || data.message || ('HTTP ' + res.status));
         note.textContent = 'Opgeslagen ✓'; note.classList.add('ok');
         await loadLocations();
         setTimeout(() => { locFormWrap.hidden = true; }, 700);
       } catch (err) {
-        console.warn('[locations save] mislukt:', err);
         note.textContent = 'Kon niet opslaan: ' + (err.message || 'onbekende fout'); note.classList.add('error');
       } finally {
         btn.classList.remove('loading'); btn.disabled = false;
