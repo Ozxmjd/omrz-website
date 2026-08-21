@@ -1256,7 +1256,7 @@
 
     // ---- Stempel-rendering ----
     // Bron-afbeelding voor logo-stempels: aparte stempel-upload heeft voorrang, anders het bedrijfslogo.
-    const stampImageSrc = () => card.stamp_type === 'logo' ? (card.stamp_logo_url || card.logo_url || '') : '';
+    const stampImageSrc = () => card.stamp_type === 'logo' ? absoluteUrl(card.stamp_logo_url || card.logo_url || '') : '';
     // De gekozen vorm als SVG-masker (data-URI) — het logo vult exact die vorm.
     function shapeMaskUrl(shape) {
       const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='#000'>${SHAPE_PATH[shape] || SHAPE_PATH.circle}</svg>`;
@@ -1296,7 +1296,7 @@
       if (!el) return;
       const photo = c.background_type === 'photo' && !!c.background_url;
       el.classList.toggle('has-photo', photo);
-      if (photo) { el.style.background = '#111'; pvBg.style.backgroundImage = `url("${c.background_url}")`; }
+      if (photo) { el.style.background = '#111'; pvBg.style.backgroundImage = `url("${absoluteUrl(c.background_url)}")`; }
       else { el.style.background = c.primary_color || '#1a1a2e'; pvBg.style.backgroundImage = 'none'; }
 
       // Lettertype toepassen op alle kaartteksten.
@@ -1304,7 +1304,7 @@
 
       const txt = c.text_color || '#ffffff';
       el.style.color = txt;
-      if (c.logo_url) { pvLogo.src = c.logo_url; pvLogo.hidden = false; } else { pvLogo.hidden = true; }
+      if (c.logo_url) { pvLogo.src = absoluteUrl(c.logo_url); pvLogo.hidden = false; } else { pvLogo.hidden = true; }
       // Teksten worden EXACT getoond zoals getypt (geen hoofdletter-/kleineletter-conversie).
       pvBiz.textContent = c.business_name || 'Mijn zaak'; pvBiz.style.color = txt;
       pvChip.style.background = c.accent_color || 'rgba(255,255,255,.6)';
@@ -1530,9 +1530,9 @@
       setShape(card.stamp_shape || 'star');
       setFill(card.stamp_fill || 'filled');
 
-      if (card.logo_url) { logoPrev.style.backgroundImage = `url("${card.logo_url}")`; logoPrev.textContent = ''; }
-      if (card.background_url) { bgPrev.style.backgroundImage = `url("${card.background_url}")`; bgPrev.textContent = ''; }
-      if (card.stamp_logo_url) { stampLogoPrev.style.backgroundImage = `url("${card.stamp_logo_url}")`; stampLogoPrev.textContent = ''; }
+      if (card.logo_url) { logoPrev.style.backgroundImage = `url("${absoluteUrl(card.logo_url)}")`; logoPrev.textContent = ''; }
+      if (card.background_url) { bgPrev.style.backgroundImage = `url("${absoluteUrl(card.background_url)}")`; bgPrev.textContent = ''; }
+      if (card.stamp_logo_url) { stampLogoPrev.style.backgroundImage = `url("${absoluteUrl(card.stamp_logo_url)}")`; stampLogoPrev.textContent = ''; }
       switchBgTab(card.background_type === 'photo' ? 'photo' : 'color');
       updateLogoStampAvailability();
       setStampType(card.stamp_type || 'shape');
@@ -1541,9 +1541,29 @@
     }
 
     // ---- Uploads (logo & achtergrond) ----
-    async function uploadFile(endpoint, file, statusEl, onDone) {
+    // Zoek een URL in een (mogelijk geneste) upload-respons, ongeacht de veldnaam die de backend gebruikt.
+    function extractUploadUrl(data) {
+      if (!data || typeof data !== 'object') return '';
+      const direct = data.url || data.logo_url || data.logoUrl || data.background_url || data.backgroundUrl
+        || data.image_url || data.imageUrl || data.file_url || data.fileUrl || data.secure_url
+        || data.location || data.Location || data.path || data.src || data.filename || data.fileName;
+      if (direct) return direct;
+      for (const nested of [data.data, data.file, data.result, data.upload, data.image]) {
+        const found = extractUploadUrl(nested);
+        if (found) return found;
+      }
+      return '';
+    }
+    // Maak een pad absoluut t.o.v. de backend-host (relatieve paden wijzen anders naar de verkeerde origin).
+    function absoluteUrl(u) {
+      if (!u) return u;
+      if (/^(https?:|data:|blob:)/i.test(u)) return u;
+      return API_BASE + (u.charAt(0) === '/' ? '' : '/') + u;
+    }
+
+    async function uploadFile(endpoint, file, statusEl, onDone, onError) {
       if (!file) return;
-      if (!/^image\/(png|jpe?g)$/.test(file.type)) { statusEl.textContent = 'Alleen PNG of JPG.'; statusEl.className = 'upload-status error'; return; }
+      if (!/^image\/(png|jpe?g)$/.test(file.type)) { statusEl.textContent = 'Alleen PNG of JPG.'; statusEl.className = 'upload-status error'; if (onError) onError(); return; }
       statusEl.textContent = 'Uploaden…'; statusEl.className = 'upload-status';
       try {
         const token = localStorage.getItem('omrz_token');
@@ -1551,33 +1571,48 @@
         const fd = new FormData(); fd.append('file', file);
         const res = await fetch(API_BASE + endpoint, { method: 'POST', headers, body: fd });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error || data.message || 'Upload mislukt');
-        const url = data.url || data.logo_url || data.background_url || data.file_url || data.location || data.path;
-        if (!url) throw new Error('Geen URL ontvangen van de server');
+        // DEBUG: toon exact wat de server teruggeeft (open de console om de respons-vorm te zien).
+        console.log('[upload]', endpoint, '→ HTTP', res.status, '· respons:', data);
+        if (!res.ok) throw new Error(data.error || data.message || ('Upload mislukt (HTTP ' + res.status + ')'));
+        const url = extractUploadUrl(data);
+        if (!url) throw new Error('Geen URL in respons. Ontvangen velden: ' + (Object.keys(data).join(', ') || '(leeg)'));
+        console.log('[upload]', endpoint, '→ URL gebruikt:', url, '· absoluut:', absoluteUrl(url));
         statusEl.textContent = 'Geüpload ✓'; statusEl.className = 'upload-status ok';
         onDone(url);
       } catch (err) {
+        console.warn('[upload] mislukt:', endpoint, err);
         statusEl.textContent = err.message || 'Upload mislukt.'; statusEl.className = 'upload-status error';
+        if (onError) onError();
       }
     }
     document.getElementById('logoFile').addEventListener('change', (e) => {
       const file = e.target.files[0]; if (!file) return;
-      logoPrev.style.backgroundImage = `url("${URL.createObjectURL(file)}")`; logoPrev.textContent = '';
-      uploadFile('/api/stamp/upload-logo', file, document.getElementById('logoStatus'), (url) => { card.logo_url = url; updateLogoStampAvailability(); paintEditor(); });
+      const local = URL.createObjectURL(file);
+      // Direct zichtbaar: toon het gekozen logo meteen in de instelling én op de kaart-preview.
+      logoPrev.style.backgroundImage = `url("${local}")`; logoPrev.textContent = '';
+      pvLogo.src = local; pvLogo.hidden = false;
+      stampTypeLogoBtn.hidden = false;
+      uploadFile('/api/stamp/upload-logo', file, document.getElementById('logoStatus'),
+        (url) => { card.logo_url = url; updateLogoStampAvailability(); paintEditor(); },
+        () => { paintEditor(); updateLogoStampAvailability(); }   // revert bij fout
+      );
     });
     document.getElementById('stampLogoFile').addEventListener('change', (e) => {
       const file = e.target.files[0]; if (!file) return;
-      stampLogoPrev.style.backgroundImage = `url("${URL.createObjectURL(file)}")`; stampLogoPrev.textContent = '';
-      uploadFile('/api/stamp/upload-logo', file, document.getElementById('stampLogoStatus'), (url) => {
-        card.stamp_logo_url = url; updateLogoStampAvailability(); setStampType('logo');
-      });
+      const local = URL.createObjectURL(file);
+      stampLogoPrev.style.backgroundImage = `url("${local}")`; stampLogoPrev.textContent = '';
+      uploadFile('/api/stamp/upload-logo', file, document.getElementById('stampLogoStatus'),
+        (url) => { card.stamp_logo_url = url; updateLogoStampAvailability(); setStampType('logo'); },
+        () => { paintEditor(); }
+      );
     });
     document.getElementById('bgFile').addEventListener('change', (e) => {
       const file = e.target.files[0]; if (!file) return;
       bgPrev.style.backgroundImage = `url("${URL.createObjectURL(file)}")`; bgPrev.textContent = '';
-      uploadFile('/api/stamp/upload-background', file, document.getElementById('bgStatus'), (url) => {
-        card.background_url = url; card.background_type = 'photo'; switchBgTab('photo'); paintEditor();
-      });
+      uploadFile('/api/stamp/upload-background', file, document.getElementById('bgStatus'),
+        (url) => { card.background_url = url; card.background_type = 'photo'; switchBgTab('photo'); paintEditor(); },
+        () => { paintEditor(); }
+      );
     });
 
     // ---- Kaart opslaan ----
