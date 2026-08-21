@@ -456,6 +456,9 @@
     .theme-btn.active { border-color: #fff; }
     .theme-swatch { height: 46px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
     .theme-name { display: block; font-size: 12.5px; font-weight: 600; color: var(--pearl); padding: 8px 6px; text-align: center; background: rgba(255,255,255,.03); }
+    /* Sectie 4 soepel in-/uitfaden (verborgen bij foto-achtergrond) */
+    #themeSection { transition: opacity .3s var(--ease), transform .3s var(--ease); }
+    #themeSection.collapsing { opacity: 0; transform: translateY(-8px); }
 
     /* Shapes */
     .shape-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px; }
@@ -732,8 +735,8 @@
                 </div>
               </section>
 
-              <!-- 4 · Thema stijlen -->
-              <section class="ed-section glass">
+              <!-- 4 · Thema stijlen (verborgen bij foto-achtergrond) -->
+              <section class="ed-section glass" id="themeSection">
                 <h3><span class="sec-num">4</span> Thema stijlen</h3>
                 <p class="b-sub">Een complete look in één klik.</p>
                 <div class="theme-grid" id="themeGrid"></div>
@@ -1249,6 +1252,7 @@
     const stampLogoPrev = document.getElementById('stampLogoPrev');
     const fontGrid = document.getElementById('fontGrid');
     const themeGrid = document.getElementById('themeGrid');
+    const themeSection = document.getElementById('themeSection');
     const bgTabs = document.getElementById('bgTabs');
     const logoPrev = document.getElementById('logoPrev');
     const bgPrev = document.getElementById('bgPrev');
@@ -1497,7 +1501,24 @@
       document.getElementById('bgPaneColor').classList.toggle('active', which === 'color');
       document.getElementById('bgPanePhoto').classList.toggle('active', which === 'photo');
       if (autoContrast.checked) setText(autoTextColor(), true);
+      updateThemeSectionVisibility();
       paintEditor();
+    }
+    // Thema stijlen (sectie 4) bepalen kleuren → zinloos bij een foto-achtergrond, dus verbergen.
+    // Deterministische timer (matcht de .3s CSS-transitie) i.p.v. transitionend, dat kan uitblijven.
+    let themeHideTimer = null;
+    function updateThemeSectionVisibility() {
+      if (themeHideTimer) { clearTimeout(themeHideTimer); themeHideTimer = null; }
+      if (card.background_type === 'photo') {
+        themeSection.classList.add('collapsing');            // uitfaden…
+        themeHideTimer = setTimeout(() => {                  // …daarna uit de layout
+          themeSection.style.display = 'none'; themeHideTimer = null;
+        }, 300);
+      } else {
+        themeSection.style.display = '';                     // terug in de layout
+        void themeSection.offsetHeight;                      // reflow forceren
+        themeSection.classList.remove('collapsing');         // infaden
+      }
     }
     [...bgTabs.children].forEach(btn => btn.addEventListener('click', () => switchBgTab(btn.dataset.bg)));
     [...fillToggle.children].forEach(btn => btn.addEventListener('click', () => setFill(btn.dataset.fill)));
