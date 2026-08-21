@@ -111,6 +111,19 @@
             background: rgba(226, 75, 75, 0.13); color: #FF9E9E; border: 1px solid rgba(226, 75, 75, 0.32); }
         .alert.hidden { display: none; }
 
+        /* Handmatig zoeken (camera-alternatief) */
+        .manual-wrap { margin-top: 16px; text-align: center; }
+        .manual-link { background: none; border: none; color: var(--muted); font-size: 14.5px; font-family: 'Inter', sans-serif; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+        .manual-link:hover { color: var(--gold); }
+        .manual-search { display: flex; gap: 10px; margin-top: 14px; }
+        .manual-search input[type="text"] { height: 54px; font-size: 16px; }
+        .manual-search .btn { margin-top: 0; min-height: 54px; width: auto; padding: 0 22px; font-size: 16px; border-radius: 14px; flex-shrink: 0; }
+        .manual-result { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; margin-top: 10px; padding: 14px 16px; border-radius: 14px; background: var(--glass); border: 1px solid var(--glass-brd); color: var(--text); font-family: 'Inter', sans-serif; cursor: pointer; transition: border-color 0.2s; }
+        .manual-result:hover { border-color: var(--glass-brd-2); }
+        .manual-result .mr-name { font-size: 16px; font-weight: 700; }
+        .manual-result .mr-meta { font-size: 13.5px; color: var(--muted); flex-shrink: 0; }
+        .loader-row { color: var(--muted); font-size: 14.5px; text-align: center; padding: 12px 0; }
+
         /* ===== PIN keypad ===== */
         .pin-dots { display: flex; gap: 18px; justify-content: center; margin: 8px 0 32px; height: 24px; }
         .pin-dot { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--muted);
@@ -346,6 +359,19 @@
                         <button class="camera-open" id="cameraBtn" onclick="startCamera()"><span class="cam-ic">📷</span> Camera openen</button>
                     </div>
                     <div class="alert hidden" id="scanAlert" style="text-align:center;"></div>
+
+                    <!-- Alternatief: handmatig zoeken als de camera niet werkt -->
+                    <div class="manual-wrap" id="manualHint">
+                        <button type="button" class="manual-link" id="manualToggle" onclick="toggleManualSearch()">Camera werkt niet? Zoek klant handmatig →</button>
+                        <div id="manualPanel" style="display:none;">
+                            <div class="manual-search">
+                                <input type="text" id="manualQuery" placeholder="Zoek op naam of telefoon…" autocomplete="off" />
+                                <button type="button" class="btn btn-green" id="manualSearchBtn" onclick="doManualSearch()">Zoeken</button>
+                            </div>
+                            <div class="alert hidden" id="manualAlert" style="text-align:center;"></div>
+                            <div id="manualResults"></div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Customer result -->
@@ -366,7 +392,7 @@
                         </div>
 
                         <div id="rewardControls" style="display:none;">
-                            <button class="btn btn-green" onclick="redeemReward()">Beloning uitreiken 🎉</button>
+                            <button class="btn btn-green" onclick="redeemReward(event)">Beloning uitreiken 🎉</button>
                         </div>
 
                         <button class="btn btn-ghost" onclick="resetToScan()">Annuleren</button>
@@ -431,6 +457,21 @@
         function showAlert(id, msg) { const el = $(id); el.textContent = msg; el.classList.remove('hidden'); }
         function hideAlert(id) { $(id).classList.add('hidden'); }
 
+        // ---- netwerk / API-helper ----
+        const NET_MSG = 'Geen internetverbinding. Controleer je verbinding en probeer opnieuw.';
+        // Wrap fetch zodat netwerkfouten (geen internet) begrijpelijk en herkenbaar zijn.
+        async function apiCall(url, opts) {
+            if (!navigator.onLine) { const e = new Error(NET_MSG); e.network = true; throw e; }
+            try {
+                return await fetch(url, opts);
+            } catch (_) {
+                const e = new Error(NET_MSG); e.network = true; throw e;
+            }
+        }
+        // Dubbele-scan bescherming: dezelfde kaart kan 3s lang niet opnieuw verwerkt worden.
+        let lastStampedQr = null, lastStampAt = 0;
+        const RESCAN_BLOCK_MS = 3000;
+
         // ---- routing on load ----
         function boot() {
             if (store.card_id && store.pin) {
@@ -453,13 +494,13 @@
             if (!email || !password) return showAlert('pairAlert', 'Vul e-mail en wachtwoord in.');
             btn.disabled = true; btn.textContent = 'Inloggen…';
             try {
-                const res = await fetch(API_BASE + '/api/stamp/login', {
+                const res = await apiCall(API_BASE + '/api/stamp/login', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password }),
                 });
-                const data = await res.json();
+                const data = await res.json().catch(() => ({}));
                 if (!res.ok || !data.token || !data.card_id) {
-                    showAlert('pairAlert', data.error || 'Inloggen mislukt.');
+                    showAlert('pairAlert', data.error || 'Inloggen mislukt. Controleer je gegevens.');
                     return;
                 }
                 localStorage.setItem(LS.token, data.token);
@@ -469,7 +510,7 @@
 
                 // Kaartgegevens ophalen (bedrijfsnaam, aantal stempels, beloning)
                 try {
-                    const cardRes = await fetch(API_BASE + '/api/stamp/cards/' + data.card_id);
+                    const cardRes = await apiCall(API_BASE + '/api/stamp/cards/' + data.card_id);
                     const card = await cardRes.json();
                     if (cardRes.ok) {
                         store.biz = card.business_name || 'Winkel';
@@ -490,7 +531,7 @@
                 hideAlert('setpinAlert');
                 showScreen('setpin');
             } catch (err) {
-                showAlert('pairAlert', 'Serverfout. Probeer opnieuw.');
+                showAlert('pairAlert', err.network ? err.message : 'Er ging iets mis. Probeer het opnieuw.');
             } finally {
                 btn.disabled = false; btn.textContent = 'Inloggen';
             }
@@ -587,6 +628,7 @@
             $('cameraWrap').classList.remove('on');
             $('cameraOpenWrap').style.display = 'flex';
             hideAlert('scanAlert');
+            hideManualSearch();
         }
         function lockScreen() {
             stopCamera();
@@ -598,7 +640,7 @@
         async function loadTodayStats() {
             if (!store.card_id) return;
             try {
-                const res = await fetch(API_BASE + '/api/stamp/today-stats?card_id=' + encodeURIComponent(store.card_id));
+                const res = await apiCall(API_BASE + '/api/stamp/today-stats?card_id=' + encodeURIComponent(store.card_id));
                 const data = await res.json();
                 if (res.ok && data.success) {
                     animateCount('statStamps', data.stamps_today || 0);
@@ -622,9 +664,13 @@
 
         async function startCamera() {
             hideAlert('scanAlert');
+            hideManualSearch();
+            const btn = $('cameraBtn');
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                return showAlert('scanAlert', 'Camera wordt niet ondersteund op dit apparaat.');
+                cameraProblem('Camera niet beschikbaar op dit apparaat of deze browser.');
+                return;
             }
+            if (btn) { btn.disabled = true; btn.innerHTML = '<span class="cam-ic">📷</span> Camera starten…'; }
             try {
                 stream = await navigator.mediaDevices.getUserMedia({
                     video: { facingMode: { ideal: 'environment' } }, audio: false,
@@ -637,8 +683,100 @@
                 scanning = true;
                 tick();
             } catch (err) {
-                showAlert('scanAlert', 'Geen toegang tot camera. Geef toestemming in de instellingen.');
+                // Geef per foutsoort een begrijpelijke uitleg.
+                const n = err && err.name;
+                if (n === 'NotAllowedError' || n === 'PermissionDeniedError' || n === 'SecurityError') {
+                    cameraProblem('Cameratoegang geweigerd. Tik op het slot- of camera-icoon in de adresbalk, sta cameratoegang toe en probeer opnieuw.');
+                } else if (n === 'NotFoundError' || n === 'DevicesNotFoundError') {
+                    cameraProblem('Geen camera gevonden op dit apparaat.');
+                } else if (n === 'NotReadableError' || n === 'TrackStartError') {
+                    cameraProblem('De camera is in gebruik door een andere app. Sluit die app en probeer opnieuw.');
+                } else {
+                    cameraProblem('Camera niet beschikbaar. Controleer of je toestemming hebt gegeven voor cameratoegang.');
+                }
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerHTML = '<span class="cam-ic">📷</span> Camera openen'; }
             }
+        }
+        // Camera-probleem tonen + het handmatig-zoeken alternatief openen.
+        function cameraProblem(msg) {
+            showAlert('scanAlert', msg);
+            showManualSearch();
+        }
+
+        // ---- Handmatig klant zoeken (alternatief voor de camera) ----
+        function showManualSearch() {
+            $('manualPanel').style.display = 'block';
+            $('manualToggle').textContent = 'Verberg handmatig zoeken';
+            const q = $('manualQuery'); if (q) q.focus();
+        }
+        function hideManualSearch() {
+            const p = $('manualPanel'); if (!p) return;
+            p.style.display = 'none';
+            $('manualToggle').textContent = 'Camera werkt niet? Zoek klant handmatig →';
+            $('manualResults').innerHTML = '';
+            hideAlert('manualAlert');
+        }
+        function toggleManualSearch() {
+            if ($('manualPanel').style.display === 'block') hideManualSearch();
+            else showManualSearch();
+        }
+        async function doManualSearch() {
+            const q = $('manualQuery').value.trim().toLowerCase();
+            const btn = $('manualSearchBtn');
+            hideAlert('manualAlert');
+            if (q.length < 2) { showAlert('manualAlert', 'Typ minimaal 2 tekens om te zoeken.'); return; }
+            btn.disabled = true; const orig = btn.textContent; btn.textContent = 'Bezig…';
+            $('manualResults').innerHTML = '<div class="loader-row">Zoeken…</div>';
+            try {
+                const res = await apiCall(API_BASE + '/api/stamp/customers/' + encodeURIComponent(store.card_id));
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error('laden mislukt');
+                const list = Array.isArray(data) ? data : (data.customers || data.holders || []);
+                const nq = q.replace(/\s/g, '');
+                const matches = list.filter(c => {
+                    const name = String(c.customer_name || c.name || '').toLowerCase();
+                    const phone = String(c.phone || c.telefoon || c.customer_phone || '').toLowerCase().replace(/\s/g, '');
+                    return name.includes(q) || (nq && phone.includes(nq));
+                }).slice(0, 8);
+                if (!matches.length) {
+                    $('manualResults').innerHTML = '';
+                    showAlert('manualAlert', 'Geen klant gevonden. Probeer een andere naam of scan de QR-code.');
+                    return;
+                }
+                $('manualResults').innerHTML = matches.map((c, i) => {
+                    const name = esc(c.customer_name || c.name || 'Klant');
+                    const col = c.stamps_collected ?? c.stamps ?? c.current_stamps ?? 0;
+                    const req = c.stamps_required ?? store.required ?? 0;
+                    return `<button type="button" class="manual-result" data-idx="${i}"><span class="mr-name">${name}</span><span class="mr-meta">${col}/${req} stempels</span></button>`;
+                }).join('');
+                $('manualResults').querySelectorAll('.manual-result').forEach(b =>
+                    b.addEventListener('click', () => selectManualCustomer(matches[b.dataset.idx | 0])));
+            } catch (err) {
+                $('manualResults').innerHTML = '';
+                showAlert('manualAlert', err.network ? err.message : 'Kon klanten niet laden. Probeer opnieuw.');
+            } finally {
+                btn.disabled = false; btn.textContent = orig;
+            }
+        }
+        function selectManualCustomer(c) {
+            const qr = c.customer_qr_code || c.qr_code || c.qr || c.holder_id || '';
+            if (!qr) { showAlert('manualAlert', 'Deze klant kan alleen via de QR-code gestempeld worden.'); return; }
+            stopCamera();
+            $('cameraWrap').classList.remove('on');
+            current = {
+                customer_qr_code: qr,
+                holder_id: c.holder_id,
+                customer_name: c.customer_name || c.name || 'Klant',
+                stamps_collected: c.stamps_collected ?? c.stamps ?? c.current_stamps ?? 0,
+                stamps_required: c.stamps_required ?? store.required ?? 0,
+                reward_available: !!c.reward_available,
+                reward_description: c.reward_description || store.reward,
+                total_rewards_earned: c.total_rewards_earned || 0,
+            };
+            amount = 1;
+            hideManualSearch();
+            showCustomer();
         }
         function stopCamera() {
             scanning = false;
@@ -661,25 +799,36 @@
         }
 
         async function onQrDetected(qr) {
+            // Dubbele scan: dezelfde kaart binnen 3s na een stempel negeren.
+            if (qr === lastStampedQr && (Date.now() - lastStampAt) < RESCAN_BLOCK_MS) {
+                showAlert('scanAlert', 'Even wachten… deze kaart is net gestempeld.');
+                // Blijf scannen; probeer over een moment opnieuw (voorkomt spam).
+                setTimeout(() => { if (scanning) { hideAlert('scanAlert'); rafId = requestAnimationFrame(tick); } }, 900);
+                return;
+            }
             scanning = false;
             stopCamera();
             $('cameraWrap').classList.remove('on');
+            hideManualSearch();
+            $('scanAlert').classList.remove('hidden');
+            $('scanAlert').textContent = 'Klant ophalen…';
             try {
                 const url = API_BASE + '/api/stamp/lookup?card_id=' + encodeURIComponent(store.card_id) +
                     '&customer_qr_code=' + encodeURIComponent(qr);
-                const res = await fetch(url);
-                const data = await res.json();
+                const res = await apiCall(url);
+                const data = await res.json().catch(() => ({}));
                 if (!res.ok || !data.success) {
                     $('cameraOpenWrap').style.display = 'flex';
-                    showAlert('scanAlert', data.error || 'Klant niet gevonden.');
+                    showAlert('scanAlert', data.error || 'Klant niet gevonden. Probeer de QR-code opnieuw te scannen.');
                     return;
                 }
+                hideAlert('scanAlert');
                 current = { ...data, customer_qr_code: qr };
                 amount = 1;
                 showCustomer();
             } catch (err) {
                 $('cameraOpenWrap').style.display = 'flex';
-                showAlert('scanAlert', 'Serverfout bij ophalen klant.');
+                showAlert('scanAlert', err.network ? err.message : 'Kon de klant niet ophalen. Probeer het opnieuw.');
             }
         }
 
@@ -746,20 +895,24 @@
 
         async function giveStamps() {
             const btn = $('giveBtn');
+            if (btn.disabled) return;               // voorkom dubbel klikken
             btn.disabled = true;
             const original = btn.textContent;
             btn.textContent = 'Bezig…';
+            hideAlert('scanAlert');
             try {
-                const res = await fetch(API_BASE + '/api/stamp/give', {
+                const res = await apiCall(API_BASE + '/api/stamp/give', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ card_id: store.card_id, customer_qr_code: current.customer_qr_code, amount }),
                 });
-                const data = await res.json();
+                const data = await res.json().catch(() => ({}));
                 if (!res.ok || !data.success) {
                     btn.disabled = false; btn.textContent = original;
-                    showAlert('scanAlert', data.error || 'Stempelen mislukt.');
+                    showAlert('scanAlert', data.error || 'Stempel niet opgeslagen — probeer opnieuw.');
                     return;
                 }
+                // Onthoud voor dubbele-scan bescherming (3s dezelfde kaart blokkeren).
+                lastStampedQr = current.customer_qr_code; lastStampAt = Date.now();
                 const req = data.stamps_required || store.required || 0;
                 const now = data.current_stamps || 0;
                 const full = data.reward_earned || (now >= req && req > 0);
@@ -775,23 +928,33 @@
                 }
             } catch (err) {
                 btn.disabled = false; btn.textContent = original;
-                showAlert('scanAlert', 'Serverfout bij stempelen.');
+                showAlert('scanAlert', err.network ? err.message : 'Stempel niet opgeslagen — probeer opnieuw.');
             }
         }
 
-        async function redeemReward() {
+        async function redeemReward(ev) {
+            const btn = ev && ev.currentTarget ? ev.currentTarget : null;
+            if (btn) { if (btn.disabled) return; btn.disabled = true; var orig = btn.textContent; btn.textContent = 'Bezig…'; }
+            hideAlert('scanAlert');
             try {
-                const res = await fetch(API_BASE + '/api/stamp/redeem', {
+                const res = await apiCall(API_BASE + '/api/stamp/redeem', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ holder_id: current.holder_id }),
                 });
-                const data = await res.json();
-                if (!res.ok || !data.success) { showAlert('scanAlert', data.error || 'Inwisselen mislukt.'); return; }
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok || !data.success) {
+                    if (btn) { btn.disabled = false; btn.textContent = orig; }
+                    showAlert('scanAlert', data.error || 'Beloning niet ingewisseld — probeer opnieuw.');
+                    return;
+                }
+                // Blokkeer dubbele inwisseling van dezelfde kaart kortstondig.
+                lastStampedQr = current.customer_qr_code; lastStampAt = Date.now();
                 loadTodayStats();
                 showSuccess('🎉', 'Beloning uitgereikt!', (current.reward_description || store.reward || 'Beloning') + ' voor ' + (current.customer_name || 'de klant'));
                 fireConfetti();
             } catch (err) {
-                showAlert('scanAlert', 'Serverfout bij inwisselen.');
+                if (btn) { btn.disabled = false; btn.textContent = orig; }
+                showAlert('scanAlert', err.network ? err.message : 'Beloning niet ingewisseld — probeer opnieuw.');
             }
         }
 
@@ -855,16 +1018,16 @@
             if (!store.email) return showAlert('unpairAlert', 'Geen account bekend op dit apparaat.');
             btn.disabled = true; btn.textContent = 'Controleren…';
             try {
-                const res = await fetch(API_BASE + '/api/stamp/login', {
+                const res = await apiCall(API_BASE + '/api/stamp/login', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: store.email, password }),
                 });
-                const data = await res.json();
+                const data = await res.json().catch(() => ({}));
                 if (!res.ok || !data.token) { showAlert('unpairAlert', 'Onjuist wachtwoord.'); return; }
                 Object.values(LS).forEach(k => localStorage.removeItem(k));
                 location.reload();
             } catch (err) {
-                showAlert('unpairAlert', 'Serverfout. Probeer opnieuw.');
+                showAlert('unpairAlert', err.network ? err.message : 'Er ging iets mis. Probeer opnieuw.');
             } finally {
                 btn.disabled = false; btn.textContent = 'Uitloggen';
             }

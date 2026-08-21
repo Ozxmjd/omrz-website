@@ -2134,6 +2134,12 @@
       if (token) h['Authorization'] = 'Bearer ' + token;
       return h;
     }
+
+    // ---- Netwerk-hulp: onderscheid "geen internet" van serverfouten ----
+    const NET_MSG = 'Geen internetverbinding. Controleer je verbinding en probeer opnieuw.';
+    function isNetworkError(err) {
+      return !navigator.onLine || (err instanceof TypeError) || (err && err.message === 'Failed to fetch');
+    }
     function setScanStatus(msg, isError) {
       scanStatus.textContent = msg || '';
       scanStatus.classList.toggle('error', !!isError);
@@ -2213,6 +2219,13 @@
 
     // QR gevonden → camera bevriezen (foto-effect), groene rand + "QR Gevonden!", daarna data ophalen.
     async function onQrDetected(qrData) {
+      // Geen internet? Direct duidelijk melden en blijven scannen.
+      if (!navigator.onLine) {
+        setScanStatus(NET_MSG, true);
+        scanBusy = false;
+        scanRAF = requestAnimationFrame(scanTick);
+        return;
+      }
       scanBusy = true;
       scannedQr = qrData;
       if (scanRAF) { cancelAnimationFrame(scanRAF); scanRAF = null; }
@@ -2316,6 +2329,7 @@
 
     // Bevestigen → POST /api/stamp/give met de gekozen hoeveelheid.
     async function confirmGive() {
+      if (confirmBtn.disabled) return;   // voorkom dubbel klikken tijdens laden
       confirmBtn.disabled = true; confirmBtn.classList.add('loading');
       custError.hidden = true;
       try {
@@ -2325,11 +2339,11 @@
           body: JSON.stringify({ card_id: cardId, customer_qr_code: scannedQr, amount: selectedAmount }),
         });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error || data.message || 'Stempel geven mislukt');
+        if (!res.ok) throw new Error(data.error || data.message || 'Stempel niet opgeslagen — probeer opnieuw.');
         newCount = Number(data.stamps ?? data.current_stamps ?? data.stamp_count ?? (currentStamps + selectedAmount));
         showResult();
       } catch (err) {
-        custError.textContent = err.message || 'Er ging iets mis. Probeer opnieuw.';
+        custError.textContent = isNetworkError(err) ? NET_MSG : (err.message || 'Stempel niet opgeslagen — probeer opnieuw.');
         custError.hidden = false;
       } finally {
         confirmBtn.disabled = false; confirmBtn.classList.remove('loading');
@@ -2361,6 +2375,7 @@
 
     // Beloning uitreiken → reset stempels naar 0 via POST /api/stamp/redeem.
     async function redeemReward() {
+      if (redeemBtn.disabled) return;   // voorkom dubbel klikken tijdens laden
       redeemBtn.disabled = true; redeemBtn.classList.add('loading');
       redeemError.hidden = true;
       try {
@@ -2370,14 +2385,14 @@
           body: JSON.stringify({ card_id: cardId, customer_qr_code: scannedQr }),
         });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error || data.message || 'Beloning uitreiken mislukt');
+        if (!res.ok) throw new Error(data.error || data.message || 'Beloning niet ingewisseld — probeer opnieuw.');
         currentStamps = 0; newCount = 0;
         rewardBanner.textContent = '✅ Beloning uitgedeeld! Stempels gereset naar 0';
         rewardBanner.classList.add('redeemed');
         redeemBtn.hidden = true;
         resultSub.textContent = `Nu heeft die 0/${stampsRequired} stempels`;
       } catch (err) {
-        redeemError.textContent = err.message || 'Er ging iets mis. Probeer opnieuw.';
+        redeemError.textContent = isNetworkError(err) ? NET_MSG : (err.message || 'Beloning niet ingewisseld — probeer opnieuw.');
         redeemError.hidden = false;
       } finally {
         redeemBtn.disabled = false; redeemBtn.classList.remove('loading');
