@@ -593,16 +593,22 @@
               <h3>Actieve stempelkaart</h3>
               <p class="b-sub">Zo ziet je kaart eruit in de wallet van je klant.</p>
               <div class="preview-stage">
-                <div class="stampcard" id="ovPreview">
-                  <div class="sc-top">
-                    <span class="sc-biz" id="ovBiz">Mijn zaak</span>
-                    <span class="sc-chip"></span>
+                <div class="stampcard rich" id="ovPreview">
+                  <div class="sc-bg" id="ovBg"></div>
+                  <div class="sc-shade"></div>
+                  <div class="sc-inner">
+                    <div class="sc-top">
+                      <div class="sc-brand">
+                        <img class="sc-logo" id="ovLogo" alt="Logo" hidden />
+                        <span class="sc-biz" id="ovBiz">Mijn zaak</span>
+                      </div>
+                    </div>
+                    <div class="sc-hi" id="ovHi">Hi Sara! 👋</div>
+                    <div class="sc-title" id="ovTitle">Stempelkaart</div>
+                    <div class="sc-reward" id="ovReward">Spaar stempels → gratis product</div>
+                    <div class="sc-stamps" id="ovStamps"></div>
+                    <div class="sc-progress" id="ovProgress">0 / 6 stempels</div>
                   </div>
-                  <div class="sc-hi" id="ovHi">Hi daar! 👋</div>
-                  <div class="sc-title" id="ovTitle">Stempelkaart</div>
-                  <div class="sc-reward" id="ovReward">Spaar stempels → gratis product</div>
-                  <div class="sc-stamps" id="ovStamps"></div>
-                  <div class="sc-progress" id="ovProgress">0 / 6 stempels</div>
                 </div>
               </div>
             </div>
@@ -1091,6 +1097,7 @@
       closeSidebar();
       if (tab === 'qr') renderQR();
       if (tab === 'klanten') loadCustomers();
+      if (tab === 'overzicht') paintOverview();   // altijd de actuele kaart tonen
       if (tab === 'statistieken') renderChart(currentRange);
       if (tab !== 'stempel') { stopScanner(); resetScanFlow(); } // camera vrijgeven + flow resetten bij verlaten van de scan-tab
     }
@@ -1112,37 +1119,9 @@
       window.location.href = 'login.html';
     });
 
-    // ---- Stempelrij renderen ----
-    function renderStampRow(el, total, filled, icon) {
-      el.style.gridTemplateColumns = `repeat(${Math.min(total, 6)}, 1fr)`;
-      el.innerHTML = '';
-      for (let i = 0; i < total; i++) {
-        const s = document.createElement('div');
-        const isFilled = i < filled;
-        s.className = 'sc-stamp' + (isFilled ? ' filled' : ' empty');
-        s.textContent = icon || '⭐';
-        el.appendChild(s);
-      }
-    }
-
-    // ---- Kaart-preview vullen ----
-    function paintPreview(prefix, c, filled) {
-      const cardEl = document.getElementById(prefix === 'ov' ? 'ovPreview' : 'editPreview');
-      cardEl.style.background = c.primary_color;
-      document.getElementById(prefix + 'Biz').textContent = c.business_name || 'Mijn zaak';
-      // Klantnaam-plaatshouder — in de wallet van de klant staat hier hun eigen naam.
-      const hi = document.getElementById(prefix + 'Hi');
-      if (hi) hi.textContent = 'Hi daar! 👋';
-      document.getElementById(prefix + 'Title').textContent = c.card_title || 'Stempelkaart';
-      document.getElementById(prefix + 'Reward').textContent =
-        `Spaar ${c.stamps_required} stempels → ${c.reward_description || 'gratis product'}`;
-      renderStampRow(document.getElementById(prefix + 'Stamps'), c.stamps_required, filled, c.stamp_style);
-      document.getElementById(prefix + 'Progress').textContent = `${filled} / ${c.stamps_required} stempels`;
-    }
-
+    // Beide previews (Overzicht + Mijn Kaart) gebruiken exact dezelfde renderer → altijd identiek.
     function refreshPreviews() {
-      // Overzicht toont een voorbeeld met wat gespaarde stempels; de editor-preview heeft z'n eigen renderer.
-      paintPreview('ov', card, Math.min(2, card.stamps_required));
+      paintOverview();
       paintEditor();
       document.getElementById('bizName').textContent = card.business_name || 'Mijn zaak';
     }
@@ -1255,15 +1234,29 @@
     const bgTabs = document.getElementById('bgTabs');
     const logoPrev = document.getElementById('logoPrev');
     const bgPrev = document.getElementById('bgPrev');
-    // Preview
-    const pvBg = document.getElementById('pvBg');
-    const pvLogo = document.getElementById('pvLogo');
-    const pvBiz = document.getElementById('pvBiz');
-    const pvHi = document.getElementById('pvHi');
-    const pvTitle = document.getElementById('pvTitle');
-    const pvReward = document.getElementById('pvReward');
-    const pvStamps = document.getElementById('pvStamps');
-    const pvProgress = document.getElementById('pvProgress');
+    // Preview-refs, gebundeld per kaart zodat editor- én overzicht-preview dezelfde renderer delen.
+    const editorRefs = {
+      cardEl: document.getElementById('editPreview'),
+      bg: document.getElementById('pvBg'),
+      logo: document.getElementById('pvLogo'),
+      biz: document.getElementById('pvBiz'),
+      hi: document.getElementById('pvHi'),
+      title: document.getElementById('pvTitle'),
+      reward: document.getElementById('pvReward'),
+      stamps: document.getElementById('pvStamps'),
+      progress: document.getElementById('pvProgress'),
+    };
+    const overviewRefs = {
+      cardEl: document.getElementById('ovPreview'),
+      bg: document.getElementById('ovBg'),
+      logo: document.getElementById('ovLogo'),
+      biz: document.getElementById('ovBiz'),
+      hi: document.getElementById('ovHi'),
+      title: document.getElementById('ovTitle'),
+      reward: document.getElementById('ovReward'),
+      stamps: document.getElementById('ovStamps'),
+      progress: document.getElementById('ovProgress'),
+    };
 
     // ---- Stempel-rendering ----
     // Bron-afbeelding voor logo-stempels: aparte stempel-upload heeft voorrang, anders het bedrijfslogo.
@@ -1320,45 +1313,48 @@
       return st;
     }
 
-    // ---- Live preview ----
-    function paintEditor() {
+    // ---- Live preview (gedeelde renderer voor editor- én overzicht-kaart) ----
+    // t = { cardEl, bg, logo, biz, hi, title, reward, stamps, progress }
+    function renderCardInto(t) {
       const c = card;
-      const el = document.getElementById('editPreview');
+      const el = t.cardEl;
       if (!el) return;
       const photo = c.background_type === 'photo' && !!c.background_url;
       el.classList.toggle('has-photo', photo);
-      if (photo) { el.style.background = '#111'; pvBg.style.backgroundImage = `url("${absoluteUrl(c.background_url)}")`; }
-      else { el.style.background = c.primary_color || '#1a1a2e'; pvBg.style.backgroundImage = 'none'; }
+      if (photo) { el.style.background = '#111'; t.bg.style.backgroundImage = `url("${absoluteUrl(c.background_url)}")`; }
+      else { el.style.background = c.primary_color || '#1a1a2e'; t.bg.style.backgroundImage = 'none'; }
 
       // Lettertype toepassen op alle kaartteksten.
       el.style.fontFamily = fontStack(c.card_font);
 
       const txt = c.text_color || '#ffffff';
       el.style.color = txt;
-      if (c.logo_url) { pvLogo.src = absoluteUrl(c.logo_url); pvLogo.hidden = false; } else { pvLogo.hidden = true; }
+      if (c.logo_url) { t.logo.src = absoluteUrl(c.logo_url); t.logo.hidden = false; } else { t.logo.hidden = true; }
       // Teksten worden EXACT getoond zoals getypt (geen hoofdletter-/kleineletter-conversie).
-      pvBiz.textContent = c.business_name || 'Mijn zaak'; pvBiz.style.color = txt;
-      pvHi.textContent = 'Hi Sara! 👋'; pvHi.style.color = txt;
-      pvTitle.textContent = c.card_title || 'Stempelkaart'; pvTitle.style.color = txt;
+      t.biz.textContent = c.business_name || 'Mijn zaak'; t.biz.style.color = txt;
+      t.hi.textContent = 'Hi Sara! 👋'; t.hi.style.color = txt;
+      t.title.textContent = c.card_title || 'Stempelkaart'; t.title.style.color = txt;
 
       // Spaardoel-tekst: optioneel tonen, met eigen tekst of automatische fallback.
       if (c.show_reward_text === false) {
-        pvReward.style.display = 'none';
+        t.reward.style.display = 'none';
       } else {
-        pvReward.style.display = '';
-        pvReward.textContent = (c.reward_text && c.reward_text.trim())
+        t.reward.style.display = '';
+        t.reward.textContent = (c.reward_text && c.reward_text.trim())
           ? c.reward_text
           : `Spaar ${c.stamps_required} stempels → ${c.reward_description || 'gratis product'}`;
-        pvReward.style.color = txt; pvReward.style.opacity = '.8';
+        t.reward.style.color = txt; t.reward.style.opacity = '.8';
       }
 
       const filled = Math.min(3, c.stamps_required);
-      pvStamps.style.gridTemplateColumns = `repeat(${Math.min(c.stamps_required, 6)}, 1fr)`;
-      pvStamps.innerHTML = '';
-      for (let i = 0; i < c.stamps_required; i++) pvStamps.appendChild(stampNode(i < filled));
-      pvProgress.textContent = `${filled} / ${c.stamps_required} stempels`;
-      pvProgress.style.color = c.accent_color || txt;
+      t.stamps.style.gridTemplateColumns = `repeat(${Math.min(c.stamps_required, 6)}, 1fr)`;
+      t.stamps.innerHTML = '';
+      for (let i = 0; i < c.stamps_required; i++) t.stamps.appendChild(stampNode(i < filled));
+      t.progress.textContent = `${filled} / ${c.stamps_required} stempels`;
+      t.progress.style.color = c.accent_color || txt;
     }
+    function paintEditor() { renderCardInto(editorRefs); }
+    function paintOverview() { renderCardInto(overviewRefs); }
 
     // ---- Presets bouwen / markeren ----
     function buildPresets(container, list, onPick) {
@@ -1652,7 +1648,7 @@
       const local = URL.createObjectURL(file);
       // Direct zichtbaar: toon het gekozen logo meteen in de instelling én op de kaart-preview.
       logoPrev.style.backgroundImage = `url("${local}")`; logoPrev.textContent = '';
-      pvLogo.src = local; pvLogo.hidden = false;
+      editorRefs.logo.src = local; editorRefs.logo.hidden = false;
       stampTypeLogoBtn.hidden = false;
       uploadFile('/api/stamp/upload-logo', file, document.getElementById('logoStatus'),
         (url) => { card.logo_url = url; updateLogoStampAvailability(); paintEditor(); },
@@ -1723,6 +1719,7 @@
         if (!res.ok) throw new Error(data.error || 'Opslaan mislukt');
         if (data.id && !cardId) localStorage.setItem('omrz_card_id', data.id);
         note.textContent = 'Opgeslagen ✓'; note.classList.add('ok');
+        paintOverview();   // Overzicht-preview direct bijwerken naar de zojuist opgeslagen kaart
       } catch (err) {
         note.textContent = 'Kon niet opslaan — probeer opnieuw.'; note.classList.add('error');
       } finally {
