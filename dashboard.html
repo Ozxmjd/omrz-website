@@ -8,7 +8,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800;900&family=Lora:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
   <style>
     :root {
@@ -413,6 +413,20 @@
     .preset { width: 34px; height: 34px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: transform .15s var(--ease), border-color .15s var(--ease); box-shadow: inset 0 0 0 1px rgba(255,255,255,.14); }
     .preset:hover { transform: scale(1.12); }
     .preset.active { border-color: #fff; }
+    .cp-hexwrap { display: flex; flex-direction: column; gap: 5px; }
+    .hex-input { width: 118px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 14px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: .04em; background: rgba(255,255,255,.04); border: 1px solid var(--border-strong); border-radius: 9px; padding: 8px 10px; }
+    .hex-input:focus { outline: none; border-color: #fff; background: rgba(255,255,255,.07); }
+    .hex-input.invalid { border-color: #ff8f8f; color: #ffb4b4; }
+
+    /* Font picker */
+    .font-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .font-btn { padding: 12px 14px; border: 1px solid var(--border-strong); border-radius: 12px; background: rgba(255,255,255,.04); color: #fff; cursor: pointer; font-size: 17px; line-height: 1.2; text-align: left; transition: border-color .2s var(--ease), background .2s var(--ease); }
+    .font-btn small { display: block; font-family: var(--font); font-size: 11.5px; font-weight: 500; color: var(--muted); margin-top: 3px; }
+    .font-btn:hover { background: rgba(255,255,255,.08); }
+    .font-btn.active { border-color: #fff; background: rgba(255,255,255,.1); }
+
+    /* Logo-stempel (afbeelding in vorm-masker) */
+    .sc-stamps .st-img { width: 100%; height: 100%; display: block; background-size: cover; background-position: center; }
 
     /* Segmented tabs */
     .ed-tabs, .toggle-row { display: inline-flex; padding: 4px; border-radius: 12px; border: 1px solid var(--border); background: rgba(255,255,255,.03); margin-bottom: 18px; }
@@ -654,6 +668,11 @@
                     <input type="text" id="fReward" placeholder="Gratis koffie" />
                   </div>
                   <div class="field">
+                    <label class="check-row" style="margin:0 0 12px;"><input type="checkbox" id="showRewardText" checked /> Toon spaardoel tekst op de kaart</label>
+                    <input type="text" id="rewardText" placeholder="Spaar 6 = gratis koffie" />
+                    <div class="upload-hint">Laat leeg voor automatische tekst: “Spaar X stempels → beloning”.</div>
+                  </div>
+                  <div class="field">
                     <label for="fStamps">Aantal stempels <span class="range-val" id="fStampsVal">6</span></label>
                     <input type="range" class="range" id="fStamps" min="4" max="12" value="6" />
                   </div>
@@ -689,9 +708,9 @@
                 <div class="ed-tabpane active" id="bgPaneColor">
                   <div class="cp-main">
                     <input type="color" id="primaryColor" value="#1a1a2e" aria-label="Achtergrondkleur" />
-                    <div>
-                      <div class="cp-hex-label">Gekozen kleur</div>
-                      <div class="cp-hex" id="primaryHex">#1A1A2E</div>
+                    <div class="cp-hexwrap">
+                      <span class="cp-hex-label">Hex-code</span>
+                      <input type="text" class="hex-input" id="primaryHex" value="#1A1A2E" maxlength="7" spellcheck="false" aria-label="Achtergrond hex-code" />
                     </div>
                   </div>
                   <div class="preset-grid" id="primaryPresets"></div>
@@ -730,29 +749,60 @@
                   <button type="button" data-fill="filled" class="active">Gevuld</button>
                   <button type="button" data-fill="outline">Outline</button>
                 </div>
+
+                <span class="field-label-inline">Vulling</span>
+                <div class="toggle-row" id="stampTypeToggle" style="margin-bottom:14px;">
+                  <button type="button" data-stamptype="shape" class="active">Kleur</button>
+                  <button type="button" data-stamptype="logo" id="stampTypeLogoBtn" hidden>Mijn logo</button>
+                </div>
+                <div class="uploader" style="margin-bottom:18px;">
+                  <div class="upload-prev" id="stampLogoPrev">🖼️</div>
+                  <div class="upload-main">
+                    <label class="btn btn-ghost btn-upload">
+                      <span class="btn-label">Stempel-afbeelding uploaden</span>
+                      <input type="file" id="stampLogoFile" accept="image/png,image/jpeg" />
+                    </label>
+                    <div class="upload-hint">Los van je logo — de vorm werkt als masker en de afbeelding vult elke verdiende stempel.</div>
+                    <div class="upload-status" id="stampLogoStatus"></div>
+                  </div>
+                </div>
+
                 <span class="field-label-inline">Stempel kleur</span>
                 <div class="cp-main">
                   <input type="color" id="stampColor" value="#c9a45c" aria-label="Stempelkleur" />
-                  <div><div class="cp-hex-label">Stempel kleur</div><div class="cp-hex" id="stampHex">#C9A45C</div></div>
+                  <div class="cp-hexwrap">
+                    <span class="cp-hex-label">Hex-code</span>
+                    <input type="text" class="hex-input" id="stampHex" value="#C9A45C" maxlength="7" spellcheck="false" aria-label="Stempel hex-code" />
+                  </div>
                 </div>
                 <div class="preset-grid" id="stampPresets"></div>
               </section>
 
-              <!-- 6 · Tekst & kleuren -->
+              <!-- 6 · Lettertype, tekst & kleuren -->
               <section class="ed-section glass">
-                <h3><span class="sec-num">6</span> Tekst &amp; kleuren</h3>
-                <p class="b-sub">Tekstkleur en accentkleur van de kaart.</p>
+                <h3><span class="sec-num">6</span> Lettertype, tekst &amp; kleuren</h3>
+                <p class="b-sub">Kies een lettertype en de tekst- en accentkleur van de kaart.</p>
+
+                <span class="field-label-inline">Lettertype</span>
+                <div class="font-grid" id="fontGrid" style="margin-bottom:22px;"></div>
+
                 <span class="field-label-inline">Tekstkleur</span>
                 <div class="cp-main">
                   <input type="color" id="textColor" value="#ffffff" aria-label="Tekstkleur" />
-                  <div><div class="cp-hex-label">Tekstkleur</div><div class="cp-hex" id="textHex">#FFFFFF</div></div>
+                  <div class="cp-hexwrap">
+                    <span class="cp-hex-label">Hex-code</span>
+                    <input type="text" class="hex-input" id="textHex" value="#FFFFFF" maxlength="7" spellcheck="false" aria-label="Tekst hex-code" />
+                  </div>
                 </div>
                 <label class="check-row"><input type="checkbox" id="autoContrast" /> Automatisch contrast (zwart/wit op basis van achtergrond)</label>
 
                 <span class="field-label-inline" style="margin-top:20px;">Accentkleur</span>
                 <div class="cp-main">
                   <input type="color" id="accentColor" value="#c9a45c" aria-label="Accentkleur" />
-                  <div><div class="cp-hex-label">Accentkleur</div><div class="cp-hex" id="accentHex">#C9A45C</div></div>
+                  <div class="cp-hexwrap">
+                    <span class="cp-hex-label">Hex-code</span>
+                    <input type="text" class="hex-input" id="accentHex" value="#C9A45C" maxlength="7" spellcheck="false" aria-label="Accent hex-code" />
+                  </div>
                 </div>
                 <div class="preset-grid" id="accentPresets"></div>
               </section>
@@ -1000,7 +1050,10 @@
       business_name: 'Café OMRZ',
       card_title: 'Koffie Spaarkaart',
       reward_description: 'Gratis koffie',
+      show_reward_text: true,
+      reward_text: '',
       stamps_required: 6,
+      card_font: 'Inter',
       logo_url: '',
       background_url: '',
       background_type: 'color',
@@ -1012,6 +1065,8 @@
       stamp_shape: 'star',
       stamp_fill: 'filled',
       stamp_style: '★',
+      stamp_type: 'shape',
+      stamp_logo_url: '',
     };
     let stats = { total_customers: 0, total_stamps: 0, total_rewards: 0 };
 
@@ -1071,7 +1126,7 @@
       if (hi) hi.textContent = 'Hi daar! 👋';
       document.getElementById(prefix + 'Title').textContent = c.card_title || 'Stempelkaart';
       document.getElementById(prefix + 'Reward').textContent =
-        `Spaar ${c.stamps_required} stempels → ${(c.reward_description || 'gratis product').toLowerCase()}`;
+        `Spaar ${c.stamps_required} stempels → ${c.reward_description || 'gratis product'}`;
       renderStampRow(document.getElementById(prefix + 'Stamps'), c.stamps_required, filled, c.stamp_style);
       document.getElementById(prefix + 'Progress').textContent = `${filled} / ${c.stamps_required} stempels`;
     }
@@ -1108,18 +1163,41 @@
     };
 
     const SHAPE_PATH = {
-      circle: '<circle cx="12" cy="12" r="9"/>',
-      square: '<rect x="3.5" y="3.5" width="17" height="17" rx="4"/>',
-      star:   '<path d="M12 2.6l2.85 5.9 6.5.62-4.9 4.28 1.46 6.36L12 16.9 6.09 20.36l1.46-6.36-4.9-4.28 6.5-.62z"/>',
-      heart:  '<path d="M12 20.6l-1.3-1.2C6 15.1 3 12.4 3 9.1 3 6.6 4.9 4.7 7.3 4.7c1.5 0 2.9.7 3.8 1.9L12 7.7l.9-1.1c.9-1.2 2.3-1.9 3.8-1.9 2.4 0 4.3 1.9 4.3 4.4 0 3.3-3 6-7.7 10.3z"/>',
+      circle:  '<circle cx="12" cy="12" r="9"/>',
+      square:  '<rect x="3.5" y="3.5" width="17" height="17" rx="4"/>',
+      star:    '<path d="M12 2.6l2.85 5.9 6.5.62-4.9 4.28 1.46 6.36L12 16.9 6.09 20.36l1.46-6.36-4.9-4.28 6.5-.62z"/>',
+      heart:   '<path d="M12 20.6l-1.3-1.2C6 15.1 3 12.4 3 9.1 3 6.6 4.9 4.7 7.3 4.7c1.5 0 2.9.7 3.8 1.9L12 7.7l.9-1.1c.9-1.2 2.3-1.9 3.8-1.9 2.4 0 4.3 1.9 4.3 4.4 0 3.3-3 6-7.7 10.3z"/>',
+      diamond: '<path d="M12 2.2l9.3 9.8-9.3 9.8L2.7 12z"/>',
+      hexagon: '<path d="M12 2.3l8.5 4.9v9.6L12 21.7l-8.5-4.9V7.2z"/>',
+      flower:  '<path d="M12 2c1.55 0 2.8 1.25 2.8 2.8 1.1-1.1 2.9-1.1 4 0s1.1 2.9 0 4c1.55 0 2.8 1.25 2.8 2.8s-1.25 2.8-2.8 2.8c1.1 1.1 1.1 2.9 0 4s-2.9 1.1-4 0c0 1.55-1.25 2.8-2.8 2.8s-2.8-1.25-2.8-2.8c-1.1 1.1-2.9 1.1-4 0s-1.1-2.9 0-4C3.65 14.4 2.4 13.15 2.4 11.6S3.65 8.8 5.2 8.8c-1.1-1.1-1.1-2.9 0-4s2.9-1.1 4 0C9.2 3.25 10.45 2 12 2zm0 6.4a3.2 3.2 0 1 0 0 6.4 3.2 3.2 0 0 0 0-6.4z"/>',
+      bolt:    '<path d="M13.5 2L4 13.2h6.2L9.4 22l9.6-11.6h-6.3z"/>',
+      crown:   '<path d="M3 8.5l3.6 2.4L12 4l5.4 6.9L21 8.5l-1.8 10.5H4.8z"/>',
+      coffee:  '<path d="M4 7.5h13v4.5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM17 8.5h2.2a2.4 2.4 0 0 1 0 4.8H17zM5 20.5h11"/>',
     };
-    const SHAPE_GLYPH = { circle:'●', square:'■', star:'★', heart:'♥' };
+    const SHAPE_GLYPH = { circle:'●', square:'■', star:'★', heart:'♥', diamond:'◆', hexagon:'⬢', flower:'✿', bolt:'⚡', crown:'👑', coffee:'☕' };
     const SHAPES = [
-      { key:'circle', label:'Cirkel' },
-      { key:'star',   label:'Ster' },
-      { key:'heart',  label:'Hart' },
-      { key:'square', label:'Vierkant' },
+      { key:'circle',  label:'Cirkel' },
+      { key:'star',    label:'Ster' },
+      { key:'heart',   label:'Hart' },
+      { key:'square',  label:'Vierkant' },
+      { key:'diamond', label:'Diamant' },
+      { key:'hexagon', label:'Zeshoek' },
+      { key:'flower',  label:'Bloem' },
+      { key:'bolt',    label:'Bliksem' },
+      { key:'crown',   label:'Kroon' },
+      { key:'coffee',  label:'Koffie' },
     ];
+
+    // ---- Lettertypen (Google Fonts) ----
+    const FONTS = [
+      { key:'Inter',            note:'Modern',          stack:"'Inter', sans-serif" },
+      { key:'Playfair Display', note:'Elegant serif',   stack:"'Playfair Display', serif" },
+      { key:'Poppins',          note:'Rond, vriendelijk', stack:"'Poppins', sans-serif" },
+      { key:'Montserrat',       note:'Strak',           stack:"'Montserrat', sans-serif" },
+      { key:'Lora',             note:'Klassiek serif',  stack:"'Lora', serif" },
+      { key:'Bebas Neue',       note:'Bold display',    stack:"'Bebas Neue', sans-serif" },
+    ];
+    const fontStack = (name) => (FONTS.find(f => f.key === name) || FONTS[0]).stack;
 
     // ---- Kleur-helpers ----
     const isHex = (v) => /^#[0-9a-fA-F]{6}$/.test(v || '');
@@ -1138,6 +1216,8 @@
     const fBiz = document.getElementById('fBiz');
     const fTitle = document.getElementById('fTitle');
     const fReward = document.getElementById('fReward');
+    const showRewardText = document.getElementById('showRewardText');
+    const rewardText = document.getElementById('rewardText');
     const fStamps = document.getElementById('fStamps');
     const fStampsVal = document.getElementById('fStampsVal');
     const primaryColor = document.getElementById('primaryColor');
@@ -1155,6 +1235,10 @@
     const stampPresets = document.getElementById('stampPresets');
     const shapeGrid = document.getElementById('shapeGrid');
     const fillToggle = document.getElementById('fillToggle');
+    const stampTypeToggle = document.getElementById('stampTypeToggle');
+    const stampTypeLogoBtn = document.getElementById('stampTypeLogoBtn');
+    const stampLogoPrev = document.getElementById('stampLogoPrev');
+    const fontGrid = document.getElementById('fontGrid');
     const themeGrid = document.getElementById('themeGrid');
     const bgTabs = document.getElementById('bgTabs');
     const logoPrev = document.getElementById('logoPrev');
@@ -1170,9 +1254,29 @@
     const pvStamps = document.getElementById('pvStamps');
     const pvProgress = document.getElementById('pvProgress');
 
-    // ---- Stempel-SVG ----
-    function stampSVG(active) {
-      const path = SHAPE_PATH[card.stamp_shape] || SHAPE_PATH.circle;
+    // ---- Stempel-rendering ----
+    // Bron-afbeelding voor logo-stempels: aparte stempel-upload heeft voorrang, anders het bedrijfslogo.
+    const stampImageSrc = () => card.stamp_type === 'logo' ? (card.stamp_logo_url || card.logo_url || '') : '';
+    // De gekozen vorm als SVG-masker (data-URI) — het logo vult exact die vorm.
+    function shapeMaskUrl(shape) {
+      const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='#000'>${SHAPE_PATH[shape] || SHAPE_PATH.circle}</svg>`;
+      return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+    }
+    function stampHTML(active) {
+      const shape = card.stamp_shape || 'circle';
+      const path = SHAPE_PATH[shape] || SHAPE_PATH.circle;
+      const img = stampImageSrc();
+
+      // Logo-als-stempel: verdiende stempel = logo gemaskerd in de vorm; leeg = vage vorm-omtrek.
+      if (card.stamp_type === 'logo' && img) {
+        if (active) {
+          const mask = shapeMaskUrl(shape);
+          return `<span class="st"><span class="st-img" style="background-image:url('${img}');-webkit-mask:${mask} center/contain no-repeat;mask:${mask} center/contain no-repeat;"></span></span>`;
+        }
+        return `<span class="st"><svg viewBox="0 0 24 24" fill="none" stroke="${card.text_color || '#ffffff'}" stroke-width="1.8" stroke-linejoin="round" opacity="0.3">${path}</svg></span>`;
+      }
+
+      // Kleur-modus (gevuld / outline).
       const col = card.stamp_color || card.accent_color || '#c9a45c';
       const outline = card.stamp_fill === 'outline';
       let fill, stroke, opacity = '';
@@ -1195,19 +1299,32 @@
       if (photo) { el.style.background = '#111'; pvBg.style.backgroundImage = `url("${c.background_url}")`; }
       else { el.style.background = c.primary_color || '#1a1a2e'; pvBg.style.backgroundImage = 'none'; }
 
+      // Lettertype toepassen op alle kaartteksten.
+      el.style.fontFamily = fontStack(c.card_font);
+
       const txt = c.text_color || '#ffffff';
       el.style.color = txt;
       if (c.logo_url) { pvLogo.src = c.logo_url; pvLogo.hidden = false; } else { pvLogo.hidden = true; }
+      // Teksten worden EXACT getoond zoals getypt (geen hoofdletter-/kleineletter-conversie).
       pvBiz.textContent = c.business_name || 'Mijn zaak'; pvBiz.style.color = txt;
       pvChip.style.background = c.accent_color || 'rgba(255,255,255,.6)';
       pvHi.textContent = 'Hi Sara! 👋'; pvHi.style.color = txt;
       pvTitle.textContent = c.card_title || 'Stempelkaart'; pvTitle.style.color = txt;
-      pvReward.textContent = `Spaar ${c.stamps_required} stempels → ${(c.reward_description || 'gratis product').toLowerCase()}`;
-      pvReward.style.color = txt; pvReward.style.opacity = '.8';
+
+      // Spaardoel-tekst: optioneel tonen, met eigen tekst of automatische fallback.
+      if (c.show_reward_text === false) {
+        pvReward.style.display = 'none';
+      } else {
+        pvReward.style.display = '';
+        pvReward.textContent = (c.reward_text && c.reward_text.trim())
+          ? c.reward_text
+          : `Spaar ${c.stamps_required} stempels → ${c.reward_description || 'gratis product'}`;
+        pvReward.style.color = txt; pvReward.style.opacity = '.8';
+      }
 
       const filled = Math.min(3, c.stamps_required);
       pvStamps.style.gridTemplateColumns = `repeat(${Math.min(c.stamps_required, 6)}, 1fr)`;
-      let html = ''; for (let i = 0; i < c.stamps_required; i++) html += stampSVG(i < filled);
+      let html = ''; for (let i = 0; i < c.stamps_required; i++) html += stampHTML(i < filled);
       pvStamps.innerHTML = html;
       pvProgress.textContent = `${filled} / ${c.stamps_required} stempels`;
       pvProgress.style.color = c.accent_color || txt;
@@ -1228,12 +1345,19 @@
         ch.classList.toggle('active', (ch.dataset.val || '').toLowerCase() === (activeVal || '').toLowerCase()));
     }
 
+    // Werk het hex-tekstveld bij, maar niet terwijl de gebruiker er zelf in typt.
+    function syncHexInput(el, val) {
+      if (document.activeElement === el) return;
+      el.classList.remove('invalid');
+      el.value = isHex(val) ? val.toUpperCase() : (firstHex(val) || '');
+    }
+
     // ---- Setters ----
     function setPrimary(val) {
       card.primary_color = val;
       card.background_type = 'color';
       if (isHex(val)) primaryColor.value = val;
-      primaryHex.textContent = isHex(val) ? val.toUpperCase() : 'Gradient';
+      syncHexInput(primaryHex, val);
       markPresets(primaryPresets, val);
       if (autoContrast.checked) setText(autoTextColor(), true);
       paintEditor();
@@ -1241,21 +1365,21 @@
     function setAccent(val) {
       card.accent_color = val;
       if (isHex(val)) accentColorInput.value = val;
-      accentHex.textContent = isHex(val) ? val.toUpperCase() : val;
+      syncHexInput(accentHex, val);
       markPresets(accentPresets, val);
       paintEditor();
     }
     function setStampColor(val) {
       card.stamp_color = val;
       if (isHex(val)) stampColorInput.value = val;
-      stampHex.textContent = isHex(val) ? val.toUpperCase() : val;
+      syncHexInput(stampHex, val);
       markPresets(stampPresets, val);
       paintEditor();
     }
     function setText(val, fromAuto) {
       card.text_color = val;
       if (isHex(val)) textColorInput.value = val;
-      textHex.textContent = isHex(val) ? val.toUpperCase() : val;
+      syncHexInput(textHex, val);
       if (!fromAuto) autoContrast.checked = false;
       paintEditor();
     }
@@ -1269,6 +1393,22 @@
       card.stamp_fill = fill;
       [...fillToggle.children].forEach(ch => ch.classList.toggle('active', ch.dataset.fill === fill));
       paintEditor();
+    }
+    function setFont(name) {
+      card.card_font = name;
+      [...fontGrid.children].forEach(ch => ch.classList.toggle('active', ch.dataset.font === name));
+      paintEditor();
+    }
+    function setStampType(type) {
+      card.stamp_type = (type === 'logo') ? 'logo' : 'shape';
+      [...stampTypeToggle.children].forEach(ch => ch.classList.toggle('active', ch.dataset.stamptype === card.stamp_type));
+      paintEditor();
+    }
+    // "Mijn logo" alleen tonen wanneer er een logo of stempel-afbeelding beschikbaar is.
+    function updateLogoStampAvailability() {
+      const has = !!(card.logo_url || card.stamp_logo_url);
+      stampTypeLogoBtn.hidden = !has;
+      if (!has && card.stamp_type === 'logo') setStampType('shape');
     }
 
     // ---- UI opbouwen ----
@@ -1325,6 +1465,42 @@
     textColorInput.addEventListener('input', () => setText(textColorInput.value, false));
     autoContrast.addEventListener('change', () => { if (autoContrast.checked) setText(autoTextColor(), true); });
 
+    // ---- Handmatige hex-invoer ----
+    function bindHexInput(el, apply) {
+      el.addEventListener('input', () => {
+        const raw = el.value.trim();
+        if (/^#?[0-9a-fA-F]{6}$/.test(raw)) {
+          el.classList.remove('invalid');
+          apply(raw[0] === '#' ? raw : '#' + raw);
+        } else {
+          el.classList.add('invalid');
+        }
+      });
+      el.addEventListener('blur', () => { el.classList.remove('invalid'); });
+    }
+    bindHexInput(primaryHex, setPrimary);
+    bindHexInput(stampHex, setStampColor);
+    bindHexInput(textHex, (v) => setText(v, false));
+    bindHexInput(accentHex, setAccent);
+
+    // ---- Lettertype-keuze ----
+    FONTS.forEach(f => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'font-btn'; b.dataset.font = f.key;
+      b.style.fontFamily = f.stack;
+      b.innerHTML = `${f.key}<small>${f.note}</small>`;
+      b.addEventListener('click', () => setFont(f.key));
+      fontGrid.appendChild(b);
+    });
+
+    // ---- Stempel-vulling (kleur / logo) ----
+    [...stampTypeToggle.children].forEach(btn =>
+      btn.addEventListener('click', () => { if (!btn.hidden) setStampType(btn.dataset.stamptype); }));
+
+    // ---- Spaardoel-tekst ----
+    showRewardText.addEventListener('change', () => { card.show_reward_text = showRewardText.checked; paintEditor(); });
+    rewardText.addEventListener('input', () => { card.reward_text = rewardText.value; paintEditor(); });
+
     // ---- Tekst-inputs + slider ----
     fBiz.addEventListener('input', () => { card.business_name = fBiz.value.trim() || 'Mijn zaak'; refreshPreviews(); });
     fTitle.addEventListener('input', () => { card.card_title = fTitle.value.trim() || 'Stempelkaart'; paintEditor(); });
@@ -1342,7 +1518,11 @@
       fStamps.value = Math.max(4, Math.min(12, card.stamps_required || 6));
       fStampsVal.textContent = card.stamps_required;
 
+      showRewardText.checked = card.show_reward_text !== false;
+      rewardText.value = card.reward_text || '';
+
       autoContrast.checked = false;
+      setFont(card.card_font || 'Inter');
       setPrimary(card.primary_color || '#1a1a2e');
       setAccent(card.accent_color || '#c9a45c');
       setStampColor(card.stamp_color || card.accent_color || '#c9a45c');
@@ -1352,7 +1532,10 @@
 
       if (card.logo_url) { logoPrev.style.backgroundImage = `url("${card.logo_url}")`; logoPrev.textContent = ''; }
       if (card.background_url) { bgPrev.style.backgroundImage = `url("${card.background_url}")`; bgPrev.textContent = ''; }
+      if (card.stamp_logo_url) { stampLogoPrev.style.backgroundImage = `url("${card.stamp_logo_url}")`; stampLogoPrev.textContent = ''; }
       switchBgTab(card.background_type === 'photo' ? 'photo' : 'color');
+      updateLogoStampAvailability();
+      setStampType(card.stamp_type || 'shape');
 
       [...themeGrid.children].forEach(ch => ch.classList.toggle('active', ch.dataset.theme === card.theme_style));
     }
@@ -1380,7 +1563,14 @@
     document.getElementById('logoFile').addEventListener('change', (e) => {
       const file = e.target.files[0]; if (!file) return;
       logoPrev.style.backgroundImage = `url("${URL.createObjectURL(file)}")`; logoPrev.textContent = '';
-      uploadFile('/api/stamp/upload-logo', file, document.getElementById('logoStatus'), (url) => { card.logo_url = url; paintEditor(); });
+      uploadFile('/api/stamp/upload-logo', file, document.getElementById('logoStatus'), (url) => { card.logo_url = url; updateLogoStampAvailability(); paintEditor(); });
+    });
+    document.getElementById('stampLogoFile').addEventListener('change', (e) => {
+      const file = e.target.files[0]; if (!file) return;
+      stampLogoPrev.style.backgroundImage = `url("${URL.createObjectURL(file)}")`; stampLogoPrev.textContent = '';
+      uploadFile('/api/stamp/upload-logo', file, document.getElementById('stampLogoStatus'), (url) => {
+        card.stamp_logo_url = url; updateLogoStampAvailability(); setStampType('logo');
+      });
     });
     document.getElementById('bgFile').addEventListener('change', (e) => {
       const file = e.target.files[0]; if (!file) return;
@@ -1402,7 +1592,10 @@
         owner_email: userEmail || '',
         card_title: card.card_title,
         reward_description: card.reward_description,
+        show_reward_text: card.show_reward_text,
+        reward_text: card.reward_text,
         stamps_required: card.stamps_required,
+        card_font: card.card_font,
         logo_url: card.logo_url,
         background_url: card.background_url,
         background_type: card.background_type,
@@ -1414,6 +1607,8 @@
         stamp_shape: card.stamp_shape,
         stamp_fill: card.stamp_fill,
         stamp_style: card.stamp_style,
+        stamp_type: card.stamp_type,
+        stamp_logo_url: card.stamp_logo_url,
       };
       try {
         const url = cardId
@@ -1681,7 +1876,7 @@
       custHi.textContent = `Hi ${holderName}! 👋`;
       custTitle.textContent = card.card_title || 'Stempelkaart';
       custReward.textContent =
-        `Spaar ${stampsRequired} stempels → ${(card.reward_description || 'gratis product').toLowerCase()}`;
+        `Spaar ${stampsRequired} stempels → ${card.reward_description || 'gratis product'}`;
       updateCustomerUI();
     }
 
@@ -1757,7 +1952,7 @@
 
       // Reward-check op basis van stamps_required uit de kaart.
       if (newCount >= stampsRequired) {
-        const rewardText = (card.reward_description || 'de beloning').toLowerCase();
+        const rewardText = card.reward_description || 'de beloning';
         rewardBanner.textContent = `🎉 ${holderName} heeft recht op ${rewardText}!`;
         rewardBanner.classList.remove('redeemed');
         redeemBtn.hidden = false;
@@ -1969,6 +2164,9 @@
           card.stamps_required = c.stamps_required ?? card.stamps_required;
           card.primary_color = c.primary_color ?? card.primary_color;
           card.stamp_style = c.stamp_style ?? card.stamp_style;
+          card.show_reward_text = c.show_reward_text ?? card.show_reward_text;
+          card.reward_text = c.reward_text ?? card.reward_text;
+          card.card_font = c.card_font ?? card.card_font;
           card.logo_url = c.logo_url ?? card.logo_url;
           card.background_url = c.background_url ?? card.background_url;
           card.background_type = c.background_type ?? card.background_type;
@@ -1978,6 +2176,8 @@
           card.stamp_color = c.stamp_color ?? c.accent_color ?? card.stamp_color;
           card.stamp_shape = c.stamp_shape ?? card.stamp_shape;
           card.stamp_fill = c.stamp_fill ?? card.stamp_fill;
+          card.stamp_type = c.stamp_type ?? card.stamp_type;
+          card.stamp_logo_url = c.stamp_logo_url ?? card.stamp_logo_url;
 
           const s = data.stats || {};
           document.getElementById('statCustomers').textContent = s.total_customers ?? s.customers ?? 0;
