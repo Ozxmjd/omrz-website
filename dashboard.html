@@ -1271,24 +1271,37 @@
       const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='#000'>${SHAPE_PATH[shape] || SHAPE_PATH.circle}</svg>`;
       return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
     }
-    function stampHTML(active) {
+    // Bouw één stempel als DOM-node. Voor logo-stempels zetten we de mask via de CSSOM
+    // (element.style.maskImage) i.p.v. een innerHTML-string — anders botsen de dubbele
+    // aanhalingstekens in url("data:…") met het style="…"-attribuut en faalt de mask.
+    function stampNode(active) {
       const shape = card.stamp_shape || 'circle';
       const path = SHAPE_PATH[shape] || SHAPE_PATH.circle;
       const img = stampImageSrc();
+      const st = document.createElement('span');
+      st.className = 'st';
 
       // Logo-als-stempel: de vorm is de outline, het logo vult de binnenkant.
-      //  • verdiend  = vorm-omtrek + logo gemaskerd in die vorm
-      //  • leeg      = alleen de vage vorm-omtrek
       if (card.stamp_type === 'logo' && img) {
         if (active) {
-          const mask = shapeMaskUrl(shape);
+          const imgEl = document.createElement('span');
+          imgEl.className = 'st-img';
+          imgEl.style.backgroundImage = `url("${img}")`;
+          const m = shapeMaskUrl(shape);                 // url("data:image/svg+xml,…")
+          imgEl.style.webkitMaskImage = m;    imgEl.style.maskImage = m;
+          imgEl.style.webkitMaskRepeat = 'no-repeat';  imgEl.style.maskRepeat = 'no-repeat';
+          imgEl.style.webkitMaskPosition = 'center';   imgEl.style.maskPosition = 'center';
+          imgEl.style.webkitMaskSize = 'contain';      imgEl.style.maskSize = 'contain';
+          st.appendChild(imgEl);
+          // Vorm-omtrek eromheen.
           const stroke = card.stamp_color || card.text_color || '#ffffff';
-          return `<span class="st">`
-            + `<span class="st-img" style="background-image:url('${img}');-webkit-mask:${mask} center/contain no-repeat;mask:${mask} center/contain no-repeat;"></span>`
-            + `<svg class="st-outline" viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="1.6" stroke-linejoin="round">${path}</svg>`
-            + `</span>`;
+          st.insertAdjacentHTML('beforeend',
+            `<svg class="st-outline" viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="1.6" stroke-linejoin="round">${path}</svg>`);
+        } else {
+          // Leeg: alleen de vage vorm-omtrek.
+          st.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="${card.text_color || '#ffffff'}" stroke-width="1.8" stroke-linejoin="round" opacity="0.3">${path}</svg>`;
         }
-        return `<span class="st"><svg viewBox="0 0 24 24" fill="none" stroke="${card.text_color || '#ffffff'}" stroke-width="1.8" stroke-linejoin="round" opacity="0.3">${path}</svg></span>`;
+        return st;
       }
 
       // Kleur-modus (gevuld / outline).
@@ -1301,7 +1314,8 @@
       } else {
         fill = 'none'; stroke = card.text_color || '#ffffff'; opacity = ' opacity="0.3"';
       }
-      return `<span class="st"><svg viewBox="0 0 24 24" fill="${fill}" stroke="${stroke}" stroke-width="1.8" stroke-linejoin="round"${opacity}>${path}</svg></span>`;
+      st.innerHTML = `<svg viewBox="0 0 24 24" fill="${fill}" stroke="${stroke}" stroke-width="1.8" stroke-linejoin="round"${opacity}>${path}</svg>`;
+      return st;
     }
 
     // ---- Live preview ----
@@ -1339,8 +1353,8 @@
 
       const filled = Math.min(3, c.stamps_required);
       pvStamps.style.gridTemplateColumns = `repeat(${Math.min(c.stamps_required, 6)}, 1fr)`;
-      let html = ''; for (let i = 0; i < c.stamps_required; i++) html += stampHTML(i < filled);
-      pvStamps.innerHTML = html;
+      pvStamps.innerHTML = '';
+      for (let i = 0; i < c.stamps_required; i++) pvStamps.appendChild(stampNode(i < filled));
       pvProgress.textContent = `${filled} / ${c.stamps_required} stempels`;
       pvProgress.style.color = c.accent_color || txt;
     }
