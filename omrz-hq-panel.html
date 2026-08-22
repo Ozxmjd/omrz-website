@@ -279,6 +279,35 @@
 
     @media (max-width: 620px) { .form-grid2 { grid-template-columns: 1fr; } }
 
+    /* ---------- Facturen ---------- */
+    .inv-list { display: grid; gap: 12px; }
+    .inv-row { display: flex; align-items: center; gap: 16px; width: 100%; text-align: left; font-family: inherit; cursor: pointer; padding: 15px 18px; border-radius: var(--radius); background: var(--card); border: 1px solid var(--border); color: var(--text); transition: transform .15s var(--ease), border-color .2s var(--ease), background .2s var(--ease); }
+    .inv-row:hover { transform: translateY(-2px); border-color: var(--border-strong); background: rgba(255,255,255,.07); }
+    .inv-no { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13.5px; font-weight: 700; color: #fff; flex-shrink: 0; min-width: 92px; }
+    .inv-main { flex: 1; min-width: 0; }
+    .inv-client { font-size: 14.5px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .inv-sub { font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+    .inv-amount { font-size: 15px; font-weight: 800; color: #fff; white-space: nowrap; flex-shrink: 0; }
+    .inv-tags { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+    .pill.open { color: #fdba74; background: rgba(251,146,60,.14); border: 1px solid rgba(251,146,60,.45); }
+    .pill.paid { color: #6ee7a0; background: rgba(74,222,128,.12); border: 1px solid rgba(74,222,128,.4); }
+    @media (max-width: 620px) { .inv-row .inv-date { display: none; } }
+
+    /* Live berekening in het factuur-formulier */
+    .inv-calc { background: rgba(255,255,255,.04); border: 1px solid var(--border); border-radius: 14px; padding: 14px 18px; display: grid; gap: 9px; }
+    .ic-row { display: flex; align-items: center; justify-content: space-between; font-size: 14px; color: var(--muted); }
+    .ic-row span:last-child { font-weight: 700; color: var(--pearl); font-variant-numeric: tabular-nums; }
+    .ic-total { padding-top: 9px; margin-top: 3px; border-top: 1px solid var(--border); font-size: 16px; color: #fff; }
+    .ic-total span:last-child { color: #fff; font-weight: 800; }
+
+    /* Factuur-detail */
+    .inv-detail { display: grid; gap: 10px; margin-top: 14px; }
+    .inv-detail .d-row { display: flex; justify-content: space-between; gap: 16px; font-size: 14.5px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .inv-detail .d-row:last-child { border-bottom: 0; }
+    .inv-detail .d-lbl { color: var(--muted); }
+    .inv-detail .d-val { color: #fff; font-weight: 600; text-align: right; }
+    .inv-detail .d-row.d-total .d-val { font-size: 17px; font-weight: 800; }
+
     .sidebar-overlay { display: none; position: fixed; inset: 0; z-index: 45; background: rgba(0,0,0,.5); }
 
     /* ---------- Responsive ---------- */
@@ -312,6 +341,10 @@
         <div class="side-link" data-tab="winkeliers">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5M4 9v10a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9M3 9h18M9 20v-6h6v6"/></svg>
           Winkeliers
+        </div>
+        <div class="side-link" data-tab="facturen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M14 2v5h5M8 13h8M8 17h5"/></svg>
+          Facturen
         </div>
         <div class="side-link" data-tab="statistieken">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16M8 16v-4M12 16V8M16 16v-6M20 16v-2"/></svg>
@@ -408,6 +441,35 @@
 
           <div id="bizTableWrap">
             <div class="loader" style="padding:20px 4px;"><span class="spinner"></span> Winkeliers laden…</div>
+          </div>
+        </section>
+
+        <!-- ===== Facturen ===== -->
+        <section class="panel" id="panel-facturen">
+          <div class="panel-head">
+            <h2>Facturen</h2>
+            <p>Maak, beheer en volg de facturen van je winkeliers.</p>
+          </div>
+
+          <div class="biz-toolbar">
+            <div class="biz-search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" id="invSearch" placeholder="Zoek op factuurnummer of klant…" autocomplete="off" />
+            </div>
+            <button class="btn btn-primary" id="newInvoiceBtn">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+              Nieuwe factuur
+            </button>
+          </div>
+
+          <div class="seg" id="invStatusSeg" style="margin-bottom:18px;">
+            <button class="active" data-f="all">Alle</button>
+            <button data-f="open">Open</button>
+            <button data-f="paid">Betaald</button>
+          </div>
+
+          <div id="invListWrap">
+            <div class="loader" style="padding:20px 4px;"><span class="spinner"></span> Facturen laden…</div>
           </div>
         </section>
 
@@ -526,6 +588,71 @@
     </div>
   </div>
 
+  <!-- ===== Nieuwe factuur modal ===== -->
+  <div class="modal-overlay" id="invModal" hidden>
+    <div class="modal glass" role="dialog" aria-modal="true" aria-labelledby="invModalTitle">
+      <div class="modal-head">
+        <div>
+          <h3 id="invModalTitle">Nieuwe factuur</h3>
+          <div class="mh-sub">Factuurnummer wordt automatisch toegekend</div>
+        </div>
+        <button class="modal-close" id="invClose" aria-label="Sluiten">✕</button>
+      </div>
+
+      <form class="form-grid2" id="invForm">
+        <div class="cm-field full"><label for="ivClient">Klant</label>
+          <select id="ivClient"><option value="">— Kies een winkelier —</option></select>
+        </div>
+        <div class="cm-field full"><label for="ivDesc">Beschrijving</label><input type="text" id="ivDesc" placeholder="Stempelkaart abonnement" /></div>
+        <div class="cm-field"><label for="ivPeriod">Periode</label><input type="text" id="ivPeriod" placeholder="September 2026" /></div>
+        <div class="cm-field"><label for="ivDate">Factuurdatum</label><input type="date" id="ivDate" /></div>
+
+        <div class="cm-field"><label for="ivAmount">Bedrag excl. BTW (€)</label><input type="number" id="ivAmount" min="0" step="0.01" placeholder="29,00" /></div>
+        <div class="cm-field"><label for="ivVat">BTW-percentage (%)</label><input type="number" id="ivVat" min="0" step="1" value="21" /></div>
+        <div class="cm-field"><label for="ivDiscount">Korting</label><input type="number" id="ivDiscount" min="0" step="0.01" placeholder="0" /></div>
+        <div class="cm-field"><label for="ivDiscountType">Kortingstype</label>
+          <select id="ivDiscountType"><option value="amount">Bedrag (€)</option><option value="percent">Percentage (%)</option></select>
+        </div>
+
+        <!-- Live berekening -->
+        <div class="inv-calc full" id="invCalc">
+          <div class="ic-row"><span>Subtotaal</span><span id="calcSub">€0,00</span></div>
+          <div class="ic-row" id="calcDiscRow"><span>Korting</span><span id="calcDisc">−€0,00</span></div>
+          <div class="ic-row"><span id="calcVatLbl">BTW (21%)</span><span id="calcVat">€0,00</span></div>
+          <div class="ic-row ic-total"><span>Totaal</span><span id="calcTotal">€0,00</span></div>
+        </div>
+
+        <div class="cm-modal-foot full">
+          <button type="submit" class="btn btn-primary" id="invSaveBtn"><span class="btn-label">Factuur aanmaken</span></button>
+          <button type="button" class="btn btn-ghost" id="invCancelBtn">Annuleren</button>
+          <span class="save-note" id="invNote"></span>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== Factuur detail modal ===== -->
+  <div class="modal-overlay" id="invDetailModal" hidden>
+    <div class="modal glass" role="dialog" aria-modal="true" aria-labelledby="idTitle">
+      <div class="modal-head">
+        <div>
+          <h3 id="idTitle">Factuur</h3>
+          <div class="mh-sub" id="idSub">—</div>
+        </div>
+        <button class="modal-close" id="idClose" aria-label="Sluiten">✕</button>
+      </div>
+
+      <div class="inv-detail" id="idBody"></div>
+
+      <div class="cm-modal-foot" style="margin-top:22px;">
+        <button type="button" class="btn btn-primary" id="idMarkPaid">Markeer als betaald</button>
+        <button type="button" class="btn btn-ghost" id="idPdf">Download PDF</button>
+        <button type="button" class="btn btn-ghost" id="idEmail">Verstuur per e-mail</button>
+        <span class="save-note" id="idNote"></span>
+      </div>
+    </div>
+  </div>
+
   <script>
     const API_BASE = 'https://ai-review-bot-production.up.railway.app';
     const PRICE_PER_MONTH = 29;
@@ -551,6 +678,7 @@
       panels.forEach(p => p.classList.toggle('active', p.id === 'panel-' + tab));
       const active = [...links].find(l => l.dataset.tab === tab);
       if (active) pageTitle.textContent = active.textContent.trim();
+      if (tab === 'facturen') loadInvoices();
       closeSidebar();
     }
     links.forEach(l => l.addEventListener('click', () => activateTab(l.dataset.tab)));
@@ -980,6 +1108,266 @@
         btn.classList.remove('loading'); btn.disabled = false;
         setTimeout(() => { note.className = 'save-note'; note.textContent = ''; }, 5000);
       }
+    });
+
+    // ============================================================
+    //  FACTUREN
+    // ============================================================
+    const eur = (n) => '€' + (Number(n) || 0).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    let invoices = [];
+    let invoicesLoaded = false;
+    let invStatusFilter = 'all';
+
+    function normalizeInvoiceStatus(raw) {
+      const s = String(raw.status || raw.payment_status || '').toLowerCase();
+      if (['paid','betaald','payed','completed'].includes(s)) return { key: 'paid', label: 'Betaald', cls: 'paid' };
+      return { key: 'open', label: 'Open', cls: 'open' };
+    }
+    function normalizeInvoice(raw, i) {
+      const subtotal = Number(raw.subtotal ?? raw.amount_excl ?? raw.amount ?? 0) || 0;
+      const discount = Number(raw.discount_amount ?? raw.discount ?? 0) || 0;
+      const vatPct = Number(raw.vat_percentage ?? raw.vat_percent ?? raw.vat ?? 21);
+      const vatAmount = Number(raw.vat_amount ?? (((subtotal - discount) * (isFinite(vatPct) ? vatPct : 21)) / 100)) || 0;
+      const total = Number(raw.total ?? raw.total_incl ?? (subtotal - discount + vatAmount)) || 0;
+      return {
+        id: raw.id ?? raw.invoice_id ?? raw._id ?? ('inv-' + i),
+        number: raw.invoice_number || raw.number || raw.invoice_no || '—',
+        clientId: raw.business_id ?? raw.client_id ?? raw.customer_id ?? '',
+        clientName: raw.business_name || raw.client_name || raw.customer_name || 'Onbekende klant',
+        description: raw.description || raw.omschrijving || '',
+        period: raw.period || raw.periode || '',
+        subtotal, discount,
+        discountType: (String(raw.discount_type || 'amount').toLowerCase() === 'percent') ? 'percent' : 'amount',
+        vatPct: isFinite(vatPct) ? vatPct : 21,
+        vatAmount, total,
+        dateRaw: raw.invoice_date || raw.date || raw.created_at || null,
+        status: normalizeInvoiceStatus(raw),
+      };
+    }
+
+    // Volgende factuurnummer (client-side voorstel): JAAR-### oplopend.
+    function nextInvoiceNumber() {
+      const year = (parseDate(new Date().toISOString()) || new Date()).getFullYear();
+      let max = 0;
+      invoices.forEach(inv => {
+        const m = String(inv.number).match(new RegExp('^' + year + '-(\\d+)$'));
+        if (m) max = Math.max(max, parseInt(m[1], 10));
+      });
+      return year + '-' + String(max + 1).padStart(3, '0');
+    }
+
+    // ---- Laden ----
+    async function loadInvoices() {
+      const wrap = document.getElementById('invListWrap');
+      if (invoicesLoaded) { renderInvoiceList(); return; }
+      wrap.innerHTML = '<div class="loader" style="padding:20px 4px;"><span class="spinner"></span> Facturen laden…</div>';
+      try {
+        const res = await fetch(API_BASE + '/api/admin/invoices', { headers: adminHeaders() });
+        if (res.status === 401 || res.status === 403) { localStorage.removeItem('admin_token'); window.location.replace('omrz-hq-control.html'); return; }
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Laden mislukt');
+        const list = Array.isArray(data) ? data : (data.invoices || data.facturen || []);
+        invoices = list.map(normalizeInvoice);
+        invoicesLoaded = true;
+        renderInvoiceList();
+      } catch (err) {
+        wrap.innerHTML = '<div class="empty-state">Kon facturen niet laden. Controleer je verbinding en probeer opnieuw.</div>';
+      }
+    }
+
+    const invSearch = document.getElementById('invSearch');
+    function filteredInvoices() {
+      const q = (invSearch.value || '').trim().toLowerCase();
+      return invoices.filter(inv => {
+        if (invStatusFilter !== 'all' && inv.status.key !== invStatusFilter) return false;
+        if (!q) return true;
+        return String(inv.number).toLowerCase().includes(q) || inv.clientName.toLowerCase().includes(q);
+      });
+    }
+    function renderInvoiceList() {
+      const wrap = document.getElementById('invListWrap');
+      if (!invoices.length) { wrap.innerHTML = '<div class="empty-state">Nog geen facturen. Maak je eerste factuur aan.</div>'; return; }
+      const rows = filteredInvoices();
+      if (!rows.length) { wrap.innerHTML = '<div class="empty-state">Geen facturen gevonden. Pas je zoekopdracht of filter aan.</div>'; return; }
+      wrap.innerHTML = '<div class="inv-list">' + rows.map(inv => `
+        <button type="button" class="inv-row" data-id="${escapeHtml(String(inv.id))}">
+          <span class="inv-no">${escapeHtml(inv.number)}</span>
+          <div class="inv-main">
+            <div class="inv-client">${escapeHtml(inv.clientName)}</div>
+            <div class="inv-sub">${escapeHtml(inv.period || inv.description || '—')}</div>
+          </div>
+          <span class="inv-date inv-sub" style="flex-shrink:0;">${formatDate(inv.dateRaw)}</span>
+          <div class="inv-tags">
+            <span class="inv-amount">${eur(inv.total)}</span>
+            <span class="pill ${inv.status.cls}">${inv.status.label}</span>
+          </div>
+        </button>`).join('') + '</div>';
+      wrap.querySelectorAll('.inv-row').forEach(el => el.addEventListener('click', () => openInvoiceDetail(el.dataset.id)));
+    }
+    invSearch.addEventListener('input', renderInvoiceList);
+    document.querySelectorAll('#invStatusSeg button').forEach(btn =>
+      btn.addEventListener('click', () => {
+        invStatusFilter = btn.dataset.f;
+        document.querySelectorAll('#invStatusSeg button').forEach(x => x.classList.toggle('active', x === btn));
+        renderInvoiceList();
+      }));
+
+    // ---- Nieuwe factuur ----
+    const invModal = document.getElementById('invModal');
+    function computeInvoice() {
+      const subtotal = parseFloat(document.getElementById('ivAmount').value) || 0;
+      const vatPct = parseFloat(document.getElementById('ivVat').value);
+      const vp = isFinite(vatPct) ? vatPct : 21;
+      const discInput = parseFloat(document.getElementById('ivDiscount').value) || 0;
+      const discType = document.getElementById('ivDiscountType').value;
+      const discount = discType === 'percent' ? (subtotal * discInput / 100) : discInput;
+      const base = Math.max(0, subtotal - discount);
+      const vatAmount = base * vp / 100;
+      const total = base + vatAmount;
+      return { subtotal, discount, discType, discInput, vatPct: vp, vatAmount, total };
+    }
+    function renderCalc() {
+      const c = computeInvoice();
+      document.getElementById('calcSub').textContent = eur(c.subtotal);
+      document.getElementById('calcDisc').textContent = '−' + eur(c.discount);
+      document.getElementById('calcDiscRow').style.display = c.discount > 0 ? 'flex' : 'none';
+      document.getElementById('calcVatLbl').textContent = `BTW (${c.vatPct}%)`;
+      document.getElementById('calcVat').textContent = eur(c.vatAmount);
+      document.getElementById('calcTotal').textContent = eur(c.total);
+    }
+    ['ivAmount', 'ivVat', 'ivDiscount', 'ivDiscountType'].forEach(id =>
+      document.getElementById(id).addEventListener('input', renderCalc));
+    document.getElementById('ivDiscountType').addEventListener('change', renderCalc);
+
+    function openInvoiceModal() {
+      // Klant-dropdown vullen vanuit de winkeliers.
+      const sel = document.getElementById('ivClient');
+      sel.innerHTML = '<option value="">— Kies een winkelier —</option>' +
+        businesses.map(b => `<option value="${escapeHtml(String(b.id))}">${escapeHtml(b.name)}</option>`).join('');
+      document.getElementById('invForm').reset();
+      document.getElementById('ivVat').value = '21';
+      document.getElementById('ivDate').value = new Date().toISOString().slice(0, 10);
+      document.getElementById('ivDesc').value = 'Stempelkaart abonnement';
+      const note = document.getElementById('invNote'); note.className = 'save-note'; note.textContent = '';
+      renderCalc();
+      invModal.hidden = false;
+    }
+    function closeInvoiceModal() { invModal.hidden = true; }
+    document.getElementById('newInvoiceBtn').addEventListener('click', openInvoiceModal);
+    document.getElementById('invClose').addEventListener('click', closeInvoiceModal);
+    document.getElementById('invCancelBtn').addEventListener('click', closeInvoiceModal);
+    invModal.addEventListener('click', (e) => { if (e.target === invModal) closeInvoiceModal(); });
+
+    document.getElementById('invForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('invSaveBtn');
+      const note = document.getElementById('invNote');
+      const clientId = document.getElementById('ivClient').value;
+      const client = businesses.find(b => String(b.id) === String(clientId));
+      const c = computeInvoice();
+      note.className = 'save-note';
+      if (!clientId) { note.textContent = 'Kies eerst een klant.'; note.className = 'save-note error'; return; }
+      if (!(c.subtotal > 0)) { note.textContent = 'Vul een bedrag in.'; note.className = 'save-note error'; return; }
+
+      const payload = {
+        invoice_number: nextInvoiceNumber(),
+        business_id: clientId,
+        business_name: client ? client.name : '',
+        description: document.getElementById('ivDesc').value.trim(),
+        period: document.getElementById('ivPeriod').value.trim(),
+        invoice_date: document.getElementById('ivDate').value || null,
+        subtotal: round2(c.subtotal),
+        discount_amount: round2(c.discount),
+        discount_type: c.discType,
+        vat_percentage: c.vatPct,
+        vat_amount: round2(c.vatAmount),
+        total: round2(c.total),
+        status: 'open',
+      };
+
+      btn.classList.add('loading'); btn.disabled = true;
+      try {
+        const res = await fetch(API_BASE + '/api/admin/invoices', { method: 'POST', headers: adminHeaders(), body: JSON.stringify(payload) });
+        if (res.status === 401 || res.status === 403) { localStorage.removeItem('admin_token'); window.location.replace('omrz-hq-control.html'); return; }
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || data.message || 'Aanmaken mislukt');
+        // Voeg toe aan de lijst (gebruik de server-respons indien beschikbaar).
+        const created = (data && (data.invoice || data.id || data.invoice_number)) ? normalizeInvoice(data.invoice || { ...payload, ...data }) : normalizeInvoice(payload);
+        invoices.unshift(created);
+        note.textContent = 'Factuur aangemaakt ✓'; note.classList.add('ok');
+        renderInvoiceList();
+        setTimeout(closeInvoiceModal, 700);
+      } catch (err) {
+        note.textContent = 'Kon niet aanmaken: ' + (err.message || 'onbekende fout'); note.classList.add('error');
+      } finally {
+        btn.classList.remove('loading'); btn.disabled = false;
+      }
+    });
+    function round2(n) { return Math.round((Number(n) || 0) * 100) / 100; }
+
+    // ---- Factuur detail ----
+    const invDetailModal = document.getElementById('invDetailModal');
+    let detailInvoice = null;
+    function openInvoiceDetail(id) {
+      const inv = invoices.find(x => String(x.id) === String(id));
+      if (!inv) return;
+      detailInvoice = inv;
+      document.getElementById('idTitle').textContent = 'Factuur ' + inv.number;
+      document.getElementById('idSub').textContent = inv.clientName;
+      document.getElementById('idBody').innerHTML = `
+        <div class="d-row"><span class="d-lbl">Status</span><span class="d-val"><span class="pill ${inv.status.cls}">${inv.status.label}</span></span></div>
+        <div class="d-row"><span class="d-lbl">Klant</span><span class="d-val">${escapeHtml(inv.clientName)}</span></div>
+        <div class="d-row"><span class="d-lbl">Beschrijving</span><span class="d-val">${escapeHtml(inv.description || '—')}</span></div>
+        <div class="d-row"><span class="d-lbl">Periode</span><span class="d-val">${escapeHtml(inv.period || '—')}</span></div>
+        <div class="d-row"><span class="d-lbl">Factuurdatum</span><span class="d-val">${formatDate(inv.dateRaw)}</span></div>
+        <div class="d-row"><span class="d-lbl">Subtotaal</span><span class="d-val">${eur(inv.subtotal)}</span></div>
+        ${inv.discount > 0 ? `<div class="d-row"><span class="d-lbl">Korting</span><span class="d-val">−${eur(inv.discount)}</span></div>` : ''}
+        <div class="d-row"><span class="d-lbl">BTW (${inv.vatPct}%)</span><span class="d-val">${eur(inv.vatAmount)}</span></div>
+        <div class="d-row d-total"><span class="d-lbl">Totaal</span><span class="d-val">${eur(inv.total)}</span></div>`;
+      const paidBtn = document.getElementById('idMarkPaid');
+      paidBtn.style.display = inv.status.key === 'paid' ? 'none' : '';
+      const note = document.getElementById('idNote'); note.className = 'save-note'; note.textContent = '';
+      invDetailModal.hidden = false;
+    }
+    function closeInvoiceDetail() { invDetailModal.hidden = true; detailInvoice = null; }
+    document.getElementById('idClose').addEventListener('click', closeInvoiceDetail);
+    invDetailModal.addEventListener('click', (e) => { if (e.target === invDetailModal) closeInvoiceDetail(); });
+
+    document.getElementById('idMarkPaid').addEventListener('click', async () => {
+      if (!detailInvoice) return;
+      const inv = detailInvoice;
+      const btn = document.getElementById('idMarkPaid');
+      const note = document.getElementById('idNote'); note.className = 'save-note';
+      btn.classList.add('loading'); btn.disabled = true;
+      try {
+        const res = await fetch(API_BASE + '/api/admin/invoices/' + encodeURIComponent(inv.id), {
+          method: 'PUT', headers: adminHeaders(), body: JSON.stringify({ status: 'paid' }),
+        });
+        if (res.status === 401 || res.status === 403) { localStorage.removeItem('admin_token'); window.location.replace('omrz-hq-control.html'); return; }
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || data.message || 'Wijzigen mislukt');
+        inv.status = { key: 'paid', label: 'Betaald', cls: 'paid' };
+        note.textContent = 'Gemarkeerd als betaald ✓'; note.classList.add('ok');
+        renderInvoiceList();
+        openInvoiceDetail(inv.id);   // ververs detail
+      } catch (err) {
+        note.textContent = 'Kon status niet wijzigen: ' + (err.message || 'onbekende fout'); note.classList.add('error');
+      } finally {
+        btn.classList.remove('loading'); btn.disabled = false;
+      }
+    });
+    // PDF en e-mail volgen later — nu een nette placeholder.
+    document.getElementById('idPdf').addEventListener('click', () => {
+      const note = document.getElementById('idNote'); note.className = 'save-note'; note.textContent = 'PDF-download komt binnenkort beschikbaar.';
+    });
+    document.getElementById('idEmail').addEventListener('click', () => {
+      const note = document.getElementById('idNote'); note.className = 'save-note'; note.textContent = 'Versturen per e-mail komt binnenkort beschikbaar.';
+    });
+    // Esc sluit elke open modal.
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      if (!invModal.hidden) closeInvoiceModal();
+      if (!invDetailModal.hidden) closeInvoiceDetail();
     });
 
     // ---- Init ----
