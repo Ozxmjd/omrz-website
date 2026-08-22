@@ -227,6 +227,58 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .empty-state { text-align: center; padding: 50px 24px; color: var(--muted); font-size: 15px; }
 
+    /* ---------- CRM: filter segment ---------- */
+    .seg { display: inline-flex; padding: 4px; border-radius: 12px; border: 1px solid var(--border); background: rgba(255,255,255,.03); flex-wrap: wrap; }
+    .seg button { font-family: inherit; font-size: 13.5px; font-weight: 600; color: var(--muted); padding: 8px 16px; border-radius: 9px; border: 0; background: none; cursor: pointer; transition: color .2s var(--ease), background .2s var(--ease); }
+    .seg button.active { color: #0a0a0a; background: #fff; }
+
+    /* ---------- CRM: winkelier-kaarten ---------- */
+    .crm-list { display: grid; gap: 12px; }
+    .crm-card { display: flex; align-items: center; gap: 16px; width: 100%; text-align: left; font-family: inherit; cursor: pointer; padding: 16px 18px; border-radius: var(--radius); background: var(--card); border: 1px solid var(--border); color: var(--text); transition: transform .15s var(--ease), border-color .2s var(--ease), background .2s var(--ease); }
+    .crm-card:hover { transform: translateY(-2px); border-color: var(--border-strong); background: rgba(255,255,255,.07); }
+    .crm-avatar { width: 44px; height: 44px; flex-shrink: 0; border-radius: 12px; background: rgba(255,255,255,.08); border: 1px solid var(--border-strong); display: grid; place-items: center; font-size: 15px; font-weight: 800; color: #fff; }
+    .crm-main { flex: 1; min-width: 0; }
+    .crm-name { font-size: 15.5px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .crm-sub { font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+    .crm-tags { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+    .crm-price { font-size: 14px; font-weight: 700; color: var(--pearl); white-space: nowrap; }
+    .crm-locs { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+    .crm-chev { width: 18px; height: 18px; color: var(--muted); flex-shrink: 0; }
+    @media (max-width: 620px) {
+      .crm-tags { gap: 10px; }
+      .crm-price, .crm-locs { display: none; }
+    }
+
+    /* ---------- CRM: modal ---------- */
+    .modal-overlay { position: fixed; inset: 0; z-index: 200; display: flex; align-items: flex-start; justify-content: center; padding: 24px; overflow-y: auto; background: rgba(0,0,0,.62); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); animation: fade .25s var(--ease); }
+    .modal-overlay[hidden] { display: none; }
+    .modal { width: 100%; max-width: 660px; margin: auto; border-radius: 20px; padding: 26px; color-scheme: dark; }
+    .modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 4px; }
+    .modal-head h3 { font-size: 21px; font-weight: 800; letter-spacing: -.02em; }
+    .modal-head .mh-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .modal-close { background: none; border: 1px solid var(--border-strong); color: #fff; width: 36px; height: 36px; border-radius: 10px; cursor: pointer; font-size: 15px; flex-shrink: 0; }
+    .modal-close:hover { background: rgba(255,255,255,.08); }
+    .crm-meta-row { display: flex; gap: 26px; margin: 16px 0 22px; padding: 14px 18px; border-radius: 14px; background: rgba(255,255,255,.04); border: 1px solid var(--border); }
+    .crm-meta-row .m-val { font-size: 19px; font-weight: 800; color: #fff; }
+    .crm-meta-row .m-lbl { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .form-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-grid2 .full { grid-column: 1 / -1; }
+    .cm-field label { display: block; font-size: 12.5px; font-weight: 600; color: var(--pearl); margin-bottom: 7px; }
+    .cm-field input, .cm-field select, .cm-field textarea {
+      width: 100%; font-family: inherit; font-size: 14.5px; color: #fff;
+      background: rgba(255,255,255,.04); border: 1px solid var(--border-strong);
+      border-radius: 11px; padding: 11px 13px; transition: border-color .2s var(--ease), background .2s var(--ease);
+    }
+    .cm-field input:focus, .cm-field select:focus, .cm-field textarea:focus { outline: none; border-color: #fff; background: rgba(255,255,255,.07); }
+    .cm-field input::placeholder, .cm-field textarea::placeholder { color: #6a6a6a; }
+    .cm-field textarea { resize: vertical; min-height: 92px; }
+    .cm-field input[readonly] { color: var(--muted); cursor: default; background: rgba(255,255,255,.02); }
+    .cm-field select option { background: #141414; color: #fff; }
+    .cm-modal-foot { display: flex; align-items: center; gap: 14px; margin-top: 6px; flex-wrap: wrap; }
+
+    @media (max-width: 620px) { .form-grid2 { grid-template-columns: 1fr; } }
+
     .sidebar-overlay { display: none; position: fixed; inset: 0; z-index: 45; background: rgba(0,0,0,.5); }
 
     /* ---------- Responsive ---------- */
@@ -336,21 +388,26 @@
         <section class="panel" id="panel-winkeliers">
           <div class="panel-head">
             <h2>Winkeliers</h2>
-            <p>Alle zaken die zich hebben aangemeld op OMRZ Digital.</p>
+            <p>Beheer al je klanten — klik op een winkelier om alle gegevens te bekijken en te bewerken.</p>
           </div>
 
           <div class="biz-toolbar">
             <div class="biz-search">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-              <input type="text" id="bizSearch" placeholder="Zoek op bedrijfsnaam of e-mail…" autocomplete="off" />
+              <input type="text" id="bizSearch" placeholder="Zoek op naam, e-mail of contactpersoon…" autocomplete="off" />
             </div>
             <button class="btn btn-ghost" id="refreshBtn">Vernieuwen</button>
           </div>
 
-          <div class="block glass" style="padding:0; overflow:hidden;">
-            <div id="bizTableWrap">
-              <div class="loader" style="padding:28px;"><span class="spinner"></span> Winkeliers laden…</div>
-            </div>
+          <div class="seg" id="statusSeg" style="margin-bottom:18px;">
+            <button class="active" data-f="all">Alle</button>
+            <button data-f="trial">Trial</button>
+            <button data-f="active">Actief</button>
+            <button data-f="canceled">Opgezegd</button>
+          </div>
+
+          <div id="bizTableWrap">
+            <div class="loader" style="padding:20px 4px;"><span class="spinner"></span> Winkeliers laden…</div>
           </div>
         </section>
 
@@ -415,6 +472,60 @@
     </div>
   </div>
 
+  <!-- ===== CRM klant-detail modal ===== -->
+  <div class="modal-overlay" id="crmModal" hidden>
+    <div class="modal glass" role="dialog" aria-modal="true" aria-labelledby="crmName">
+      <div class="modal-head">
+        <div>
+          <h3 id="crmModalTitle">Winkelier</h3>
+          <div class="mh-sub" id="crmModalSub">Klantgegevens bewerken</div>
+        </div>
+        <button class="modal-close" id="crmClose" aria-label="Sluiten">✕</button>
+      </div>
+
+      <div class="crm-meta-row">
+        <div><div class="m-val" id="cmLocationsView">0</div><div class="m-lbl">Vestigingen</div></div>
+        <div><div class="m-val" id="cmCustomersView">0</div><div class="m-lbl">Klanten</div></div>
+        <div><div class="m-val" id="cmStampsView">0</div><div class="m-lbl">Stempels</div></div>
+      </div>
+
+      <form class="form-grid2" id="crmForm">
+        <div class="cm-field full"><label for="cmName">Bedrijfsnaam</label><input type="text" id="cmName" /></div>
+        <div class="cm-field full"><label for="cmContact">Contactpersoon</label><input type="text" id="cmContact" placeholder="Naam" /></div>
+        <div class="cm-field"><label for="cmEmail">E-mailadres</label><input type="email" id="cmEmail" /></div>
+        <div class="cm-field"><label for="cmPhone">Telefoon</label><input type="tel" id="cmPhone" /></div>
+        <div class="cm-field"><label for="cmKvk">KvK-nummer</label><input type="text" id="cmKvk" /></div>
+        <div class="cm-field"><label for="cmBtw">BTW-nummer</label><input type="text" id="cmBtw" /></div>
+        <div class="cm-field full"><label for="cmAddress">Adres</label><input type="text" id="cmAddress" placeholder="Straat en huisnummer" /></div>
+        <div class="cm-field"><label for="cmPostcode">Postcode</label><input type="text" id="cmPostcode" /></div>
+        <div class="cm-field"><label for="cmCity">Plaats</label><input type="text" id="cmCity" /></div>
+
+        <div class="cm-field"><label for="cmPrice">Abonnement prijs (€)</label><input type="number" id="cmPrice" min="0" step="0.01" placeholder="29" /></div>
+        <div class="cm-field"><label for="cmBilling">Abonnement type</label>
+          <select id="cmBilling"><option value="monthly">Maandelijks</option><option value="yearly">Jaarlijks</option></select>
+        </div>
+        <div class="cm-field"><label for="cmStart">Startdatum abonnement</label><input type="date" id="cmStart" /></div>
+        <div class="cm-field"><label for="cmStatus">Abonnement status</label>
+          <select id="cmStatus"><option value="trial">Trial</option><option value="active">Actief</option><option value="canceled">Opgezegd</option></select>
+        </div>
+        <div class="cm-field"><label for="cmPayment">Betaalmethode</label>
+          <select id="cmPayment"><option value="incasso">Incasso</option><option value="stripe">Stripe</option><option value="manual">Handmatig</option></select>
+        </div>
+        <div class="cm-field"><label for="cmLocations">Aantal vestigingen</label><input type="text" id="cmLocations" readonly title="Automatisch geteld" /></div>
+        <div class="cm-field"><label for="cmLastPay">Laatste betaaldatum</label><input type="date" id="cmLastPay" /></div>
+        <div class="cm-field"><label for="cmNextPay">Volgende betaaldatum</label><input type="date" id="cmNextPay" /></div>
+
+        <div class="cm-field full"><label for="cmNotes">Opmerkingen</label><textarea id="cmNotes" placeholder="Interne notities over deze klant…"></textarea></div>
+
+        <div class="cm-modal-foot full">
+          <button type="submit" class="btn btn-primary" id="crmSaveBtn"><span class="btn-label">Opslaan</span></button>
+          <button type="button" class="btn btn-ghost" id="crmCancelBtn">Annuleren</button>
+          <span class="save-note" id="crmNote"></span>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
     const API_BASE = 'https://ai-review-bot-production.up.railway.app';
     const PRICE_PER_MONTH = 29;
@@ -475,37 +586,57 @@
     }
     const MONTHS = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
 
-    // ---- Winkelier-record normaliseren ----
-    function normalizeBusiness(raw) {
-      const name = raw.business_name || raw.name || raw.company || 'Naamloze zaak';
-      const email = raw.email || raw.owner_email || raw.contact_email || '—';
-      const customers = Number(raw.customer_count ?? raw.customers ?? raw.total_customers ?? raw.holders ?? 0) || 0;
-      const stamps = Number(raw.total_stamps ?? raw.stamps ?? raw.stamps_given ?? 0) || 0;
-      const createdRaw = raw.created_at || raw.registered_at || raw.signup_date || raw.created || raw.date_joined || null;
-
-      // Status actief/inactief
-      let active;
-      if (typeof raw.active === 'boolean') active = raw.active;
-      else if (typeof raw.is_active === 'boolean') active = raw.is_active;
-      else if (raw.status) active = String(raw.status).toLowerCase() === 'active' || String(raw.status).toLowerCase() === 'actief';
-      else active = true;
-
-      // Abonnementstatus
-      const subRaw = (raw.subscription_status || raw.subscription || raw.plan || raw.sub_status || '').toString().toLowerCase();
-      let sub = { cls: 'none', label: 'Geen' };
-      if (['active','paid','betaald','betalend','pro','premium'].includes(subRaw)) sub = { cls: 'paid', label: 'Betalend' };
-      else if (['trial','trialing','proef','trialend'].includes(subRaw)) sub = { cls: 'trial', label: 'Proef' };
-      else if (['canceled','cancelled','geannuleerd','inactive','none','expired'].includes(subRaw)) sub = { cls: 'none', label: subRaw ? 'Geen' : 'Geen' };
-      else if (subRaw) sub = { cls: 'paid', label: subRaw.charAt(0).toUpperCase() + subRaw.slice(1) };
-      else if (active) sub = { cls: 'paid', label: 'Betalend' };
-
+    // ---- Winkelier-record normaliseren (CRM) ----
+    const pickDate = (raw, keys) => { for (const k of keys) if (raw[k]) return raw[k]; return null; };
+    function normalizeStatus(raw) {
+      const s = String(raw.subscription_status || raw.status || raw.subscription || raw.plan || raw.sub_status || '').toLowerCase();
+      if (['trial','trialing','proef','trialend','proefperiode'].includes(s)) return { key: 'trial', label: 'Trial', cls: 'trial' };
+      if (['canceled','cancelled','opgezegd','geannuleerd','expired','inactive','ended','none'].includes(s)) return { key: 'canceled', label: 'Opgezegd', cls: 'inactive' };
+      if (['active','actief','paid','betaald','betalend','pro','premium'].includes(s)) return { key: 'active', label: 'Actief', cls: 'active' };
+      return { key: 'active', label: 'Actief', cls: 'active' };
+    }
+    function normalizePayment(raw) {
+      const p = String(raw.payment_method || raw.billing_method || '').toLowerCase();
+      if (['incasso','sepa','direct_debit','automatische_incasso'].includes(p)) return 'incasso';
+      if (['stripe','card','creditcard'].includes(p)) return 'stripe';
+      return 'manual';
+    }
+    function normalizeBusiness(raw, i) {
+      const billingRaw = String(raw.billing_type || raw.billing_cycle || raw.subscription_type || raw.interval || 'monthly').toLowerCase();
+      const locsRaw = raw.location_count ?? raw.locations_count ?? raw.num_locations
+        ?? (Array.isArray(raw.locations) ? raw.locations.length : raw.vestigingen);
+      const createdRaw = pickDate(raw, ['created_at','registered_at','signup_date','created','date_joined']);
       return {
-        name, email, customers, stamps,
+        id: raw.id ?? raw.business_id ?? raw._id ?? raw.uuid ?? ('biz-' + i),
+        name: raw.business_name || raw.name || raw.company || 'Naamloze zaak',
+        contact: raw.contact_name || raw.contact_person || raw.contactpersoon || raw.owner_name || '',
+        email: raw.email || raw.owner_email || raw.contact_email || '',
+        phone: raw.phone || raw.telefoon || raw.phone_number || '',
+        kvk: raw.kvk || raw.kvk_number || raw.coc_number || '',
+        btw: raw.btw || raw.vat || raw.vat_number || raw.btw_number || '',
+        address: raw.address || raw.street || '',
+        postcode: raw.postcode || raw.postal_code || raw.zip || '',
+        city: raw.city || raw.plaats || '',
+        locations: Number(locsRaw) || 0,
+        price: Number(raw.subscription_price ?? raw.price ?? raw.amount ?? raw.monthly_price ?? 0) || 0,
+        billing: (billingRaw.includes('year') || billingRaw.includes('jaar')) ? 'yearly' : 'monthly',
+        startDate: pickDate(raw, ['subscription_start','subscription_start_date','start_date','started_at']),
+        lastPayment: pickDate(raw, ['last_payment','last_payment_date','last_paid_at']),
+        nextPayment: pickDate(raw, ['next_payment','next_payment_date','next_billing_date','renews_at']),
+        paymentMethod: normalizePayment(raw),
+        notes: raw.notes || raw.opmerkingen || raw.remarks || '',
+        customers: Number(raw.customer_count ?? raw.customers ?? raw.total_customers ?? raw.holders ?? 0) || 0,
+        stamps: Number(raw.total_stamps ?? raw.stamps ?? raw.stamps_given ?? 0) || 0,
         createdRaw,
         created: parseDate(createdRaw),
-        active,
-        sub,
+        status: normalizeStatus(raw),
+        get active() { return this.status.key === 'active'; },
       };
+    }
+    // Maandelijkse omzet-equivalent van één winkelier.
+    function monthlyOf(b) {
+      const p = b.price || PRICE_PER_MONTH;
+      return b.billing === 'yearly' ? p / 12 : p;
     }
 
     // ---- State ----
@@ -555,14 +686,15 @@
       const totalBiz = businesses.length;
       const totalCust = businesses.reduce((s, b) => s + b.customers, 0);
       const totalStamps = businesses.reduce((s, b) => s + b.stamps, 0);
-      const payingBiz = businesses.filter(b => b.active).length;
-      const revenue = payingBiz * PRICE_PER_MONTH;
+      const payingList = businesses.filter(b => b.active);
+      const payingBiz = payingList.length;
+      const revenue = payingList.reduce((s, b) => s + monthlyOf(b), 0);
 
       document.getElementById('statBusinesses').textContent = totalBiz.toLocaleString('nl-NL');
       document.getElementById('statCustomers').textContent = totalCust.toLocaleString('nl-NL');
       document.getElementById('statStamps').textContent = totalStamps.toLocaleString('nl-NL');
       document.getElementById('statRevenue').textContent = euro(revenue);
-      document.getElementById('statRevenueSub').textContent = `${payingBiz} actieve winkeliers × €${PRICE_PER_MONTH}`;
+      document.getElementById('statRevenueSub').textContent = `${payingBiz} actieve ${payingBiz === 1 ? 'winkelier' : 'winkeliers'}`;
 
       // Nieuwste 5 winkeliers
       const recent = [...businesses]
@@ -581,54 +713,170 @@
         </div>`).join('')}</div>`;
     }
 
-    // ---- Winkeliers-tabel ----
+    // ---- Winkeliers-lijst (CRM) ----
     const bizSearch = document.getElementById('bizSearch');
-    function renderBusinessTable() {
+    let statusFilter = 'all';
+    const CHEV = '<svg class="crm-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>';
+
+    function filteredBusinesses() {
       const q = (bizSearch.value || '').trim().toLowerCase();
-      const rows = q
-        ? businesses.filter(b => b.name.toLowerCase().includes(q) || b.email.toLowerCase().includes(q))
-        : businesses;
-      const wrap = document.getElementById('bizTableWrap');
-
-      if (!businesses.length) { wrap.innerHTML = '<div class="empty-state">Nog geen winkeliers aangemeld.</div>'; return; }
-      if (!rows.length) { wrap.innerHTML = `<div class="empty-state">Geen winkeliers gevonden voor "${escapeHtml(bizSearch.value.trim())}".</div>`; return; }
-
-      const body = rows.map(b => `
-        <tr>
-          <td>
-            <div class="biz-name-cell">
-              <div class="biz-avatar">${escapeHtml(initials(b.name))}</div>
-              <div><div class="bn">${escapeHtml(b.name)}</div></div>
-            </div>
-          </td>
-          <td class="col-email">${escapeHtml(b.email)}</td>
-          <td class="col-num">${b.customers.toLocaleString('nl-NL')}</td>
-          <td>${formatDate(b.createdRaw)}</td>
-          <td><span class="pill ${b.active ? 'active' : 'inactive'}">${b.active ? 'Actief' : 'Inactief'}</span></td>
-          <td><span class="pill ${b.sub.cls}">${escapeHtml(b.sub.label)}</span></td>
-        </tr>`).join('');
-
-      wrap.innerHTML = `
-        <div class="table-wrap">
-          <table class="biz-table">
-            <thead>
-              <tr>
-                <th>Bedrijfsnaam</th>
-                <th>E-mail</th>
-                <th>Klanten</th>
-                <th>Registratie</th>
-                <th>Status</th>
-                <th>Abonnement</th>
-              </tr>
-            </thead>
-            <tbody>${body}</tbody>
-          </table>
-        </div>`;
+      return businesses.filter(b => {
+        if (statusFilter !== 'all' && b.status.key !== statusFilter) return false;
+        if (!q) return true;
+        return b.name.toLowerCase().includes(q)
+          || (b.email || '').toLowerCase().includes(q)
+          || (b.contact || '').toLowerCase().includes(q);
+      });
     }
-    bizSearch.addEventListener('input', renderBusinessTable);
+    // Backwards-compat alias (renderAll roept dit aan).
+    function renderBusinessTable() { renderBusinessList(); }
+    function renderBusinessList() {
+      const wrap = document.getElementById('bizTableWrap');
+      if (!businesses.length) { wrap.innerHTML = '<div class="empty-state">Nog geen winkeliers aangemeld.</div>'; return; }
+      const rows = filteredBusinesses();
+      if (!rows.length) { wrap.innerHTML = '<div class="empty-state">Geen winkeliers gevonden. Pas je zoekopdracht of filter aan.</div>'; return; }
+
+      wrap.innerHTML = '<div class="crm-list">' + rows.map(b => `
+        <button type="button" class="crm-card" data-id="${escapeHtml(String(b.id))}">
+          <div class="crm-avatar">${escapeHtml(initials(b.name))}</div>
+          <div class="crm-main">
+            <div class="crm-name">${escapeHtml(b.name)}</div>
+            <div class="crm-sub">${escapeHtml(b.email || 'Geen e-mail')}${b.city ? ' · ' + escapeHtml(b.city) : ''}</div>
+          </div>
+          <div class="crm-tags">
+            <span class="pill ${b.status.cls}">${b.status.label}</span>
+            <span class="crm-price">${b.price ? euro(b.price) + (b.billing === 'yearly' ? '/jr' : '/mnd') : '—'}</span>
+            <span class="crm-locs">${b.locations} ${b.locations === 1 ? 'vestiging' : 'vestigingen'}</span>
+          </div>
+          ${CHEV}
+        </button>`).join('') + '</div>';
+
+      wrap.querySelectorAll('.crm-card').forEach(el =>
+        el.addEventListener('click', () => openCrm(el.dataset.id)));
+    }
+    bizSearch.addEventListener('input', renderBusinessList);
+    // Statusfilter
+    document.querySelectorAll('#statusSeg button').forEach(btn =>
+      btn.addEventListener('click', () => {
+        statusFilter = btn.dataset.f;
+        document.querySelectorAll('#statusSeg button').forEach(x => x.classList.toggle('active', x === btn));
+        renderBusinessList();
+      }));
     document.getElementById('refreshBtn').addEventListener('click', () => {
-      document.getElementById('bizTableWrap').innerHTML = '<div class="loader" style="padding:28px;"><span class="spinner"></span> Vernieuwen…</div>';
+      document.getElementById('bizTableWrap').innerHTML = '<div class="loader" style="padding:20px 4px;"><span class="spinner"></span> Vernieuwen…</div>';
       loadBusinesses();
+    });
+
+    // ============================================================
+    //  CRM klant-detail modal
+    // ============================================================
+    const crmModal = document.getElementById('crmModal');
+    let editingBiz = null;
+    const toDateInput = (v) => { const d = parseDate(v); return d ? d.toISOString().slice(0, 10) : ''; };
+    const setVal = (id, v) => { document.getElementById(id).value = v == null ? '' : v; };
+
+    function openCrm(id) {
+      const b = businesses.find(x => String(x.id) === String(id));
+      if (!b) return;
+      editingBiz = b;
+      document.getElementById('crmModalTitle').textContent = b.name;
+      document.getElementById('crmModalSub').textContent = b.email || 'Klantgegevens bewerken';
+      document.getElementById('cmLocationsView').textContent = b.locations.toLocaleString('nl-NL');
+      document.getElementById('cmCustomersView').textContent = b.customers.toLocaleString('nl-NL');
+      document.getElementById('cmStampsView').textContent = b.stamps.toLocaleString('nl-NL');
+
+      setVal('cmName', b.name);
+      setVal('cmContact', b.contact);
+      setVal('cmEmail', b.email);
+      setVal('cmPhone', b.phone);
+      setVal('cmKvk', b.kvk);
+      setVal('cmBtw', b.btw);
+      setVal('cmAddress', b.address);
+      setVal('cmPostcode', b.postcode);
+      setVal('cmCity', b.city);
+      setVal('cmPrice', b.price || '');
+      document.getElementById('cmBilling').value = b.billing;
+      setVal('cmStart', toDateInput(b.startDate));
+      document.getElementById('cmStatus').value = b.status.key;
+      document.getElementById('cmPayment').value = b.paymentMethod;
+      setVal('cmLocations', b.locations + (b.locations === 1 ? ' vestiging' : ' vestigingen'));
+      setVal('cmLastPay', toDateInput(b.lastPayment));
+      setVal('cmNextPay', toDateInput(b.nextPayment));
+      setVal('cmNotes', b.notes);
+
+      const note = document.getElementById('crmNote'); note.className = 'save-note'; note.textContent = '';
+      crmModal.hidden = false;
+    }
+    function closeCrm() { crmModal.hidden = true; editingBiz = null; }
+    document.getElementById('crmClose').addEventListener('click', closeCrm);
+    document.getElementById('crmCancelBtn').addEventListener('click', closeCrm);
+    crmModal.addEventListener('click', (e) => { if (e.target === crmModal) closeCrm(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !crmModal.hidden) closeCrm(); });
+
+    document.getElementById('crmForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!editingBiz) return;
+      const b = editingBiz;
+      const btn = document.getElementById('crmSaveBtn');
+      const note = document.getElementById('crmNote');
+      const v = id => document.getElementById(id).value.trim();
+      const statusKey = document.getElementById('cmStatus').value;
+      const billing = document.getElementById('cmBilling').value;
+      const payment = document.getElementById('cmPayment').value;
+      const price = parseFloat(document.getElementById('cmPrice').value) || 0;
+
+      // Payload met de veldnamen die de backend verwacht.
+      const payload = {
+        business_name: v('cmName'),
+        contact_name: v('cmContact'),
+        email: v('cmEmail'),
+        phone: v('cmPhone'),
+        kvk: v('cmKvk'),
+        btw: v('cmBtw'),
+        address: v('cmAddress'),
+        postcode: v('cmPostcode'),
+        city: v('cmCity'),
+        subscription_price: price,
+        billing_type: billing,
+        subscription_start: v('cmStart') || null,
+        subscription_status: statusKey,
+        payment_method: payment,
+        last_payment: v('cmLastPay') || null,
+        next_payment: v('cmNextPay') || null,
+        notes: v('cmNotes'),
+      };
+
+      note.className = 'save-note'; btn.classList.add('loading'); btn.disabled = true;
+      try {
+        const res = await fetch(API_BASE + '/api/admin/businesses/' + encodeURIComponent(b.id), {
+          method: 'PUT', headers: adminHeaders(), body: JSON.stringify(payload),
+        });
+        if (res.status === 401 || res.status === 403) {
+          localStorage.removeItem('admin_token'); window.location.replace('omrz-hq-control.html'); return;
+        }
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || data.message || 'Opslaan mislukt');
+
+        // Lokale state bijwerken zodat de lijst meteen klopt.
+        Object.assign(b, {
+          name: payload.business_name || b.name,
+          contact: payload.contact_name, email: payload.email, phone: payload.phone,
+          kvk: payload.kvk, btw: payload.btw, address: payload.address,
+          postcode: payload.postcode, city: payload.city,
+          price, billing, paymentMethod: payment,
+          startDate: payload.subscription_start, lastPayment: payload.last_payment, nextPayment: payload.next_payment,
+          notes: payload.notes, status: normalizeStatus({ subscription_status: statusKey }),
+        });
+        note.textContent = 'Opgeslagen ✓'; note.classList.add('ok');
+        document.getElementById('crmModalTitle').textContent = b.name;
+        renderBusinessList();
+        renderOverview();
+        setTimeout(closeCrm, 700);
+      } catch (err) {
+        note.textContent = 'Kon niet opslaan: ' + (err.message || 'onbekende fout'); note.classList.add('error');
+      } finally {
+        btn.classList.remove('loading'); btn.disabled = false;
+      }
     });
 
     // ---- Charts ----
