@@ -1356,12 +1356,59 @@
         btn.classList.remove('loading'); btn.disabled = false;
       }
     });
-    // PDF en e-mail volgen later — nu een nette placeholder.
-    document.getElementById('idPdf').addEventListener('click', () => {
-      const note = document.getElementById('idNote'); note.className = 'save-note'; note.textContent = 'PDF-download komt binnenkort beschikbaar.';
+    // ---- PDF downloaden (met Authorization-header → blob → download) ----
+    document.getElementById('idPdf').addEventListener('click', async () => {
+      if (!detailInvoice) return;
+      const inv = detailInvoice;
+      const btn = document.getElementById('idPdf');
+      const note = document.getElementById('idNote'); note.className = 'save-note';
+      const orig = btn.textContent;
+      btn.classList.add('loading'); btn.disabled = true; btn.textContent = 'Bezig…';
+      try {
+        const res = await fetch(API_BASE + '/api/admin/invoices/' + encodeURIComponent(inv.id) + '/pdf', {
+          headers: { 'Authorization': 'Bearer ' + adminToken },
+        });
+        if (res.status === 401 || res.status === 403) { localStorage.removeItem('admin_token'); window.location.replace('omrz-hq-control.html'); return; }
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const blob = await res.blob();
+        // Trigger de download via een tijdelijke blob-URL.
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'factuur-' + String(inv.number).replace(/[^\w.-]+/g, '-') + '.pdf';
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+        note.textContent = 'PDF gedownload ✓'; note.classList.add('ok');
+      } catch (err) {
+        note.textContent = 'Kon de PDF niet downloaden. Probeer het opnieuw.'; note.classList.add('error');
+      } finally {
+        btn.classList.remove('loading'); btn.disabled = false; btn.textContent = orig;
+      }
     });
-    document.getElementById('idEmail').addEventListener('click', () => {
-      const note = document.getElementById('idNote'); note.className = 'save-note'; note.textContent = 'Versturen per e-mail komt binnenkort beschikbaar.';
+
+    // ---- Factuur per e-mail versturen ----
+    document.getElementById('idEmail').addEventListener('click', async () => {
+      if (!detailInvoice) return;
+      const inv = detailInvoice;
+      const btn = document.getElementById('idEmail');
+      const note = document.getElementById('idNote'); note.className = 'save-note';
+      const orig = btn.textContent;
+      btn.classList.add('loading'); btn.disabled = true; btn.textContent = 'Versturen…';
+      try {
+        const res = await fetch(API_BASE + '/api/admin/invoices/' + encodeURIComponent(inv.id) + '/send', {
+          method: 'POST', headers: adminHeaders(),
+        });
+        if (res.status === 401 || res.status === 403) { localStorage.removeItem('admin_token'); window.location.replace('omrz-hq-control.html'); return; }
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || data.message || 'Versturen mislukt');
+        // Werk de status bij als de backend een nieuwe status teruggeeft.
+        if (data.status) { inv.status = normalizeInvoiceStatus({ status: data.status }); renderInvoiceList(); }
+        note.textContent = 'Factuur verstuurd!'; note.classList.add('ok');
+      } catch (err) {
+        note.textContent = 'Kon niet versturen: ' + (err.message || 'onbekende fout'); note.classList.add('error');
+      } finally {
+        btn.classList.remove('loading'); btn.disabled = false; btn.textContent = orig;
+      }
     });
     // Esc sluit elke open modal.
     document.addEventListener('keydown', (e) => {
