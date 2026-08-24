@@ -426,6 +426,9 @@
     .sc-logo { width: 34px; height: 34px; border-radius: 8px; object-fit: cover; background: rgba(255,255,255,.2); flex-shrink: 0; }
     .sc-stamps .st { width: 100%; aspect-ratio: 1; display: block; position: relative; }
     .sc-stamps .st > svg { width: 100%; height: 100%; display: block; }
+    /* Gecentreerde stempelrijen (editor-/overzicht-preview) */
+    .sc-stamp-row { display: flex; justify-content: center; gap: 9px; width: 100%; }
+    .sc-footer { margin-top: 12px; font-size: 12px; text-align: center; line-height: 1.4; }
 
     /* Color pickers */
     .cp-main { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
@@ -747,6 +750,7 @@
                     <div class="sc-reward" id="ovReward">Spaar stempels → gratis product</div>
                     <div class="sc-stamps" id="ovStamps"></div>
                     <div class="sc-progress" id="ovProgress">0 / 6 stempels</div>
+                    <div class="sc-footer" id="ovFooter" hidden></div>
                   </div>
                 </div>
               </div>
@@ -786,6 +790,7 @@
                   <div class="sc-reward" id="pvReward">Spaar 6 stempels → gratis koffie</div>
                   <div class="sc-stamps" id="pvStamps"></div>
                   <div class="sc-progress" id="pvProgress">3 / 6 stempels</div>
+                  <div class="sc-footer" id="pvFooter" hidden></div>
                 </div>
               </div>
               <p class="pv-label">Live preview — zo ziet je klant de kaart</p>
@@ -815,6 +820,11 @@
                     <label class="check-row" style="margin:0 0 12px;"><input type="checkbox" id="showRewardText" checked /> Toon spaardoel tekst op de kaart</label>
                     <input type="text" id="rewardText" placeholder="Spaar 6 = gratis koffie" />
                     <div class="upload-hint">Laat leeg voor automatische tekst: “Spaar X stempels → beloning”.</div>
+                  </div>
+                  <div class="field">
+                    <label class="check-row" style="margin:0 0 12px;"><input type="checkbox" id="showFooterText" /> Toon tekst onderaan de kaart</label>
+                    <input type="text" id="footerText" placeholder="Bedankt voor je bezoek!" />
+                    <div class="upload-hint">Bijv. een bedankje of je openingstijden — verschijnt onderaan de kaart.</div>
                   </div>
                   <div class="field">
                     <label for="fStamps">Aantal stempels <span class="range-val" id="fStampsVal">6</span></label>
@@ -892,6 +902,12 @@
                 <div class="toggle-row" id="fillToggle" style="margin-bottom:18px;">
                   <button type="button" data-fill="filled" class="active">Gevuld</button>
                   <button type="button" data-fill="outline">Outline</button>
+                </div>
+
+                <!-- Lijndikte: alleen bij Outline -->
+                <div class="field" id="outlineWidthField" hidden style="margin-bottom:18px;">
+                  <label for="fOutline">Lijndikte <span class="range-val" id="fOutlineVal">2.5</span></label>
+                  <input type="range" class="range" id="fOutline" min="1" max="8" step="0.5" value="2.5" />
                 </div>
 
                 <!-- Vulling: alleen bij Outline (bij Gevuld is de vorm massief gekleurd) -->
@@ -1281,6 +1297,8 @@
       reward_description: 'Gratis koffie',
       show_reward_text: true,
       reward_text: '',
+      footer_text: '',
+      show_footer_text: false,
       stamps_required: 6,
       card_font: 'Inter',
       logo_url: '',
@@ -1296,6 +1314,7 @@
       stamp_style: '★',
       stamp_type: 'shape',
       stamp_logo_url: '',
+      outline_width: 2.5,
     };
     let stats = { total_customers: 0, total_stamps: 0, total_rewards: 0 };
 
@@ -1508,6 +1527,11 @@
     const fReward = document.getElementById('fReward');
     const showRewardText = document.getElementById('showRewardText');
     const rewardText = document.getElementById('rewardText');
+    const showFooterText = document.getElementById('showFooterText');
+    const footerText = document.getElementById('footerText');
+    const fOutline = document.getElementById('fOutline');
+    const fOutlineVal = document.getElementById('fOutlineVal');
+    const outlineWidthField = document.getElementById('outlineWidthField');
     const fStamps = document.getElementById('fStamps');
     const fStampsVal = document.getElementById('fStampsVal');
     const primaryColor = document.getElementById('primaryColor');
@@ -1547,6 +1571,7 @@
       reward: document.getElementById('pvReward'),
       stamps: document.getElementById('pvStamps'),
       progress: document.getElementById('pvProgress'),
+      footer: document.getElementById('pvFooter'),
     };
     const overviewRefs = {
       cardEl: document.getElementById('ovPreview'),
@@ -1558,6 +1583,7 @@
       reward: document.getElementById('ovReward'),
       stamps: document.getElementById('ovStamps'),
       progress: document.getElementById('ovProgress'),
+      footer: document.getElementById('ovFooter'),
     };
 
     // ---- Stempel-rendering ----
@@ -1578,6 +1604,10 @@
       const st = document.createElement('span');
       st.className = 'st';
 
+      // Instelbare lijndikte. Bij een logo-stempel iets dunner, zodat het logo goed zichtbaar blijft.
+      const ow = Number(card.outline_width) || 2.5;
+      const owLogo = Math.max(1, ow * 0.65);
+
       // Logo-als-stempel: de vorm is de outline, het logo vult de binnenkant.
       if (card.stamp_type === 'logo' && img) {
         if (active) {
@@ -1590,13 +1620,13 @@
           imgEl.style.webkitMaskPosition = 'center';   imgEl.style.maskPosition = 'center';
           imgEl.style.webkitMaskSize = 'contain';      imgEl.style.maskSize = 'contain';
           st.appendChild(imgEl);
-          // Vorm-omtrek eromheen.
+          // Vorm-omtrek eromheen (dunnere lijn voor het logo).
           const stroke = card.stamp_color || card.text_color || '#ffffff';
           st.insertAdjacentHTML('beforeend',
-            `<svg class="st-outline" viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="1.6" stroke-linejoin="round">${path}</svg>`);
+            `<svg class="st-outline" viewBox="0 0 24 24" fill="none" stroke="${stroke}" stroke-width="${owLogo}" stroke-linejoin="round">${path}</svg>`);
         } else {
           // Leeg: alleen de vage vorm-omtrek.
-          st.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="${card.text_color || '#ffffff'}" stroke-width="1.8" stroke-linejoin="round" opacity="0.3">${path}</svg>`;
+          st.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="${card.text_color || '#ffffff'}" stroke-width="${owLogo}" stroke-linejoin="round" opacity="0.3">${path}</svg>`;
         }
         return st;
       }
@@ -1604,6 +1634,8 @@
       // Kleur-modus (gevuld / outline).
       const col = card.stamp_color || card.accent_color || '#c9a45c';
       const outline = card.stamp_fill === 'outline';
+      // Lijndikte alleen relevant in outline-modus; gevuld-modus houdt dunne lege omtrekken.
+      const sw = outline ? ow : 1.8;
       let fill, stroke, opacity = '';
       if (active) {
         if (outline) { fill = 'none'; stroke = col; }
@@ -1611,7 +1643,7 @@
       } else {
         fill = 'none'; stroke = card.text_color || '#ffffff'; opacity = ' opacity="0.3"';
       }
-      st.innerHTML = `<svg viewBox="0 0 24 24" fill="${fill}" stroke="${stroke}" stroke-width="1.8" stroke-linejoin="round"${opacity}>${path}</svg>`;
+      st.innerHTML = `<svg viewBox="0 0 24 24" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" stroke-linejoin="round"${opacity}>${path}</svg>`;
       return st;
     }
 
@@ -1648,12 +1680,38 @@
         t.reward.style.color = txt; t.reward.style.opacity = '.8';
       }
 
-      const filled = Math.min(3, c.stamps_required);
-      t.stamps.style.gridTemplateColumns = `repeat(${Math.min(c.stamps_required, 6)}, 1fr)`;
+      // Stempels netjes over 2 gecentreerde rijen verdelen (bovenste rij krijgt de meeste bij oneven).
+      const total = c.stamps_required;
+      const filled = Math.min(3, total);
+      const perRow = Math.max(1, Math.ceil(total / 2));
+      const gap = 9;
+      const itemW = `calc((100% - ${(perRow - 1) * gap}px) / ${perRow})`;
+      t.stamps.style.display = 'flex';
+      t.stamps.style.flexDirection = 'column';
+      t.stamps.style.gap = gap + 'px';
+      t.stamps.style.gridTemplateColumns = '';
       t.stamps.innerHTML = '';
-      for (let i = 0; i < c.stamps_required; i++) t.stamps.appendChild(stampNode(i < filled));
-      t.progress.textContent = `${filled} / ${c.stamps_required} stempels`;
+      let row = null;
+      for (let i = 0; i < total; i++) {
+        if (i % perRow === 0) { row = document.createElement('div'); row.className = 'sc-stamp-row'; t.stamps.appendChild(row); }
+        const node = stampNode(i < filled);
+        node.style.width = itemW; node.style.flexShrink = '0';
+        row.appendChild(node);
+      }
+      t.progress.textContent = `${filled} / ${total} stempels`;
       t.progress.style.color = c.accent_color || txt;
+
+      // Tekst onderaan de kaart (optioneel, exact zoals getypt).
+      if (t.footer) {
+        if (c.show_footer_text && (c.footer_text || '').trim()) {
+          t.footer.hidden = false;
+          t.footer.textContent = c.footer_text;
+          t.footer.style.color = txt;
+          t.footer.style.opacity = '.7';
+        } else {
+          t.footer.hidden = true;
+        }
+      }
     }
     function paintEditor() { renderCardInto(editorRefs); }
     function paintOverview() { renderCardInto(overviewRefs); }
@@ -1747,6 +1805,7 @@
       if (!hasLogo && card.stamp_type === 'logo') card.stamp_type = 'shape';
 
       fillingGroup.hidden = !outline;                 // vulling-groep alleen bij Outline
+      outlineWidthField.hidden = !outline;            // lijndikte-slider alleen bij Outline
       stampTypeLogoBtn.hidden = !hasLogo;             // "Mijn logo" automatisch beschikbaar
       [...stampTypeToggle.children].forEach(ch => ch.classList.toggle('active', ch.dataset.stamptype === card.stamp_type));
       stampColorField.style.display = (card.stamp_type === 'logo') ? 'none' : '';   // kleur verbergen bij logo
@@ -1860,6 +1919,13 @@
     // ---- Spaardoel-tekst ----
     showRewardText.addEventListener('change', () => { card.show_reward_text = showRewardText.checked; paintEditor(); });
     rewardText.addEventListener('input', () => { card.reward_text = rewardText.value; paintEditor(); });
+    showFooterText.addEventListener('change', () => { card.show_footer_text = showFooterText.checked; paintEditor(); });
+    footerText.addEventListener('input', () => { card.footer_text = footerText.value; paintEditor(); });
+    fOutline.addEventListener('input', () => {
+      card.outline_width = parseFloat(fOutline.value) || 2.5;
+      fOutlineVal.textContent = card.outline_width;
+      paintEditor();
+    });
 
     // ---- Tekst-inputs + slider ----
     fBiz.addEventListener('input', () => { card.business_name = fBiz.value.trim() || 'Mijn zaak'; refreshPreviews(); });
@@ -1884,6 +1950,11 @@
 
       showRewardText.checked = card.show_reward_text !== false;
       rewardText.value = card.reward_text || '';
+      showFooterText.checked = card.show_footer_text === true;
+      footerText.value = card.footer_text || '';
+      card.outline_width = Number(card.outline_width) || 2.5;
+      fOutline.value = card.outline_width;
+      fOutlineVal.textContent = card.outline_width;
 
       autoContrast.checked = false;
       setFont(card.card_font || 'Inter');
@@ -1989,6 +2060,8 @@
         reward_description: card.reward_description,
         show_reward_text: card.show_reward_text,
         reward_text: card.reward_text,
+        footer_text: card.footer_text,
+        show_footer_text: card.show_footer_text,
         stamps_required: card.stamps_required,
         card_font: card.card_font,
         logo_url: card.logo_url,
@@ -2004,6 +2077,7 @@
         stamp_style: card.stamp_style,
         stamp_type: card.stamp_type,
         stamp_logo_url: card.stamp_logo_url,
+        outline_width: card.outline_width,
       };
       try {
         const url = cardId
@@ -2577,6 +2651,8 @@
           card.stamp_style = c.stamp_style ?? card.stamp_style;
           card.show_reward_text = c.show_reward_text ?? card.show_reward_text;
           card.reward_text = c.reward_text ?? card.reward_text;
+          card.footer_text = c.footer_text ?? card.footer_text;
+          card.show_footer_text = c.show_footer_text ?? card.show_footer_text;
           card.card_font = c.card_font ?? card.card_font;
           card.logo_url = c.logo_url ?? card.logo_url;
           card.background_url = c.background_url ?? card.background_url;
@@ -2589,6 +2665,7 @@
           card.stamp_fill = c.stamp_fill ?? card.stamp_fill;
           card.stamp_type = c.stamp_type ?? card.stamp_type;
           card.stamp_logo_url = c.stamp_logo_url ?? card.stamp_logo_url;
+          card.outline_width = c.outline_width ?? card.outline_width;
 
           const s = data.stats || {};
           document.getElementById('statCustomers').textContent = s.total_customers ?? s.customers ?? 0;
