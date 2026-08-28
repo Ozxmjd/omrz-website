@@ -613,6 +613,61 @@
     .lock-modal p strong { color: var(--pearl); }
     .lock-modal .btn { width: 100%; }
 
+    /* ---------- Groot abonnement-scherm ---------- */
+    .btn-outline { background: transparent; color: var(--text); border-color: var(--border-strong); }
+    .btn-outline:hover { background: #fff; color: #0a0a0a; border-color: #fff; }
+    .btn-block { width: 100%; }
+
+    .sub-modal-overlay { position: fixed; inset: 0; z-index: 300; display: flex; align-items: flex-start; justify-content: center; padding: 28px 20px; overflow-y: auto; background: rgba(0,0,0,.72); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); animation: fade .3s var(--ease); }
+    .sub-modal-overlay[hidden] { display: none; }
+    .sub-modal { position: relative; width: 100%; max-width: 860px; margin: auto; border-radius: 24px; padding: 36px 34px 30px; }
+    .sub-modal-close { position: absolute; top: 18px; right: 18px; width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border-strong); background: rgba(255,255,255,.04); color: #fff; font-size: 16px; cursor: pointer; z-index: 2; transition: background .2s var(--ease); }
+    .sub-modal-close:hover { background: rgba(255,255,255,.1); }
+    .sm-head { text-align: center; max-width: 560px; margin: 0 auto 22px; }
+    .sm-head h2 { font-size: clamp(24px, 3.4vw, 32px); font-weight: 800; letter-spacing: -.03em; line-height: 1.12; }
+    .sm-head p { color: var(--muted); font-size: 15.5px; margin-top: 10px; }
+
+    .sm-billing { display: flex; justify-content: center; margin-bottom: 24px; }
+    .billing-inner { display: inline-flex; align-items: center; gap: 4px; padding: 5px; border-radius: 999px; border: 1px solid var(--border); background: rgba(255,255,255,.03); }
+    .billing-inner button { font-family: inherit; font-size: 14px; font-weight: 600; color: var(--muted); padding: 9px 18px; border-radius: 999px; border: 0; background: none; cursor: pointer; transition: color .2s var(--ease), background .2s var(--ease); }
+    .billing-inner button.active { color: #0a0a0a; background: #fff; }
+    .billing-inner .save { margin-left: 4px; font-size: 11px; font-weight: 800; color: #6ee7a0; background: rgba(74,222,128,.14); border: 1px solid rgba(74,222,128,.4); padding: 2px 8px; border-radius: 999px; }
+
+    .sm-msg { display: none; max-width: 560px; margin: 0 auto 18px; font-size: 14px; padding: 11px 14px; border-radius: 11px; text-align: center; }
+    .sm-msg.error { display: block; color: #ffb4b4; background: rgba(255,80,80,.08); border: 1px solid rgba(255,80,80,.25); }
+    .sm-msg.ok { display: block; color: #b4ffcf; background: rgba(80,255,140,.08); border: 1px solid rgba(80,255,140,.25); }
+
+    .sm-plans { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+    .sm-plan { position: relative; padding: 26px 24px; border-radius: 18px; border: 1px solid var(--border); background: rgba(255,255,255,.03); display: flex; flex-direction: column; overflow: hidden; }
+    .sm-plan.featured { border-color: var(--border-strong); background: rgba(255,255,255,.05); }
+    .sm-plans.selectable .sm-plan { cursor: pointer; transition: border-color .2s var(--ease), box-shadow .2s var(--ease); }
+    .sm-plans.selectable .sm-plan:hover { border-color: var(--border-strong); }
+    .sm-plans.selectable .sm-plan.selected { border-color: #fff; box-shadow: inset 0 0 0 1px #fff; }
+    .sm-plan .badge-pop { position: absolute; top: 16px; right: 16px; font-size: 11px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: #0a0a0a; background: #fff; padding: 4px 11px; border-radius: 999px; }
+    .sm-plan .tier { font-size: 14px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+    .sm-plan .amount { margin: 12px 0 3px; font-size: 38px; font-weight: 800; letter-spacing: -.03em; color: #fff; line-height: 1; }
+    .sm-plan .amount small { font-size: 15px; font-weight: 500; color: var(--muted); letter-spacing: 0; }
+    .sm-plan .amount-sub { color: var(--muted); font-size: 13.5px; margin-bottom: 20px; min-height: 19px; }
+    .sm-plan .amount-sub .save-inline { color: #6ee7a0; font-weight: 700; }
+    .sm-features { list-style: none; display: grid; gap: 11px; margin-bottom: 22px; flex: 1; }
+    .sm-features li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--pearl); }
+    .sm-features li::before { content: ""; flex: none; width: 17px; height: 17px; margin-top: 2px; border-radius: 50%; background: rgba(110,231,160,.16); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236ee7a0' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: center; background-size: 10px; }
+    .sm-features li.hl { color: #fff; font-weight: 600; }
+
+    .sm-trial { display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap; margin-top: 20px; padding: 20px 22px; border-radius: 16px; border: 1px dashed var(--border-strong); background: rgba(255,255,255,.03); }
+    .sm-trial[hidden] { display: none; }
+    .sm-trial-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .sm-trial-text strong { font-size: 15.5px; font-weight: 700; color: #fff; }
+    .sm-trial-text small { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+    .sm-trial-btn { flex-shrink: 0; }
+
+    @media (max-width: 720px) {
+      .sub-modal { padding: 30px 20px 24px; }
+      .sm-plans { grid-template-columns: 1fr; }
+      .sm-trial { flex-direction: column; align-items: stretch; text-align: center; }
+      .sm-trial-btn { width: 100%; }
+    }
+
     /* ---------- Responsive ---------- */
     @media (max-width: 900px) {
       .two-col { grid-template-columns: 1fr; }
@@ -1318,6 +1373,71 @@
     </div>
   </div>
 
+  <!-- ===== Groot abonnement-scherm (bij geen toegang / upgrade) ===== -->
+  <div class="sub-modal-overlay" id="subModal" hidden>
+    <div class="sub-modal glass" role="dialog" aria-modal="true" aria-labelledby="smTitle">
+      <button class="sub-modal-close" id="subModalClose" aria-label="Sluiten">✕</button>
+
+      <div class="sm-head">
+        <h2 id="smTitle">Kies je abonnement</h2>
+        <p id="smSub">Kies het pakket dat bij jouw zaak past.</p>
+      </div>
+
+      <div class="sm-billing">
+        <div class="billing-inner" id="smBilling">
+          <button type="button" data-cycle="monthly" class="active">Maandelijks</button>
+          <button type="button" data-cycle="yearly">Jaarlijks <span class="save">Bespaar tot 17%</span></button>
+        </div>
+      </div>
+
+      <div class="sm-msg" id="smMsg"></div>
+
+      <div class="sm-plans" id="smPlans">
+        <!-- Basic -->
+        <div class="sm-plan" data-plan="basic">
+          <div class="tier">Basic</div>
+          <div class="amount" id="smBasicAmount">€34,99<small>/maand</small></div>
+          <div class="amount-sub" id="smBasicSub">Altijd maandelijks opzegbaar</div>
+          <ul class="sm-features">
+            <li>Digitale stempelkaart</li>
+            <li>Onbeperkt klanten</li>
+            <li>Google &amp; Apple Wallet</li>
+            <li>Dashboard &amp; statistieken</li>
+            <li>Medewerker scan-app</li>
+            <li>Meerdere vestigingen</li>
+          </ul>
+          <button type="button" class="btn btn-outline btn-block sm-choose" data-plan="basic">
+            <span class="btn-label">Kies Basic</span>
+          </button>
+        </div>
+        <!-- Premium -->
+        <div class="sm-plan featured" data-plan="premium">
+          <span class="badge-pop">Populair</span>
+          <div class="tier">Premium</div>
+          <div class="amount" id="smPremAmount">€44,99<small>/maand</small></div>
+          <div class="amount-sub" id="smPremSub">Altijd maandelijks opzegbaar</div>
+          <ul class="sm-features">
+            <li class="hl">Alles van Basic</li>
+            <li>Locatie meldingen — klanten krijgen een melding als ze in de buurt van je winkel zijn</li>
+            <li>Prioriteit support</li>
+          </ul>
+          <button type="button" class="btn btn-primary btn-block sm-choose" data-plan="premium">
+            <span class="btn-label">Kies Premium</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Proefperiode-optie (alleen als can_use_trial = true) -->
+      <div class="sm-trial" id="smTrial" hidden>
+        <div class="sm-trial-text">
+          <strong>Of probeer eerst 14 dagen gratis</strong>
+          <small>Geen kosten tijdens de proef. Daarna automatisch verlengd met het gekozen pakket (kies hierboven welk pakket).</small>
+        </div>
+        <button type="button" class="btn btn-primary sm-trial-btn" id="smStartTrial">Start 14 dagen gratis proefperiode</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const API_BASE = 'https://ai-review-bot-production.up.railway.app';
 
@@ -1383,7 +1503,7 @@
     // en een netwerkhaperning sluit geen betalende klant buiten).
     let subscription = {
       access_status: 'active', plan: 'basic', billing_cycle: null,
-      days_left_in_trial: 0, is_trial_expired: false, has_access: true,
+      days_left_in_trial: 0, is_trial_expired: false, has_access: true, can_use_trial: false,
     };
     const LOCKED_TABS = new Set(['stempel', 'kaart', 'klanten', 'vestigingen']);
     // 'meldingen' is Premium: ontgrendeld bij Premium of tijdens de trial, anders vergrendeld.
@@ -1393,22 +1513,9 @@
       if (tab === 'meldingen' && meldingenLocked()) return 'premium';
       return null;
     }
-    function showAccessLock() {
-      openModal('Proefperiode verlopen', `
-        <div class="lock-modal">
-          <div class="lock-emoji">🔒</div>
-          <p>Je proefperiode is verlopen. Kies een abonnement om door te gaan.</p>
-          <a href="abonnement.html" class="btn btn-primary">Kies een abonnement</a>
-        </div>`);
-    }
-    function showPremiumLock() {
-      openModal('Premium functie', `
-        <div class="lock-modal">
-          <div class="lock-emoji">🔒</div>
-          <p><strong>Locatie meldingen</strong> is een Premium functie. Upgrade naar Premium om deze te gebruiken.</p>
-          <a href="abonnement.html" class="btn btn-primary">Upgrade naar Premium</a>
-        </div>`);
-    }
+    // Beide feature-locks openen nu het grote abonnement-scherm in het dashboard zelf.
+    function showAccessLock() { openSubModal(); }
+    function showPremiumLock() { openSubModal(); }
 
     function activateTab(tab) {
       // Feature-lock: geblokkeerde tab niet openen, maar een nette upgrade-melding tonen.
@@ -1445,6 +1552,7 @@
           is_trial_expired: !!(s.is_trial_expired ?? s.trial_expired),
           // has_access expliciet uit de API; alleen 'false' vergrendelt.
           has_access: (s.has_access ?? s.hasAccess) === false ? false : true,
+          can_use_trial: !!(s.can_use_trial ?? s.canUseTrial),
         };
       } catch (e) { /* fail open bij netwerkfout */ }
       applySubscription();
@@ -1452,6 +1560,8 @@
     function applySubscription() {
       renderSubBanner();
       applyLockIcons();
+      // Zonder toegang: toon direct het grote abonnement-scherm.
+      if (!subscription.has_access) openSubModal();
     }
     function renderSubBanner() {
       const b = document.getElementById('subBanner');
@@ -1460,7 +1570,7 @@
         b.className = 'sub-banner expired';
         b.innerHTML =
           '<div class="sb-text"><span class="sb-ic">🔒</span><span><strong>Je proefperiode is verlopen.</strong> Kies een abonnement om je stempelkaart weer te gebruiken.</span></div>' +
-          '<a href="abonnement.html" class="btn btn-primary sb-btn">Kies een abonnement</a>';
+          '<button type="button" class="btn btn-primary sb-btn" data-open-sub>Kies een abonnement</button>';
         b.hidden = false;
       } else if (s.access_status === 'trial') {
         const d = Math.max(0, s.days_left_in_trial);
@@ -1468,12 +1578,16 @@
         b.className = 'sub-banner' + (warn ? ' warn' : '');
         b.innerHTML =
           `<div class="sb-text"><span class="sb-ic">${warn ? '⏳' : '✨'}</span><span><strong>Je proefperiode: nog ${d} ${d === 1 ? 'dag' : 'dagen'}</strong>${warn ? ' — kies op tijd een abonnement zodat je zonder onderbreking doorgaat.' : '.'}</span></div>` +
-          '<a href="abonnement.html" class="btn btn-primary sb-btn">Kies een abonnement</a>';
+          '<button type="button" class="btn btn-primary sb-btn" data-open-sub>Kies een abonnement</button>';
         b.hidden = false;
       } else {
         b.hidden = true;
       }
     }
+    // De banner-knop opent het abonnement-scherm (geen losse pagina meer).
+    document.getElementById('subBanner').addEventListener('click', (e) => {
+      if (e.target.closest('[data-open-sub]')) openSubModal();
+    });
     function applyLockIcons() {
       // Basisfuncties vergrendelen wanneer er geen toegang is.
       LOCKED_TABS.forEach(tab => {
@@ -1486,6 +1600,97 @@
       // Premium-slot op "Locatie meldingen".
       const mel = [...links].find(l => l.dataset.tab === 'meldingen');
       if (mel) mel.classList.toggle('locked', meldingenLocked());
+    }
+
+    // ====== Groot abonnement-scherm (modal) ======
+    const SUB_PRICES = {
+      basic:   { monthly: { amount: '€34,99', per: '/maand', sub: 'Altijd maandelijks opzegbaar' }, yearly: { amount: '€349', per: '/jaar', sub: '€29,08 per maand · <span class="save-inline">bespaar €71</span>' } },
+      premium: { monthly: { amount: '€44,99', per: '/maand', sub: 'Altijd maandelijks opzegbaar' }, yearly: { amount: '€449', per: '/jaar', sub: '€37,42 per maand · <span class="save-inline">bespaar €91</span>' } },
+    };
+    let smBilling = 'monthly';
+    let smSelectedPlan = 'premium';
+    const subModal = document.getElementById('subModal');
+    const smMsgEl = document.getElementById('smMsg');
+    function smShowMsg(t, type) { smMsgEl.textContent = t; smMsgEl.className = 'sm-msg ' + type; }
+    function smClearMsg() { smMsgEl.className = 'sm-msg'; smMsgEl.textContent = ''; }
+
+    function renderSmPrices() {
+      const b = SUB_PRICES.basic[smBilling], p = SUB_PRICES.premium[smBilling];
+      document.getElementById('smBasicAmount').innerHTML = b.amount + '<small>' + b.per + '</small>';
+      document.getElementById('smBasicSub').innerHTML = b.sub;
+      document.getElementById('smPremAmount').innerHTML = p.amount + '<small>' + p.per + '</small>';
+      document.getElementById('smPremSub').innerHTML = p.sub;
+    }
+    function setSelectedPlan(plan) {
+      smSelectedPlan = plan;
+      document.querySelectorAll('#smPlans .sm-plan').forEach(c => c.classList.toggle('selected', c.dataset.plan === plan));
+    }
+    function openSubModal() {
+      const s = subscription;
+      let title = 'Kies je abonnement', sub = 'Kies het pakket dat bij jouw zaak past.';
+      if (s.access_status === 'none' && !s.has_access) { title = 'Activeer je stempelkaart'; sub = 'Kies een pakket om je digitale stempelkaart te activeren.'; }
+      else if (!s.has_access) { title = 'Je proefperiode is verlopen'; sub = 'Kies een abonnement om je stempelkaart weer te gebruiken.'; }
+      document.getElementById('smTitle').textContent = title;
+      document.getElementById('smSub').textContent = sub;
+
+      const trial = document.getElementById('smTrial');
+      const plans = document.getElementById('smPlans');
+      if (s.can_use_trial) { trial.hidden = false; plans.classList.add('selectable'); setSelectedPlan(smSelectedPlan || 'premium'); }
+      else { trial.hidden = true; plans.classList.remove('selectable'); }
+
+      smClearMsg();
+      renderSmPrices();
+      subModal.hidden = false;
+    }
+    function closeSubModal() { subModal.hidden = true; }
+    document.getElementById('subModalClose').addEventListener('click', closeSubModal);
+    subModal.addEventListener('click', (e) => { if (e.target === subModal) closeSubModal(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !subModal.hidden) closeSubModal(); });
+
+    document.querySelectorAll('#smBilling button').forEach(btn => btn.addEventListener('click', () => {
+      smBilling = btn.dataset.cycle;
+      document.querySelectorAll('#smBilling button').forEach(x => x.classList.toggle('active', x === btn));
+      renderSmPrices();
+    }));
+    // Kaart-selectie (alleen zinvol bij de trial-optie).
+    document.querySelectorAll('#smPlans .sm-plan').forEach(card => card.addEventListener('click', (e) => {
+      if (!document.getElementById('smPlans').classList.contains('selectable')) return;
+      if (e.target.closest('.sm-choose')) return;   // de knop doet direct afrekenen
+      setSelectedPlan(card.dataset.plan);
+    }));
+    // "Kies Basic/Premium" → direct afrekenen (zonder trial).
+    document.querySelectorAll('#smPlans .sm-choose').forEach(btn =>
+      btn.addEventListener('click', (e) => { e.stopPropagation(); startCheckout(btn.dataset.plan, false, btn); }));
+    // "Start 14 dagen gratis" → afrekenen met trial, voor het geselecteerde pakket.
+    document.getElementById('smStartTrial').addEventListener('click', (e) => startCheckout(smSelectedPlan, true, e.currentTarget));
+
+    async function startCheckout(plan, withTrial, btn) {
+      if (btn.disabled) return;
+      if (!localStorage.getItem('omrz_token')) { smShowMsg('Je bent niet ingelogd. Log opnieuw in.', 'error'); return; }
+      smClearMsg();
+      const original = btn.textContent;
+      const allBtns = [...document.querySelectorAll('#smPlans .sm-choose'), document.getElementById('smStartTrial')];
+      btn.disabled = true; btn.textContent = 'Bezig met doorsturen naar betaling…';
+      allBtns.forEach(b => { if (b !== btn) b.disabled = true; });
+      const reset = () => { btn.disabled = false; btn.textContent = original; allBtns.forEach(b => b.disabled = false); };
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/create-checkout-session', {
+          method: 'POST', headers: authHeaders(),
+          body: JSON.stringify({ plan, billing_cycle: smBilling, with_trial: withTrial }),
+        });
+        if (res.status === 401 || res.status === 403) { smShowMsg('Je sessie is verlopen. Log opnieuw in.', 'error'); reset(); return; }
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || data.message || 'Kon de betaling niet starten. Probeer het opnieuw.');
+        const url = data.url || data.checkout_url || data.session_url || (data.session && data.session.url) || (data.data && data.data.url);
+        if (!url) throw new Error('Geen betaal-URL ontvangen van de server. Probeer het opnieuw.');
+        localStorage.setItem('omrz_plan', plan);
+        smShowMsg('Je wordt doorgestuurd naar de beveiligde betaalpagina…', 'ok');
+        window.location.href = url;   // → Stripe Checkout
+      } catch (err) {
+        const net = (!navigator.onLine || err instanceof TypeError);
+        smShowMsg(net ? 'Geen internetverbinding. Controleer je verbinding en probeer opnieuw.' : (err.message || 'Er ging iets mis. Probeer het opnieuw.'), 'error');
+        reset();
+      }
     }
 
     // ---- Overzicht: snelkoppelingen ----
