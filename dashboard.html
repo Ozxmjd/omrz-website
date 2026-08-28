@@ -2401,16 +2401,35 @@
     plusBtn.addEventListener('click', () => { selectedAmount++; updateCustomerUI(); });
     cancelBtn.addEventListener('click', () => { startScanner(); });
 
+    // Altijd de actuele card_id ophalen (const cardId kan verouderd zijn als de kaart
+    // ná het laden is aangemaakt/opgeslagen). localStorage is leidend.
+    function activeCardId() { return localStorage.getItem('omrz_card_id') || cardId || ''; }
+
     // Bevestigen → POST /api/stamp/give met de gekozen hoeveelheid.
     async function confirmGive() {
       if (confirmBtn.disabled) return;   // voorkom dubbel klikken tijdens laden
+      const cid = activeCardId();
+
+      // Validatie: toon precies welk verplicht veld ontbreekt.
+      const missing = [];
+      if (!cid) missing.push('card_id (winkelier-kaart)');
+      if (!scannedQr) missing.push('customer_qr_code (QR-code)');
+      if (!(selectedAmount >= 1)) missing.push('amount');
+      if (missing.length) {
+        custError.textContent = 'Kan geen stempel geven — ontbrekend veld: ' + missing.join(', ') +
+          (!cid ? '. Log opnieuw in of maak eerst een stempelkaart aan onder “Mijn Kaart”.' : '.');
+        custError.hidden = false;
+        return;
+      }
+
       confirmBtn.disabled = true; confirmBtn.classList.add('loading');
       custError.hidden = true;
+      const payload = { card_id: cid, customer_qr_code: scannedQr, amount: selectedAmount };
       try {
         const res = await fetch(API_BASE + '/api/stamp/give', {
           method: 'POST',
           headers: authHeaders(),
-          body: JSON.stringify({ card_id: cardId, customer_qr_code: scannedQr, amount: selectedAmount }),
+          body: JSON.stringify(payload),
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.error || data.message || 'Stempel niet opgeslagen — probeer opnieuw.');
@@ -2450,13 +2469,23 @@
     // Beloning uitreiken → reset stempels naar 0 via POST /api/stamp/redeem.
     async function redeemReward() {
       if (redeemBtn.disabled) return;   // voorkom dubbel klikken tijdens laden
+      const cid = activeCardId();
+      const missing = [];
+      if (!cid) missing.push('card_id (winkelier-kaart)');
+      if (!scannedQr) missing.push('customer_qr_code (QR-code)');
+      if (missing.length) {
+        redeemError.textContent = 'Kan beloning niet uitreiken — ontbrekend veld: ' + missing.join(', ') + '.';
+        redeemError.hidden = false;
+        return;
+      }
       redeemBtn.disabled = true; redeemBtn.classList.add('loading');
       redeemError.hidden = true;
+      const payload = { card_id: cid, customer_qr_code: scannedQr };
       try {
         const res = await fetch(API_BASE + '/api/stamp/redeem', {
           method: 'POST',
           headers: authHeaders(),
-          body: JSON.stringify({ card_id: cardId, customer_qr_code: scannedQr }),
+          body: JSON.stringify(payload),
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.error || data.message || 'Beloning niet ingewisseld — probeer opnieuw.');

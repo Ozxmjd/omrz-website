@@ -472,6 +472,9 @@
         let lastStampedQr = null, lastStampAt = 0;
         const RESCAN_BLOCK_MS = 3000;
 
+        // Altijd de actuele card_id ophalen — localStorage is leidend, store.card_id als fallback.
+        function activeCardId() { return localStorage.getItem(LS.card_id) || store.card_id || ''; }
+
         // ---- routing on load ----
         function boot() {
             if (store.card_id && store.pin) {
@@ -638,9 +641,10 @@
 
         // ---- live dagstatistiek ----
         async function loadTodayStats() {
-            if (!store.card_id) return;
+            const cid = activeCardId();
+            if (!cid) return;
             try {
-                const res = await apiCall(API_BASE + '/api/stamp/today-stats?card_id=' + encodeURIComponent(store.card_id));
+                const res = await apiCall(API_BASE + '/api/stamp/today-stats?card_id=' + encodeURIComponent(cid));
                 const data = await res.json();
                 if (res.ok && data.success) {
                     animateCount('statStamps', data.stamps_today || 0);
@@ -729,7 +733,7 @@
             btn.disabled = true; const orig = btn.textContent; btn.textContent = 'Bezig…';
             $('manualResults').innerHTML = '<div class="loader-row">Zoeken…</div>';
             try {
-                const res = await apiCall(API_BASE + '/api/stamp/customers/' + encodeURIComponent(store.card_id));
+                const res = await apiCall(API_BASE + '/api/stamp/customers/' + encodeURIComponent(activeCardId()));
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok) throw new Error('laden mislukt');
                 const list = Array.isArray(data) ? data : (data.customers || data.holders || []);
@@ -813,7 +817,7 @@
             $('scanAlert').classList.remove('hidden');
             $('scanAlert').textContent = 'Klant ophalen…';
             try {
-                const url = API_BASE + '/api/stamp/lookup?card_id=' + encodeURIComponent(store.card_id) +
+                const url = API_BASE + '/api/stamp/lookup?card_id=' + encodeURIComponent(activeCardId()) +
                     '&customer_qr_code=' + encodeURIComponent(qr);
                 const res = await apiCall(url);
                 const data = await res.json().catch(() => ({}));
@@ -896,6 +900,19 @@
         async function giveStamps() {
             const btn = $('giveBtn');
             if (btn.disabled) return;               // voorkom dubbel klikken
+            const cid = activeCardId();
+
+            // Validatie: toon precies welk verplicht veld ontbreekt.
+            const missing = [];
+            if (!cid) missing.push('card_id (winkelier-kaart)');
+            if (!current || !current.customer_qr_code) missing.push('customer_qr_code (QR-code)');
+            if (!(amount >= 1)) missing.push('amount');
+            if (missing.length) {
+                showAlert('scanAlert', 'Kan geen stempel geven — ontbrekend veld: ' + missing.join(', ') +
+                    (!cid ? '. Log opnieuw in.' : '.'));
+                return;
+            }
+
             btn.disabled = true;
             const original = btn.textContent;
             btn.textContent = 'Bezig…';
@@ -903,7 +920,7 @@
             try {
                 const res = await apiCall(API_BASE + '/api/stamp/give', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ card_id: store.card_id, customer_qr_code: current.customer_qr_code, amount }),
+                    body: JSON.stringify({ card_id: cid, customer_qr_code: current.customer_qr_code, amount }),
                 });
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok || !data.success) {
