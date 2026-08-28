@@ -2321,11 +2321,13 @@
       setScanStatus('');
 
       // Minimale toon-tijd voor de bevestiging, parallel aan het ophalen van kaart- en klantdata.
-      const [ , cardData, holderData ] = await Promise.all([ wait(700), fetchCard(), fetchHolder(qrData) ]);
+      const [ , cardData, lookupData ] = await Promise.all([ wait(700), fetchCard(), fetchLookup(qrData) ]);
 
-      // stamps_required uit de kaartinstelling (fallback op wat we al weten)
+      // Klantgegevens uit de lookup (naam, HUIDIGE stand, holder-id).
+      const h = (lookupData && (lookupData.holder || lookupData.customer || lookupData)) || {};
       const c = (cardData && (cardData.card || cardData)) || {};
-      stampsRequired = Number(c.stamps_required ?? card.stamps_required) || 6;
+      // stamps_required: bij voorkeur uit de lookup, anders uit de kaartinstelling.
+      stampsRequired = Number(h.stamps_required ?? c.stamps_required ?? card.stamps_required) || 6;
       card.stamps_required = stampsRequired;
       if (c.business_name) card.business_name = c.business_name;
       if (c.card_title) card.card_title = c.card_title;
@@ -2343,12 +2345,10 @@
       if (c.stamp_logo_url) card.stamp_logo_url = c.stamp_logo_url;
       if (c.outline_width != null) card.outline_width = c.outline_width;
 
-      // Klantdata
-      const h = (holderData && (holderData.holder || holderData)) || {};
+      // Klantnaam, HUIDIGE stempelstand en holder-id direct tonen (vóór het toevoegen).
       holderName = h.customer_name || h.name || h.customer || 'Klant';
-      // holder-id bewaren voor de beloning-uitreiking (redeem vereist holder_id).
-      holderId = h.holder_id ?? h.id ?? h._id ?? h.holderId ?? extractHolderId(qrData) ?? null;
-      currentStamps = Number(h.stamps ?? h.current_stamps ?? h.stamp_count ?? 0) || 0;
+      holderId = h.holder_id ?? h.holderId ?? h.id ?? h._id ?? h.holder ?? h.customer_id ?? null;
+      currentStamps = Number(h.current_stamps ?? h.stamps ?? h.stamp_count ?? h.stamps_collected ?? 0) || 0;
 
       stopScanner();                     // camera verdwijnt in stap 2
       scanStage.classList.remove('found');
@@ -2356,16 +2356,22 @@
     }
 
     async function fetchCard() {
-      if (!cardId) return null;
+      const cid = activeCardId();
+      if (!cid) return null;
       try {
-        const res = await fetch(API_BASE + '/api/stamp/cards/' + cardId, { headers: authHeaders() });
+        const res = await fetch(API_BASE + '/api/stamp/cards/' + cid, { headers: authHeaders() });
         return res.ok ? (await res.json().catch(() => null)) : null;
       } catch (e) { return null; }
     }
-    async function fetchHolder(qrData) {
-      const holderId = extractHolderId(qrData);
+    // Huidige klantstand ophalen: GET /api/stamp/lookup?card_id=…&customer_qr_code=…
+    // Geeft o.a. customer_name, current_stamps, stamps_required en (idealiter) holder_id terug.
+    async function fetchLookup(qrData) {
+      const cid = activeCardId();
+      if (!cid || !qrData) return null;
       try {
-        const res = await fetch(API_BASE + '/api/stamp/holder/' + encodeURIComponent(holderId), { headers: authHeaders() });
+        const url = API_BASE + '/api/stamp/lookup?card_id=' + encodeURIComponent(cid) +
+          '&customer_qr_code=' + encodeURIComponent(qrData);
+        const res = await fetch(url, { headers: authHeaders() });
         return res.ok ? (await res.json().catch(() => null)) : null;
       } catch (e) { return null; }
     }
@@ -2499,7 +2505,8 @@
       const cid = activeCardId();
       const missing = [];
       if (!cid) missing.push('card_id (winkelier-kaart)');
-      if (!holderId) missing.push('holder_id (klant)');
+      // De backend accepteert holder_id óf customer_qr_code — minstens één is nodig.
+      if (!holderId && !scannedQr) missing.push('holder_id / customer_qr_code (klant)');
       if (missing.length) {
         redeemError.textContent = 'Kan beloning niet uitreiken — ontbrekend veld: ' + missing.join(', ') + '.';
         redeemError.hidden = false;
@@ -2507,8 +2514,9 @@
       }
       redeemBtn.disabled = true; redeemBtn.classList.add('loading');
       redeemError.hidden = true;
-      // Backend vereist holder_id; card_id + customer_qr_code meesturen voor volledigheid.
-      const payload = { card_id: cid, holder_id: holderId, customer_qr_code: scannedQr };
+      // card_id + customer_qr_code altijd meesturen; holder_id alléén als de lookup 'm gaf.
+      const payload = { card_id: cid, customer_qr_code: scannedQr };
+      if (holderId) payload.holder_id = holderId;
       try {
         const res = await fetch(API_BASE + '/api/stamp/redeem', {
           method: 'POST',
