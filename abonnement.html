@@ -111,6 +111,7 @@
 
     .pay-note { text-align: center; color: var(--muted); font-size: 13.5px; margin-top: 26px; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .pay-note svg { width: 15px; height: 15px; flex-shrink: 0; }
+    .trial-note { font-size: 12px; color: var(--muted); text-align: center; margin-top: 12px; line-height: 1.5; }
 
     .msg { display: none; max-width: 620px; margin: 0 auto 22px; font-size: 14.5px; padding: 12px 16px; border-radius: 12px; text-align: center; }
     .msg.error { display: block; color: #ffb4b4; background: rgba(255,80,80,.08); border: 1px solid rgba(255,80,80,.25); }
@@ -173,6 +174,7 @@
           <button type="button" class="btn btn-outline btn-block" id="chooseBasic" data-plan="basic">
             <span class="spinner"></span><span class="btn-label">Kies Basic</span>
           </button>
+          <p class="trial-note" id="basicTrial"></p>
         </div>
 
         <!-- Premium -->
@@ -189,13 +191,14 @@
           <button type="button" class="btn btn-primary btn-block" id="choosePremium" data-plan="premium">
             <span class="spinner"></span><span class="btn-label">Kies Premium</span>
           </button>
+          <p class="trial-note" id="premTrial"></p>
         </div>
 
       </div>
 
       <div class="pay-note">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>
-        Betaling wordt binnenkort toegevoegd — je hoeft nu nog niets te betalen.
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Veilig betalen via Stripe — iDEAL, creditcard of SEPA-incasso.
       </div>
 
       <div class="foot" id="foot">
@@ -231,12 +234,16 @@
     function showMsg(text, type) { const m = $('msg'); m.textContent = text; m.className = 'msg ' + type; }
     function clearMsg() { $('msg').className = 'msg'; $('msg').textContent = ''; }
 
+    const trialNote = (amount, per) =>
+      'Je betaalt niets tijdens de 14 dagen proefperiode. Daarna wordt automatisch ' + amount + per + ' afgeschreven. Je kunt altijd opzeggen.';
     function renderPrices() {
       const b = PRICES.basic[billing], p = PRICES.premium[billing];
       $('basicAmount').innerHTML = b.amount + '<small>' + b.per + '</small>';
       $('basicSub').innerHTML = b.sub;
       $('premAmount').innerHTML = p.amount + '<small>' + p.per + '</small>';
       $('premSub').innerHTML = p.sub;
+      $('basicTrial').textContent = trialNote(b.amount, b.per);
+      $('premTrial').textContent = trialNote(p.amount, p.per);
     }
 
     document.querySelectorAll('#billingToggle button').forEach(btn =>
@@ -247,36 +254,44 @@
       }));
     renderPrices();
 
-    // ---- Abonnement kiezen ----
+    // ---- Abonnement kiezen → Stripe Checkout ----
     async function choosePlan(plan, btn) {
       if (btn.disabled) return;
       if (!token) { showMsg('Je bent niet ingelogd. Log opnieuw in om een abonnement te kiezen.', 'error'); return; }
       clearMsg();
-      btn.disabled = true; btn.classList.add('loading');
-      // ook de andere knop blokkeren tijdens de call
+      const label = btn.querySelector('.btn-label');
+      const original = label.textContent;
       const other = plan === 'basic' ? $('choosePremium') : $('chooseBasic');
+      btn.disabled = true; btn.classList.add('loading'); label.textContent = 'Bezig met doorsturen naar betaling…';
       other.disabled = true;
+      const reset = () => { btn.disabled = false; btn.classList.remove('loading'); label.textContent = original; other.disabled = false; };
       try {
-        const res = await fetch(API_BASE + '/api/stamp/subscription', {
-          method: 'PUT',
+        // Maak een Stripe Checkout-sessie aan (14 dagen proef, betaling pas daarna).
+        const res = await fetch(API_BASE + '/api/stamp/create-checkout-session', {
+          method: 'POST',
           headers: authHeaders(),
           body: JSON.stringify({ plan, billing_cycle: billing }),
         });
         if (res.status === 401 || res.status === 403) {
           showMsg('Je sessie is verlopen. Log opnieuw in en probeer het nogmaals.', 'error');
-          btn.disabled = false; btn.classList.remove('loading'); other.disabled = false;
+          reset();
           return;
         }
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error || data.message || 'Activeren mislukt. Probeer het opnieuw.');
+        if (!res.ok) throw new Error(data.error || data.message || 'Kon de betaling niet starten. Probeer het opnieuw.');
+
+        // Stripe Checkout-URL uit de respons halen en daarheen doorsturen.
+        const url = data.url || data.checkout_url || data.session_url
+          || (data.session && data.session.url) || (data.data && data.data.url);
+        if (!url) throw new Error('Geen betaal-URL ontvangen van de server. Probeer het opnieuw.');
 
         localStorage.setItem('omrz_plan', plan);
-        showMsg('Abonnement geactiveerd! Je wordt doorgestuurd…', 'ok');
-        setTimeout(() => { window.location.href = 'dashboard.html'; }, 900);
+        showMsg('Je wordt doorgestuurd naar de beveiligde betaalpagina…', 'ok');
+        window.location.href = url;   // → Stripe Checkout
       } catch (err) {
         const net = (!navigator.onLine || err instanceof TypeError);
         showMsg(net ? 'Geen internetverbinding. Controleer je verbinding en probeer opnieuw.' : (err.message || 'Er ging iets mis. Probeer het opnieuw.'), 'error');
-        btn.disabled = false; btn.classList.remove('loading'); other.disabled = false;
+        reset();
       }
     }
     $('chooseBasic').addEventListener('click', (e) => choosePlan('basic', e.currentTarget));
