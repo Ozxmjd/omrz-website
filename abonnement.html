@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kies je abonnement · OMRZ Digital</title>
+  <meta name="description" content="Kies het OMRZ Digital abonnement dat bij jouw zaak past — Basic of Premium, maandelijks of jaarlijks." />
+  <meta name="robots" content="noindex, nofollow" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --text: #ffffff;
+      --muted: #a0a0a0;
+      --pearl: #e8e8e8;
+      --card: rgba(255, 255, 255, .05);
+      --border: rgba(255, 255, 255, .1);
+      --border-strong: rgba(255, 255, 255, .18);
+      --radius: 18px;
+      --maxw: 1000px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: var(--font); background: var(--bg); color: var(--text);
+      line-height: 1.6; font-size: 17px; min-height: 100vh; overflow-x: hidden;
+      -webkit-font-smoothing: antialiased; display: flex; flex-direction: column;
+    }
+    a { color: inherit; text-decoration: none; }
+    body::before {
+      content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background:
+        radial-gradient(760px 500px at 82% -12%, rgba(255,255,255,.06), transparent 60%),
+        radial-gradient(640px 460px at 4% 4%, rgba(255,255,255,.04), transparent 60%);
+    }
+    .container { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: 24px; }
+
+    /* Topbar */
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px 24px; }
+    .brand { font-size: 20px; font-weight: 800; letter-spacing: -.02em; color: #fff; display: inline-flex; align-items: center; gap: 10px; }
+    .brand-logo { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; object-position: center; flex-shrink: 0; }
+    .back-link { font-size: 14px; font-weight: 600; color: var(--muted); display: inline-flex; align-items: center; gap: 7px; transition: color .2s var(--ease); }
+    .back-link:hover { color: #fff; }
+    .back-link svg { width: 16px; height: 16px; }
+
+    .glass { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+
+    main { flex: 1; padding: 20px 0 70px; }
+    .head { text-align: center; max-width: 620px; margin: 10px auto 30px; }
+    .head h1 { font-size: clamp(28px, 4.6vw, 42px); font-weight: 800; letter-spacing: -.03em; line-height: 1.1; }
+    .head p { color: var(--muted); font-size: 17px; margin-top: 12px; }
+
+    /* Banner (huidige fase) */
+    .phase { display: none; max-width: 620px; margin: 0 auto 26px; padding: 12px 18px; border-radius: 12px; font-size: 14px; text-align: center; }
+    .phase.show { display: block; }
+    .phase.trial { color: #d6f5e2; background: rgba(74,222,128,.1); border: 1px solid rgba(74,222,128,.35); }
+    .phase.warn { color: #fdba74; background: rgba(251,146,60,.12); border: 1px solid rgba(251,146,60,.45); }
+    .phase.expired { color: #ffb4b4; background: rgba(255,80,80,.1); border: 1px solid rgba(255,80,80,.35); }
+
+    /* Billing toggle */
+    .billing { display: flex; justify-content: center; margin-bottom: 34px; }
+    .billing-inner { display: inline-flex; align-items: center; gap: 4px; padding: 5px; border-radius: 999px; border: 1px solid var(--border); background: rgba(255,255,255,.03); }
+    .billing button { position: relative; font-family: inherit; font-size: 14.5px; font-weight: 600; color: var(--muted); padding: 10px 20px; border-radius: 999px; border: 0; background: none; cursor: pointer; transition: color .2s var(--ease), background .2s var(--ease); }
+    .billing button.active { color: #0a0a0a; background: #fff; }
+    .billing .save { margin-left: 4px; font-size: 11px; font-weight: 800; color: #6ee7a0; background: rgba(74,222,128,.14); border: 1px solid rgba(74,222,128,.4); padding: 2px 8px; border-radius: 999px; }
+
+    /* Pakketten */
+    .plans { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: start; }
+    .plan { position: relative; padding: 34px 30px; display: flex; flex-direction: column; overflow: hidden; }
+    .plan.featured { border-color: var(--border-strong); box-shadow: 0 30px 70px rgba(0,0,0,.45); }
+    .plan.featured::before { content: ""; position: absolute; inset: 0; background: radial-gradient(500px 240px at 50% 0%, rgba(255,255,255,.07), transparent 70%); pointer-events: none; }
+    .plan > * { position: relative; z-index: 1; }
+    .badge-pop { position: absolute; top: 18px; right: 18px; font-size: 11.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: #0a0a0a; background: #fff; padding: 5px 12px; border-radius: 999px; }
+    .tier { font-size: 15px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+    .amount { margin: 14px 0 4px; font-size: 44px; font-weight: 800; letter-spacing: -.03em; color: #fff; line-height: 1; }
+    .amount small { font-size: 16px; font-weight: 500; color: var(--muted); letter-spacing: 0; }
+    .amount-sub { color: var(--muted); font-size: 14.5px; margin-bottom: 26px; min-height: 21px; }
+    .amount-sub .save-inline { color: #6ee7a0; font-weight: 700; }
+    .feature-list { list-style: none; display: grid; gap: 13px; margin-bottom: 30px; flex: 1; }
+    .feature-list li { display: flex; align-items: flex-start; gap: 11px; font-size: 15px; color: var(--pearl); }
+    .feature-list li::before {
+      content: ""; flex: none; width: 18px; height: 18px; margin-top: 2px; border-radius: 50%;
+      background: rgba(110,231,160,.16);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236ee7a0' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: center; background-size: 11px;
+    }
+    .feature-list li.hl { color: #fff; font-weight: 600; }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+      font-family: inherit; font-size: 15.5px; font-weight: 700; line-height: 1;
+      padding: 15px 24px; border-radius: 12px; border: 1px solid transparent; cursor: pointer; white-space: nowrap;
+      transition: transform .25s var(--ease), background .25s var(--ease), box-shadow .3s var(--ease), border-color .25s var(--ease), opacity .2s var(--ease);
+    }
+    .btn-primary { background: #ffffff; color: #0a0a0a; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(255,255,255,.18); }
+    .btn-outline { background: transparent; color: var(--text); border-color: var(--border-strong); }
+    .btn-outline:hover { background: #fff; color: #0a0a0a; border-color: #fff; }
+    .btn:disabled { opacity: .6; cursor: default; transform: none; box-shadow: none; }
+    .btn-block { width: 100%; }
+    .spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(10,10,10,.3); border-top-color: #0a0a0a; animation: spin .7s linear infinite; display: none; }
+    .btn.loading .spinner { display: inline-block; }
+    .btn.loading .btn-label { opacity: .7; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .pay-note { text-align: center; color: var(--muted); font-size: 13.5px; margin-top: 26px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .pay-note svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+    .msg { display: none; max-width: 620px; margin: 0 auto 22px; font-size: 14.5px; padding: 12px 16px; border-radius: 12px; text-align: center; }
+    .msg.error { display: block; color: #ffb4b4; background: rgba(255,80,80,.08); border: 1px solid rgba(255,80,80,.25); }
+    .msg.ok { display: block; color: #b4ffcf; background: rgba(80,255,140,.08); border: 1px solid rgba(80,255,140,.25); }
+
+    .foot { text-align: center; margin-top: 40px; color: var(--muted); font-size: 14.5px; }
+    .foot a { color: #fff; font-weight: 600; }
+    .foot a:hover { text-decoration: underline; }
+
+    @media (max-width: 760px) {
+      .plans { grid-template-columns: 1fr; }
+      .topbar { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <a href="index.html" class="brand"><img class="brand-logo" src="images/gold-logo.png" alt="OMRZ Digital logo" />OMRZ Digital</a>
+    <a href="dashboard.html" class="back-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      Terug naar dashboard
+    </a>
+  </div>
+
+  <main>
+    <div class="container">
+      <div class="head">
+        <h1>Kies je abonnement</h1>
+        <p>Begin met een pakket dat bij jouw zaak past.</p>
+      </div>
+
+      <div class="phase" id="phase"></div>
+      <div class="msg" id="msg"></div>
+
+      <!-- Facturatie-toggle -->
+      <div class="billing">
+        <div class="billing-inner" id="billingToggle">
+          <button type="button" data-cycle="monthly" class="active">Maandelijks</button>
+          <button type="button" data-cycle="yearly">Jaarlijks <span class="save">Bespaar tot 17%</span></button>
+        </div>
+      </div>
+
+      <!-- Pakketten -->
+      <div class="plans">
+
+        <!-- Basic -->
+        <div class="plan glass">
+          <div class="tier">Basic</div>
+          <div class="amount" id="basicAmount">€34,99<small>/maand</small></div>
+          <div class="amount-sub" id="basicSub">Altijd maandelijks opzegbaar</div>
+          <ul class="feature-list">
+            <li>Digitale stempelkaart</li>
+            <li>Onbeperkt klanten</li>
+            <li>Google &amp; Apple Wallet</li>
+            <li>Dashboard &amp; statistieken</li>
+            <li>Medewerker scan-app</li>
+            <li>Meerdere vestigingen</li>
+          </ul>
+          <button type="button" class="btn btn-outline btn-block" id="chooseBasic" data-plan="basic">
+            <span class="spinner"></span><span class="btn-label">Kies Basic</span>
+          </button>
+        </div>
+
+        <!-- Premium -->
+        <div class="plan glass featured">
+          <span class="badge-pop">Populair</span>
+          <div class="tier">Premium</div>
+          <div class="amount" id="premAmount">€44,99<small>/maand</small></div>
+          <div class="amount-sub" id="premSub">Altijd maandelijks opzegbaar</div>
+          <ul class="feature-list">
+            <li class="hl">Alles van Basic</li>
+            <li>Locatie meldingen — klanten krijgen een melding als ze in de buurt van je winkel zijn</li>
+            <li>Prioriteit support</li>
+          </ul>
+          <button type="button" class="btn btn-primary btn-block" id="choosePremium" data-plan="premium">
+            <span class="spinner"></span><span class="btn-label">Kies Premium</span>
+          </button>
+        </div>
+
+      </div>
+
+      <div class="pay-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>
+        Betaling wordt binnenkort toegevoegd — je hoeft nu nog niets te betalen.
+      </div>
+
+      <div class="foot" id="foot">
+        <a href="dashboard.html">Terug naar het dashboard</a>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const API_BASE = 'https://ai-review-bot-production.up.railway.app';
+    const token = localStorage.getItem('omrz_token');
+
+    // Prijzen per pakket en facturatiecyclus.
+    const PRICES = {
+      basic: {
+        monthly: { amount: '€34,99', per: '/maand', sub: 'Altijd maandelijks opzegbaar' },
+        yearly:  { amount: '€349',   per: '/jaar',  sub: '€29,08 per maand · <span class="save-inline">bespaar €71</span>' },
+      },
+      premium: {
+        monthly: { amount: '€44,99', per: '/maand', sub: 'Altijd maandelijks opzegbaar' },
+        yearly:  { amount: '€449',   per: '/jaar',  sub: '€37,42 per maand · <span class="save-inline">bespaar €91</span>' },
+      },
+    };
+
+    let billing = 'monthly';
+    const $ = (id) => document.getElementById(id);
+
+    function authHeaders() {
+      const h = { 'Content-Type': 'application/json' };
+      if (token) h['Authorization'] = 'Bearer ' + token;
+      return h;
+    }
+    function showMsg(text, type) { const m = $('msg'); m.textContent = text; m.className = 'msg ' + type; }
+    function clearMsg() { $('msg').className = 'msg'; $('msg').textContent = ''; }
+
+    function renderPrices() {
+      const b = PRICES.basic[billing], p = PRICES.premium[billing];
+      $('basicAmount').innerHTML = b.amount + '<small>' + b.per + '</small>';
+      $('basicSub').innerHTML = b.sub;
+      $('premAmount').innerHTML = p.amount + '<small>' + p.per + '</small>';
+      $('premSub').innerHTML = p.sub;
+    }
+
+    document.querySelectorAll('#billingToggle button').forEach(btn =>
+      btn.addEventListener('click', () => {
+        billing = btn.dataset.cycle;
+        document.querySelectorAll('#billingToggle button').forEach(x => x.classList.toggle('active', x === btn));
+        renderPrices();
+      }));
+    renderPrices();
+
+    // ---- Abonnement kiezen ----
+    async function choosePlan(plan, btn) {
+      if (btn.disabled) return;
+      if (!token) { showMsg('Je bent niet ingelogd. Log opnieuw in om een abonnement te kiezen.', 'error'); return; }
+      clearMsg();
+      btn.disabled = true; btn.classList.add('loading');
+      // ook de andere knop blokkeren tijdens de call
+      const other = plan === 'basic' ? $('choosePremium') : $('chooseBasic');
+      other.disabled = true;
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/subscription', {
+          method: 'PUT',
+          headers: authHeaders(),
+          body: JSON.stringify({ plan, billing_cycle: billing }),
+        });
+        if (res.status === 401 || res.status === 403) {
+          showMsg('Je sessie is verlopen. Log opnieuw in en probeer het nogmaals.', 'error');
+          btn.disabled = false; btn.classList.remove('loading'); other.disabled = false;
+          return;
+        }
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || data.message || 'Activeren mislukt. Probeer het opnieuw.');
+
+        localStorage.setItem('omrz_plan', plan);
+        showMsg('Abonnement geactiveerd! Je wordt doorgestuurd…', 'ok');
+        setTimeout(() => { window.location.href = 'dashboard.html'; }, 900);
+      } catch (err) {
+        const net = (!navigator.onLine || err instanceof TypeError);
+        showMsg(net ? 'Geen internetverbinding. Controleer je verbinding en probeer opnieuw.' : (err.message || 'Er ging iets mis. Probeer het opnieuw.'), 'error');
+        btn.disabled = false; btn.classList.remove('loading'); other.disabled = false;
+      }
+    }
+    $('chooseBasic').addEventListener('click', (e) => choosePlan('basic', e.currentTarget));
+    $('choosePremium').addEventListener('click', (e) => choosePlan('premium', e.currentTarget));
+
+    // ---- Huidige fase tonen ----
+    async function loadPhase() {
+      if (!token) return;
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/subscription', { headers: authHeaders() });
+        if (!res.ok) return;
+        const d = await res.json().catch(() => null);
+        const s = (d && (d.subscription || d.data || d)) || {};
+        const status = s.access_status || s.status;
+        const hasAccess = (s.has_access ?? s.hasAccess) === false ? false : true;
+        const days = Math.max(0, Number(s.days_left_in_trial ?? s.trial_days_left ?? 0) || 0);
+        const plan = (s.plan || '').toString().toLowerCase();
+        const phase = $('phase');
+
+        if (!hasAccess) {
+          phase.className = 'phase expired show';
+          phase.textContent = 'Je proefperiode is verlopen. Kies hieronder een abonnement om weer aan de slag te gaan.';
+        } else if (status === 'trial') {
+          phase.className = 'phase show' + (days < 3 ? ' warn' : ' trial');
+          phase.textContent = 'Nog niet zeker? Je proefperiode loopt nog ' + days + ' ' + (days === 1 ? 'dag' : 'dagen') + '.';
+        } else if (status === 'active' && plan) {
+          phase.className = 'phase trial show';
+          phase.textContent = 'Je huidige abonnement: ' + (plan.charAt(0).toUpperCase() + plan.slice(1)) + '. Je kunt hieronder wisselen.';
+          // Markeer het huidige plan op de knop.
+          const cur = plan === 'premium' ? $('choosePremium') : $('chooseBasic');
+          if (cur) cur.querySelector('.btn-label').textContent = 'Huidig plan — wijzig';
+        }
+      } catch (e) { /* stil falen */ }
+    }
+    loadPhase();
+  </script>
+</body>
+</html>
