@@ -661,6 +661,43 @@
     .sm-trial-text small { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
     .sm-trial-btn { flex-shrink: 0; }
 
+    /* ---------- Mijn Abonnement ---------- */
+    .sub-card { padding: 30px 28px; }
+    .sub-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .sub-plan-name { font-size: 28px; font-weight: 800; letter-spacing: -.02em; line-height: 1; }
+    .sub-plan-sub { color: var(--muted); font-size: 14.5px; margin-top: 6px; }
+    .sub-status { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 700; padding: 7px 14px; border-radius: 999px; white-space: nowrap; }
+    .sub-status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+    .sub-status.active { color: #6ee7a0; background: rgba(74,222,128,.12); border: 1px solid rgba(74,222,128,.4); }
+    .sub-status.trial { color: #a5c9ff; background: rgba(96,150,255,.12); border: 1px solid rgba(96,150,255,.4); }
+    .sub-status.expired { color: #ffb4b4; background: rgba(255,80,80,.1); border: 1px solid rgba(255,80,80,.35); }
+    .sub-detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 18px; margin: 24px 0; padding: 20px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .sub-detail .sd-lbl { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+    .sub-detail .sd-val { font-size: 17px; font-weight: 700; margin-top: 5px; }
+    .sub-trial-line { display: inline-flex; align-items: center; gap: 8px; font-size: 14.5px; color: #a5c9ff; margin-bottom: 22px; }
+    .sub-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+    .sub-actions .btn { padding: 15px 26px; }
+
+    /* ---------- Facturen ---------- */
+    .inv-list { display: grid; gap: 12px; }
+    .inv-row { display: flex; align-items: center; gap: 16px; padding: 16px 20px; }
+    .inv-no { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13.5px; font-weight: 700; color: #fff; min-width: 96px; flex-shrink: 0; }
+    .inv-main { flex: 1; min-width: 0; }
+    .inv-date { font-size: 13.5px; color: var(--muted); }
+    .inv-amount { font-size: 15.5px; font-weight: 800; color: #fff; white-space: nowrap; flex-shrink: 0; }
+    .inv-badge { font-size: 12px; font-weight: 700; padding: 5px 11px; border-radius: 999px; white-space: nowrap; flex-shrink: 0; }
+    .inv-badge.paid { color: #6ee7a0; background: rgba(74,222,128,.12); border: 1px solid rgba(74,222,128,.4); }
+    .inv-badge.open { color: #fdba74; background: rgba(251,146,60,.14); border: 1px solid rgba(251,146,60,.45); }
+    .inv-acts { display: flex; gap: 8px; flex-shrink: 0; }
+    .inv-acts .btn { padding: 9px 14px; font-size: 13px; }
+    .panel-empty { text-align: center; padding: 50px 24px; color: var(--muted); font-size: 15px; }
+    @media (max-width: 680px) {
+      .inv-row { flex-wrap: wrap; }
+      .inv-amount { order: 3; }
+      .inv-acts { order: 4; width: 100%; }
+      .inv-acts .btn { flex: 1; }
+    }
+
     @media (max-width: 720px) {
       .sub-modal { padding: 30px 20px 24px; }
       .sm-plans { grid-template-columns: 1fr; }
@@ -737,6 +774,14 @@
         <div class="side-link" data-tab="statistieken">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16M8 16v-4M12 16V8M16 16v-6M20 16v-2"/></svg>
           Statistieken
+        </div>
+        <div class="side-link" data-tab="abonnement" id="navAbonnement">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M2 10h20"/></svg>
+          Mijn Abonnement
+        </div>
+        <div class="side-link" data-tab="facturen" id="navFacturen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M14 2v5h5M8 13h8M8 17h5"/></svg>
+          Facturen
         </div>
         <div class="side-link" data-tab="instellingen">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-2.82 1.17V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 8 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15H4.5a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 6 9.4l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 11 5.6V5.5a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 2.4 1.51l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 13z"/></svg>
@@ -1306,6 +1351,28 @@
           </div>
         </section>
 
+        <!-- ===== Mijn Abonnement ===== -->
+        <section class="panel" id="panel-abonnement">
+          <div class="panel-head">
+            <h2>Mijn Abonnement</h2>
+            <p>Bekijk je huidige pakket en beheer je abonnement.</p>
+          </div>
+          <div id="subInfoWrap">
+            <div class="loader"><span class="spinner"></span> Laden…</div>
+          </div>
+        </section>
+
+        <!-- ===== Facturen ===== -->
+        <section class="panel" id="panel-facturen">
+          <div class="panel-head">
+            <h2>Facturen</h2>
+            <p>Al je facturen op één plek — download of bekijk ze online.</p>
+          </div>
+          <div id="invoicesWrap">
+            <div class="loader"><span class="spinner"></span> Facturen laden…</div>
+          </div>
+        </section>
+
         <!-- ===== Instellingen ===== -->
         <section class="panel" id="panel-instellingen">
           <div class="panel-head">
@@ -1431,7 +1498,7 @@
       <div class="sm-trial" id="smTrial" hidden>
         <div class="sm-trial-text">
           <strong>Of probeer eerst 14 dagen gratis</strong>
-          <small>Geen kosten tijdens de proef. Daarna automatisch verlengd met het gekozen pakket (kies hierboven welk pakket).</small>
+          <small id="smTrialNote">Geen kosten tijdens de proef. Daarna automatisch verlengd met het gekozen pakket (kies hierboven welk pakket).</small>
         </div>
         <button type="button" class="btn btn-primary sm-trial-btn" id="smStartTrial">Start 14 dagen gratis proefperiode</button>
       </div>
@@ -1532,6 +1599,8 @@
       if (tab === 'klanten') loadCustomers();
       if (tab === 'overzicht') refreshOverview();   // header, stats, kaart-preview en recente activiteit verversen
       if (tab === 'vestigingen') renderLocationsPanel();
+      if (tab === 'abonnement') renderSubscriptionPanel();
+      if (tab === 'facturen') loadInvoices();
       if (tab === 'statistieken') renderChart(currentRange);
       if (tab !== 'stempel') { stopScanner(); resetScanFlow(); } // camera vrijgeven + flow resetten bij verlaten van de scan-tab
     }
@@ -1620,10 +1689,20 @@
       document.getElementById('smBasicSub').innerHTML = b.sub;
       document.getElementById('smPremAmount').innerHTML = p.amount + '<small>' + p.per + '</small>';
       document.getElementById('smPremSub').innerHTML = p.sub;
+      updateTrialNote();
+    }
+    // De trial-notitie weerspiegelt het gekozen pakket én de gekozen cyclus (maandelijks óf jaarlijks).
+    function updateTrialNote() {
+      const note = document.getElementById('smTrialNote');
+      if (!note) return;
+      const pr = SUB_PRICES[smSelectedPlan] && SUB_PRICES[smSelectedPlan][smBilling];
+      const name = smSelectedPlan === 'premium' ? 'Premium' : 'Basic';
+      if (pr) note.textContent = 'Geen kosten tijdens de 14 dagen proef. Daarna automatisch ' + pr.amount + pr.per + ' voor ' + name + '. Je kunt altijd opzeggen.';
     }
     function setSelectedPlan(plan) {
       smSelectedPlan = plan;
       document.querySelectorAll('#smPlans .sm-plan').forEach(c => c.classList.toggle('selected', c.dataset.plan === plan));
+      updateTrialNote();
     }
     function openSubModal() {
       const s = subscription;
@@ -1691,6 +1770,140 @@
         smShowMsg(net ? 'Geen internetverbinding. Controleer je verbinding en probeer opnieuw.' : (err.message || 'Er ging iets mis. Probeer het opnieuw.'), 'error');
         reset();
       }
+    }
+
+    // ====== Mijn Abonnement ======
+    function planLabel(p) { return p === 'premium' ? 'Premium' : (p === 'basic' ? 'Basic' : '—'); }
+    function priceLabel(plan, cycle) {
+      const pr = SUB_PRICES[plan] && SUB_PRICES[plan][cycle === 'yearly' ? 'yearly' : 'monthly'];
+      return pr ? (pr.amount + pr.per) : '—';
+    }
+    function renderSubscriptionPanel() {
+      const wrap = document.getElementById('subInfoWrap');
+      const s = subscription;
+
+      // Nog nooit een abonnement → uitnodigen om te kiezen (opent het modal).
+      if (s.access_status === 'none') {
+        wrap.innerHTML =
+          '<div class="block glass sub-card">' +
+            '<div class="panel-empty" style="padding:34px 10px 24px;">Je hebt nog geen abonnement. Kies een pakket om je stempelkaart te activeren.</div>' +
+            '<div class="sub-actions" style="justify-content:center;"><button type="button" class="btn btn-primary" id="subChooseBtn">Kies een abonnement</button></div>' +
+          '</div>';
+        document.getElementById('subChooseBtn').addEventListener('click', openSubModal);
+        return;
+      }
+
+      const isTrial = s.access_status === 'trial';
+      const status = !s.has_access ? { cls: 'expired', label: 'Verlopen' }
+        : isTrial ? { cls: 'trial', label: 'Proefperiode' }
+        : { cls: 'active', label: 'Actief' };
+      const cycle = (s.billing_cycle === 'yearly') ? 'Jaarlijks' : 'Maandelijks';
+      const days = Math.max(0, s.days_left_in_trial);
+
+      wrap.innerHTML =
+        '<div class="block glass sub-card">' +
+          '<div class="sub-top">' +
+            '<div><div class="sub-plan-name">' + planLabel(s.plan) + '</div>' +
+              '<div class="sub-plan-sub">Je huidige OMRZ Digital-abonnement</div></div>' +
+            '<span class="sub-status ' + status.cls + '">' + status.label + '</span>' +
+          '</div>' +
+          '<div class="sub-detail-grid">' +
+            '<div class="sub-detail"><div class="sd-lbl">Pakket</div><div class="sd-val">' + planLabel(s.plan) + '</div></div>' +
+            '<div class="sub-detail"><div class="sd-lbl">Facturatie</div><div class="sd-val">' + cycle + '</div></div>' +
+            '<div class="sub-detail"><div class="sd-lbl">Prijs</div><div class="sd-val">' + priceLabel(s.plan, s.billing_cycle) + '</div></div>' +
+          '</div>' +
+          (isTrial ? '<div class="sub-trial-line">⏳ Nog ' + days + ' ' + (days === 1 ? 'dag' : 'dagen') + ' proefperiode</div>' : '') +
+          '<div class="sub-actions">' +
+            '<button type="button" class="btn btn-primary" id="managePortalBtn"><span class="btn-label">Beheer abonnement</span></button>' +
+            (!s.has_access ? '<button type="button" class="btn btn-ghost" id="subChooseBtn2">Kies een abonnement</button>' : '') +
+          '</div>' +
+          '<span class="save-note" id="portalNote" style="display:block;margin-top:14px;"></span>' +
+        '</div>';
+
+      document.getElementById('managePortalBtn').addEventListener('click', openPortal);
+      const cb = document.getElementById('subChooseBtn2');
+      if (cb) cb.addEventListener('click', openSubModal);
+    }
+
+    // Stripe Customer Portal openen (opzeggen, betaalmethode / pakket wijzigen).
+    async function openPortal() {
+      const btn = document.getElementById('managePortalBtn');
+      const note = document.getElementById('portalNote');
+      if (!btn || btn.disabled) return;
+      note.className = 'save-note'; note.textContent = '';
+      const label = btn.querySelector('.btn-label');
+      const original = label.textContent;
+      btn.disabled = true; btn.classList.add('loading'); label.textContent = 'Bezig met openen…';
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/create-portal-session', { method: 'POST', headers: authHeaders() });
+        if (res.status === 401 || res.status === 403) { note.textContent = 'Je sessie is verlopen. Log opnieuw in.'; note.classList.add('error'); btn.disabled = false; btn.classList.remove('loading'); label.textContent = original; return; }
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || data.message || 'Kon het beheerportaal niet openen.');
+        const url = data.url || data.portal_url || (data.session && data.session.url) || (data.data && data.data.url);
+        if (!url) throw new Error('Geen portaal-URL ontvangen. Probeer het opnieuw.');
+        window.location.href = url;   // → Stripe Customer Portal
+      } catch (err) {
+        const net = (!navigator.onLine || err instanceof TypeError);
+        note.textContent = net ? 'Geen internetverbinding. Probeer het opnieuw.' : (err.message || 'Er ging iets mis. Probeer het opnieuw.');
+        note.classList.add('error');
+        btn.disabled = false; btn.classList.remove('loading'); label.textContent = original;
+      }
+    }
+
+    // ====== Facturen ======
+    let invoicesLoaded = false;
+    function normalizeInvoice(raw, i) {
+      const status = String(raw.status || raw.payment_status || '').toLowerCase();
+      const paid = ['paid', 'betaald', 'succeeded', 'complete', 'completed'].includes(status);
+      const amtNum = Number(raw.amount ?? raw.total ?? raw.amount_paid ?? raw.amount_due ?? 0);
+      // Bedragen komen soms in centen; > 1000 zonder decimalen behandelen we als centen.
+      const amount = (raw.amount_cents != null) ? Number(raw.amount_cents) / 100 : amtNum;
+      return {
+        id: raw.id ?? raw.invoice_id ?? ('inv-' + i),
+        number: raw.invoice_number || raw.number || raw.invoice_no || ('—'),
+        dateRaw: raw.date || raw.created_at || raw.created || raw.invoice_date || null,
+        amount: amount,
+        paid,
+        pdf: raw.pdf_url || raw.invoice_pdf || raw.pdf || '',
+        hosted: raw.hosted_url || raw.hosted_invoice_url || raw.url || '',
+      };
+    }
+    async function loadInvoices() {
+      const wrap = document.getElementById('invoicesWrap');
+      if (invoicesLoaded) return;   // eenmalig laden; tab-wissel houdt de lijst
+      wrap.innerHTML = '<div class="loader"><span class="spinner"></span> Facturen laden…</div>';
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/invoices', { headers: authHeaders() });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Laden mislukt');
+        const list = Array.isArray(data) ? data : (data.invoices || data.data || []);
+        const rows = list.map(normalizeInvoice)
+          .sort((a, b) => (b.dateRaw ? new Date(b.dateRaw).getTime() : 0) - (a.dateRaw ? new Date(a.dateRaw).getTime() : 0));
+        invoicesLoaded = true;
+        renderInvoices(rows);
+      } catch (err) {
+        wrap.innerHTML = '<div class="panel-empty">Kon de facturen niet laden. Controleer je verbinding en probeer opnieuw.</div>';
+      }
+    }
+    function renderInvoices(rows) {
+      const wrap = document.getElementById('invoicesWrap');
+      if (!rows.length) {
+        wrap.innerHTML = '<div class="block glass"><div class="panel-empty">Nog geen facturen. Facturen verschijnen hier na je eerste betaling.</div></div>';
+        return;
+      }
+      const money = (n) => '€' + (Number(n) || 0).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      wrap.innerHTML = '<div class="inv-list">' + rows.map(inv => {
+        const acts =
+          (inv.pdf ? '<a class="btn btn-ghost" href="' + escapeHtml(inv.pdf) + '" target="_blank" rel="noopener">Download PDF</a>' : '') +
+          (inv.hosted ? '<a class="btn btn-ghost" href="' + escapeHtml(inv.hosted) + '" target="_blank" rel="noopener">Bekijk</a>' : '');
+        return '<div class="inv-row glass">' +
+          '<span class="inv-no">' + escapeHtml(inv.number) + '</span>' +
+          '<div class="inv-main"><div class="inv-date">' + (formatVisitDate(inv.dateRaw) || '—') + '</div></div>' +
+          '<span class="inv-amount">' + money(inv.amount) + '</span>' +
+          '<span class="inv-badge ' + (inv.paid ? 'paid' : 'open') + '">' + (inv.paid ? 'Betaald' : 'Open') + '</span>' +
+          (acts ? '<div class="inv-acts">' + acts + '</div>' : '') +
+        '</div>';
+      }).join('') + '</div>';
     }
 
     // ---- Overzicht: snelkoppelingen ----
