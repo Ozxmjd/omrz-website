@@ -57,6 +57,8 @@
       background: rgba(14,14,14,.82); border-right: 1px solid var(--border);
       backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
       transition: transform .3s var(--ease);
+      /* Menu zelf scrollbaar zodat alle items (t/m Uitloggen) bereikbaar zijn op kleine schermen. */
+      overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
     }
     .sidebar-head { display: flex; align-items: center; justify-content: space-between; padding: 4px 8px 22px; }
     .side-nav { display: grid; gap: 4px; }
@@ -588,7 +590,7 @@
     .modal-empty { text-align: center; color: var(--muted); font-size: 13.5px; padding: 14px 0; }
     .modal-body .field { margin-bottom: 14px; }
 
-    .sidebar-overlay { display: none; position: fixed; inset: 0; z-index: 45; background: rgba(0,0,0,.5); }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; z-index: 45; background: rgba(0,0,0,.5); overscroll-behavior: contain; touch-action: none; }
 
     /* ---------- Abonnement-banner ---------- */
     .sub-banner { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding: 14px 20px; border-radius: 14px; margin-bottom: 22px; border: 1px solid var(--border-strong); background: rgba(255,255,255,.05); }
@@ -727,6 +729,8 @@
       .sidebar { transform: translateX(-100%); }
       .sidebar.open { transform: none; }
       .sidebar-overlay.show { display: block; }
+      /* Achtergrond niet mee laten scrollen wanneer het mobiele menu open is. */
+      body.menu-open { overflow: hidden; }
       .content { margin-left: 0; }
       .menu-btn { display: flex; }
       .page { padding: 22px 18px 50px; }
@@ -2030,8 +2034,8 @@
     // ---- Mobiele sidebar ----
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebarOverlay');
-    function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('show'); }
-    function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('show'); }
+    function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('show'); document.body.classList.add('menu-open'); }
+    function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('show'); document.body.classList.remove('menu-open'); }
     document.getElementById('menuBtn').addEventListener('click', openSidebar);
     overlay.addEventListener('click', closeSidebar);
 
