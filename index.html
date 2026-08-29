@@ -350,6 +350,8 @@
     .coming-badge { display:inline-block; font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); background:rgba(255,255,255,.06); border:1px solid var(--border); padding:6px 14px; border-radius:999px; margin-bottom:16px; }
     .coming-card h2 { font-size:30px; letter-spacing:-.02em; margin-bottom:10px; }
     .coming-card p { color:var(--muted); max-width:540px; margin:0 auto 22px; }
+    /* Vaste nav niet over de sectie-top laten vallen bij ankersprongen. */
+    #producten, #demo, #coming-soon, #prijzen, #showcase { scroll-margin-top: 88px; }
   </style>
 </head>
 <body>
@@ -360,7 +362,7 @@
       <a href="index.html" class="brand"><img class="brand-logo" src="images/gold-logo.png" alt="OMRZ Digital logo" />OMRZ Digital</a>
       <nav>
         <ul class="nav-links" id="navLinks">
-          <li><a href="#showcase">Producten</a></li>
+          <li><a href="#producten">Producten</a></li>
           <li><a href="stempelkaart.html">Stempelkaart</a></li>
           <li><a href="#prijzen">Prijzen</a></li>
         </ul>
@@ -610,14 +612,14 @@
         <p class="hero-sub">Automatiseer je klantcommunicatie en klantenbinding. Gebouwd voor horeca, beauty en retail. Snel en direct inzetbaar.</p>
         <div class="hero-actions">
           <a href="aanmelden.html" class="btn btn-primary">Gratis starten</a>
-          <a href="#tools" class="btn btn-ghost">Bekijk demo</a>
+          <a href="#demo" class="btn btn-ghost">Bekijk demo</a>
         </div>
       </div>
     </div>
   </section>
 
   <!-- ===== Hoofdproduct: Digitale Stempelkaart ===== -->
-  <section class="section" id="tools" style="padding-top:40px;">
+  <section class="section" id="producten" style="padding-top:40px;">
     <div class="container">
       <div class="section-head">
         <span class="eyebrow reveal">Ons hoofdproduct</span>
@@ -636,7 +638,7 @@
           </ul>
           <a href="stempelkaart.html" class="btn btn-primary" style="margin-top:26px;">Bekijk de stempelkaart →</a>
         </div>
-        <div class="split-visual">
+        <div class="split-visual" id="demo">
           <div class="phone-stage">
             <div class="phone">
               <div class="phone-notch"></div>
@@ -663,6 +665,18 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Binnenkort: Review Bot ===== -->
+  <section class="section" id="coming-soon" style="padding-top:0;">
+    <div class="container">
+      <div class="coming-card glass reveal">
+        <span class="coming-badge">Binnenkort beschikbaar</span>
+        <h2>Review Bot</h2>
+        <p>Automatische, persoonlijke antwoorden op je Google reviews, in jouw eigen tone-of-voice en dag en nacht actief. We werken er hard aan. Coming soon.</p>
+        <a href="contact.html" class="btn btn-ghost">Houd me op de hoogte</a>
       </div>
     </div>
   </section>
@@ -736,18 +750,6 @@
           </ul>
           <a href="aanmelden.html?pakket=premium" class="btn btn-primary btn-block">Kies Premium</a>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== Binnenkort: Review Bot ===== -->
-  <section class="section" id="coming-soon" style="padding-top:0;">
-    <div class="container">
-      <div class="coming-card glass reveal">
-        <span class="coming-badge">Binnenkort beschikbaar</span>
-        <h2>Review Bot</h2>
-        <p>Automatische, persoonlijke antwoorden op je Google reviews, in jouw eigen tone-of-voice en dag en nacht actief. We werken er hard aan. Coming soon.</p>
-        <a href="contact.html" class="btn btn-ghost">Houd me op de hoogte</a>
       </div>
     </div>
   </section>
