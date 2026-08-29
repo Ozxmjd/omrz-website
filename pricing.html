@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Prijzen · OMRZ Digital</title>
-  <meta name="description" content="Overzichtelijke pakketten voor het MKB. Starter €29/maand, Pro €69/maand. Altijd maandelijks opzegbaar." />
+  <meta name="description" content="Overzichtelijke pakketten voor het MKB. Basic vanaf €34,99/maand, Premium vanaf €44,99/maand. Altijd maandelijks opzegbaar." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -111,6 +111,8 @@
       filter: blur(30px); pointer-events: none; z-index: 0;
     }
     .price-card.featured > * { position: relative; z-index: 1; }
+    .price-card { position: relative; }
+    .price-card.featured > .badge-pop { position: absolute; }
     .badge-pop { position: absolute; top: 20px; right: 20px; z-index: 2; background: #ffffff; color: #0a0a0a; font-size: 12px; font-weight: 700; letter-spacing: .03em; padding: 6px 12px; border-radius: 999px; }
 
     .pricing-note { text-align: center; color: var(--muted); font-size: 15px; margin-top: 34px; }
@@ -130,6 +132,13 @@
     @media (max-width: 760px) {
       .pricing-grid, .info-grid { grid-template-columns: 1fr; }
     }
+    /* ---- Billing toggle ---- */
+    .bill-toggle { display:inline-flex; gap:4px; padding:5px; margin:0 auto; background:rgba(255,255,255,.05); border:1px solid var(--border); border-radius:999px; }
+    .bill-toggle .bt-opt { -webkit-appearance:none; appearance:none; background:transparent; border:0; cursor:pointer; font-family:inherit; font-size:14px; font-weight:600; color:var(--muted); padding:9px 18px; border-radius:999px; display:inline-flex; align-items:center; gap:8px; transition:background .2s, color .2s; }
+    .bill-toggle .bt-opt.active { background:#fff; color:#0a0a0a; }
+    .bill-toggle .bt-save { font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; background:rgba(34,197,94,.16); color:#4ade80; }
+    .bill-toggle .bt-opt.active .bt-save { background:rgba(10,10,10,.12); color:#0a7d3a; }
+    .save-inline { color:#4ade80; font-weight:700; }
   </style>
 </head>
 <body>
@@ -142,7 +151,6 @@
         <ul class="nav-links" id="navLinks">
           <li><a href="index.html#showcase">Producten</a></li>
           <li><a href="stempelkaart.html">Stempelkaart</a></li>
-          <li><a href="index.html#tools">Review Bot</a></li>
           <li><a href="index.html#prijzen" class="active">Prijzen</a></li>
         </ul>
       </nav>
@@ -166,36 +174,40 @@
   <!-- ===== Pricing cards ===== -->
   <section class="section" style="padding-top: 20px;">
     <div class="container">
+      <div style="text-align:center; margin-bottom:8px;">
+        <div class="bill-toggle reveal" role="tablist" aria-label="Facturatie">
+            <button type="button" class="bt-opt active" data-cycle="monthly" role="tab">Maandelijks</button>
+            <button type="button" class="bt-opt" data-cycle="yearly" role="tab">Jaarlijks<span class="bt-save">bespaar tot 17%</span></button>
+          </div>
+      </div>
       <div class="pricing-grid">
-        <!-- Starter -->
+        <!-- Basic -->
         <div class="price-card glass reveal">
-          <div class="tier">Starter</div>
-          <div class="amount">€29<small>/maand</small></div>
-          <div class="amount-sub">Alleen digitale stempelkaart</div>
+          <div class="tier">Basic</div>
+          <div class="amount js-amount" data-m="€34,99" data-y="€349" data-mper="/maand" data-yper="/jaar">€34,99<small>/maand</small></div>
+          <div class="amount-sub js-sub" data-m="Altijd maandelijks opzegbaar" data-y="€29,08/maand · <span class=&quot;save-inline&quot;>bespaar €71</span>">Altijd maandelijks opzegbaar</div>
           <ul class="feature-list">
-            <li>Digitale stempelkaart</li>
-            <li>Onbeperkt spaarkaarten</li>
-            <li>QR-code &amp; telefoon-integratie</li>
+            <li>Digitale stempelkaart in Apple &amp; Google Wallet</li>
+            <li>Onbeperkt aantal klanten</li>
+            <li>Eigen huisstijl &amp; beloningen</li>
             <li>Klantinzicht dashboard</li>
             <li>E-mail support</li>
           </ul>
-          <a href="aanmelden.html?pakket=starter" class="btn btn-outline btn-block btn-lg">Kies Starter</a>
+          <a href="aanmelden.html?pakket=basic" class="btn btn-outline btn-block btn-lg">Kies Basic</a>
         </div>
 
-        <!-- Pro -->
+        <!-- Premium -->
         <div class="price-card glass featured reveal" data-delay="1">
           <div class="badge-pop">Populair</div>
-          <div class="tier">Pro</div>
-          <div class="amount">€69<small>/maand</small></div>
-          <div class="amount-sub">Stempelkaart + AI Review Bot</div>
+          <div class="tier">Premium</div>
+          <div class="amount js-amount" data-m="€44,99" data-y="€449" data-mper="/maand" data-yper="/jaar">€44,99<small>/maand</small></div>
+          <div class="amount-sub js-sub" data-m="Altijd maandelijks opzegbaar" data-y="€37,42/maand · <span class=&quot;save-inline&quot;>bespaar €91</span>">Altijd maandelijks opzegbaar</div>
           <ul class="feature-list">
-            <li>Alles uit Starter</li>
-            <li>AI Review Bot inbegrepen</li>
-            <li>Automatische review-antwoorden</li>
-            <li>Eigen tone-of-voice &amp; meertalig</li>
+            <li>Alles van Basic</li>
+            <li>Locatie meldingen als klanten in de buurt zijn</li>
             <li>Prioriteit support</li>
           </ul>
-          <a href="aanmelden.html?pakket=pro" class="btn btn-primary btn-block btn-lg">Kies Pro</a>
+          <a href="aanmelden.html?pakket=premium" class="btn btn-primary btn-block btn-lg">Kies Premium</a>
         </div>
       </div>
 
@@ -210,9 +222,9 @@
         <div class="info-card glass reveal">
           <h3>Wat zit er in elk pakket?</h3>
           <ul class="info-list">
-            <li><strong>Starter (€29/mnd)</strong>: de digitale stempelkaart om klanten te binden.</li>
-            <li><strong>Pro (€69/mnd)</strong>: stempelkaart én de AI Review Bot in één voordelig pakket.</li>
-            <li><strong>Later upgraden</strong>: je stapt op elk moment over van Starter naar Pro.</li>
+            <li><strong>Basic (€34,99/mnd)</strong>: de digitale stempelkaart om klanten te binden.</li>
+            <li><strong>Premium (€44,99/mnd)</strong>: alles van Basic plus locatie meldingen en prioriteit support.</li>
+            <li><strong>Later upgraden</strong>: je stapt op elk moment over van Basic naar Premium.</li>
           </ul>
         </div>
         <div class="info-card glass reveal" data-delay="1">
@@ -220,7 +232,7 @@
           <ul class="info-list">
             <li><strong>Kan ik maandelijks opzeggen?</strong> Ja, bij het maandabonnement zit je nergens aan vast.</li>
             <li><strong>Zijn er opstartkosten?</strong> Nee, en de eerste 14 dagen zijn gratis.</li>
-            <li><strong>Kan ik later upgraden?</strong> Zeker, je stapt op elk moment over van Starter naar Pro.</li>
+            <li><strong>Kan ik later upgraden?</strong> Zeker, je stapt op elk moment over van Basic naar Premium.</li>
           </ul>
         </div>
       </div>
@@ -247,7 +259,7 @@
           <p>Slimme AI-tools die het Nederlandse MKB laten groeien.</p>
         </div>
         <div class="footer-cols">
-          <div class="footer-col"><h4>Producten</h4><ul><li><a href="index.html#tools">AI Review Bot</a></li><li><a href="stempelkaart.html">Digitale Stempelkaart</a></li><li><a href="index.html#prijzen">Prijzen</a></li></ul></div>
+          <div class="footer-col"><h4>Producten</h4><ul><li><a href="index.html#coming-soon">AI Review Bot <span style="opacity:.6">· binnenkort</span></a></li><li><a href="stempelkaart.html">Digitale Stempelkaart</a></li><li><a href="index.html#prijzen">Prijzen</a></li></ul></div>
           <div class="footer-col"><h4>Bedrijf</h4><ul><li><a href="index.html">Home</a></li><li><a href="contact.html">Contact</a></li><li><a href="mailto:info@omrzdigital.nl">info@omrzdigital.nl</a></li></ul></div>
         </div>
       </div>
@@ -277,6 +289,25 @@
       var io = new IntersectionObserver(function (es) { es.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } }); }, { threshold: .12, rootMargin: '0px 0px -8% 0px' });
       reveals.forEach(function (el) { io.observe(el); });
     } else { reveals.forEach(function (el) { el.classList.add('in'); }); }
+  })();
+  </script>
+  <script>
+  (function(){
+    var wraps = document.querySelectorAll('.bill-toggle');
+    if(!wraps.length) return;
+    function apply(cycle){
+      document.querySelectorAll('.js-amount').forEach(function(el){
+        var amt = cycle==='yearly'? el.dataset.y : el.dataset.m;
+        var per = cycle==='yearly'? el.dataset.yper : el.dataset.mper;
+        el.innerHTML = amt + '<small>' + per + '</small>';
+      });
+      document.querySelectorAll('.js-sub').forEach(function(el){
+        el.innerHTML = cycle==='yearly'? el.dataset.y : el.dataset.m;
+      });
+      wraps.forEach(function(w){ w.querySelectorAll('.bt-opt').forEach(function(b){ b.classList.toggle('active', b.dataset.cycle===cycle); }); });
+    }
+    wraps.forEach(function(w){ w.querySelectorAll('.bt-opt').forEach(function(b){ b.addEventListener('click', function(){ apply(b.dataset.cycle); }); }); });
+    apply('monthly');
   })();
   </script>
 </body>
