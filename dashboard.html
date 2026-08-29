@@ -600,6 +600,8 @@
     .sub-banner.warn .sb-text { color: #fdba74; }
     .sub-banner.expired { background: rgba(255,80,80,.1); border-color: rgba(255,80,80,.4); }
     .sub-banner.expired .sb-text { color: #ffb4b4; }
+    .sub-banner.invite { background: rgba(74,222,128,.1); border-color: rgba(74,222,128,.42); }
+    .sub-banner.invite .sb-text { color: #bbf7d0; }
 
     /* ---------- Feature-locks ---------- */
     .side-link.locked { opacity: .6; }
@@ -1571,6 +1573,7 @@
     let subscription = {
       access_status: 'active', plan: 'basic', billing_cycle: null,
       days_left_in_trial: 0, is_trial_expired: false, has_access: true, can_use_trial: false,
+      trial_used: false, payment_failed: false,
     };
     const LOCKED_TABS = new Set(['stempel', 'kaart', 'klanten', 'vestigingen']);
     // 'meldingen' is Premium: ontgrendeld bij Premium of tijdens de trial, anders vergrendeld.
@@ -1622,6 +1625,11 @@
           // has_access expliciet uit de API; alleen 'false' vergrendelt.
           has_access: (s.has_access ?? s.hasAccess) === false ? false : true,
           can_use_trial: !!(s.can_use_trial ?? s.canUseTrial),
+          // Heeft dit account ooit een proefperiode gebruikt?
+          trial_used: !!(s.trial_used ?? s.trialUsed ?? s.has_used_trial ?? s.trial_ended),
+          // Verlopen door een mislukte betaling (paid subscriber, betaling faalde)?
+          payment_failed: !!(s.payment_failed ?? s.paymentFailed)
+            || ['past_due', 'unpaid', 'failed'].includes(String(s.payment_status || '').toLowerCase()),
         };
       } catch (e) { /* fail open bij netwerkfout */ }
       applySubscription();
@@ -1632,14 +1640,33 @@
       // Zonder toegang: toon direct het grote abonnement-scherm.
       if (!subscription.has_access) openSubModal();
     }
+    // Bepaal de juiste boodschap voor een account zonder toegang.
+    // Onderscheid: gloednieuw (uitnodigend) · proef voorbij · betaling mislukt.
+    function subMessage() {
+      const s = subscription;
+      // Betalend abonnement dat verliep door een mislukte betaling.
+      const paymentFailed = s.payment_failed || (s.access_status === 'expired' && !!s.billing_cycle);
+      if (paymentFailed) {
+        return { title: 'Je abonnement is verlopen', text: 'Werk je betaling bij om door te gaan.', tone: 'expired', portal: true, cta: 'Betaling bijwerken' };
+      }
+      // De proefperiode is geweest en voorbij.
+      if (s.trial_used) {
+        return { title: 'Je proefperiode is verlopen', text: 'Kies een abonnement om je stempelkaart weer te gebruiken.', tone: 'expired', cta: 'Kies een abonnement' };
+      }
+      // Gloednieuw account: nog nooit een abonnement of proef → uitnodigend.
+      return { title: 'Activeer je stempelkaart', text: 'Kies een abonnement of start je gratis proefperiode om te beginnen.', tone: 'invite', cta: 'Aan de slag' };
+    }
     function renderSubBanner() {
       const b = document.getElementById('subBanner');
       const s = subscription;
       if (!s.has_access) {
-        b.className = 'sub-banner expired';
+        const m = subMessage();
+        const invite = m.tone === 'invite';
+        b.className = 'sub-banner ' + (invite ? 'invite' : 'expired');
+        const action = m.portal ? 'data-open-portal' : 'data-open-sub';
         b.innerHTML =
-          '<div class="sb-text"><span class="sb-ic">🔒</span><span><strong>Je proefperiode is verlopen.</strong> Kies een abonnement om je stempelkaart weer te gebruiken.</span></div>' +
-          '<button type="button" class="btn btn-primary sb-btn" data-open-sub>Kies een abonnement</button>';
+          `<div class="sb-text"><span class="sb-ic">${invite ? '✨' : '🔒'}</span><span><strong>${m.title}.</strong> ${m.text}</span></div>` +
+          `<button type="button" class="btn btn-primary sb-btn" ${action}>${m.cta}</button>`;
         b.hidden = false;
       } else if (s.access_status === 'trial') {
         const d = Math.max(0, s.days_left_in_trial);
@@ -1655,6 +1682,8 @@
     }
     // De banner-knop opent het abonnement-scherm (geen losse pagina meer).
     document.getElementById('subBanner').addEventListener('click', (e) => {
+      const portalBtn = e.target.closest('[data-open-portal]');
+      if (portalBtn) { openPortal(portalBtn); return; }
       if (e.target.closest('[data-open-sub]')) openSubModal();
     });
     function applyLockIcons() {
@@ -1707,8 +1736,7 @@
     function openSubModal() {
       const s = subscription;
       let title = 'Kies je abonnement', sub = 'Kies het pakket dat bij jouw zaak past.';
-      if (s.access_status === 'none' && !s.has_access) { title = 'Activeer je stempelkaart'; sub = 'Kies een pakket om je digitale stempelkaart te activeren.'; }
-      else if (!s.has_access) { title = 'Je proefperiode is verlopen'; sub = 'Kies een abonnement om je stempelkaart weer te gebruiken.'; }
+      if (!s.has_access) { const m = subMessage(); title = m.title; sub = m.text; }
       document.getElementById('smTitle').textContent = title;
       document.getElementById('smSub').textContent = sub;
 
@@ -1820,23 +1848,28 @@
           '<span class="save-note" id="portalNote" style="display:block;margin-top:14px;"></span>' +
         '</div>';
 
-      document.getElementById('managePortalBtn').addEventListener('click', openPortal);
+      document.getElementById('managePortalBtn').addEventListener('click', (e) => openPortal(e.currentTarget));
       const cb = document.getElementById('subChooseBtn2');
       if (cb) cb.addEventListener('click', openSubModal);
     }
 
     // Stripe Customer Portal openen (opzeggen, betaalmethode / pakket wijzigen).
-    async function openPortal() {
-      const btn = document.getElementById('managePortalBtn');
-      const note = document.getElementById('portalNote');
-      if (!btn || btn.disabled) return;
-      note.className = 'save-note'; note.textContent = '';
-      const label = btn.querySelector('.btn-label');
-      const original = label.textContent;
-      btn.disabled = true; btn.classList.add('loading'); label.textContent = 'Bezig met openen…';
+    // trigger = de aangeklikte knop (paneel of banner); mag ontbreken.
+    async function openPortal(trigger) {
+      const btn = (trigger && trigger.tagName) ? trigger : document.getElementById('managePortalBtn');
+      const note = document.getElementById('portalNote');   // alleen in het paneel aanwezig
+      if (btn && btn.disabled) return;
+      const label = btn && btn.querySelector('.btn-label');
+      const original = label ? label.textContent : (btn ? btn.textContent : '');
+      const setBtn = (txt) => { if (!btn) return; if (label) label.textContent = txt; else btn.textContent = txt; };
+      const restore = () => { if (btn) { btn.disabled = false; btn.classList.remove('loading'); } setBtn(original); };
+      const fail = (msg) => { if (note) { note.textContent = msg; note.classList.add('error'); } else { alert(msg); } restore(); };
+      if (note) { note.className = 'save-note'; note.textContent = ''; }
+      if (btn) { btn.disabled = true; btn.classList.add('loading'); }
+      setBtn('Bezig met openen…');
       try {
         const res = await fetch(API_BASE + '/api/stamp/create-portal-session', { method: 'POST', headers: authHeaders() });
-        if (res.status === 401 || res.status === 403) { note.textContent = 'Je sessie is verlopen. Log opnieuw in.'; note.classList.add('error'); btn.disabled = false; btn.classList.remove('loading'); label.textContent = original; return; }
+        if (res.status === 401 || res.status === 403) { fail('Je sessie is verlopen. Log opnieuw in.'); return; }
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.error || data.message || 'Kon het beheerportaal niet openen.');
         const url = data.url || data.portal_url || (data.session && data.session.url) || (data.data && data.data.url);
@@ -1844,9 +1877,7 @@
         window.location.href = url;   // → Stripe Customer Portal
       } catch (err) {
         const net = (!navigator.onLine || err instanceof TypeError);
-        note.textContent = net ? 'Geen internetverbinding. Probeer het opnieuw.' : (err.message || 'Er ging iets mis. Probeer het opnieuw.');
-        note.classList.add('error');
-        btn.disabled = false; btn.classList.remove('loading'); label.textContent = original;
+        fail(net ? 'Geen internetverbinding. Probeer het opnieuw.' : (err.message || 'Er ging iets mis. Probeer het opnieuw.'));
       }
     }
 
