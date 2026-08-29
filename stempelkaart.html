@@ -368,6 +368,10 @@
     }
     @media (max-width: 640px) {
       .steps4, .feat-grid { grid-template-columns: 1fr; }
+      /* Lange knoppen (o.a. "Aanmelden vanaf €34,99/maand") netjes binnen het scherm houden:
+         geen nowrap-overflow meer, gecentreerd en volledig zichtbaar. */
+      .cta { padding: 54px 22px; }
+      .cta .btn, .hero-actions .btn { white-space: normal; max-width: 100%; line-height: 1.3; }
       .journey-step { padding: 16px 18px; gap: 14px; }
     }
     @media (prefers-reduced-motion: reduce) {
