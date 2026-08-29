@@ -636,9 +636,9 @@
 
     .sm-billing { display: flex; justify-content: center; margin-bottom: 24px; }
     .billing-inner { display: inline-flex; align-items: center; gap: 4px; padding: 5px; border-radius: 999px; border: 1px solid var(--border); background: rgba(255,255,255,.03); }
-    .billing-inner button { font-family: inherit; font-size: 14px; font-weight: 600; color: var(--muted); padding: 9px 18px; border-radius: 999px; border: 0; background: none; cursor: pointer; transition: color .2s var(--ease), background .2s var(--ease); }
+    .billing-inner button { font-family: inherit; font-size: 14px; font-weight: 600; color: var(--muted); padding: 9px 18px; border-radius: 999px; border: 0; background: none; cursor: pointer; white-space: nowrap; transition: color .2s var(--ease), background .2s var(--ease); }
     .billing-inner button.active { color: #0a0a0a; background: #fff; }
-    .billing-inner .save { margin-left: 4px; font-size: 11px; font-weight: 800; color: #6ee7a0; background: rgba(74,222,128,.14); border: 1px solid rgba(74,222,128,.4); padding: 2px 8px; border-radius: 999px; }
+    .billing-inner .save { margin-left: 4px; font-size: 11px; font-weight: 800; color: #6ee7a0; background: rgba(74,222,128,.14); border: 1px solid rgba(74,222,128,.4); padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
 
     .sm-msg { display: none; max-width: 560px; margin: 0 auto 18px; font-size: 14px; padding: 11px 14px; border-radius: 11px; text-align: center; }
     .sm-msg.error { display: block; color: #ffb4b4; background: rgba(255,80,80,.08); border: 1px solid rgba(255,80,80,.25); }
@@ -706,7 +706,17 @@
     }
 
     @media (max-width: 720px) {
-      .sub-modal { padding: 30px 20px 24px; }
+      /* Minder overlay-marge zodat het modal maximale breedte krijgt op de telefoon. */
+      .sub-modal-overlay { padding: 18px 12px; }
+      /* Extra ruimte bovenaan zodat de ✕ nooit over de (gecentreerde) titel valt. */
+      .sub-modal { padding: 58px 16px 24px; }
+      .sub-modal-close { top: 14px; right: 14px; width: 34px; height: 34px; }
+      .sm-head { max-width: none; }
+      /* Facturatie-toggle compacter zodat "Bespaar tot 17%" op één regel past. */
+      .sm-billing { max-width: 100%; }
+      .billing-inner { max-width: 100%; padding: 4px; gap: 2px; }
+      .billing-inner button { padding: 8px 11px; font-size: 12.5px; }
+      .billing-inner .save { margin-left: 3px; font-size: 9.5px; padding: 2px 6px; }
       .sm-plans { grid-template-columns: 1fr; }
       .sm-trial { flex-direction: column; align-items: stretch; text-align: center; }
       .sm-trial-btn { width: 100%; }

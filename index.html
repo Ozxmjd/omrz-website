@@ -352,6 +352,14 @@
     .coming-card p { color:var(--muted); max-width:540px; margin:0 auto 22px; }
     /* Vaste nav niet over de sectie-top laten vallen bij ankersprongen. */
     #producten, #demo, #coming-soon, #prijzen, #showcase { scroll-margin-top: 88px; }
+    /* ---- Kleine telefoons: nav compact houden, merknaam niet laten afbreken ---- */
+    @media (max-width: 560px) {
+      .brand { white-space: nowrap; font-size: 18px; }
+      .brand-logo { width: 34px; height: 34px; }
+      .nav-right { gap: 6px; }
+      .nav-right .btn-outline, .nav-right .btn { padding: 10px 15px; font-size: 14px; }
+      .nav-login { padding: 0 2px; }
+    }
   </style>
 </head>
 <body>
