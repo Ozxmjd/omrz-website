@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kies je abonnement · OMRZ Digital</title>
-  <meta name="description" content="Kies het OMRZ Digital abonnement dat bij jouw zaak past — Basic of Premium, maandelijks of jaarlijks." />
+  <meta name="description" content="Kies het OMRZ Digital abonnement dat bij jouw zaak past. Basic of Premium, maandelijks of jaarlijks." />
   <meta name="robots" content="noindex, nofollow" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -185,7 +185,7 @@
           <div class="amount-sub" id="premSub">Altijd maandelijks opzegbaar</div>
           <ul class="feature-list">
             <li class="hl">Alles van Basic</li>
-            <li>Locatie meldingen — klanten krijgen een melding als ze in de buurt van je winkel zijn</li>
+            <li>Locatie meldingen: klanten krijgen een melding als ze in de buurt van je winkel zijn</li>
             <li>Prioriteit support</li>
           </ul>
           <button type="button" class="btn btn-primary btn-block" id="choosePremium" data-plan="premium">
@@ -198,7 +198,7 @@
 
       <div class="pay-note">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        Veilig betalen via Stripe — iDEAL, creditcard of SEPA-incasso.
+        Veilig betalen via Stripe. iDEAL, creditcard of SEPA-incasso.
       </div>
 
       <div class="foot" id="foot">
@@ -322,7 +322,7 @@
           phase.textContent = 'Je huidige abonnement: ' + (plan.charAt(0).toUpperCase() + plan.slice(1)) + '. Je kunt hieronder wisselen.';
           // Markeer het huidige plan op de knop.
           const cur = plan === 'premium' ? $('choosePremium') : $('chooseBasic');
-          if (cur) cur.querySelector('.btn-label').textContent = 'Huidig plan — wijzig';
+          if (cur) cur.querySelector('.btn-label').textContent = 'Huidig plan · wijzigen';
         }
       } catch (e) { /* stil falen */ }
     }
