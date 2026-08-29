@@ -245,7 +245,7 @@
     .scan-stage {
       position: relative; width: 100%; aspect-ratio: 1; border-radius: 22px; overflow: hidden;
       background: #000; border: 1px solid var(--border-strong); box-shadow: 0 24px 60px rgba(0,0,0,.5);
-      display: none;   /* pas zichtbaar wanneer de camera live is — geen leeg camerablok in de rust-staat */
+      display: none;   /* pas zichtbaar wanneer de camera live is, geen leeg camerablok in de rust-staat */
       margin-bottom: 4px;
     }
     .scan-stage.live, .scan-stage.found { display: block; }
@@ -605,9 +605,12 @@
 
     /* ---------- Feature-locks ---------- */
     .side-link.locked { opacity: .6; }
-    .side-link.locked::after { content: "🔒"; margin-left: auto; font-size: 12px; }
+    .side-link.locked::after { content: ""; margin-left: auto; width: 13px; height: 13px; display: block; flex: 0 0 auto; background-color: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E") center / contain no-repeat; opacity: .7; }
     .quick-btn.locked { opacity: .55; }
-    .quick-btn.locked::after { content: "🔒"; margin-left: auto; align-self: center; font-size: 15px; }
+    .quick-btn.locked::after { content: ""; margin-left: auto; align-self: center; width: 15px; height: 15px; display: block; flex: 0 0 auto; background-color: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E") center / contain no-repeat; opacity: .7; }
+    .sub-banner .sb-ic svg { width: 16px; height: 16px; display: block; }
+    .upload-prev svg { width: 26px; height: 26px; }
+    .loc-opt .lo-check svg { width: 16px; height: 16px; display: block; }
 
     .lock-modal { text-align: center; }
     .lock-modal .lock-emoji { font-size: 44px; line-height: 1; margin-bottom: 14px; }
@@ -889,7 +892,7 @@
                         <span class="sc-biz" id="ovBiz">Mijn zaak</span>
                       </div>
                     </div>
-                    <div class="sc-hi" id="ovHi">Hi Sara! 👋</div>
+                    <div class="sc-hi" id="ovHi">Hi Sara!</div>
                     <div class="sc-title" id="ovTitle">Stempelkaart</div>
                     <div class="sc-reward" id="ovReward">Spaar stempels → gratis product</div>
                     <div class="sc-stamps" id="ovStamps"></div>
@@ -929,7 +932,7 @@
                       <span class="sc-biz" id="pvBiz">Café OMRZ</span>
                     </div>
                   </div>
-                  <div class="sc-hi" id="pvHi">Hi Sara! 👋</div>
+                  <div class="sc-hi" id="pvHi">Hi Sara!</div>
                   <div class="sc-title" id="pvTitle">Koffie Spaarkaart</div>
                   <div class="sc-reward" id="pvReward">Spaar 6 stempels → gratis koffie</div>
                   <div class="sc-stamps" id="pvStamps"></div>
@@ -937,7 +940,7 @@
                   <div class="sc-footer" id="pvFooter" hidden></div>
                 </div>
               </div>
-              <p class="pv-label">Live preview — zo ziet je klant de kaart</p>
+              <p class="pv-label">Live preview: zo ziet je klant de kaart</p>
             </div>
 
             <!-- ===== Instellingen ===== -->
@@ -968,7 +971,7 @@
                   <div class="field">
                     <label class="check-row" style="margin:0 0 12px;"><input type="checkbox" id="showFooterText" /> Toon tekst onderaan de kaart</label>
                     <input type="text" id="footerText" placeholder="Bedankt voor je bezoek!" />
-                    <div class="upload-hint">Bijv. een bedankje of je openingstijden — verschijnt onderaan de kaart.</div>
+                    <div class="upload-hint">Bijv. een bedankje of je openingstijden. Verschijnt onderaan de kaart.</div>
                   </div>
                   <div class="field">
                     <label for="fStamps">Aantal stempels <span class="range-val" id="fStampsVal">6</span></label>
@@ -982,7 +985,7 @@
                 <h3><span class="sec-num">2</span> Logo</h3>
                 <p class="b-sub">Je logo verschijnt linksboven op de kaart.</p>
                 <div class="uploader">
-                  <div class="upload-prev" id="logoPrev">🏪</div>
+                  <div class="upload-prev" id="logoPrev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div>
                   <div class="upload-main">
                     <label class="btn btn-ghost btn-upload">
                       <span class="btn-label">Logo uploaden</span>
@@ -1016,7 +1019,7 @@
 
                 <div class="ed-tabpane" id="bgPanePhoto">
                   <div class="uploader">
-                    <div class="upload-prev bg" id="bgPrev">🖼️</div>
+                    <div class="upload-prev bg" id="bgPrev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div>
                     <div class="upload-main">
                       <label class="btn btn-ghost btn-upload">
                         <span class="btn-label">Foto uploaden</span>
@@ -1062,7 +1065,7 @@
                     <button type="button" data-stamptype="logo" id="stampTypeLogoBtn" hidden>Mijn logo</button>
                   </div>
                   <div class="uploader" style="margin-bottom:18px;">
-                    <div class="upload-prev" id="stampLogoPrev">🖼️</div>
+                    <div class="upload-prev" id="stampLogoPrev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div>
                     <div class="upload-main">
                       <label class="btn btn-ghost btn-upload">
                         <span class="btn-label">Andere afbeelding uploaden</span>
@@ -1149,7 +1152,7 @@
                 </div>
                 <video id="scanVideo" playsinline muted></video>
                 <div class="scan-frame" id="scanFrame"><span></span><span></span><span></span><span></span></div>
-                <div class="scan-found" id="scanFound">✓ QR Gevonden!</div>
+                <div class="scan-found" id="scanFound">QR gevonden!</div>
                 <canvas id="scanCanvas" hidden></canvas>
               </div>
 
@@ -1171,7 +1174,7 @@
                   <span class="sc-biz" id="custBiz">Mijn zaak</span>
                   <span class="sc-chip"></span>
                 </div>
-                <div class="sc-hi" id="custHi">Hi daar! 👋</div>
+                <div class="sc-hi" id="custHi">Hi daar!</div>
                 <div class="sc-title" id="custTitle">Stempelkaart</div>
                 <div class="sc-reward" id="custReward">Spaar stempels → gratis product</div>
                 <div class="sc-stamps" id="custStamps"></div>
@@ -1188,7 +1191,7 @@
               </div>
 
               <p class="add-preview" id="addPreview">Na toevoegen: 1/6 stempels</p>
-              <div class="reward-hint" id="rewardHint" hidden>🎉 Klant ontvangt beloning!</div>
+              <div class="reward-hint" id="rewardHint" hidden>Klant ontvangt beloning!</div>
               <p class="cust-error" id="custError" hidden></p>
 
               <button class="btn scan-btn give-btn" id="confirmBtn">
@@ -1200,7 +1203,7 @@
             <!-- STAP 3 + 4 · Bevestiging & beloning -->
             <div class="stamp-result" id="stampResult" hidden>
               <div class="result-card success" id="resultCard">
-                <div class="result-check" id="resultCheck">✓</div>
+                <div class="result-check" id="resultCheck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
                 <p class="result-title" id="resultTitle">Stempel gegeven!</p>
                 <p class="result-sub" id="resultSub"></p>
               </div>
@@ -1277,11 +1280,11 @@
             <div class="share-modes" id="shareModes">
               <button type="button" class="share-mode active" data-mode="shared">
                 <span class="sm-radio"></span>
-                <span class="sm-tx"><strong>Gedeelde stempelkaart</strong><small>Klanten sparen bij álle vestigingen op één kaart — stempels tellen overal mee.</small></span>
+                <span class="sm-tx"><strong>Gedeelde stempelkaart</strong><small>Klanten sparen bij álle vestigingen op één kaart. Stempels tellen overal mee.</small></span>
               </button>
               <button type="button" class="share-mode" data-mode="separate">
                 <span class="sm-radio"></span>
-                <span class="sm-tx"><strong>Aparte kaart per vestiging</strong><small>Elke vestiging heeft een eigen kaart — klanten sparen per locatie apart.</small></span>
+                <span class="sm-tx"><strong>Aparte kaart per vestiging</strong><small>Elke vestiging heeft een eigen kaart. Klanten sparen per locatie apart.</small></span>
               </button>
             </div>
             <div class="save-row">
@@ -1329,7 +1332,7 @@
             <p>Stuur klanten automatisch een melding wanneer ze in de buurt van je zaak zijn.</p>
           </div>
           <div class="block glass" style="text-align:center; padding:54px 24px;">
-            <div style="font-size:42px; margin-bottom:14px;">🔔</div>
+            <div style="margin-bottom:14px; color: var(--muted); display:flex; justify-content:center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:42px;height:42px"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></div>
             <h3 style="font-size:19px; font-weight:800; letter-spacing:-.02em; margin-bottom:8px;">Binnenkort beschikbaar</h3>
             <p style="color:var(--muted); font-size:15px; max-width:460px; margin:0 auto;">We werken aan locatie-gebaseerde meldingen. Als Premium-gebruiker krijg je hier straks als eerste toegang toe.</p>
           </div>
@@ -1368,7 +1371,7 @@
         <section class="panel" id="panel-facturen">
           <div class="panel-head">
             <h2>Facturen</h2>
-            <p>Al je facturen op één plek — download of bekijk ze online.</p>
+            <p>Al je facturen op één plek. Download of bekijk ze online.</p>
           </div>
           <div id="invoicesWrap">
             <div class="loader"><span class="spinner"></span> Facturen laden…</div>
@@ -1487,7 +1490,7 @@
           <div class="amount-sub" id="smPremSub">Altijd maandelijks opzegbaar</div>
           <ul class="sm-features">
             <li class="hl">Alles van Basic</li>
-            <li>Locatie meldingen — klanten krijgen een melding als ze in de buurt van je winkel zijn</li>
+            <li>Locatie meldingen: klanten krijgen een melding als ze in de buurt van je winkel zijn</li>
             <li>Prioriteit support</li>
           </ul>
           <button type="button" class="btn btn-primary btn-block sm-choose" data-plan="premium">
@@ -1665,7 +1668,7 @@
         b.className = 'sub-banner ' + (invite ? 'invite' : 'expired');
         const action = m.portal ? 'data-open-portal' : 'data-open-sub';
         b.innerHTML =
-          `<div class="sb-text"><span class="sb-ic">${invite ? '✨' : '🔒'}</span><span><strong>${m.title}.</strong> ${m.text}</span></div>` +
+          `<div class="sb-text">${invite ? '' : '<span class="sb-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>'}<span><strong>${m.title}.</strong> ${m.text}</span></div>` +
           `<button type="button" class="btn btn-primary sb-btn" ${action}>${m.cta}</button>`;
         b.hidden = false;
       } else if (s.access_status === 'trial') {
@@ -1673,7 +1676,7 @@
         const warn = d < 3;
         b.className = 'sub-banner' + (warn ? ' warn' : '');
         b.innerHTML =
-          `<div class="sb-text"><span class="sb-ic">${warn ? '⏳' : '✨'}</span><span><strong>Je proefperiode: nog ${d} ${d === 1 ? 'dag' : 'dagen'}</strong>${warn ? ' — kies op tijd een abonnement zodat je zonder onderbreking doorgaat.' : '.'}</span></div>` +
+          `<div class="sb-text"><span><strong>Je proefperiode: nog ${d} ${d === 1 ? 'dag' : 'dagen'}</strong>${warn ? '. Kies op tijd een abonnement zodat je zonder onderbreking doorgaat.' : '.'}</span></div>` +
           '<button type="button" class="btn btn-primary sb-btn" data-open-sub>Kies een abonnement</button>';
         b.hidden = false;
       } else {
@@ -1840,7 +1843,7 @@
             '<div class="sub-detail"><div class="sd-lbl">Facturatie</div><div class="sd-val">' + cycle + '</div></div>' +
             '<div class="sub-detail"><div class="sd-lbl">Prijs</div><div class="sd-val">' + priceLabel(s.plan, s.billing_cycle) + '</div></div>' +
           '</div>' +
-          (isTrial ? '<div class="sub-trial-line">⏳ Nog ' + days + ' ' + (days === 1 ? 'dag' : 'dagen') + ' proefperiode</div>' : '') +
+          (isTrial ? '<div class="sub-trial-line">Nog ' + days + ' ' + (days === 1 ? 'dag' : 'dagen') + ' proefperiode</div>' : '') +
           '<div class="sub-actions">' +
             '<button type="button" class="btn btn-primary" id="managePortalBtn"><span class="btn-label">Beheer abonnement</span></button>' +
             (!s.has_access ? '<button type="button" class="btn btn-ghost" id="subChooseBtn2">Kies een abonnement</button>' : '') +
@@ -2189,13 +2192,13 @@
     // ---- Stempel-rendering ----
     // Bron-afbeelding voor logo-stempels: aparte stempel-upload heeft voorrang, anders het bedrijfslogo.
     const stampImageSrc = () => card.stamp_type === 'logo' ? absoluteUrl(card.stamp_logo_url || card.logo_url || '') : '';
-    // De gekozen vorm als SVG-masker (data-URI) — het logo vult exact die vorm.
+    // De gekozen vorm als SVG-masker (data-URI): het logo vult exact die vorm.
     function shapeMaskUrl(shape) {
       const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='#000'>${SHAPE_PATH[shape] || SHAPE_PATH.circle}</svg>`;
       return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
     }
     // Bouw één stempel als DOM-node. Voor logo-stempels zetten we de mask via de CSSOM
-    // (element.style.maskImage) i.p.v. een innerHTML-string — anders botsen de dubbele
+    // (element.style.maskImage) i.p.v. een innerHTML-string, anders botsen de dubbele
     // aanhalingstekens in url("data:…") met het style="…"-attribuut en faalt de mask.
     function stampNode(active) {
       const shape = card.stamp_shape || 'circle';
@@ -2266,7 +2269,7 @@
       if (c.logo_url) { t.logo.src = absoluteUrl(c.logo_url); t.logo.hidden = false; } else { t.logo.hidden = true; }
       // Teksten worden EXACT getoond zoals getypt (geen hoofdletter-/kleineletter-conversie).
       t.biz.textContent = c.business_name || 'Mijn zaak'; t.biz.style.color = txt;
-      t.hi.textContent = 'Hi Sara! 👋'; t.hi.style.color = txt;
+      t.hi.textContent = 'Hi Sara!'; t.hi.style.color = txt;
       t.title.textContent = c.card_title || 'Stempelkaart'; t.title.style.color = txt;
 
       // Spaardoel-tekst: optioneel tonen, met eigen tekst of automatische fallback.
@@ -2609,7 +2612,7 @@
         if (!res.ok) throw new Error(data.error || data.message || ('Upload mislukt (HTTP ' + res.status + ')'));
         const url = extractUploadUrl(data);
         if (!url) throw new Error('Geen URL in respons. Ontvangen velden: ' + (Object.keys(data).join(', ') || '(leeg)'));
-        statusEl.textContent = 'Geüpload ✓'; statusEl.className = 'upload-status ok';
+        statusEl.textContent = 'Geüpload'; statusEl.className = 'upload-status ok';
         onDone(url);
       } catch (err) {
         statusEl.textContent = err.message || 'Upload mislukt.'; statusEl.className = 'upload-status error';
@@ -2694,10 +2697,10 @@
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.error || 'Opslaan mislukt');
         if (data.id && !cardId) localStorage.setItem('omrz_card_id', data.id);
-        note.textContent = 'Opgeslagen ✓'; note.classList.add('ok');
+        note.textContent = 'Opgeslagen'; note.classList.add('ok');
         paintOverview();   // Overzicht-preview direct bijwerken naar de zojuist opgeslagen kaart
       } catch (err) {
-        note.textContent = 'Kon niet opslaan — probeer opnieuw.'; note.classList.add('error');
+        note.textContent = 'Kon niet opslaan. Probeer opnieuw.'; note.classList.add('error');
       } finally {
         btn.classList.remove('loading'); btn.disabled = false;
         setTimeout(() => { note.className = 'save-note'; note.textContent = ''; }, 4000);
@@ -2708,7 +2711,7 @@
     document.getElementById('profileForm').addEventListener('submit', (e) => {
       e.preventDefault();
       const note = document.getElementById('profileNote');
-      note.textContent = 'Profiel opgeslagen ✓'; note.className = 'save-note ok';
+      note.textContent = 'Profiel opgeslagen'; note.className = 'save-note ok';
       setTimeout(() => { note.className = 'save-note'; note.textContent = ''; }, 4000);
     });
     document.getElementById('passwordForm').addEventListener('submit', (e) => {
@@ -2718,7 +2721,7 @@
       const cf = document.getElementById('pwConfirm').value;
       if (nw.length < 8) { note.textContent = 'Minimaal 8 tekens.'; note.className = 'save-note error'; return; }
       if (nw !== cf) { note.textContent = 'Wachtwoorden komen niet overeen.'; note.className = 'save-note error'; return; }
-      note.textContent = 'Wachtwoord gewijzigd ✓'; note.className = 'save-note ok';
+      note.textContent = 'Wachtwoord gewijzigd'; note.className = 'save-note ok';
       e.target.reset();
       setTimeout(() => { note.className = 'save-note'; note.textContent = ''; }, 4000);
     });
@@ -2747,7 +2750,7 @@
     }
     document.getElementById('copyQrBtn').addEventListener('click', async () => {
       const btn = document.getElementById('copyQrBtn');
-      try { await navigator.clipboard.writeText(scanUrl()); btn.textContent = 'Gekopieerd ✓'; }
+      try { await navigator.clipboard.writeText(scanUrl()); btn.textContent = 'Gekopieerd'; }
       catch { btn.textContent = 'Kopiëren mislukt'; }
       setTimeout(() => { btn.textContent = 'Link kopiëren'; }, 2500);
     });
@@ -2859,7 +2862,7 @@
         scanStage.classList.add('live');
         openCamBtn.hidden = true;
         stopCamBtn.hidden = false;
-        setScanStatus('Camera actief — richt op de QR-code van je klant.');
+        setScanStatus('Camera actief. Richt op de QR-code van je klant.');
         scanRAF = requestAnimationFrame(scanTick);
       } catch (err) {
         setScanStatus('Geen toegang tot de camera. Sta cameratoegang toe en probeer opnieuw.', true);
@@ -2975,7 +2978,7 @@
       custName.textContent = holderName;
       custCard.style.background = card.primary_color || '#1a1a2e';
       custBiz.textContent = card.business_name || 'Mijn zaak';
-      custHi.textContent = `Hi ${holderName}! 👋`;
+      custHi.textContent = `Hi ${holderName}!`;
       custTitle.textContent = card.card_title || 'Stempelkaart';
       custReward.textContent =
         `Spaar ${stampsRequired} stempels → ${card.reward_description || 'gratis product'}`;
@@ -3032,7 +3035,7 @@
       if (!scannedQr) missing.push('customer_qr_code (QR-code)');
       if (!(selectedAmount >= 1)) missing.push('amount');
       if (missing.length) {
-        custError.textContent = 'Kan geen stempel geven — ontbrekend veld: ' + missing.join(', ') +
+        custError.textContent = 'Kan geen stempel geven, ontbrekend veld: ' + missing.join(', ') +
           (!cid ? '. Log opnieuw in of maak eerst een stempelkaart aan onder “Mijn Kaart”.' : '.');
         custError.hidden = false;
         return;
@@ -3048,11 +3051,11 @@
           body: JSON.stringify(payload),
         });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error || data.message || 'Stempel niet opgeslagen — probeer opnieuw.');
+        if (!res.ok) throw new Error(data.error || data.message || 'Stempel niet opgeslagen. Probeer opnieuw.');
         newCount = Number(data.stamps ?? data.current_stamps ?? data.stamp_count ?? (currentStamps + selectedAmount));
         showResult();
       } catch (err) {
-        custError.textContent = isNetworkError(err) ? NET_MSG : (err.message || 'Stempel niet opgeslagen — probeer opnieuw.');
+        custError.textContent = isNetworkError(err) ? NET_MSG : (err.message || 'Stempel niet opgeslagen. Probeer opnieuw.');
         custError.hidden = false;
       } finally {
         confirmBtn.disabled = false; confirmBtn.classList.remove('loading');
@@ -3077,7 +3080,7 @@
       // Reward-check op basis van stamps_required uit de kaart.
       if (newCount >= stampsRequired) {
         const rewardText = card.reward_description || 'de beloning';
-        rewardBanner.textContent = `🎉 ${holderName} heeft recht op ${rewardText}!`;
+        rewardBanner.textContent = `${holderName} heeft recht op ${rewardText}!`;
         rewardBanner.classList.remove('redeemed');
         redeemBtn.hidden = false;
         redeemError.hidden = true;
@@ -3093,10 +3096,10 @@
       const cid = activeCardId();
       const missing = [];
       if (!cid) missing.push('card_id (winkelier-kaart)');
-      // De backend accepteert holder_id óf customer_qr_code — minstens één is nodig.
+      // De backend accepteert holder_id óf customer_qr_code, minstens één is nodig.
       if (!holderId && !scannedQr) missing.push('holder_id / customer_qr_code (klant)');
       if (missing.length) {
-        redeemError.textContent = 'Kan beloning niet uitreiken — ontbrekend veld: ' + missing.join(', ') + '.';
+        redeemError.textContent = 'Kan beloning niet uitreiken, ontbrekend veld: ' + missing.join(', ') + '.';
         redeemError.hidden = false;
         return;
       }
@@ -3112,14 +3115,14 @@
           body: JSON.stringify(payload),
         });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error || data.message || 'Beloning niet ingewisseld — probeer opnieuw.');
+        if (!res.ok) throw new Error(data.error || data.message || 'Beloning niet ingewisseld. Probeer opnieuw.');
         currentStamps = 0; newCount = 0;
-        rewardBanner.textContent = '✅ Beloning uitgedeeld! Stempels gereset naar 0';
+        rewardBanner.textContent = 'Beloning uitgedeeld! Stempels gereset naar 0';
         rewardBanner.classList.add('redeemed');
         redeemBtn.hidden = true;
         resultSub.textContent = `Nu heeft die 0/${stampsRequired} stempels`;
       } catch (err) {
-        redeemError.textContent = isNetworkError(err) ? NET_MSG : (err.message || 'Beloning niet ingewisseld — probeer opnieuw.');
+        redeemError.textContent = isNetworkError(err) ? NET_MSG : (err.message || 'Beloning niet ingewisseld. Probeer opnieuw.');
         redeemError.hidden = false;
       } finally {
         redeemBtn.disabled = false; redeemBtn.classList.remove('loading');
@@ -3258,7 +3261,7 @@
         renderCustomers();
       } catch (err) {
         custTotal.textContent = '—';
-        custListWrap.innerHTML = `<div class="cust-empty"><p>Kon klanten niet laden — probeer het later opnieuw.</p></div>`;
+        custListWrap.innerHTML = `<div class="cust-empty"><p>Kon klanten niet laden. Probeer het later opnieuw.</p></div>`;
       }
     }
 
@@ -3330,7 +3333,7 @@
           if (data.owner_email) document.getElementById('userEmail').textContent = data.owner_email;
         }
       } catch (err) {
-        // Stil falen — toon de standaardweergave.
+        // Stil falen, toon de standaardweergave.
       } finally {
         fillForm();
         refreshPreviews();
@@ -3415,7 +3418,7 @@
       const opt = (id, name, sub) => `
         <div class="loc-opt ${(!id && !currentLocationId) || id === currentLocationId ? 'active' : ''}" data-loc="${id || ''}" role="option">
           <span class="lo-name"><span>${escapeHtml(name)}</span>${sub ? `<small>${escapeHtml(sub)}</small>` : ''}</span>
-          <span class="lo-check">✓</span>
+          <span class="lo-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
         </div>`;
       locMenu.innerHTML = opt('', 'Alle vestigingen', locations.length + ' vestigingen')
         + locations.map(l => opt(l.id, l.name, l.addressLine || l.city)).join('');
@@ -3498,9 +3501,9 @@
           method: 'PUT', headers: authHeaders(), body: JSON.stringify({ mode: sharingMode }),
         });
         if (!res.ok) throw new Error();
-        note.textContent = 'Opgeslagen ✓'; note.classList.add('ok');
+        note.textContent = 'Opgeslagen'; note.classList.add('ok');
       } catch (e) {
-        note.textContent = 'Kon niet opslaan — probeer opnieuw.'; note.classList.add('error');
+        note.textContent = 'Kon niet opslaan. Probeer opnieuw.'; note.classList.add('error');
       } finally {
         btn.classList.remove('loading'); btn.disabled = false;
         setTimeout(() => { note.className = 'save-note'; note.textContent = ''; }, 4000);
@@ -3546,7 +3549,7 @@
         const res = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(payload) });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.error || data.message || ('HTTP ' + res.status));
-        note.textContent = 'Opgeslagen ✓'; note.classList.add('ok');
+        note.textContent = 'Opgeslagen'; note.classList.add('ok');
         await loadLocations();
         setTimeout(() => { locFormWrap.hidden = true; }, 700);
       } catch (err) {
@@ -3591,7 +3594,7 @@
       }
       document.getElementById('modalQrPrint').addEventListener('click', () => window.print());
       document.getElementById('modalQrCopy').addEventListener('click', async (ev) => {
-        try { await navigator.clipboard.writeText(url); ev.target.textContent = 'Gekopieerd ✓'; }
+        try { await navigator.clipboard.writeText(url); ev.target.textContent = 'Gekopieerd'; }
         catch { ev.target.textContent = 'Kopiëren mislukt'; }
         setTimeout(() => { ev.target.textContent = 'Link kopiëren'; }, 2500);
       });
@@ -3656,7 +3659,7 @@
           method: 'POST', headers: authHeaders(), body: JSON.stringify(payload),
         });
         if (!res.ok) throw new Error();
-        note.textContent = 'Toegevoegd ✓'; note.classList.add('ok');
+        note.textContent = 'Toegevoegd'; note.classList.add('ok');
         document.getElementById('mgrForm').reset();
         loc.managers = null;           // forceer verse lijst
         loadManagers(loc);
