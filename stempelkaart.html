@@ -303,6 +303,26 @@
     .benefit-list .ic { width: 24px; height: 24px; flex-shrink: 0; border-radius: 7px; display: grid; place-items: center; background: rgba(255,255,255,.10); color: var(--accent); }
     .benefit-list .ic svg { width: 14px; height: 14px; }
 
+    /* Vierstaps-uitleg */
+    .steps4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    .steps4 .step { padding: 30px 26px; }
+    .steps4 .step-num { font-size: 40px; top: 22px; right: 26px; }
+
+    /* Feature-kaarten */
+    .feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+    .feat-card { padding: 30px 28px; }
+    .feat-icon { width: 46px; height: 46px; border-radius: 13px; display: grid; place-items: center; background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.03)); color: var(--accent-2); margin-bottom: 18px; }
+    .feat-icon svg { width: 24px; height: 24px; }
+    .feat-card h3 { font-size: 18.5px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 9px; display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+    .feat-card p { color: var(--muted); font-size: 15px; }
+    .feat-tag { font-size: 10.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: #0a0a0a; background: var(--accent); padding: 3px 9px; border-radius: 999px; }
+
+    /* Klantreis */
+    .journey { max-width: 640px; margin: 0 auto; display: grid; gap: 14px; }
+    .journey-step { display: flex; align-items: center; gap: 18px; padding: 18px 22px; }
+    .j-num { flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-size: 16px; font-weight: 800; color: var(--accent-2); border: 1px solid var(--border-strong); background: rgba(255,255,255,.05); }
+    .journey-step p { color: #d4d4d8; font-size: 16px; }
+
     .price-wrap { max-width: 460px; margin: 0 auto; }
     .price-card { padding: 44px 38px; text-align: center; position: relative; border-color: rgba(255,255,255,.4); }
     .price-card::before { content: ""; position: absolute; inset: -1px; border-radius: var(--radius); z-index: -1; background: radial-gradient(circle at 50% 0%, rgba(255,255,255,.22), transparent 60%); filter: blur(18px); }
@@ -341,8 +361,14 @@
       .nav-links.open { display: flex; position: absolute; top: 70px; left: 0; right: 0; flex-direction: column; gap: 4px; padding: 16px 24px 24px; background: rgba(5,5,8,.97); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
       .nav-links.open a { padding: 12px 0; font-size: 17px; }
       .steps { grid-template-columns: 1fr; }
+      .steps4 { grid-template-columns: repeat(2, 1fr); }
+      .feat-grid { grid-template-columns: repeat(2, 1fr); }
       .benefits { grid-template-columns: 1fr; }
       .section { padding: 74px 0; }
+    }
+    @media (max-width: 640px) {
+      .steps4, .feat-grid { grid-template-columns: 1fr; }
+      .journey-step { padding: 16px 18px; gap: 14px; }
     }
     @media (prefers-reduced-motion: reduce) {
       .reveal { transition: none; opacity: 1; transform: none; }
@@ -530,64 +556,98 @@
     </div>
   </section>
 
-  <!-- ===== 2. Hoe werkt het ===== -->
+  <!-- ===== 2. Hoe het werkt (4 stappen) ===== -->
   <section class="section" id="hoe" style="padding-top:0;">
     <div class="container">
       <div class="section-head">
-        <span class="eyebrow reveal">Hoe werkt het</span>
-        <h2 class="section-title reveal">In drie stappen sparen</h2>
+        <span class="eyebrow reveal">Hoe het werkt</span>
+        <h2 class="section-title reveal">Van ontwerp tot beloning in vier stappen</h2>
       </div>
-      <div class="steps">
+      <div class="steps4">
         <div class="step glass reveal">
           <span class="step-num">01</span>
-          <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2.5"/><path d="M11 18h2"/></svg></div>
-          <h3>Klant voegt de kaart toe</h3>
-          <p>Via een QR-code of link zet de klant de stempelkaart in één tik in Apple Wallet of Google Wallet. Geen app-installatie nodig.</p>
+          <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.06 11.9l8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/></svg></div>
+          <h3>Ontwerp je eigen kaart</h3>
+          <p>Personaliseer je stempelkaart volledig naar je eigen concept: upload je logo, kies je kleuren, lettertype, achtergrond (foto of kleur), stempelvormen en je eigen beloning. Alles in een paar klikken.</p>
         </div>
         <div class="step glass reveal">
           <span class="step-num">02</span>
-          <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2"/><path d="M4 12h16"/></svg></div>
-          <h3>Jij scant de kaart</h3>
-          <p>Bij elk bezoek of aankoop scan je de telefoon van de klant en voeg je een stempel toe. De kaart werkt direct bij.</p>
+          <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3M21 14v3M14 18v3M18 21h3"/></svg></div>
+          <h3>Deel je QR-code</h3>
+          <p>Print je unieke QR-code en leg 'm op de toonbank. Klanten scannen en maken direct hun digitale kaart aan.</p>
         </div>
         <div class="step glass reveal">
           <span class="step-num">03</span>
-          <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-8"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7S9 2 6.5 3.5 6 7 12 7zM12 7s3-5 5.5-3.5S18 7 12 7z"/></svg></div>
-          <h3>Kaart vol = beloning</h3>
-          <p>Is de kaart vol, dan krijgt de klant automatisch een melding met de beloning. Reden genoeg om weer langs te komen.</p>
+          <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19"/><path d="M17 14.5h.01"/></svg></div>
+          <h3>Klanten sparen digitaal</h3>
+          <p>Klanten voegen de kaart toe aan hun Apple Wallet of Google Wallet. Geen app nodig, altijd bij de hand op hun telefoon.</p>
+        </div>
+        <div class="step glass reveal">
+          <span class="step-num">04</span>
+          <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14"/><path d="M19.3 13.7A2.5 2.5 0 0 0 17.5 13h-11A2.5 2.5 0 0 0 4 15.5V17a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-1.5c0-.7-.3-1.3-.7-1.8Z"/><path d="M14 13V8.5C14 7 15 7 15 5a3 3 0 0 0-6 0c0 2 1 2 1 3.5V13"/></svg></div>
+          <h3>Geef stempels &amp; beloon</h3>
+          <p>Scan de code van de klant en geef stempels. Bij een volle kaart reik je eenvoudig de beloning uit. Alles wordt automatisch bijgehouden.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ===== 3. Voordelen ===== -->
+  <!-- ===== 3. Wat maakt het bijzonder (features) ===== -->
   <section class="section" style="padding-top:0;">
     <div class="container">
       <div class="section-head">
         <span class="eyebrow reveal">Voordelen</span>
-        <h2 class="section-title reveal">Goed voor jou én je klant</h2>
+        <h2 class="section-title reveal">Wat maakt het bijzonder</h2>
       </div>
-      <div class="benefits">
-        <div class="benefit-col glass reveal">
-          <span class="col-eyebrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M6 21V9l6-4 6 4v12"/><path d="M10 21v-5h4v5"/></svg> Voor de winkelier</span>
-          <h3>Meer terugkerende klanten</h3>
-          <ul class="benefit-list">
-            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Klanten komen vaker terug om vol te sparen</li>
-            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Geen kosten meer voor papieren kaartjes</li>
-            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Inzicht in bezoek- en spaargedrag</li>
-            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Je eigen huisstijl op de kaart</li>
-          </ul>
+      <div class="feat-grid">
+        <div class="feat-card glass reveal">
+          <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg></div>
+          <h3>Volledig aanpasbaar</h3>
+          <p>Maak de kaart helemaal van jou. Je logo, je kleuren, je huisstijl, je beloning. De kaart past bij jouw concept.</p>
         </div>
-        <div class="benefit-col glass reveal">
-          <span class="col-eyebrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg> Voor de klant</span>
-          <h3>Sparen zonder gedoe</h3>
-          <ul class="benefit-list">
-            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Geen app en geen kaartje dat kwijtraakt</li>
-            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Altijd bij de hand in de wallet</li>
-            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Automatisch bericht bij een beloning</li>
-            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Overzicht van gespaarde stempels</li>
-          </ul>
+        <div class="feat-card glass reveal">
+          <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19"/><path d="M17 14.5h.01"/></svg></div>
+          <h3>In de wallet</h3>
+          <p>Klanten bewaren de kaart in Apple Wallet of Google Wallet. Altijd bij de hand, nooit meer kwijt zoals een papieren kaart.</p>
         </div>
+        <div class="feat-card glass reveal">
+          <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+          <h3>Locatie meldingen <span class="feat-tag">Premium</span></h3>
+          <p>Klanten krijgen automatisch een melding op hun telefoon wanneer ze in de buurt van jouw winkel zijn. Zo trek je ze terug naar je zaak.</p>
+        </div>
+        <div class="feat-card glass reveal">
+          <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="3" y1="20" x2="21" y2="20"/></svg></div>
+          <h3>Inzicht in je klanten</h3>
+          <p>Zie precies wie je terugkerende klanten zijn, hoeveel ze sparen en wanneer ze langskomen.</p>
+        </div>
+        <div class="feat-card glass reveal">
+          <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1.5-5h15L21 9"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/><path d="M3 9h18"/></svg></div>
+          <h3>Meerdere vestigingen</h3>
+          <p>Heb je meerdere locaties? Beheer ze allemaal vanuit één dashboard, met gedeelde of aparte kaarten.</p>
+        </div>
+        <div class="feat-card glass reveal">
+          <div class="feat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <h3>Medewerkers-app</h3>
+          <p>Je personeel geeft eenvoudig stempels via een simpele scan-app op de tablet of telefoon.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 4. Voor jouw klanten (klantreis) ===== -->
+  <section class="section" style="padding-top:0;">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow reveal">Voor jouw klanten</span>
+        <h2 class="section-title reveal">Zo ervaren je klanten het</h2>
+        <p class="section-sub reveal">Simpel en snel, zonder app of gedoe.</p>
+      </div>
+      <div class="journey">
+        <div class="journey-step glass reveal"><span class="j-num">1</span><p>Klant scant je QR-code bij de kassa.</p></div>
+        <div class="journey-step glass reveal"><span class="j-num">2</span><p>Maakt in seconden een digitale kaart aan.</p></div>
+        <div class="journey-step glass reveal"><span class="j-num">3</span><p>Voegt de kaart toe aan de wallet (Apple of Google).</p></div>
+        <div class="journey-step glass reveal"><span class="j-num">4</span><p>Krijgt een melding als ze langs je winkel lopen.</p></div>
+        <div class="journey-step glass reveal"><span class="j-num">5</span><p>Spaart bij elk bezoek en verzilvert beloningen.</p></div>
       </div>
     </div>
   </section>
