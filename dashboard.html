@@ -667,6 +667,11 @@
     .sm-trial-text strong { font-size: 15.5px; font-weight: 700; color: #fff; }
     .sm-trial-text small { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
     .sm-trial-btn { flex-shrink: 0; }
+    .sm-trial-points { list-style: none; display: grid; gap: 7px; margin-top: 6px; }
+    .sm-trial-points li { display: flex; align-items: flex-start; gap: 9px; font-size: 12.8px; color: var(--muted); line-height: 1.45; }
+    .sm-trial-points b { color: #fff; font-weight: 700; }
+    .sm-trial-points .tp-check { flex-shrink: 0; width: 16px; height: 16px; margin-top: 1px; color: #6ee7a0; }
+    .sm-trial-points .tp-check svg { width: 16px; height: 16px; display: block; }
 
     /* ---------- Mijn Abonnement ---------- */
     .sub-card { padding: 30px 28px; }
@@ -1517,7 +1522,11 @@
       <div class="sm-trial" id="smTrial" hidden>
         <div class="sm-trial-text">
           <strong>Of probeer eerst 14 dagen gratis</strong>
-          <small id="smTrialNote">Geen kosten tijdens de proef. Daarna automatisch verlengd met het gekozen pakket (kies hierboven welk pakket).</small>
+          <ul class="sm-trial-points">
+            <li><span class="tp-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span>Vandaag betaal je <b>€0</b></span></li>
+            <li><span class="tp-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span id="smTrialCharge">Na 14 dagen proefperiode wordt het gekozen pakket automatisch afgeschreven</span></li>
+            <li><span class="tp-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span>Je kunt altijd opzeggen tijdens de proefperiode</span></li>
+          </ul>
         </div>
         <button type="button" class="btn btn-primary sm-trial-btn" id="smStartTrial">Start 14 dagen gratis proefperiode</button>
       </div>
@@ -1737,13 +1746,14 @@
       document.getElementById('smPremSub').innerHTML = p.sub;
       updateTrialNote();
     }
-    // De trial-notitie weerspiegelt het gekozen pakket én de gekozen cyclus (maandelijks óf jaarlijks).
+    // De trial-uitleg weerspiegelt het gekozen pakket én de gekozen cyclus (maandelijks óf jaarlijks).
     function updateTrialNote() {
-      const note = document.getElementById('smTrialNote');
-      if (!note) return;
+      const el = document.getElementById('smTrialCharge');
+      if (!el) return;
       const pr = SUB_PRICES[smSelectedPlan] && SUB_PRICES[smSelectedPlan][smBilling];
       const name = smSelectedPlan === 'premium' ? 'Premium' : 'Basic';
-      if (pr) note.textContent = 'Geen kosten tijdens de 14 dagen proef. Daarna automatisch ' + pr.amount + pr.per + ' voor ' + name + '. Je kunt altijd opzeggen.';
+      const period = smBilling === 'yearly' ? 'jaar' : 'maand';
+      if (pr) el.innerHTML = 'Na 14 dagen proefperiode wordt automatisch <b>' + pr.amount + ' per ' + period + '</b> voor ' + name + ' afgeschreven';
     }
     function setSelectedPlan(plan) {
       smSelectedPlan = plan;
@@ -1800,7 +1810,8 @@
       try {
         const res = await fetch(API_BASE + '/api/stamp/create-checkout-session', {
           method: 'POST', headers: authHeaders(),
-          body: JSON.stringify({ plan, billing_cycle: smBilling, with_trial: withTrial }),
+          // with_trial expliciet boolean: true bij de proefknop, false bij direct een pakket kiezen.
+          body: JSON.stringify({ plan, billing_cycle: smBilling, with_trial: !!withTrial }),
         });
         if (res.status === 401 || res.status === 403) { smShowMsg('Je sessie is verlopen. Log opnieuw in.', 'error'); reset(); return; }
         const data = await res.json().catch(() => ({}));
