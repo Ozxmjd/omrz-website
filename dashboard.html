@@ -169,6 +169,26 @@
     .sc-stamp.pending { border-style: solid; border-color: #6ee7a0; background: rgba(22,163,74,.35); color: #fff; }
     .sc-progress { font-size: 12.5px; color: rgba(255,255,255,.7); text-align: right; }
 
+    /* ---- Wallet-pas preview: 3 delen (bovenkant / midden / onderkant) ---- */
+    .stampcard.wallet { padding: 0; overflow: hidden; }
+    .wp-band { position: relative; }
+    .wp-header { padding: 18px 20px 15px; display: flex; flex-direction: column; gap: 9px; }
+    .wp-header .sc-top { margin: 0; }
+    .wp-hi { font-size: 14px; font-weight: 700; }
+    .wp-middle { position: relative; padding: 20px; min-height: 96px; }
+    .wp-middle .sc-stamps { position: relative; z-index: 2; margin: 0; }
+    .wp-footer { padding: 15px 20px 18px; }
+    .wp-footer .sc-title { margin-bottom: 3px; }
+    .wp-footer .sc-reward { margin-bottom: 12px; }
+    .wp-foot-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .wp-foot-row .sc-progress { text-align: left; }
+    .wp-qr { width: 40px; height: 40px; border-radius: 7px; flex-shrink: 0; background-color: #fff; background-image: linear-gradient(45deg,#000 25%,transparent 25%,transparent 75%,#000 75%),linear-gradient(45deg,#000 25%,transparent 25%,transparent 75%,#000 75%); background-size: 10px 10px; background-position: 0 0, 5px 5px; opacity: .92; }
+    /* Pas-deel badges + uitleg in de editor */
+    .part-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--pearl); background: rgba(255,255,255,.08); border: 1px solid var(--border-strong); padding: 3px 9px; border-radius: 999px; }
+    .ed-note { display: flex; gap: 9px; align-items: flex-start; font-size: 13px; color: var(--muted); background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 10px; padding: 11px 13px; margin: 4px 0 16px; line-height: 1.5; }
+    .ed-note svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; color: var(--pearl); }
+    .ed-note b { color: var(--pearl); }
+
     /* ---------- Form ---------- */
     .form-grid { display: grid; gap: 18px; }
     .field label { display: block; font-size: 13px; font-weight: 600; color: var(--pearl); margin-bottom: 8px; }
@@ -901,21 +921,28 @@
               <h3>Actieve stempelkaart</h3>
               <p class="b-sub">Zo ziet je kaart eruit in de wallet van je klant.</p>
               <div class="preview-stage">
-                <div class="stampcard rich" id="ovPreview">
-                  <div class="sc-bg" id="ovBg"></div>
-                  <div class="sc-shade"></div>
-                  <div class="sc-inner">
+                <div class="stampcard rich wallet" id="ovPreview">
+                  <div class="wp-band wp-header" id="ovHeader">
                     <div class="sc-top">
                       <div class="sc-brand">
                         <img class="sc-logo" id="ovLogo" alt="Logo" hidden />
                         <span class="sc-biz" id="ovBiz">Mijn zaak</span>
                       </div>
                     </div>
-                    <div class="sc-hi" id="ovHi">Hi Sara!</div>
+                    <div class="wp-hi" id="ovHi">Hi Sara!</div>
+                  </div>
+                  <div class="wp-band wp-middle" id="ovMiddle">
+                    <div class="sc-bg" id="ovBg"></div>
+                    <div class="sc-shade"></div>
+                    <div class="sc-stamps" id="ovStamps"></div>
+                  </div>
+                  <div class="wp-band wp-footer" id="ovFootBand">
                     <div class="sc-title" id="ovTitle">Stempelkaart</div>
                     <div class="sc-reward" id="ovReward">Spaar stempels → gratis product</div>
-                    <div class="sc-stamps" id="ovStamps"></div>
-                    <div class="sc-progress" id="ovProgress">0 / 6 stempels</div>
+                    <div class="wp-foot-row">
+                      <span class="sc-progress" id="ovProgress">0 / 6 stempels</span>
+                      <span class="wp-qr" aria-hidden="true"></span>
+                    </div>
                     <div class="sc-footer" id="ovFooter" hidden></div>
                   </div>
                 </div>
@@ -941,21 +968,28 @@
 
             <!-- ===== Live preview (sticky) ===== -->
             <div class="editor-preview">
-              <div class="stampcard rich" id="editPreview">
-                <div class="sc-bg" id="pvBg"></div>
-                <div class="sc-shade"></div>
-                <div class="sc-inner">
+              <div class="stampcard rich wallet" id="editPreview">
+                <div class="wp-band wp-header" id="pvHeader">
                   <div class="sc-top">
                     <div class="sc-brand">
                       <img class="sc-logo" id="pvLogo" alt="Logo" hidden />
                       <span class="sc-biz" id="pvBiz">Café OMRZ</span>
                     </div>
                   </div>
-                  <div class="sc-hi" id="pvHi">Hi Sara!</div>
+                  <div class="wp-hi" id="pvHi">Hi Sara!</div>
+                </div>
+                <div class="wp-band wp-middle" id="pvMiddle">
+                  <div class="sc-bg" id="pvBg"></div>
+                  <div class="sc-shade"></div>
+                  <div class="sc-stamps" id="pvStamps"></div>
+                </div>
+                <div class="wp-band wp-footer" id="pvFootBand">
                   <div class="sc-title" id="pvTitle">Koffie Spaarkaart</div>
                   <div class="sc-reward" id="pvReward">Spaar 6 stempels → gratis koffie</div>
-                  <div class="sc-stamps" id="pvStamps"></div>
-                  <div class="sc-progress" id="pvProgress">3 / 6 stempels</div>
+                  <div class="wp-foot-row">
+                    <span class="sc-progress" id="pvProgress">3 / 6 stempels</span>
+                    <span class="wp-qr" aria-hidden="true"></span>
+                  </div>
                   <div class="sc-footer" id="pvFooter" hidden></div>
                 </div>
               </div>
@@ -983,18 +1017,9 @@
                     <input type="text" id="fReward" placeholder="Gratis koffie" />
                   </div>
                   <div class="field">
-                    <label class="check-row" style="margin:0 0 12px;"><input type="checkbox" id="showRewardText" checked /> Toon spaardoel tekst op de kaart</label>
-                    <input type="text" id="rewardText" placeholder="Spaar 6 = gratis koffie" />
-                    <div class="upload-hint">Laat leeg voor automatische tekst: “Spaar X stempels → beloning”.</div>
-                  </div>
-                  <div class="field">
-                    <label class="check-row" style="margin:0 0 12px;"><input type="checkbox" id="showFooterText" /> Toon tekst onderaan de kaart</label>
-                    <input type="text" id="footerText" placeholder="Bedankt voor je bezoek!" />
-                    <div class="upload-hint">Bijv. een bedankje of je openingstijden. Verschijnt onderaan de kaart.</div>
-                  </div>
-                  <div class="field">
                     <label for="fStamps">Aantal stempels <span class="range-val" id="fStampsVal">6</span></label>
-                    <input type="range" class="range" id="fStamps" min="4" max="12" value="6" />
+                    <input type="range" class="range" id="fStamps" min="4" max="30" value="6" />
+                    <div class="upload-hint">Hoeveel stempels heeft een volle kaart? (4 tot 30)</div>
                   </div>
                 </div>
               </section>
@@ -1002,7 +1027,7 @@
               <!-- 2 · Logo -->
               <section class="ed-section glass">
                 <h3><span class="sec-num">2</span> Logo</h3>
-                <p class="b-sub">Je logo verschijnt linksboven op de kaart.</p>
+                <p class="b-sub">Verschijnt linksboven op de pas, naast je winkelnaam.</p>
                 <div class="uploader">
                   <div class="upload-prev" id="logoPrev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div>
                   <div class="upload-main">
@@ -1016,10 +1041,33 @@
                 </div>
               </section>
 
-              <!-- 3 · Achtergrond -->
+              <!-- Thema's (snelstart, optioneel) -->
+              <section class="ed-section glass" id="themeSection">
+                <h3>Thema&#39;s <span class="part-badge">Snelstart</span></h3>
+                <p class="b-sub">Kies een complete look in één klik. Daarna stel je alles hieronder verder af.</p>
+                <div class="theme-grid" id="themeGrid"></div>
+              </section>
+
+              <!-- 3 · Bovenkant pas (header) -->
               <section class="ed-section glass">
-                <h3><span class="sec-num">3</span> Achtergrond</h3>
-                <p class="b-sub">Kies een kleur of upload een foto.</p>
+                <h3><span class="sec-num">3</span> Bovenkant pas <span class="part-badge">Bovenkant</span></h3>
+                <div class="ed-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>Dit is het bovenste deel van de pas met je logo, winkelnaam en de klantnaam.</span></div>
+                <span class="field-label-inline">Header kleur</span>
+                <div class="cp-main">
+                  <input type="color" id="passColor" value="#1a1a2e" aria-label="Header kleur" />
+                  <div class="cp-hexwrap">
+                    <span class="cp-hex-label">Hex-code</span>
+                    <input type="text" class="hex-input" id="passHex" value="#1A1A2E" maxlength="7" spellcheck="false" aria-label="Header hex-code" />
+                  </div>
+                </div>
+                <div class="preset-grid" id="passPresets"></div>
+                <div class="upload-hint" style="margin-top:12px;">De onderkant van de pas gebruikt automatisch dezelfde kleur.</div>
+              </section>
+
+              <!-- 4 · Midden pas (stempels) -->
+              <section class="ed-section glass">
+                <h3><span class="sec-num">4</span> Midden pas <span class="part-badge">Midden</span></h3>
+                <div class="ed-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>Dit is het middelste deel waar je stempels op staan. Kies de achtergrond áchter de stempels: een kleur of een foto.</span></div>
                 <div class="ed-tabs" id="bgTabs">
                   <button type="button" data-bg="color" class="active">Kleur</button>
                   <button type="button" data-bg="photo">Foto</button>
@@ -1027,10 +1075,10 @@
 
                 <div class="ed-tabpane active" id="bgPaneColor">
                   <div class="cp-main">
-                    <input type="color" id="primaryColor" value="#1a1a2e" aria-label="Achtergrondkleur" />
+                    <input type="color" id="primaryColor" value="#1a1a2e" aria-label="Achtergrondkleur midden" />
                     <div class="cp-hexwrap">
                       <span class="cp-hex-label">Hex-code</span>
-                      <input type="text" class="hex-input" id="primaryHex" value="#1A1A2E" maxlength="7" spellcheck="false" aria-label="Achtergrond hex-code" />
+                      <input type="text" class="hex-input" id="primaryHex" value="#1A1A2E" maxlength="7" spellcheck="false" aria-label="Midden hex-code" />
                     </div>
                   </div>
                   <div class="preset-grid" id="primaryPresets"></div>
@@ -1051,17 +1099,10 @@
                 </div>
               </section>
 
-              <!-- 4 · Thema stijlen (verborgen bij foto-achtergrond) -->
-              <section class="ed-section glass" id="themeSection">
-                <h3><span class="sec-num">4</span> Thema stijlen</h3>
-                <p class="b-sub">Een complete look in één klik.</p>
-                <div class="theme-grid" id="themeGrid"></div>
-              </section>
-
               <!-- 5 · Stempel stijl -->
               <section class="ed-section glass">
                 <h3><span class="sec-num">5</span> Stempel stijl</h3>
-                <p class="b-sub">Vorm, stijl en kleur van de stempels.</p>
+                <p class="b-sub">Vorm, stijl en kleur van de stempels die je klanten sparen.</p>
                 <span class="field-label-inline">Vorm</span>
                 <div class="shape-grid" id="shapeGrid"></div>
                 <span class="field-label-inline">Stijl</span>
@@ -1076,7 +1117,7 @@
                   <input type="range" class="range" id="fOutline" min="1" max="8" step="0.5" value="2.5" />
                 </div>
 
-                <!-- Vulling: alleen bij Outline (bij Gevuld is de vorm massief gekleurd) -->
+                <!-- Vulling: alleen bij Outline -->
                 <div id="fillingGroup" hidden>
                   <span class="field-label-inline">Vulling</span>
                   <div class="toggle-row" id="stampTypeToggle" style="margin-bottom:14px;">
@@ -1096,7 +1137,7 @@
                   </div>
                 </div>
 
-                <!-- Stempel kleur: alleen in kleur-modus (niet bij logo-vulling) -->
+                <!-- Stempel kleur: alleen in kleur-modus -->
                 <div id="stampColorField">
                   <span class="field-label-inline">Stempel kleur</span>
                   <div class="cp-main">
@@ -1110,10 +1151,27 @@
                 </div>
               </section>
 
-              <!-- 6 · Lettertype, tekst & kleuren -->
+              <!-- 6 · Onderkant pas (teksten) -->
               <section class="ed-section glass">
-                <h3><span class="sec-num">6</span> Lettertype, tekst &amp; kleuren</h3>
-                <p class="b-sub">Kies een lettertype en de tekst- en accentkleur van de kaart.</p>
+                <h3><span class="sec-num">6</span> Onderkant pas <span class="part-badge">Onderkant</span></h3>
+                <div class="ed-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>Dit is het onderste deel met je teksten, de stempelteller en de QR-code. Het gebruikt dezelfde kleur als de bovenkant.</span></div>
+                <div class="upload-hint" style="margin-bottom:16px;">Hier verschijnen automatisch: je <b>kaart titel</b>, de <b>beloning</b>, de <b>stempelteller</b> en de <b>QR-code</b>.</div>
+                <div class="field">
+                  <label class="check-row" style="margin:0 0 12px;"><input type="checkbox" id="showRewardText" checked /> Toon spaardoel tekst op de pas</label>
+                  <input type="text" id="rewardText" placeholder="Spaar 6 = gratis koffie" />
+                  <div class="upload-hint">Laat leeg voor automatische tekst: &ldquo;Spaar X stempels &rarr; beloning&rdquo;.</div>
+                </div>
+                <div class="field" style="margin-top:16px;">
+                  <label class="check-row" style="margin:0 0 12px;"><input type="checkbox" id="showFooterText" /> Toon extra tekst onderaan</label>
+                  <input type="text" id="footerText" placeholder="Bedankt voor je bezoek!" />
+                  <div class="upload-hint">Bijv. een bedankje of je openingstijden.</div>
+                </div>
+              </section>
+
+              <!-- 7 · Lettertype & tekstkleuren -->
+              <section class="ed-section glass">
+                <h3><span class="sec-num">7</span> Lettertype &amp; tekstkleuren</h3>
+                <p class="b-sub">Kies een lettertype en de tekst- en accentkleur van de pas.</p>
 
                 <span class="field-label-inline">Lettertype</span>
                 <div class="font-grid" id="fontGrid" style="margin-bottom:22px;"></div>
@@ -1575,6 +1633,7 @@
       background_url: '',
       background_type: 'color',
       theme_style: '',
+      pass_color: '#1a1a2e',
       primary_color: '#1a1a2e',
       text_color: '#ffffff',
       accent_color: '#c9a45c',
@@ -2087,6 +2146,7 @@
       'linear-gradient(135deg,#c9a45c,#8a6d2f)',
       'linear-gradient(135deg,#0f2027,#2c5364)',
     ];
+    const PASS_PRESETS   = ['#1a1a2e','#0a0a0a','#ffffff','#7c2d12','#065f46','#1e3a8a','#4c1d95','#9f1239'];
     const ACCENT_PRESETS = ['#c9a45c','#ffffff','#f59e0b','#ef4444','#10b981','#3b82f6','#a855f7','#ec4899'];
     const STAMP_PRESETS  = ['#c9a45c','#ffffff','#fbbf24','#ef4444','#22c55e','#38bdf8','#a78bfa','#f472b6'];
 
@@ -2162,6 +2222,8 @@
     const outlineWidthField = document.getElementById('outlineWidthField');
     const fStamps = document.getElementById('fStamps');
     const fStampsVal = document.getElementById('fStampsVal');
+    const passColor = document.getElementById('passColor');
+    const passHex = document.getElementById('passHex');
     const primaryColor = document.getElementById('primaryColor');
     const primaryHex = document.getElementById('primaryHex');
     const stampColorInput = document.getElementById('stampColor');
@@ -2172,6 +2234,7 @@
     const accentHex = document.getElementById('accentHex');
     const autoContrast = document.getElementById('autoContrast');
     // Containers
+    const passPresets = document.getElementById('passPresets');
     const primaryPresets = document.getElementById('primaryPresets');
     const accentPresets = document.getElementById('accentPresets');
     const stampPresets = document.getElementById('stampPresets');
@@ -2191,6 +2254,9 @@
     // Preview-refs, gebundeld per kaart zodat editor- én overzicht-preview dezelfde renderer delen.
     const editorRefs = {
       cardEl: document.getElementById('editPreview'),
+      header: document.getElementById('pvHeader'),
+      middle: document.getElementById('pvMiddle'),
+      footBand: document.getElementById('pvFootBand'),
       bg: document.getElementById('pvBg'),
       logo: document.getElementById('pvLogo'),
       biz: document.getElementById('pvBiz'),
@@ -2203,6 +2269,9 @@
     };
     const overviewRefs = {
       cardEl: document.getElementById('ovPreview'),
+      header: document.getElementById('ovHeader'),
+      middle: document.getElementById('ovMiddle'),
+      footBand: document.getElementById('ovFootBand'),
       bg: document.getElementById('ovBg'),
       logo: document.getElementById('ovLogo'),
       biz: document.getElementById('ovBiz'),
@@ -2283,8 +2352,14 @@
       if (!el) return;
       const photo = c.background_type === 'photo' && !!c.background_url;
       el.classList.toggle('has-photo', photo);
-      if (photo) { el.style.background = '#111'; t.bg.style.backgroundImage = `url("${absoluteUrl(c.background_url)}")`; }
-      else { el.style.background = c.primary_color || '#1a1a2e'; t.bg.style.backgroundImage = 'none'; }
+      // Bovenkant + onderkant delen de pass_color (net als in Apple Wallet); midden = de stempel-achtergrond.
+      const pass = firstHex(c.pass_color) || firstHex(c.primary_color) || '#1a1a2e';
+      if (t.header) t.header.style.background = pass;
+      if (t.footBand) t.footBand.style.background = pass;
+      el.style.background = pass;
+      const midEl = t.middle || el;
+      if (photo) { midEl.style.background = '#111'; t.bg.style.backgroundImage = `url("${absoluteUrl(c.background_url)}")`; }
+      else { midEl.style.background = c.primary_color || '#1a1a2e'; t.bg.style.backgroundImage = 'none'; }
 
       // Lettertype toepassen op alle kaartteksten.
       el.style.fontFamily = fontStack(c.card_font);
@@ -2376,6 +2451,13 @@
       if (autoContrast.checked) setText(autoTextColor(), true);
       paintEditor();
     }
+    function setPass(val) {
+      card.pass_color = val;
+      if (isHex(val)) passColor.value = val;
+      syncHexInput(passHex, val);
+      markPresets(passPresets, val);
+      paintEditor();
+    }
     function setAccent(val) {
       card.accent_color = val;
       if (isHex(val)) accentColorInput.value = val;
@@ -2442,6 +2524,7 @@
     const updateLogoStampAvailability = updateStampControls;
 
     // ---- UI opbouwen ----
+    buildPresets(passPresets, PASS_PRESETS, setPass);
     buildPresets(primaryPresets, BG_PRESETS, setPrimary);
     buildPresets(accentPresets, ACCENT_PRESETS, setAccent);
     buildPresets(stampPresets, STAMP_PRESETS, setStampColor);
@@ -2466,6 +2549,7 @@
       const t = THEMES[key]; if (!t) return;
       card.theme_style = key;
       autoContrast.checked = false;
+      setPass(firstHex(t.primary_color) || card.pass_color || '#1a1a2e');
       setPrimary(t.primary_color);
       setAccent(t.accent_color);
       setStampColor(t.stamp_color);
@@ -2506,6 +2590,7 @@
     [...fillToggle.children].forEach(btn => btn.addEventListener('click', () => setFill(btn.dataset.fill)));
 
     // ---- Color inputs (volledige kleurenwiel) ----
+    passColor.addEventListener('input', () => setPass(passColor.value));
     primaryColor.addEventListener('input', () => setPrimary(primaryColor.value));
     accentColorInput.addEventListener('input', () => setAccent(accentColorInput.value));
     stampColorInput.addEventListener('input', () => setStampColor(stampColorInput.value));
@@ -2525,6 +2610,7 @@
       });
       el.addEventListener('blur', () => { el.classList.remove('invalid'); });
     }
+    bindHexInput(passHex, setPass);
     bindHexInput(primaryHex, setPrimary);
     bindHexInput(stampHex, setStampColor);
     bindHexInput(textHex, (v) => setText(v, false));
@@ -2560,7 +2646,7 @@
     fTitle.addEventListener('input', () => { card.card_title = fTitle.value.trim() || 'Stempelkaart'; paintEditor(); });
     fReward.addEventListener('input', () => { card.reward_description = fReward.value.trim() || 'Gratis product'; paintEditor(); });
     fStamps.addEventListener('input', () => {
-      card.stamps_required = Math.max(4, Math.min(12, parseInt(fStamps.value, 10) || 6));
+      card.stamps_required = Math.max(4, Math.min(30, parseInt(fStamps.value, 10) || 6));
       fStampsVal.textContent = card.stamps_required; refreshPreviews();
     });
 
@@ -2573,7 +2659,7 @@
       fBiz.value = card.business_name || '';
       fTitle.value = card.card_title || '';
       fReward.value = card.reward_description || '';
-      fStamps.value = Math.max(4, Math.min(12, card.stamps_required || 6));
+      fStamps.value = Math.max(4, Math.min(30, card.stamps_required || 6));
       fStampsVal.textContent = card.stamps_required;
 
       showRewardText.checked = card.show_reward_text !== false;
@@ -2586,6 +2672,7 @@
 
       autoContrast.checked = false;
       setFont(card.card_font || 'Inter');
+      setPass(firstHex(card.pass_color) || firstHex(card.primary_color) || '#1a1a2e');
       setPrimary(card.primary_color || '#1a1a2e');
       setAccent(card.accent_color || '#c9a45c');
       setStampColor(card.stamp_color || card.accent_color || '#c9a45c');
@@ -2696,6 +2783,7 @@
         background_url: card.background_url,
         background_type: card.background_type,
         theme_style: card.theme_style,
+        pass_color: card.pass_color,
         primary_color: card.primary_color,
         text_color: card.text_color,
         accent_color: card.accent_color,
@@ -3330,6 +3418,7 @@
           card.reward_description = c.reward_description ?? card.reward_description;
           card.stamps_required = c.stamps_required ?? card.stamps_required;
           card.primary_color = c.primary_color ?? card.primary_color;
+          card.pass_color = c.pass_color ?? (firstHex(card.primary_color) || card.pass_color);
           card.stamp_style = c.stamp_style ?? card.stamp_style;
           card.show_reward_text = c.show_reward_text ?? card.show_reward_text;
           card.reward_text = c.reward_text ?? card.reward_text;
