@@ -768,13 +768,15 @@
             if (!qr) { showAlert('manualAlert', 'Deze klant kan alleen via de QR-code gestempeld worden.'); return; }
             stopCamera();
             $('cameraWrap').classList.remove('on');
+            const mcol = Number(c.stamps_collected ?? c.stamps ?? c.current_stamps ?? 0) || 0;
+            const mreq = Number(c.stamps_required ?? store.required ?? 0) || 0;
             current = {
                 customer_qr_code: qr,
                 holder_id: c.holder_id,
                 customer_name: c.customer_name || c.name || 'Klant',
-                stamps_collected: c.stamps_collected ?? c.stamps ?? c.current_stamps ?? 0,
-                stamps_required: c.stamps_required ?? store.required ?? 0,
-                reward_available: !!c.reward_available,
+                stamps_collected: mcol,
+                stamps_required: mreq,
+                reward_available: (!!c.reward_available) || (mreq > 0 && mcol >= mreq),
                 reward_description: c.reward_description || store.reward,
                 total_rewards_earned: c.total_rewards_earned || 0,
             };
@@ -828,6 +830,12 @@
                 }
                 hideAlert('scanAlert');
                 current = { ...data, customer_qr_code: qr };
+                // Stand, holder-id én volle-kaart-status robuust normaliseren (veldnamen verschillen per backend).
+                current.stamps_collected = Number(data.stamps_collected ?? data.current_stamps ?? data.stamps ?? data.stamp_count ?? 0) || 0;
+                current.stamps_required = Number(data.stamps_required ?? store.required ?? 0) || 0;
+                current.holder_id = data.holder_id ?? data.holderId ?? data.id ?? data.holder ?? data.customer_id ?? current.holder_id;
+                current.reward_available = (data.reward_available ?? data.rewardAvailable ?? data.reward_ready ?? false) === true
+                    || (current.stamps_required > 0 && current.stamps_collected >= current.stamps_required);
                 amount = 1;
                 showCustomer();
             } catch (err) {
@@ -849,14 +857,16 @@
             $('custAvatar').textContent = (name.trim()[0] || '?').toUpperCase();
 
             const req = current.stamps_required || store.required || 0;
-            const col = current.stamps_collected || 0;
+            const col = Number(current.stamps_collected ?? current.current_stamps ?? current.stamps ?? 0) || 0;
             $('custMeta').textContent = col + ' / ' + req + ' stempels' +
                 (current.total_rewards_earned ? ' · ' + current.total_rewards_earned + ' beloningen ontvangen' : '');
 
             renderCircles(col, req, 0);
 
-            if (current.reward_available) {
-                // Kaart is vol: beloning uitreiken aanbieden
+            // Volle kaart (reward_available OF stand ≥ vereist) → uitreiken tonen i.p.v. stempel geven.
+            const full = current.reward_available === true || (req > 0 && col >= req);
+            if (full) {
+                // Kaart is vol: verberg de +/- teller, toon "Beloning uitreiken"
                 $('giveControls').style.display = 'none';
                 $('rewardControls').style.display = 'block';
             } else {
@@ -951,12 +961,14 @@
 
         async function redeemReward(ev) {
             const btn = ev && ev.currentTarget ? ev.currentTarget : null;
+            // Bevestiging vragen vóór het uitreiken (de kaart wordt hierna gereset).
+            if (!window.confirm('Beloning uitreiken aan ' + (current.customer_name || 'de klant') + '? De stempelkaart wordt teruggezet naar 0.')) return;
             if (btn) { if (btn.disabled) return; btn.disabled = true; var orig = btn.textContent; btn.textContent = 'Bezig…'; }
             hideAlert('scanAlert');
             try {
                 const res = await apiCall(API_BASE + '/api/stamp/redeem', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ holder_id: current.holder_id }),
+                    body: JSON.stringify({ card_id: activeCardId(), holder_id: current.holder_id, customer_qr_code: current.customer_qr_code }),
                 });
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok || !data.success) {

@@ -336,6 +336,8 @@
     .counter-mid { min-width: 92px; text-align: center; }
     .counter-num { font-size: 48px; font-weight: 800; color: #fff; line-height: 1; }
     .counter-cap { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    #giveControls[hidden], #fullControls[hidden] { display: none; }
+    .cust-full-title { font-size: 22px; font-weight: 800; color: #6ee7a0; text-align: center; margin-bottom: 6px; }
     .add-preview { font-size: 15px; color: var(--pearl); text-align: center; margin-bottom: 10px; }
     .reward-hint {
       width: 100%; text-align: center; padding: 14px 18px; border-radius: 14px; margin-bottom: 12px;
@@ -372,6 +374,7 @@
     .result-title { font-size: 21px; font-weight: 800; margin-bottom: 6px; }
     .result-sub { font-size: 15px; color: #444; }
     .reward-block { width: 100%; display: flex; flex-direction: column; align-items: center; }
+    .reward-block[hidden] { display: none; }
     .reward-banner {
       width: 100%; text-align: center; padding: 24px 20px; border-radius: 22px; margin-bottom: 12px;
       background: #16a34a; color: #fff; font-size: 19px; font-weight: 800;
@@ -1278,22 +1281,36 @@
                 <div class="sc-progress" id="custProgress">0 / 6 stempels</div>
               </div>
 
-              <div class="counter">
-                <button type="button" class="counter-btn" id="minusBtn" aria-label="Minder">−</button>
-                <div class="counter-mid">
-                  <div class="counter-num" id="counterNum">1</div>
-                  <div class="counter-cap">stempels</div>
+              <!-- NIET VOL: normale stempel-geven opties -->
+              <div id="giveControls">
+                <div class="counter">
+                  <button type="button" class="counter-btn" id="minusBtn" aria-label="Minder">−</button>
+                  <div class="counter-mid">
+                    <div class="counter-num" id="counterNum">1</div>
+                    <div class="counter-cap">stempels</div>
+                  </div>
+                  <button type="button" class="counter-btn" id="plusBtn" aria-label="Meer">+</button>
                 </div>
-                <button type="button" class="counter-btn" id="plusBtn" aria-label="Meer">+</button>
+
+                <p class="add-preview" id="addPreview">Na toevoegen: 1/6 stempels</p>
+                <div class="reward-hint" id="rewardHint" hidden>Klant ontvangt beloning!</div>
+                <p class="cust-error" id="custError" hidden></p>
+
+                <button class="btn scan-btn give-btn" id="confirmBtn">
+                  <span class="btn-label" id="confirmLabel">Bevestig 1 stempel</span>
+                </button>
               </div>
 
-              <p class="add-preview" id="addPreview">Na toevoegen: 1/6 stempels</p>
-              <div class="reward-hint" id="rewardHint" hidden>Klant ontvangt beloning!</div>
-              <p class="cust-error" id="custError" hidden></p>
+              <!-- VOL: geen stempels meer geven, maar de beloning uitreiken -->
+              <div id="fullControls" hidden>
+                <p class="cust-full-title">Kaart is vol!</p>
+                <p class="add-preview" id="custFullSub">Deze klant heeft recht op de beloning.</p>
+                <p class="cust-error" id="custRedeemError" hidden></p>
+                <button class="btn scan-btn give-btn" id="custRedeemBtn">
+                  <span class="btn-label" id="custRedeemLabel">Beloning uitreiken</span>
+                </button>
+              </div>
 
-              <button class="btn scan-btn give-btn" id="confirmBtn">
-                <span class="btn-label" id="confirmLabel">Bevestig 1 stempel</span>
-              </button>
               <button class="btn scan-btn cancel-btn" id="cancelBtn">Annuleren</button>
             </div>
 
@@ -2917,6 +2934,12 @@
     const confirmBtn = document.getElementById('confirmBtn');
     const confirmLabel = document.getElementById('confirmLabel');
     const cancelBtn = document.getElementById('cancelBtn');
+    // Volle-kaart-view (beloning uitreiken i.p.v. stempel geven)
+    const giveControls = document.getElementById('giveControls');
+    const fullControls = document.getElementById('fullControls');
+    const custFullSub = document.getElementById('custFullSub');
+    const custRedeemBtn = document.getElementById('custRedeemBtn');
+    const custRedeemError = document.getElementById('custRedeemError');
     // Resultaat-view
     const stampResult = document.getElementById('stampResult');
     const resultTitle = document.getElementById('resultTitle');
@@ -2936,6 +2959,7 @@
     let stampsRequired = 6;        // uit de kaartinstelling (niet hardcoded)
     let selectedAmount = 1;        // gekozen aantal toe te voegen stempels
     let newCount = 0;              // stand na toevoegen (uit API-respons)
+    let rewardAvailable = false;   // kaart is vol → beloning kan uitgereikt worden (uit lookup)
 
     const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -3073,6 +3097,9 @@
       holderName = h.customer_name || h.name || h.customer || 'Klant';
       holderId = h.holder_id ?? h.holderId ?? h.id ?? h._id ?? h.holder ?? h.customer_id ?? null;
       currentStamps = Number(h.current_stamps ?? h.stamps ?? h.stamp_count ?? h.stamps_collected ?? 0) || 0;
+      // Volle kaart? Uit reward_available (of afgeleid uit de stand).
+      rewardAvailable = (h.reward_available ?? h.rewardAvailable ?? h.reward_ready ?? h.is_full ?? false) === true
+        || currentStamps >= stampsRequired;
 
       stopScanner();                     // camera verdwijnt in stap 2
       scanStage.classList.remove('found');
@@ -3115,7 +3142,20 @@
       custTitle.textContent = card.card_title || 'Stempelkaart';
       custReward.textContent =
         `Spaar ${stampsRequired} stempels → ${card.reward_description || 'gratis product'}`;
-      updateCustomerUI();
+
+      custRedeemError.hidden = true;
+      const full = rewardAvailable === true || currentStamps >= stampsRequired;
+      // VOL → verberg de +/- teller en toon "Beloning uitreiken"; NIET VOL → normale stempel-flow.
+      giveControls.hidden = full;
+      fullControls.hidden = !full;
+      if (full) {
+        selectedAmount = 0;                              // niets toevoegen, alleen tonen
+        custProgress.textContent = `${currentStamps} / ${stampsRequired} stempels`;
+        renderCustomerStamps();                          // alle stempels gevuld
+        custFullSub.textContent = `${holderName} heeft ${currentStamps}/${stampsRequired} gespaard en recht op ${card.reward_description || 'de beloning'}.`;
+      } else {
+        updateCustomerUI();
+      }
     }
 
     function maxAddable() { return Math.max(1, stampsRequired - currentStamps); }
@@ -3263,6 +3303,57 @@
     }
     redeemBtn.addEventListener('click', redeemReward);
 
+    // Resultaatscherm na het uitreiken van een beloning bij een reeds volle kaart.
+    function showRedeemedResult() {
+      customerView.hidden = true;
+      scanView.hidden = true;
+      stampResult.hidden = false;
+      const rc = document.getElementById('resultCheck');
+      rc.innerHTML = '';
+      rc.appendChild(stampNode(true));
+      resultTitle.textContent = 'Beloning uitgereikt!';
+      resultSub.textContent = `${holderName} kan weer sparen · 0/${stampsRequired} stempels`;
+      rewardBlock.hidden = true;
+    }
+
+    // Volle kaart → beloning uitreiken (met bevestiging) via POST /api/stamp/redeem.
+    async function redeemFromFull() {
+      if (custRedeemBtn.disabled) return;
+      const cid = activeCardId();
+      const missing = [];
+      if (!cid) missing.push('card_id (winkelier-kaart)');
+      if (!holderId && !scannedQr) missing.push('holder_id / customer_qr_code (klant)');
+      if (missing.length) {
+        custRedeemError.textContent = 'Kan beloning niet uitreiken, ontbrekend veld: ' + missing.join(', ') + '.';
+        custRedeemError.hidden = false;
+        return;
+      }
+      if (!window.confirm(`Beloning uitreiken aan ${holderName}? De stempelkaart wordt teruggezet naar 0.`)) return;
+
+      custRedeemBtn.disabled = true; custRedeemBtn.classList.add('loading');
+      custRedeemError.hidden = true;
+      const payload = { card_id: cid, customer_qr_code: scannedQr };
+      if (holderId) payload.holder_id = holderId;   // holder_id komt uit de lookup-respons
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/redeem', {
+          method: 'POST', headers: authHeaders(), body: JSON.stringify(payload),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || data.message || 'Beloning niet ingewisseld. Probeer opnieuw.');
+        // Kaart is gereset: nieuwe stand (rest-stempels als de backend die teruggeeft, anders 0).
+        currentStamps = Number(data.stamps ?? data.current_stamps ?? data.stamp_count ?? 0) || 0;
+        newCount = currentStamps; rewardAvailable = false;
+        showRedeemedResult();
+        resultSub.textContent = `${holderName} kan weer sparen · ${currentStamps}/${stampsRequired} stempels`;
+      } catch (err) {
+        custRedeemError.textContent = isNetworkError(err) ? NET_MSG : (err.message || 'Beloning niet ingewisseld. Probeer opnieuw.');
+        custRedeemError.hidden = false;
+      } finally {
+        custRedeemBtn.disabled = false; custRedeemBtn.classList.remove('loading');
+      }
+    }
+    custRedeemBtn.addEventListener('click', redeemFromFull);
+
     // ===== Navigatie / reset =====
     function resetScanFlow() {
       customerView.hidden = true;
@@ -3273,6 +3364,9 @@
       scannedQr = null;
       holderId = null;
       selectedAmount = 1;
+      rewardAvailable = false;
+      giveControls.hidden = false;
+      fullControls.hidden = true;
       setScanStatus('');
     }
 
