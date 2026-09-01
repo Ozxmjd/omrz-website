@@ -169,20 +169,32 @@
     .sc-stamp.pending { border-style: solid; border-color: #6ee7a0; background: rgba(22,163,74,.35); color: #fff; }
     .sc-progress { font-size: 12.5px; color: rgba(255,255,255,.7); text-align: right; }
 
-    /* ---- Wallet-pas preview: 3 delen (bovenkant / midden / onderkant) ---- */
-    .stampcard.wallet { padding: 0; overflow: hidden; }
+    /* ---- Apple Wallet storeCard preview (echte verhoudingen) ---- */
+    .stampcard.wallet { padding: 0; overflow: hidden; max-width: 320px; }
     .wp-band { position: relative; }
-    .wp-header { padding: 18px 20px 15px; display: flex; flex-direction: column; gap: 9px; }
-    .wp-header .sc-top { margin: 0; }
-    .wp-hi { font-size: 14px; font-weight: 700; }
-    .wp-middle { position: relative; padding: 20px; min-height: 96px; }
-    .wp-middle .sc-stamps { position: relative; z-index: 2; margin: 0; }
-    .wp-footer { padding: 15px 20px 18px; }
-    .wp-footer .sc-title { margin-bottom: 3px; }
-    .wp-footer .sc-reward { margin-bottom: 12px; }
-    .wp-foot-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .wp-foot-row .sc-progress { text-align: left; }
-    .wp-qr { width: 40px; height: 40px; border-radius: 7px; flex-shrink: 0; background-color: #fff; background-image: linear-gradient(45deg,#000 25%,transparent 25%,transparent 75%,#000 75%),linear-gradient(45deg,#000 25%,transparent 25%,transparent 75%,#000 75%); background-size: 10px 10px; background-position: 0 0, 5px 5px; opacity: .92; }
+    /* HEADER: smal, logo + winkelnaam links, klantnaam rechts */
+    .wp-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 15px; }
+    .wp-header .sc-brand { min-width: 0; gap: 8px; }
+    .wp-header .sc-logo { width: 26px; height: 26px; }
+    .wp-header .sc-biz { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .wp-hi { font-size: 12.5px; font-weight: 700; white-space: nowrap; opacity: .95; flex-shrink: 0; }
+    /* STRIP: brede band met Apple strip-ratio (~2.6:1), stempels erin */
+    .wp-strip { aspect-ratio: 2.6 / 1; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+    .wp-strip .sc-bg { position: absolute; inset: 0; background-size: cover; background-position: center; z-index: 0; }
+    .wp-strip .sc-stamps { position: relative; z-index: 2; width: 100%; margin: 0; padding: 0 14px; display: flex; flex-wrap: wrap; align-content: center; justify-content: center; gap: 7px; }
+    /* VELDEN (secondary fields): kaart titel, beloning en stempelteller */
+    .wp-fields { padding: 11px 16px 4px; }
+    .wp-field { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .wp-field-col { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+    .wp-field-right { align-items: flex-end; text-align: right; flex-shrink: 0; }
+    .wp-flabel { font-size: 8.5px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; opacity: .55; }
+    .wp-fields .sc-title { font-size: 15px; font-weight: 700; margin: 0; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .wp-fields .sc-progress { font-size: 15px; font-weight: 800; text-align: right; }
+    .wp-fields .sc-reward { font-size: 12px; margin: 7px 0 0; opacity: .8; }
+    .wp-fields .sc-footer { margin-top: 7px; }
+    /* QR: groot en gecentreerd onderaan */
+    .wp-qr-zone { display: flex; justify-content: center; padding: 12px 0 16px; }
+    .wp-qr { width: 96px; height: 96px; border-radius: 9px; background-color: #fff; background-image: linear-gradient(45deg,#000 25%,transparent 25%,transparent 75%,#000 75%),linear-gradient(45deg,#000 25%,transparent 25%,transparent 75%,#000 75%); background-size: 12px 12px; background-position: 0 0, 6px 6px; box-shadow: 0 2px 10px rgba(0,0,0,.25); }
     /* Pas-deel badges + uitleg in de editor */
     .part-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--pearl); background: rgba(255,255,255,.08); border: 1px solid var(--border-strong); padding: 3px 9px; border-radius: 999px; }
     .ed-note { display: flex; gap: 9px; align-items: flex-start; font-size: 13px; color: var(--muted); background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 10px; padding: 11px 13px; margin: 4px 0 16px; line-height: 1.5; }
@@ -923,27 +935,31 @@
               <div class="preview-stage">
                 <div class="stampcard rich wallet" id="ovPreview">
                   <div class="wp-band wp-header" id="ovHeader">
-                    <div class="sc-top">
-                      <div class="sc-brand">
-                        <img class="sc-logo" id="ovLogo" alt="Logo" hidden />
-                        <span class="sc-biz" id="ovBiz">Mijn zaak</span>
-                      </div>
+                    <div class="sc-brand">
+                      <img class="sc-logo" id="ovLogo" alt="Logo" hidden />
+                      <span class="sc-biz" id="ovBiz">Mijn zaak</span>
                     </div>
                     <div class="wp-hi" id="ovHi">Hi Sara!</div>
                   </div>
-                  <div class="wp-band wp-middle" id="ovMiddle">
+                  <div class="wp-band wp-strip" id="ovMiddle">
                     <div class="sc-bg" id="ovBg"></div>
                     <div class="sc-shade"></div>
                     <div class="sc-stamps" id="ovStamps"></div>
                   </div>
-                  <div class="wp-band wp-footer" id="ovFootBand">
-                    <div class="sc-title" id="ovTitle">Stempelkaart</div>
-                    <div class="sc-reward" id="ovReward">Spaar stempels → gratis product</div>
-                    <div class="wp-foot-row">
-                      <span class="sc-progress" id="ovProgress">0 / 6 stempels</span>
-                      <span class="wp-qr" aria-hidden="true"></span>
+                  <div class="wp-band wp-fields" id="ovFootBand">
+                    <div class="wp-field">
+                      <div class="wp-field-col">
+                        <span class="wp-flabel">Kaart</span>
+                        <span class="sc-title" id="ovTitle">Stempelkaart</span>
+                      </div>
+                      <div class="wp-field-col wp-field-right">
+                        <span class="wp-flabel">Stempels</span>
+                        <span class="sc-progress" id="ovProgress">0 / 6</span>
+                      </div>
                     </div>
+                    <div class="sc-reward" id="ovReward">Spaar stempels → gratis product</div>
                     <div class="sc-footer" id="ovFooter" hidden></div>
+                    <div class="wp-qr-zone"><div class="wp-qr" aria-hidden="true"></div></div>
                   </div>
                 </div>
               </div>
@@ -970,27 +986,31 @@
             <div class="editor-preview">
               <div class="stampcard rich wallet" id="editPreview">
                 <div class="wp-band wp-header" id="pvHeader">
-                  <div class="sc-top">
-                    <div class="sc-brand">
-                      <img class="sc-logo" id="pvLogo" alt="Logo" hidden />
-                      <span class="sc-biz" id="pvBiz">Café OMRZ</span>
-                    </div>
+                  <div class="sc-brand">
+                    <img class="sc-logo" id="pvLogo" alt="Logo" hidden />
+                    <span class="sc-biz" id="pvBiz">Café OMRZ</span>
                   </div>
                   <div class="wp-hi" id="pvHi">Hi Sara!</div>
                 </div>
-                <div class="wp-band wp-middle" id="pvMiddle">
+                <div class="wp-band wp-strip" id="pvMiddle">
                   <div class="sc-bg" id="pvBg"></div>
                   <div class="sc-shade"></div>
                   <div class="sc-stamps" id="pvStamps"></div>
                 </div>
-                <div class="wp-band wp-footer" id="pvFootBand">
-                  <div class="sc-title" id="pvTitle">Koffie Spaarkaart</div>
-                  <div class="sc-reward" id="pvReward">Spaar 6 stempels → gratis koffie</div>
-                  <div class="wp-foot-row">
-                    <span class="sc-progress" id="pvProgress">3 / 6 stempels</span>
-                    <span class="wp-qr" aria-hidden="true"></span>
+                <div class="wp-band wp-fields" id="pvFootBand">
+                  <div class="wp-field">
+                    <div class="wp-field-col">
+                      <span class="wp-flabel">Kaart</span>
+                      <span class="sc-title" id="pvTitle">Koffie Spaarkaart</span>
+                    </div>
+                    <div class="wp-field-col wp-field-right">
+                      <span class="wp-flabel">Stempels</span>
+                      <span class="sc-progress" id="pvProgress">3 / 6</span>
+                    </div>
                   </div>
+                  <div class="sc-reward" id="pvReward">Spaar 6 stempels → gratis koffie</div>
                   <div class="sc-footer" id="pvFooter" hidden></div>
+                  <div class="wp-qr-zone"><div class="wp-qr" aria-hidden="true"></div></div>
                 </div>
               </div>
               <p class="pv-label">Live preview: zo ziet je klant de kaart</p>
@@ -2383,25 +2403,25 @@
         t.reward.style.color = txt; t.reward.style.opacity = '.8';
       }
 
-      // Stempels netjes over 2 gecentreerde rijen verdelen (bovenste rij krijgt de meeste bij oneven).
+      // Stempels in de strip-band: gecentreerd, passend binnen de brede band (ratio ~2.6:1).
       const total = c.stamps_required;
       const filled = Math.min(3, total);
-      const perRow = Math.max(1, Math.ceil(total / 2));
-      const gap = 9;
-      const itemW = `calc((100% - ${(perRow - 1) * gap}px) / ${perRow})`;
+      const size = total <= 6 ? 40 : total <= 10 ? 30 : total <= 16 ? 23 : 17;
       t.stamps.style.display = 'flex';
-      t.stamps.style.flexDirection = 'column';
-      t.stamps.style.gap = gap + 'px';
+      t.stamps.style.flexDirection = 'row';
+      t.stamps.style.flexWrap = 'wrap';
+      t.stamps.style.alignContent = 'center';
+      t.stamps.style.justifyContent = 'center';
+      t.stamps.style.gap = '7px';
       t.stamps.style.gridTemplateColumns = '';
       t.stamps.innerHTML = '';
-      let row = null;
       for (let i = 0; i < total; i++) {
-        if (i % perRow === 0) { row = document.createElement('div'); row.className = 'sc-stamp-row'; t.stamps.appendChild(row); }
         const node = stampNode(i < filled);
-        node.style.width = itemW; node.style.flexShrink = '0';
-        row.appendChild(node);
+        node.style.width = size + 'px';
+        node.style.flex = '0 0 auto';
+        t.stamps.appendChild(node);
       }
-      t.progress.textContent = `${filled} / ${total} stempels`;
+      t.progress.textContent = `${filled} / ${total}`;
       t.progress.style.color = c.accent_color || txt;
 
       // Tekst onderaan de kaart (optioneel, exact zoals getypt).
