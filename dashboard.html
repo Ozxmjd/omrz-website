@@ -252,6 +252,7 @@
       transition: transform .25s var(--ease), background .25s var(--ease), box-shadow .3s var(--ease), border-color .25s var(--ease), opacity .2s var(--ease);
     }
     .btn[hidden] { display: none; }   /* het hidden-attribuut moet de inline-flex display overrulen */
+    .side-link[hidden], .quick-btn[hidden] { display: none; }   /* manager-modus verbergt owner-onderdelen */
     .btn-primary { background: #ffffff; color: #0a0a0a; }
     .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(255,255,255,.18); }
     .btn-primary:disabled { opacity: .55; cursor: default; transform: none; box-shadow: none; }
@@ -650,6 +651,29 @@
     .mgr-email { font-size: 12.5px; color: var(--muted); word-break: break-all; }
     .mgr-del { background: none; border: 0; color: #ff9b9b; cursor: pointer; font-size: 13px; padding: 6px 8px; border-radius: 8px; flex-shrink: 0; }
     .mgr-del:hover { background: rgba(255,80,80,.1); }
+
+    /* Manager-kaart: inloggegevens en acties duidelijk zichtbaar voor de winkelier. */
+    .mgr-row { flex-wrap: wrap; }
+    .mgr-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700;
+      letter-spacing: .04em; text-transform: uppercase; color: var(--pearl);
+      background: rgba(255,255,255,.07); border: 1px solid var(--border-strong);
+      border-radius: 999px; padding: 3px 9px; margin-top: 6px; }
+    .mgr-badge svg { width: 11px; height: 11px; }
+    .mgr-actions { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; margin-top: 4px; }
+    .mgr-actions .btn { font-size: 12.5px; padding: 8px 12px; border-radius: 9px; }
+    .mgr-login-hint { display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; color: var(--muted);
+      background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 12px;
+      padding: 12px 14px; margin-bottom: 16px; line-height: 1.55; }
+    .mgr-login-hint svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 2px; color: var(--pearl); }
+    .mgr-login-hint b { color: var(--pearl); }
+    .mgr-login-hint code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px;
+      color: #fff; background: rgba(255,255,255,.08); border-radius: 5px; padding: 1px 5px; word-break: break-all; }
+    .mgr-new { border: 1px solid var(--border-strong); background: rgba(255,255,255,.05);
+      border-radius: 12px; padding: 13px 15px; margin-bottom: 16px; font-size: 13px; line-height: 1.6; }
+    .mgr-new b { color: #fff; }
+    .mgr-new .mgr-cred { display: block; margin-top: 6px; color: var(--pearl); }
+    .role-chip { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700;
+      color: #0a0a0a; background: #fff; border-radius: 999px; padding: 5px 11px; white-space: nowrap; }
     .modal-empty { text-align: center; color: var(--muted); font-size: 13.5px; padding: 14px 0; }
     .modal-body .field { margin-bottom: 14px; }
 
@@ -1776,6 +1800,15 @@
     const cardId = localStorage.getItem('omrz_card_id');
     const userEmail = localStorage.getItem('omrz_email');
 
+    // ---- Rol: owner (winkelier) of manager (één vestiging) ----
+    // Een manager logt in op dezelfde login.html; het dashboard beperkt daarna zijn weergave.
+    const userRole = localStorage.getItem('omrz_role') || 'owner';
+    const isManager = userRole === 'manager';
+    const managerLocationId = localStorage.getItem('omrz_location_id') || null;
+    const managerLocationName = localStorage.getItem('omrz_location_name') || '';
+    // Tabs die alleen de eigenaar mag zien; een manager krijgt ze niet in het menu.
+    const OWNER_ONLY_TABS = new Set(['kaart', 'vestigingen', 'meldingen', 'abonnement', 'facturen', 'bedrijfsgegevens', 'instellingen']);
+
     // ---- Multi-vestiging state ----
     let locations = [];               // alle vestigingen
     let currentLocationId = null;     // null = "Alle vestigingen"
@@ -1842,6 +1875,7 @@
     // 'meldingen' is Premium: ontgrendeld bij Premium of tijdens de trial, anders vergrendeld.
     const meldingenLocked = () => !(subscription.plan === 'premium' || subscription.access_status === 'trial');
     function tabLock(tab) {
+      if (isManager && OWNER_ONLY_TABS.has(tab)) return 'owner';
       if (!subscription.has_access && LOCKED_TABS.has(tab)) return 'access';
       if (tab === 'meldingen' && meldingenLocked()) return 'premium';
       return null;
@@ -1853,6 +1887,7 @@
     function activateTab(tab) {
       // Feature-lock: geblokkeerde tab niet openen, maar een nette upgrade-melding tonen.
       const lock = tabLock(tab);
+      if (lock === 'owner') { closeSidebar(); return; }   // manager: onderdeel bestaat niet voor hem
       if (lock === 'access') { closeSidebar(); showAccessLock(); return; }
       if (lock === 'premium') { closeSidebar(); showPremiumLock(); return; }
 
@@ -2298,11 +2333,44 @@
     document.getElementById('menuBtn').addEventListener('click', openSidebar);
     overlay.addEventListener('click', closeSidebar);
 
+    // ---- Manager-modus: alleen de eigen vestiging ----
+    function applyRoleRestrictions() {
+      if (!isManager) return;
+      // Owner-onderdelen uit het menu halen én uit de snelkoppelingen op Overzicht.
+      document.querySelectorAll('.side-link[data-tab]').forEach(l => {
+        if (OWNER_ONLY_TABS.has(l.dataset.tab)) l.hidden = true;
+      });
+      document.querySelectorAll('.quick-btn[data-goto]').forEach(b => {
+        if (OWNER_ONLY_TABS.has(b.dataset.goto)) b.hidden = true;
+      });
+      // Vestiging vastzetten op die van de manager; geen kiezer, geen "Alle vestigingen".
+      if (managerLocationId) currentLocationId = managerLocationId;
+      const picker = document.getElementById('locPicker');
+      if (picker) picker.hidden = true;
+      // Duidelijk maken namens wie en waar hij werkt.
+      const chip = document.getElementById('bizName');
+      if (chip) chip.textContent = managerLocationName || chip.textContent;
+      const topbar = document.querySelector('.topbar');
+      if (topbar && !document.getElementById('roleChip')) {
+        const el = document.createElement('span');
+        el.className = 'role-chip'; el.id = 'roleChip'; el.textContent = 'Manager';
+        topbar.appendChild(el);
+      }
+      const label = document.querySelector('.side-user .u-label');
+      if (label) label.textContent = 'Manager · ' + (managerLocationName || 'jouw vestiging');
+      // Als de actieve tab niet mag, terug naar Overzicht.
+      const active = document.querySelector('.side-link.active[data-tab]');
+      if (active && OWNER_ONLY_TABS.has(active.dataset.tab)) activateTab('overzicht');
+    }
+
     // ---- Uitloggen ----
     document.getElementById('logoutBtn').addEventListener('click', () => {
       localStorage.removeItem('omrz_token');
       localStorage.removeItem('omrz_card_id');
       localStorage.removeItem('omrz_email');
+      localStorage.removeItem('omrz_role');
+      localStorage.removeItem('omrz_location_id');
+      localStorage.removeItem('omrz_location_name');
       window.location.href = 'login.html';
     });
 
@@ -3953,6 +4021,12 @@
       return l ? l.name : 'Alle vestigingen';
     }
     function renderLocPicker() {
+      // Manager: vast op de eigen vestiging, dus geen kiezer.
+      if (isManager) {
+        locPicker.hidden = true;
+        currentLocationId = managerLocationId || (locations[0] ? locations[0].id : null);
+        return;
+      }
       // Kiezer alleen tonen bij méér dan 1 vestiging.
       locPicker.hidden = locations.length <= 1;
       if (locations.length <= 1) { currentLocationId = null; return; }
@@ -4220,14 +4294,31 @@
     }
 
     // ---- Managers beheren ----
+    // De inlogpagina van dit dashboard: precies het adres dat de manager moet gebruiken.
+    const LOGIN_URL = (location.protocol === 'http:' || location.protocol === 'https:')
+      ? new URL('login.html', location.href).href
+      : 'https://omrzdigital.nl/login.html';
+    const LOGIN_URL_LABEL = LOGIN_URL.replace(/^https?:\/\//, '');
+
+    const INFO_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>';
+    const LOCK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+
     function openManagers(loc) {
       openModal('Managers · ' + loc.name, `
+        <div class="mgr-login-hint">${INFO_SVG}<div>
+          Een manager logt in op <code>${escapeHtml(LOGIN_URL_LABEL)}</code> met het e-mailadres en
+          wachtwoord dat je hieronder instelt. Hij ziet daarna <b>alleen ${escapeHtml(loc.name)}</b> —
+          klanten stempelen en de cijfers van deze vestiging. Je kaartontwerp, abonnement en
+          bedrijfsgegevens blijven van jou.
+        </div></div>
+        <div id="mgrNewWrap"></div>
         <div id="mgrListWrap"><div class="loader"><span class="spinner"></span> Managers laden…</div></div>
         <h3 style="font-size:14px;font-weight:700;margin:6px 0 12px;">Manager toevoegen</h3>
         <form id="mgrForm" class="form-grid">
           <div class="field"><label for="mgName">Naam</label><input type="text" id="mgName" placeholder="Jan Jansen" required /></div>
           <div class="field"><label for="mgEmail">E-mailadres</label><input type="email" id="mgEmail" placeholder="jan@zaak.nl" required /></div>
-          <div class="field"><label for="mgPass">Wachtwoord</label><input type="password" id="mgPass" placeholder="••••••••" autocomplete="new-password" required /></div>
+          <div class="field"><label for="mgPass">Wachtwoord</label><input type="password" id="mgPass" placeholder="Minimaal 8 tekens" autocomplete="new-password" required /></div>
+          <p class="field-hint">Geef deze twee gegevens door aan je manager — hij logt er direct mee in.</p>
           <div class="save-row">
             <button type="submit" class="btn btn-primary" id="mgAddBtn"><span class="btn-label">Manager toevoegen</span></button>
             <span class="save-note" id="mgNote"></span>
@@ -4236,6 +4327,39 @@
       loadManagers(loc);
       document.getElementById('mgrForm').addEventListener('submit', (e) => { e.preventDefault(); addManager(loc); });
     }
+
+    // Inloggegevens naar het klembord, met een nette terugkoppeling op de knop zelf.
+    async function copyToClipboard(text, btn, doneLabel) {
+      const label = btn.querySelector('.btn-label') || btn;
+      const original = label.textContent;
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          // Fallback voor oudere browsers / niet-beveiligde context.
+          const ta = document.createElement('textarea');
+          ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+          document.body.appendChild(ta); ta.select();
+          const ok = document.execCommand('copy');
+          document.body.removeChild(ta);
+          if (!ok) throw new Error('kopiëren geweigerd');
+        }
+        label.textContent = doneLabel || 'Gekopieerd ✓';
+      } catch (e) {
+        label.textContent = 'Kopiëren mislukt';
+      }
+      setTimeout(() => { label.textContent = original; }, 2200);
+    }
+
+    // De tekst die de winkelier doorstuurt naar zijn manager.
+    function managerCredentialsText(loc, name, email) {
+      return `Inloggegevens voor het OMRZ-dashboard (${loc.name})\n`
+        + `Inloggen op: ${LOGIN_URL}\n`
+        + `E-mailadres: ${email}\n`
+        + `Wachtwoord: het wachtwoord dat je van mij hebt gekregen\n\n`
+        + `Je ziet in het dashboard alleen ${loc.name}.`;
+    }
+
     async function loadManagers(loc) {
       const wrap = document.getElementById('mgrListWrap');
       if (!wrap) return;
@@ -4248,19 +4372,37 @@
         } catch (e) { managers = []; }
       }
       loc.managers = managers;
-      if (!managers.length) { wrap.innerHTML = '<div class="modal-empty">Nog geen managers voor deze vestiging.</div>'; return; }
+      if (!managers.length) {
+        wrap.innerHTML = '<div class="modal-empty">Nog geen managers voor deze vestiging. Voeg er hieronder één toe.</div>';
+        return;
+      }
       wrap.innerHTML = '<div class="mgr-list">' + managers.map(m => {
         const name = m.name || m.naam || '—';
         const email = m.email || '';
         const id = m.id ?? m.manager_id ?? m._id ?? '';
-        return `<div class="mgr-row">
+        return `<div class="mgr-row" data-mid="${escapeHtml(String(id))}" data-email="${escapeHtml(email)}" data-name="${escapeHtml(name)}">
           <div class="mgr-av">${escapeHtml(locInitials(name))}</div>
-          <div class="mgr-main"><div class="mgr-name">${escapeHtml(name)}</div><div class="mgr-email">${escapeHtml(email)}</div></div>
-          <button class="mgr-del" data-mid="${escapeHtml(String(id))}" title="Verwijderen">Verwijderen</button>
+          <div class="mgr-main">
+            <div class="mgr-name">${escapeHtml(name)}</div>
+            <div class="mgr-email">${escapeHtml(email)}</div>
+            <span class="mgr-badge">${LOCK_SVG} Wachtwoord ingesteld</span>
+          </div>
+          <button class="mgr-del" data-act="del" title="Verwijderen">Verwijderen</button>
+          <div class="mgr-actions">
+            <button type="button" class="btn btn-ghost" data-act="copy"><span class="btn-label">Kopieer inloggegevens</span></button>
+            <a class="btn btn-ghost" href="${escapeHtml(LOGIN_URL)}" target="_blank" rel="noopener">Open dashboard</a>
+          </div>
         </div>`;
       }).join('') + '</div>';
-      wrap.querySelectorAll('.mgr-del').forEach(b => b.addEventListener('click', () => deleteManager(loc, b.dataset.mid)));
+
+      wrap.querySelectorAll('.mgr-row').forEach(row => {
+        const mid = row.dataset.mid, email = row.dataset.email, name = row.dataset.name;
+        row.querySelector('[data-act="del"]').addEventListener('click', () => deleteManager(loc, mid));
+        row.querySelector('[data-act="copy"]').addEventListener('click', (e) =>
+          copyToClipboard(managerCredentialsText(loc, name, email), e.currentTarget));
+      });
     }
+
     async function addManager(loc) {
       const btn = document.getElementById('mgAddBtn');
       const note = document.getElementById('mgNote');
@@ -4277,13 +4419,33 @@
         const res = await fetch(API_BASE + '/api/stamp/locations/' + loc.id + '/managers', {
           method: 'POST', headers: authHeaders(), body: JSON.stringify(payload),
         });
-        if (!res.ok) throw new Error();
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || data.message || 'toevoegen mislukt');
         note.textContent = 'Toegevoegd'; note.classList.add('ok');
+
+        // Meteen tonen wat de manager nodig heeft om in te loggen — het wachtwoord is
+        // hierna niet meer op te vragen, dus dit is het moment om het door te geven.
+        const newWrap = document.getElementById('mgrNewWrap');
+        if (newWrap) {
+          newWrap.innerHTML = `<div class="mgr-new">
+            <b>${escapeHtml(payload.name)} kan nu inloggen.</b>
+            <span class="mgr-cred">Inlogpagina: ${escapeHtml(LOGIN_URL_LABEL)}</span>
+            <span class="mgr-cred">E-mailadres: ${escapeHtml(payload.email)}</span>
+            <span class="mgr-cred">Wachtwoord: het wachtwoord dat je zojuist instelde</span>
+            <div class="mgr-actions">
+              <button type="button" class="btn btn-ghost" id="mgrNewCopy"><span class="btn-label">Kopieer inloggegevens</span></button>
+            </div>
+          </div>`;
+          document.getElementById('mgrNewCopy').addEventListener('click', (e) =>
+            copyToClipboard(managerCredentialsText(loc, payload.name, payload.email), e.currentTarget));
+        }
+
         document.getElementById('mgrForm').reset();
         loc.managers = null;           // forceer verse lijst
         loadManagers(loc);
       } catch (e) {
-        note.textContent = 'Kon manager niet toevoegen.'; note.classList.add('error');
+        note.textContent = 'Kon manager niet toevoegen: ' + (e.message || 'onbekende fout');
+        note.classList.add('error');
       } finally {
         btn.classList.remove('loading'); btn.disabled = false;
         setTimeout(() => { note.className = 'save-note'; note.textContent = ''; }, 4000);
@@ -4292,7 +4454,8 @@
     async function deleteManager(loc, mid) {
       if (!confirm('Deze manager verwijderen?')) return;
       try {
-        const res = await fetch(API_BASE + '/api/stamp/locations/' + loc.id + '/managers/' + encodeURIComponent(mid), { method: 'DELETE', headers: authHeaders() });
+        // De backend verwijdert op manager-id, niet via de vestiging.
+        const res = await fetch(API_BASE + '/api/stamp/managers/' + encodeURIComponent(mid), { method: 'DELETE', headers: authHeaders() });
         if (!res.ok) throw new Error();
         loc.managers = null;
         loadManagers(loc);
@@ -4302,6 +4465,7 @@
     }
 
     // ---- Init ----
+    applyRoleRestrictions();
     fillForm();
     refreshPreviews();
     renderQR();

@@ -160,6 +160,7 @@
       </form>
 
       <p class="auth-alt">Nog geen account? <a href="aanmelden.html">Registreer hier</a></p>
+      <p class="auth-alt">Ben je vestigingsmanager? Log hier in met de gegevens die je van je werkgever hebt gekregen.</p>
     </div>
   </main>
 
@@ -175,6 +176,16 @@
       msg.className = 'auth-msg ' + type;
     }
     function clearMsg() { msg.className = 'auth-msg'; msg.textContent = ''; }
+
+    async function tryLogin(path, email, password) {
+      const res = await fetch(API_BASE + path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json().catch(() => ({}));
+      return { ok: res.ok, res, data };
+    }
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -192,15 +203,18 @@
       submitBtn.classList.add('loading');
 
       try {
-        const res = await fetch(API_BASE + '/api/stamp/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password }),
-        });
+        // Eén inlogveld voor twee rollen: eerst als winkelier (owner), daarna als
+        // vestigingsmanager. Managers krijgen hun e-mail + wachtwoord van de winkelier.
+        let attempt = await tryLogin('/api/stamp/login', email, password);
+        let role = 'owner';
+        if (!attempt.ok) {
+          const asManager = await tryLogin('/api/stamp/manager/login', email, password);
+          if (asManager.ok) { attempt = asManager; role = 'manager'; }
+        }
 
-        const data = await res.json().catch(() => ({}));
+        const data = attempt.data;
 
-        if (!res.ok) {
+        if (!attempt.ok) {
           showMsg(data.error || data.message || 'Inloggen mislukt. Controleer je gegevens.', 'error');
           submitBtn.disabled = false;
           submitBtn.classList.remove('loading');
@@ -220,7 +234,19 @@
         if (cardIdVal) localStorage.setItem('omrz_card_id', cardIdVal);
         localStorage.setItem('omrz_email', email);
 
-        showMsg('Ingelogd! Je wordt doorgestuurd…', 'ok');
+        // Rol vastleggen: het dashboard beperkt de weergave voor een manager tot zijn vestiging.
+        localStorage.setItem('omrz_role', data.role || role);
+        if (role === 'manager') {
+          localStorage.setItem('omrz_location_id', data.location_id || '');
+          localStorage.setItem('omrz_location_name', data.location_name || '');
+        } else {
+          localStorage.removeItem('omrz_location_id');
+          localStorage.removeItem('omrz_location_name');
+        }
+
+        showMsg(role === 'manager'
+          ? 'Ingelogd als vestigingsmanager! Je wordt doorgestuurd…'
+          : 'Ingelogd! Je wordt doorgestuurd…', 'ok');
         window.location.href = 'dashboard.html';
       } catch (err) {
         showMsg('Kan geen verbinding maken met de server. Probeer het later opnieuw.', 'error');
