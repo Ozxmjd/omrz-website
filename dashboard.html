@@ -282,9 +282,20 @@
       box-shadow: 0 24px 60px rgba(0,0,0,.4);
     }
     .qr-box svg, .qr-box img, .qr-box canvas { display: block; width: 256px; height: 256px; }
-    .qr-caption { font-size: 15px; color: var(--pearl); max-width: 380px; margin-bottom: 8px; }
-    .qr-sub { font-size: 13.5px; color: var(--muted); max-width: 380px; margin-bottom: 22px; word-break: break-all; }
-    .qr-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+    .qr-caption { font-size: 15px; color: var(--pearl); max-width: 380px; margin-bottom: 22px; }
+    .qr-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; align-items: center; }
+    .qr-note { flex-basis: 100%; text-align: center; }
+
+    /* ---------- Printen: alleen de QR-code komt op papier ---------- */
+    .print-area { display: none; }
+    @media print {
+      body { background: #fff; }
+      .shell, .modal-overlay, .sub-modal-overlay { display: none !important; }
+      .print-area { display: block !important; text-align: center; padding: 30px 20px; color: #000; }
+      .print-area img { width: 78mm; height: 78mm; display: block; margin: 0 auto 16px; }
+      .print-area h2 { font-size: 21px; font-weight: 800; letter-spacing: -.02em; margin-bottom: 6px; color: #000; }
+      .print-area p { font-size: 14px; color: #333; }
+    }
 
     /* ---------- Geef Stempel (scanner) ---------- */
     .scan-wrap { max-width: 400px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; }
@@ -642,7 +653,7 @@
     .modal-qr { display: flex; flex-direction: column; align-items: center; text-align: center; }
     .modal-qr .qr-box { background: #fff; border-radius: 16px; padding: 18px; margin-bottom: 16px; }
     .modal-qr .qr-box img, .modal-qr .qr-box canvas { display: block; width: 220px; height: 220px; }
-    .modal-qr .qr-sub { font-size: 12.5px; color: var(--muted); word-break: break-all; margin-bottom: 16px; }
+    .modal-qr .qr-caption { font-size: 13px; color: var(--pearl); margin-bottom: 16px; max-width: 300px; }
     .mgr-list { display: grid; gap: 10px; margin-bottom: 18px; }
     .mgr-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); background: rgba(255,255,255,.03); }
     .mgr-av { width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; background: rgba(255,255,255,.08); border: 1px solid var(--border-strong); display: grid; place-items: center; font-size: 13px; font-weight: 800; color: #fff; }
@@ -1398,10 +1409,11 @@
                 <div class="loader"><span class="spinner"></span> QR-code genereren…</div>
               </div>
               <p class="qr-caption">Print deze code of zet 'm op je toonbank.</p>
-              <p class="qr-sub" id="qrUrl"></p>
               <div class="qr-actions">
-                <button class="btn btn-primary" id="printQrBtn">Printen</button>
-                <button class="btn btn-ghost" id="copyQrBtn">Link kopiëren</button>
+                <button class="btn btn-primary" id="printQrBtn"><span class="btn-label">Print QR-code</span></button>
+                <button class="btn btn-ghost" id="downloadQrBtn"><span class="btn-label">Download QR-code</span></button>
+                <button class="btn btn-ghost" id="copyQrBtn"><span class="btn-label">Kopieer link</span></button>
+                <span class="save-note qr-note" id="qrNote"></span>
               </div>
             </div>
           </div>
@@ -1695,6 +1707,9 @@
       </div>
     </div>
   </div>
+
+  <!-- Alleen zichtbaar op papier: de QR-code zonder dashboard eromheen. -->
+  <div class="print-area" id="printArea" aria-hidden="true"></div>
 
   <!-- ===== Modal (QR per vestiging · Managers) ===== -->
   <div class="modal-overlay" id="modalOverlay" hidden>
@@ -3234,11 +3249,82 @@
       const id = cardId || 'demo';
       return API_BASE + '/stamp/scan?card=' + encodeURIComponent(id);
     }
+    // Bestandsnaam-vriendelijke variant van een naam ("Café OMRZ" → "cafe-omrz").
+    function slug(text) {
+      return (text || '').toString().normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'qr-code';
+    }
+
+    // qrcodejs tekent de code op een <canvas> (met een <img> als fallback). Schaal die
+    // hard op — zonder interpolatie — zodat een geprinte of gedownloade code scherp blijft,
+    // met een witte rand eromheen (de quiet zone die scanners nodig hebben).
+    function qrDataUrl(box, size) {
+      if (!box) return '';
+      const canvas = box.querySelector('canvas');
+      const fallback = () => { const img = box.querySelector('img'); return img ? img.src : ''; };
+      if (!canvas) return fallback();
+      try {
+        const quiet = Math.round(size * 0.08);
+        const out = document.createElement('canvas');
+        out.width = out.height = size + quiet * 2;
+        const ctx = out.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, out.width, out.height);
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(canvas, quiet, quiet, size, size);
+        return out.toDataURL('image/png');
+      } catch (e) { return fallback(); }
+    }
+
+    // Downloaden als PNG. Geeft false terug als er (nog) geen code staat.
+    function downloadQr(box, filename) {
+      const dataUrl = qrDataUrl(box, 1024);
+      if (!dataUrl) return false;
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      return true;
+    }
+
+    // Printen: alleen de code op papier, niet het hele dashboard.
+    async function printQr(box, title, sub) {
+      const dataUrl = qrDataUrl(box, 1024);
+      if (!dataUrl) return false;
+      const area = document.getElementById('printArea');
+      area.innerHTML = `<img alt="QR-code" src="${dataUrl}">
+        <h2>${escapeHtml(title)}</h2>
+        <p>${escapeHtml(sub)}</p>`;
+      const img = area.querySelector('img');
+      // Wachten tot de afbeelding echt klaar is, anders print de browser een leeg vlak.
+      // Maar nooit langer dan een seconde: een trage decode mag het printen niet ophangen.
+      await Promise.race([
+        (async () => {
+          try {
+            if (img.decode) await img.decode();
+            else if (!img.complete) await new Promise(r => { img.onload = r; img.onerror = r; });
+          } catch (e) { /* niet fataal: printen gaat gewoon door */ }
+        })(),
+        new Promise(r => setTimeout(r, 1000)),
+      ]);
+      window.print();
+      return true;
+    }
+
+    function setQrNote(msg, isError) {
+      const note = document.getElementById('qrNote');
+      if (!note) return;
+      note.textContent = msg || '';
+      note.className = 'save-note qr-note' + (msg ? (isError ? ' error' : ' ok') : '');
+      if (msg) setTimeout(() => { note.textContent = ''; note.className = 'save-note qr-note'; }, 4000);
+    }
+
     let qrRendered = false;
     function renderQR() {
       const box = document.getElementById('qrBox');
       const url = scanUrl();
-      document.getElementById('qrUrl').textContent = url;
       if (qrRendered) return;
       box.innerHTML = '';
       new QRCode(box, {
@@ -3251,13 +3337,20 @@
       });
       qrRendered = true;
     }
-    document.getElementById('copyQrBtn').addEventListener('click', async () => {
-      const btn = document.getElementById('copyQrBtn');
-      try { await navigator.clipboard.writeText(scanUrl()); btn.textContent = 'Gekopieerd'; }
-      catch { btn.textContent = 'Kopiëren mislukt'; }
-      setTimeout(() => { btn.textContent = 'Link kopiëren'; }, 2500);
+    // De winkelier hoeft de technische scan-URL niet te zien; kopiëren kan wel.
+    document.getElementById('copyQrBtn').addEventListener('click', (e) =>
+      copyToClipboard(scanUrl(), e.currentTarget, 'Link gekopieerd ✓'));
+
+    document.getElementById('printQrBtn').addEventListener('click', async () => {
+      const ok = await printQr(document.getElementById('qrBox'),
+        card.business_name || 'Spaarkaart', 'Scan deze code om een stempel te sparen.');
+      if (!ok) setQrNote('De QR-code is nog niet geladen.', true);
     });
-    document.getElementById('printQrBtn').addEventListener('click', () => window.print());
+
+    document.getElementById('downloadQrBtn').addEventListener('click', () => {
+      const ok = downloadQr(document.getElementById('qrBox'), 'qr-' + slug(card.business_name) + '.png');
+      setQrNote(ok ? 'Gedownload ✓' : 'De QR-code is nog niet geladen.', !ok);
+    });
 
     // ---- Geef Stempel (QR-scanner, meerstaps flow) ----
     // Elementen
@@ -4244,13 +4337,15 @@
     }
     function openLocationQR(loc) {
       const url = locationScanUrl(loc);
+      // Ook hier geen rauwe scan-URL op het scherm — alleen de code en nette knoppen.
       openModal('QR-code · ' + loc.name, `
         <div class="modal-qr">
           <div class="qr-box" id="modalQrBox"></div>
-          <p class="qr-sub">${escapeHtml(url)}</p>
+          <p class="qr-caption">Print deze code of zet 'm op de toonbank van ${escapeHtml(loc.name)}.</p>
           <div class="qr-actions">
-            <button class="btn btn-primary" id="modalQrPrint">Printen</button>
-            <button class="btn btn-ghost" id="modalQrCopy">Link kopiëren</button>
+            <button class="btn btn-primary" id="modalQrPrint"><span class="btn-label">Print QR-code</span></button>
+            <button class="btn btn-ghost" id="modalQrDownload"><span class="btn-label">Download QR-code</span></button>
+            <button class="btn btn-ghost" id="modalQrCopy"><span class="btn-label">Kopieer link</span></button>
           </div>
         </div>`);
       const box = document.getElementById('modalQrBox');
@@ -4260,12 +4355,16 @@
       } else {
         box.textContent = 'QR-bibliotheek niet geladen.';
       }
-      document.getElementById('modalQrPrint').addEventListener('click', () => window.print());
-      document.getElementById('modalQrCopy').addEventListener('click', async (ev) => {
-        try { await navigator.clipboard.writeText(url); ev.target.textContent = 'Gekopieerd'; }
-        catch { ev.target.textContent = 'Kopiëren mislukt'; }
-        setTimeout(() => { ev.target.textContent = 'Link kopiëren'; }, 2500);
+      document.getElementById('modalQrPrint').addEventListener('click', () =>
+        printQr(box, (card.business_name || 'Spaarkaart') + ' · ' + loc.name, 'Scan deze code om een stempel te sparen.'));
+      document.getElementById('modalQrDownload').addEventListener('click', (ev) => {
+        const ok = downloadQr(box, 'qr-' + slug(card.business_name) + '-' + slug(loc.name) + '.png');
+        const label = ev.currentTarget.querySelector('.btn-label');
+        label.textContent = ok ? 'Gedownload ✓' : 'Nog niet geladen';
+        setTimeout(() => { label.textContent = 'Download QR-code'; }, 2500);
       });
+      document.getElementById('modalQrCopy').addEventListener('click', (ev) =>
+        copyToClipboard(url, ev.currentTarget, 'Link gekopieerd ✓'));
     }
 
     // ---- Managers beheren ----
