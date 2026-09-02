@@ -263,6 +263,17 @@
     .save-note.ok { color: #b4ffcf; }
     .save-note.error { color: #ffb4b4; }
 
+    /* ---------- Bedrijfsgegevens ---------- */
+    /* Compactere velden: veel gegevens op een scherm, zonder dat het formulier zwaar wordt. */
+    #panel-bedrijfsgegevens .field input { padding: 11px 13px; font-size: 14.5px; border-radius: 10px; }
+    #panel-bedrijfsgegevens .form-grid { gap: 16px; }
+    .form-section + .form-section { margin-top: 4px; padding-top: 22px; border-top: 1px solid var(--border); }
+    .form-section h4 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .09em;
+      color: var(--muted); margin-bottom: 14px; }
+    .field-hint { font-size: 12.5px; color: var(--muted); line-height: 1.5; margin-top: -4px; }
+    .field input[readonly] { background: rgba(255,255,255,.02); color: var(--muted); cursor: default; }
+    .field input[readonly]:focus { border-color: var(--border-strong); background: rgba(255,255,255,.02); }
+
     /* ---------- QR ---------- */
     .qr-wrap { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px 26px; }
     .qr-box {
@@ -858,6 +869,10 @@
         <div class="side-link" data-tab="facturen" id="navFacturen">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M14 2v5h5M8 13h8M8 17h5"/></svg>
           Facturen
+        </div>
+        <div class="side-link" data-tab="bedrijfsgegevens">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2.5"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16M2 12h20"/></svg>
+          Bedrijfsgegevens
         </div>
         <div class="side-link" data-tab="instellingen">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-2.82 1.17V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 8 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15H4.5a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 6 9.4l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 11 5.6V5.5a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 2.4 1.51l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 13z"/></svg>
@@ -1561,6 +1576,115 @@
           </div>
         </section>
 
+        <!-- ===== Bedrijfsgegevens ===== -->
+        <section class="panel" id="panel-bedrijfsgegevens">
+          <div class="panel-head">
+            <h2>Bedrijfsgegevens</h2>
+            <p>Deze gegevens gebruiken we voor de verificatie van je zaak en op je facturen. Ze blijven bewaard.</p>
+          </div>
+
+          <div class="two-col">
+            <div class="block glass">
+              <h3>Gegevens van je zaak</h3>
+              <p class="b-sub">Vul je bedrijfsgegevens één keer in — je vindt ze hier altijd terug.</p>
+
+              <form class="form-grid" id="bizForm" autocomplete="on">
+
+                <div class="form-section">
+                  <h4>Bedrijfsinfo</h4>
+                  <div class="form-grid">
+                    <div class="field">
+                      <label for="bgName">Bedrijfsnaam</label>
+                      <input type="text" id="bgName" placeholder="Café OMRZ" autocomplete="organization" />
+                    </div>
+                    <div class="field-row">
+                      <div class="field">
+                        <label for="bgKvk">KvK-nummer</label>
+                        <input type="text" id="bgKvk" placeholder="12345678" inputmode="numeric" maxlength="20" />
+                      </div>
+                      <div class="field">
+                        <label for="bgBtw">BTW-nummer</label>
+                        <input type="text" id="bgBtw" placeholder="NL123456789B01" maxlength="24" />
+                      </div>
+                    </div>
+                    <p class="field-hint">Gebruikt voor de verificatie van je zaak en op je facturen.</p>
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <h4>Contactpersoon</h4>
+                  <div class="form-grid">
+                    <div class="field">
+                      <label for="bgContact">Naam contactpersoon</label>
+                      <input type="text" id="bgContact" placeholder="Jan Jansen" autocomplete="name" />
+                    </div>
+                    <div class="field-row">
+                      <div class="field">
+                        <label for="bgEmail">E-mailadres</label>
+                        <input type="email" id="bgEmail" placeholder="jij@zaak.nl" readonly />
+                      </div>
+                      <div class="field">
+                        <label for="bgPhone">Telefoonnummer</label>
+                        <input type="text" id="bgPhone" placeholder="06 12 34 56 78" autocomplete="tel" />
+                      </div>
+                    </div>
+                    <p class="field-hint">Je e-mailadres is je inlogadres en kan hier niet worden gewijzigd.</p>
+                  </div>
+                </div>
+
+                <div class="form-section">
+                  <h4>Adres</h4>
+                  <div class="form-grid">
+                    <div class="field">
+                      <label for="bgAddress">Bedrijfsadres</label>
+                      <input type="text" id="bgAddress" placeholder="Hoofdstraat 12" autocomplete="street-address" />
+                    </div>
+                    <div class="field-row">
+                      <div class="field">
+                        <label for="bgPostcode">Postcode</label>
+                        <input type="text" id="bgPostcode" placeholder="1234 AB" maxlength="10" autocomplete="postal-code" />
+                      </div>
+                      <div class="field">
+                        <label for="bgCity">Plaats</label>
+                        <input type="text" id="bgCity" placeholder="Amsterdam" autocomplete="address-level2" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="save-row">
+                  <button type="submit" class="btn btn-primary" id="bizSaveBtn"><span class="btn-label">Gegevens opslaan</span></button>
+                  <span class="save-note" id="bizNote"></span>
+                </div>
+              </form>
+            </div>
+
+            <div class="block glass">
+              <h3>Wachtwoord wijzigen</h3>
+              <p class="b-sub">Kies een sterk, uniek wachtwoord van minimaal 8 tekens.</p>
+              <form class="form-grid" id="bgPasswordForm">
+                <div class="field">
+                  <label for="bgPwCurrent">Huidig wachtwoord</label>
+                  <input type="password" id="bgPwCurrent" placeholder="••••••••" autocomplete="current-password" />
+                </div>
+                <div class="field">
+                  <label for="bgPwNew">Nieuw wachtwoord</label>
+                  <input type="password" id="bgPwNew" placeholder="••••••••" autocomplete="new-password" />
+                </div>
+                <div class="field">
+                  <label for="bgPwConfirm">Bevestig nieuw wachtwoord</label>
+                  <input type="password" id="bgPwConfirm" placeholder="••••••••" autocomplete="new-password" />
+                </div>
+                <p class="field-hint">Na het wijzigen blijf je op dit apparaat ingelogd.</p>
+                <div class="save-row">
+                  <button type="submit" class="btn btn-primary" id="bgPwBtn"><span class="btn-label">Wachtwoord wijzigen</span></button>
+                  <span class="save-note" id="bgPwNote"></span>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
+
       </div>
     </div>
   </div>
@@ -1743,6 +1867,7 @@
       if (tab === 'vestigingen') renderLocationsPanel();
       if (tab === 'abonnement') renderSubscriptionPanel();
       if (tab === 'facturen') loadInvoices();
+      if (tab === 'bedrijfsgegevens') loadBusinessProfile();
       if (tab === 'statistieken') renderChart(currentRange);
       if (tab !== 'stempel') { stopScanner(); resetScanFlow(); } // camera vrijgeven + flow resetten bij verlaten van de scan-tab
     }
@@ -2891,6 +3016,174 @@
       note.textContent = 'Wachtwoord gewijzigd'; note.className = 'save-note ok';
       e.target.reset();
       setTimeout(() => { note.className = 'save-note'; note.textContent = ''; }, 4000);
+    });
+
+    // ---- Bedrijfsgegevens (bedrijfsinfo, contactpersoon, adres) ----
+    // De backend levert deze velden onder wisselende namen; lees tolerant, schrijf canoniek.
+    const BIZ_CACHE_KEY = 'omrz_business_profile';
+    let businessProfile = null;
+    let businessLoaded = false;
+
+    function bizVal(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
+    // Leeg laten staan wat de server niet kent, zodat een lege respons ingevulde velden niet wist.
+    function setBizVal(id, v) { const el = document.getElementById(id); if (el && v) el.value = v; }
+
+    function normalizeBusinessProfile(raw) {
+      raw = raw || {};
+      return {
+        business_name: raw.business_name || raw.name || raw.company || '',
+        kvk: raw.kvk || raw.kvk_number || raw.coc_number || '',
+        btw: raw.btw || raw.vat || raw.vat_number || raw.btw_number || '',
+        contact_person: raw.contact_person || raw.contact_name || raw.contactpersoon || raw.owner_name || '',
+        email: raw.email || raw.owner_email || raw.contact_email || '',
+        phone: raw.phone || raw.telefoon || raw.phone_number || '',
+        address: raw.address || raw.street || '',
+        postal_code: raw.postal_code || raw.postcode || raw.zip || '',
+        city: raw.city || raw.plaats || '',
+      };
+    }
+    function stripEmpty(o) {
+      const out = {};
+      Object.keys(o).forEach(k => { if (o[k]) out[k] = o[k]; });
+      return out;
+    }
+    // Lokale kopie: KvK/BTW en adres blijven zichtbaar, ook als de API even niet bereikbaar is.
+    function readBizCache() {
+      try { return JSON.parse(localStorage.getItem(BIZ_CACHE_KEY) || 'null'); } catch (e) { return null; }
+    }
+    function writeBizCache(p) {
+      try { localStorage.setItem(BIZ_CACHE_KEY, JSON.stringify(p)); } catch (e) { /* private mode / vol */ }
+    }
+    function fillBizForm(p) {
+      setBizVal('bgName', p.business_name);
+      setBizVal('bgKvk', p.kvk);
+      setBizVal('bgBtw', p.btw);
+      setBizVal('bgContact', p.contact_person);
+      setBizVal('bgPhone', p.phone);
+      setBizVal('bgAddress', p.address);
+      setBizVal('bgPostcode', p.postal_code);
+      setBizVal('bgCity', p.city);
+      const em = document.getElementById('bgEmail');
+      if (em) em.value = p.email || userEmail || '';
+    }
+    function bizFormValues() {
+      return {
+        business_name: bizVal('bgName'),
+        kvk: bizVal('bgKvk'),
+        btw: bizVal('bgBtw'),
+        contact_person: bizVal('bgContact'),
+        phone: bizVal('bgPhone'),
+        address: bizVal('bgAddress'),
+        postal_code: bizVal('bgPostcode'),
+        city: bizVal('bgCity'),
+      };
+    }
+
+    async function loadBusinessProfile(force) {
+      if (businessLoaded && !force) return;
+      const note = document.getElementById('bizNote');
+      // 1) Meteen tonen wat we lokaal weten, zodat het formulier nooit leeg oogt.
+      const cached = readBizCache();
+      fillBizForm(normalizeBusinessProfile(cached || { business_name: card.business_name, email: userEmail }));
+      // 2) Daarna de server als bron van waarheid.
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/business/profile', { headers: authHeaders() });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json().catch(() => ({}));
+        const p = normalizeBusinessProfile((data && (data.business || data.profile || data.data)) || data);
+        businessProfile = p;
+        businessLoaded = true;
+        fillBizForm(p);
+        writeBizCache(Object.assign({}, cached || {}, stripEmpty(p)));
+      } catch (e) {
+        if (note) {
+          note.textContent = 'Kon de opgeslagen gegevens niet ophalen — je ziet je laatst bekende gegevens.';
+          note.className = 'save-note error';
+          setTimeout(() => { note.className = 'save-note'; note.textContent = ''; }, 6000);
+        }
+      }
+    }
+
+    document.getElementById('bizForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('bizSaveBtn');
+      const note = document.getElementById('bizNote');
+      const p = bizFormValues();
+      if (!p.business_name) { note.textContent = 'Bedrijfsnaam is verplicht.'; note.className = 'save-note error'; return; }
+
+      // Aliassen meesturen: verschillende delen van de backend hanteren andere veldnamen.
+      const payload = Object.assign({}, p, {
+        kvk_number: p.kvk,
+        vat_number: p.btw,
+        btw_number: p.btw,
+        contact_name: p.contact_person,
+        postcode: p.postal_code,
+      });
+
+      note.className = 'save-note'; note.textContent = 'Opslaan…';
+      btn.classList.add('loading'); btn.disabled = true;
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/business/profile', {
+          method: 'PUT', headers: authHeaders(), body: JSON.stringify(payload),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || data.message || ('HTTP ' + res.status));
+
+        const saved = Object.assign({}, p, { email: (document.getElementById('bgEmail') || {}).value || userEmail || '' });
+        businessProfile = saved;
+        businessLoaded = true;
+        writeBizCache(saved);
+        // Bedrijfsnaam ook in de kaart-state bijwerken, zodat de rest van het dashboard klopt.
+        if (p.business_name) card.business_name = p.business_name;
+        note.textContent = 'Opgeslagen ✓'; note.className = 'save-note ok';
+      } catch (err) {
+        note.textContent = isNetworkError(err) ? NET_MSG : ('Kon niet opslaan: ' + (err.message || 'onbekende fout'));
+        note.className = 'save-note error';
+      } finally {
+        btn.classList.remove('loading'); btn.disabled = false;
+        setTimeout(() => { note.className = 'save-note'; note.textContent = ''; }, 5000);
+      }
+    });
+
+    // ---- Wachtwoord wijzigen ----
+    document.getElementById('bgPasswordForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('bgPwBtn');
+      const note = document.getElementById('bgPwNote');
+      const cur = document.getElementById('bgPwCurrent').value;
+      const nw  = document.getElementById('bgPwNew').value;
+      const cf  = document.getElementById('bgPwConfirm').value;
+      const fail = (m) => { note.textContent = m; note.className = 'save-note error'; };
+
+      if (!cur) { fail('Vul je huidige wachtwoord in.'); return; }
+      if (nw.length < 8) { fail('Het nieuwe wachtwoord moet minimaal 8 tekens zijn.'); return; }
+      if (nw !== cf) { fail('De nieuwe wachtwoorden komen niet overeen.'); return; }
+      if (nw === cur) { fail('Kies een ander wachtwoord dan je huidige.'); return; }
+
+      note.className = 'save-note'; note.textContent = 'Bezig…';
+      btn.classList.add('loading'); btn.disabled = true;
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/business/change-password', {
+          method: 'POST', headers: authHeaders(),
+          body: JSON.stringify({ current_password: cur, new_password: nw, confirm_password: cf }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 404 || res.status === 405 || res.status === 501) {
+          throw new Error('Wachtwoord wijzigen is nog niet beschikbaar. Probeer het later opnieuw.');
+        }
+        if (res.status === 400 || res.status === 401 || res.status === 403) {
+          throw new Error(data.error || data.message || 'Je huidige wachtwoord klopt niet.');
+        }
+        if (!res.ok) throw new Error(data.error || data.message || ('HTTP ' + res.status));
+        note.textContent = 'Wachtwoord gewijzigd ✓'; note.className = 'save-note ok';
+        e.target.reset();
+      } catch (err) {
+        note.textContent = isNetworkError(err) ? NET_MSG : (err.message || 'Kon het wachtwoord niet wijzigen.');
+        note.className = 'save-note error';
+      } finally {
+        btn.classList.remove('loading'); btn.disabled = false;
+        setTimeout(() => { note.className = 'save-note'; note.textContent = ''; }, 6000);
+      }
     });
 
     // ---- QR-code (echte, scanbare QR via qrcodejs) ----
