@@ -586,19 +586,36 @@
     /* ---------- Vestiging-lijst ---------- */
     .loc-list-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 16px; }
     .loc-list-head h3 { font-size: 17px; font-weight: 700; }
-    .loc-list { display: grid; gap: 14px; }
-    .loc-card { padding: 20px 22px; }
+    .loc-list { display: grid; gap: 12px; }
+    .loc-card { padding: 18px 20px; }
     .loc-card-top { display: flex; align-items: flex-start; gap: 14px; }
-    .loc-ic { width: 44px; height: 44px; flex-shrink: 0; border-radius: 12px; display: grid; place-items: center; background: rgba(255,255,255,.08); border: 1px solid var(--border-strong); }
+    .loc-ic { width: 42px; height: 42px; flex-shrink: 0; border-radius: 12px; display: grid; place-items: center; background: rgba(255,255,255,.08); border: 1px solid var(--border-strong); color: var(--pearl); }
     .loc-ic svg { width: 20px; height: 20px; }
     .loc-info { flex: 1; min-width: 0; }
     .loc-name { font-size: 16px; font-weight: 700; color: #fff; }
     .loc-addr { font-size: 13px; color: var(--muted); margin-top: 2px; }
-    .loc-metrics { display: flex; gap: 20px; margin-top: 14px; flex-wrap: wrap; }
-    .loc-metric .lm-val { font-size: 20px; font-weight: 800; color: #fff; }
-    .loc-metric .lm-lbl { font-size: 12px; color: var(--muted); }
-    .loc-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
-    .loc-actions .btn { padding: 9px 14px; font-size: 13.5px; }
+    .loc-metrics { display: flex; gap: 22px; margin-top: 14px; flex-wrap: wrap; }
+    .loc-metric { display: flex; flex-direction: column; }
+    .loc-metric .lm-val { font-size: 17px; font-weight: 800; color: #fff; line-height: 1.1; }
+    .loc-metric .lm-lbl { font-size: 11.5px; color: var(--muted); }
+    .loc-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+    .loc-actions .btn { padding: 8px 13px; font-size: 13px; }
+    /* Hoofdvestiging (prominent, altijd bovenaan) */
+    .loc-main { padding: 22px; border-color: var(--border-strong); margin-bottom: 12px; }
+    .loc-ic-main { background: rgba(255,255,255,.12); }
+    .loc-badge { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: #0a0a0a; background: var(--pearl); padding: 3px 9px; border-radius: 999px; margin-bottom: 8px; }
+    .loc-main .loc-name { font-size: 18px; }
+    .loc-addr.big { font-size: 14.5px; color: var(--pearl); margin-top: 5px; line-height: 1.45; }
+    .loc-sub { font-size: 12.5px; color: var(--muted); margin-top: 5px; }
+    .loc-subhead { font-size: 12.5px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin: 22px 0 12px; }
+    /* Compacte rij-vestiging: metrics rechts uitgelijnd */
+    .loc-row .loc-card-top { align-items: center; }
+    .loc-metrics-inline { margin-top: 0; align-self: center; gap: 20px; flex-shrink: 0; text-align: right; }
+    .loc-metrics-inline .lm-val { font-size: 15px; }
+    @media (max-width: 680px) {
+      .loc-row .loc-card-top { flex-wrap: wrap; }
+      .loc-metrics-inline { width: 100%; margin-top: 10px; justify-content: flex-start; text-align: left; align-self: flex-start; }
+    }
     .btn-danger { background: transparent; color: #ff9b9b; border-color: rgba(255,80,80,.35); }
     .btn-danger:hover { background: rgba(255,80,80,.1); border-color: #ff9b9b; }
 
@@ -1384,32 +1401,12 @@
         <section class="panel" id="panel-vestigingen">
           <div class="panel-head">
             <h2>Vestigingen</h2>
-            <p>Beheer je locaties, spaarmodus en managers.</p>
-          </div>
-
-          <!-- Spaarmodus -->
-          <div class="block glass" style="margin-bottom:22px;">
-            <h3>Spaarmodus</h3>
-            <p class="b-sub">Bepaal of klanten bij alle vestigingen samen sparen of per vestiging apart.</p>
-            <div class="share-modes" id="shareModes">
-              <button type="button" class="share-mode active" data-mode="shared">
-                <span class="sm-radio"></span>
-                <span class="sm-tx"><strong>Gedeelde stempelkaart</strong><small>Klanten sparen bij álle vestigingen op één kaart. Stempels tellen overal mee.</small></span>
-              </button>
-              <button type="button" class="share-mode" data-mode="separate">
-                <span class="sm-radio"></span>
-                <span class="sm-tx"><strong>Aparte kaart per vestiging</strong><small>Elke vestiging heeft een eigen kaart. Klanten sparen per locatie apart.</small></span>
-              </button>
-            </div>
-            <div class="save-row">
-              <button class="btn btn-primary" id="saveShareBtn"><span class="btn-label">Spaarmodus opslaan</span></button>
-              <span class="save-note" id="shareNote"></span>
-            </div>
+            <p>Beheer je adres, vestigingen, spaarmodus en managers.</p>
           </div>
 
           <!-- Kop + toevoegen -->
           <div class="loc-list-head">
-            <h3>Alle vestigingen</h3>
+            <h3>Adres &amp; vestigingen</h3>
             <button class="btn btn-primary" id="addLocBtn">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
               Nieuwe vestiging
@@ -1435,8 +1432,28 @@
             </form>
           </div>
 
-          <!-- Lijst -->
+          <!-- Lijst (hoofdvestiging bovenaan + overige) -->
           <div id="locListWrap"><div class="loader"><span class="spinner"></span> Vestigingen laden…</div></div>
+
+          <!-- Spaarmodus (alleen relevant bij meerdere vestigingen) -->
+          <div class="block glass" id="shareBlock" style="margin-top:22px;" hidden>
+            <h3>Spaarmodus</h3>
+            <p class="b-sub">Bepaal of klanten bij alle vestigingen samen sparen of per vestiging apart.</p>
+            <div class="share-modes" id="shareModes">
+              <button type="button" class="share-mode active" data-mode="shared">
+                <span class="sm-radio"></span>
+                <span class="sm-tx"><strong>Gedeelde stempelkaart</strong><small>Klanten sparen bij álle vestigingen op één kaart. Stempels tellen overal mee.</small></span>
+              </button>
+              <button type="button" class="share-mode" data-mode="separate">
+                <span class="sm-radio"></span>
+                <span class="sm-tx"><strong>Aparte kaart per vestiging</strong><small>Elke vestiging heeft een eigen kaart. Klanten sparen per locatie apart.</small></span>
+              </button>
+            </div>
+            <div class="save-row">
+              <button class="btn btn-primary" id="saveShareBtn"><span class="btn-label">Spaarmodus opslaan</span></button>
+              <span class="save-note" id="shareNote"></span>
+            </div>
+          </div>
         </section>
 
         <!-- ===== Locatie meldingen (Premium) ===== -->
@@ -3604,6 +3621,9 @@
         customers: Number(raw.customer_count ?? raw.customers ?? raw.total_customers ?? 0) || 0,
         stamps: Number(raw.stamp_count ?? raw.stamps ?? raw.total_stamps ?? 0) || 0,
         managers: Array.isArray(raw.managers) ? raw.managers : null,
+        isMain: !!(raw.is_main ?? raw.is_primary ?? raw.main ?? raw.primary ?? raw.hoofdvestiging ?? false),
+        lat: raw.latitude ?? raw.lat ?? null,
+        lng: raw.longitude ?? raw.lng ?? raw.lon ?? null,
       };
     }
     function locInitials(name) {
@@ -3672,39 +3692,57 @@
     }
 
     // ---- Vestigingen-tab ----
-    function renderLocationsPanel() {
-      // Spaarmodus reflecteren
-      document.querySelectorAll('#shareModes .share-mode').forEach(b =>
-        b.classList.toggle('active', b.dataset.mode === sharingMode));
+    const PIN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
 
-      const wrap = document.getElementById('locListWrap');
-      if (!locations.length) {
-        wrap.innerHTML = '<div class="activity-empty">Nog geen vestigingen. Voeg je eerste vestiging toe.</div>';
-        return;
-      }
-      wrap.innerHTML = '<div class="loc-list">' + locations.map(l => `
-        <div class="loc-card glass" data-loc="${l.id}">
+    // Compacte actieknoppen per vestiging (data-act stuurt de afhandeling).
+    function locActionsHtml(isMain) {
+      return `<div class="loc-actions">
+            <button class="btn btn-ghost" data-act="edit">${isMain ? 'Adres bewerken' : 'Bewerken'}</button>
+            <button class="btn btn-ghost" data-act="qr">QR-code</button>
+            <button class="btn btn-ghost" data-act="managers">Managers</button>
+            <button class="btn btn-danger" data-act="delete">Verwijderen</button>
+          </div>`;
+    }
+    // Hoofdvestiging: prominent, met het volledige adres altijd zichtbaar.
+    function mainCardHtml(l) {
+      return `<div class="loc-card loc-main glass" data-loc="${l.id}">
+          <div class="loc-card-top">
+            <div class="loc-ic loc-ic-main">${PIN_SVG}</div>
+            <div class="loc-info">
+              <span class="loc-badge">Hoofdvestiging</span>
+              <div class="loc-name">${escapeHtml(l.name)}</div>
+              <div class="loc-addr big">${escapeHtml(l.addressLine || 'Nog geen adres ingesteld — klik op “Adres bewerken”.')}</div>
+              ${l.phone ? `<div class="loc-sub">${escapeHtml(l.phone)}</div>` : ''}
+              <div class="loc-metrics">
+                <div class="loc-metric"><span class="lm-val">${l.customers.toLocaleString('nl-NL')}</span><span class="lm-lbl">Klanten</span></div>
+                <div class="loc-metric"><span class="lm-val">${l.stamps.toLocaleString('nl-NL')}</span><span class="lm-lbl">Stempels</span></div>
+              </div>
+            </div>
+          </div>
+          ${locActionsHtml(true)}
+        </div>`;
+    }
+    // Overige vestiging: compacte rij met adres + metrics.
+    function rowCardHtml(l) {
+      return `<div class="loc-card loc-row glass" data-loc="${l.id}">
           <div class="loc-card-top">
             <div class="loc-ic">${BUILDING_SVG}</div>
             <div class="loc-info">
               <div class="loc-name">${escapeHtml(l.name)}</div>
               <div class="loc-addr">${escapeHtml(l.addressLine || 'Geen adres opgegeven')}${l.phone ? ' · ' + escapeHtml(l.phone) : ''}</div>
-              <div class="loc-metrics">
-                <div class="loc-metric"><div class="lm-val">${l.customers.toLocaleString('nl-NL')}</div><div class="lm-lbl">Klanten</div></div>
-                <div class="loc-metric"><div class="lm-val">${l.stamps.toLocaleString('nl-NL')}</div><div class="lm-lbl">Stempels</div></div>
-              </div>
+            </div>
+            <div class="loc-metrics loc-metrics-inline">
+              <div class="loc-metric"><span class="lm-val">${l.customers.toLocaleString('nl-NL')}</span><span class="lm-lbl">Klanten</span></div>
+              <div class="loc-metric"><span class="lm-val">${l.stamps.toLocaleString('nl-NL')}</span><span class="lm-lbl">Stempels</span></div>
             </div>
           </div>
-          <div class="loc-actions">
-            <button class="btn btn-ghost" data-act="qr">QR-code</button>
-            <button class="btn btn-ghost" data-act="managers">Managers</button>
-            <button class="btn btn-ghost" data-act="edit">Bewerken</button>
-            <button class="btn btn-danger" data-act="delete">Verwijderen</button>
-          </div>
-        </div>`).join('') + '</div>';
-      // Event-delegatie op de knoppen
-      wrap.querySelectorAll('.loc-card').forEach(card => {
+          ${locActionsHtml(false)}
+        </div>`;
+    }
+    function bindLocActions(wrap) {
+      wrap.querySelectorAll('.loc-card[data-loc]').forEach(card => {
         const loc = locations.find(x => x.id === card.dataset.loc);
+        if (!loc) return;
         card.querySelectorAll('[data-act]').forEach(btn => btn.addEventListener('click', () => {
           if (btn.dataset.act === 'qr') openLocationQR(loc);
           else if (btn.dataset.act === 'managers') openManagers(loc);
@@ -3712,6 +3750,42 @@
           else if (btn.dataset.act === 'delete') deleteLocation(loc);
         }));
       });
+    }
+    function renderLocationsPanel() {
+      // Spaarmodus reflecteren en alleen tonen bij meerdere vestigingen.
+      document.querySelectorAll('#shareModes .share-mode').forEach(b =>
+        b.classList.toggle('active', b.dataset.mode === sharingMode));
+      const shareBlock = document.getElementById('shareBlock');
+      if (shareBlock) shareBlock.hidden = locations.length <= 1;
+
+      const wrap = document.getElementById('locListWrap');
+      // Geen vestigingen → het hoofdadres is nog altijd het startpunt (altijd zichtbaar/bewerkbaar).
+      if (!locations.length) {
+        wrap.innerHTML = `<div class="loc-card loc-main glass">
+            <div class="loc-card-top">
+              <div class="loc-ic loc-ic-main">${PIN_SVG}</div>
+              <div class="loc-info">
+                <span class="loc-badge">Hoofdadres</span>
+                <div class="loc-name">Nog geen adres ingesteld</div>
+                <div class="loc-addr big">Stel je hoofdadres in zodat klanten je vinden en locatie-meldingen werken.</div>
+              </div>
+            </div>
+            <div class="loc-actions"><button class="btn btn-primary" id="setMainAddr">Hoofdadres instellen</button></div>
+          </div>`;
+        const set = wrap.querySelector('#setMainAddr');
+        if (set) set.addEventListener('click', () => openLocForm(null));
+        return;
+      }
+      // Hoofdvestiging = de als 'main' gemarkeerde, anders de eerste.
+      const mainIdx = locations.findIndex(l => l.isMain);
+      const main = locations[mainIdx >= 0 ? mainIdx : 0];
+      const rest = locations.filter(l => l !== main);
+      let html = mainCardHtml(main);
+      if (rest.length) {
+        html += `<div class="loc-subhead">Overige vestigingen (${rest.length})</div><div class="loc-list">` + rest.map(rowCardHtml).join('') + '</div>';
+      }
+      wrap.innerHTML = html;
+      bindLocActions(wrap);
     }
 
     // ---- Spaarmodus ----
@@ -3757,6 +3831,26 @@
     }
     document.getElementById('addLocBtn').addEventListener('click', () => openLocForm(null));
     document.getElementById('locCancelBtn').addEventListener('click', () => { locFormWrap.hidden = true; });
+
+    // Adres → GPS-coördinaten via Nominatim (OpenStreetMap). Best-effort met timeout; faalt stil.
+    async function geocodeAddress(p) {
+      const q = [p.address, p.postal_code, p.city].filter(Boolean).join(', ');
+      if (!q) return null;                          // geen adresvelden → niets te lokaliseren
+      try {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 4500);
+        const url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=nl&q=' + encodeURIComponent(q + ', Nederland');
+        const res = await fetch(url, { headers: { 'Accept': 'application/json' }, signal: ctrl.signal });
+        clearTimeout(timer);
+        if (!res.ok) return null;
+        const arr = await res.json().catch(() => []);
+        if (Array.isArray(arr) && arr[0] && arr[0].lat && arr[0].lon) {
+          return { lat: Number(arr[0].lat), lng: Number(arr[0].lon) };
+        }
+      } catch (e) { /* offline / timeout / geblokkeerd → opslaan zonder coördinaten */ }
+      return null;
+    }
+
     locForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = document.getElementById('locSaveBtn');
@@ -3771,13 +3865,17 @@
       };
       if (!payload.location_name) { note.textContent = 'Naam is verplicht.'; note.className = 'save-note error'; return; }
       note.className = 'save-note'; btn.classList.add('loading'); btn.disabled = true;
+      // Adres → GPS geocoden voor locatie-meldingen (best-effort; blokkeert opslaan niet).
+      note.textContent = 'Adres opzoeken…';
+      const geo = await geocodeAddress(payload);
+      if (geo) { payload.latitude = geo.lat; payload.longitude = geo.lng; payload.lat = geo.lat; payload.lng = geo.lng; }
       try {
         const url = editingLocId ? API_BASE + '/api/stamp/locations/' + editingLocId : API_BASE + '/api/stamp/locations';
         const method = editingLocId ? 'PUT' : 'POST';
         const res = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(payload) });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.error || data.message || ('HTTP ' + res.status));
-        note.textContent = 'Opgeslagen'; note.classList.add('ok');
+        note.textContent = geo ? 'Opgeslagen · locatie bepaald' : 'Opgeslagen'; note.classList.add('ok');
         await loadLocations();
         setTimeout(() => { locFormWrap.hidden = true; }, 700);
       } catch (err) {
