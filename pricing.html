@@ -95,7 +95,7 @@
 
     .pricing-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 26px; max-width: 820px; margin: 56px auto 0; align-items: stretch; }
 
-    .price-card { position: relative; padding: 40px 34px; display: flex; flex-direction: column; overflow: hidden; }
+    .price-card { position: relative; padding: 40px 34px; display: flex; flex-direction: column; }
     .price-card .tier { font-size: 15px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
     .price-card .amount { margin: 14px 0 4px; font-size: 46px; font-weight: 800; letter-spacing: -.03em; color: #fff; line-height: 1; }
     .price-card .amount small { font-size: 16px; font-weight: 500; color: var(--muted); letter-spacing: 0; }
@@ -104,12 +104,19 @@
     .price-card .feature-list li { display: flex; align-items: flex-start; gap: 11px; font-size: 15.5px; color: var(--pearl); }
     .price-card .feature-list li::before { content: ""; flex: none; width: 18px; height: 18px; margin-top: 2px; border-radius: 50%; background: rgba(255,255,255,.1); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: center; background-size: 12px; }
 
-    .price-card.featured { border-color: var(--border-strong); }
+    /* Premium uitgelicht in paars — identiek aan de prijskaart op de homepage. */
+    .price-card.featured { border-color: rgba(139,92,246,.5); }
     .price-card.featured::before {
-      content: ""; position: absolute; inset: -40% -20% auto -20%; height: 260px;
-      background: radial-gradient(circle at 50% 0%, rgba(255,255,255,.35), transparent 62%);
-      filter: blur(30px); pointer-events: none; z-index: 0;
+      content: ""; position: absolute; inset: -1px; border-radius: var(--radius); z-index: -1;
+      background: radial-gradient(circle at 50% 0%, rgba(139,92,246,.45), transparent 62%);
+      filter: blur(16px); pointer-events: none;
     }
+    /* Vinkjes en badge in dezelfde paarse toon. */
+    .price-card.featured .feature-list li::before {
+      background-color: rgba(139,92,246,.18);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b5cf6' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+    }
+    .price-card.featured .badge-pop { background: #8b5cf6; color: #fff; }
     .price-card.featured > * { position: relative; z-index: 1; }
     .price-card { position: relative; }
     .price-card.featured > .badge-pop { position: absolute; }

@@ -324,8 +324,7 @@
     .journey-step p { color: #d4d4d8; font-size: 16px; }
 
     .price-wrap { max-width: 460px; margin: 0 auto; }
-    .price-card { padding: 44px 38px; text-align: center; position: relative; border-color: rgba(255,255,255,.4); }
-    .price-card::before { content: ""; position: absolute; inset: -1px; border-radius: var(--radius); z-index: -1; background: radial-gradient(circle at 50% 0%, rgba(255,255,255,.22), transparent 60%); filter: blur(18px); }
+    .price-card { padding: 44px 38px; text-align: center; position: relative; }
     .price-tier { font-size: 15px; font-weight: 600; color: var(--accent); letter-spacing: .04em; }
     .price-amount { font-size: 60px; font-weight: 800; letter-spacing: -.03em; margin: 12px 0 4px; }
     .price-amount small { font-size: 18px; font-weight: 500; color: var(--muted); }
@@ -386,8 +385,11 @@
       .rope, .coffee-give, .coffee-hold, .bubble-cust, .bubble-emp { opacity: 0; }
     }
     .price-duo { display:grid; grid-template-columns:repeat(2,1fr); gap:24px; max-width:840px; margin:0 auto; align-items:stretch; }
-    .price-card.featured { border-color: var(--accent); }
-    .price-badge { display:inline-block; font-size:12px; font-weight:700; letter-spacing:.04em; color:#0a0a0a; background:var(--accent); padding:4px 12px; border-radius:999px; margin-bottom:12px; }
+    /* Premium uitgelicht in paars — identiek aan de prijskaart op de homepage. */
+    .price-card.featured { border-color: rgba(139,92,246,.5); }
+    .price-card.featured::before { content: ""; position: absolute; inset: -1px; border-radius: var(--radius); z-index: -1; background: radial-gradient(circle at 50% 0%, rgba(139,92,246,.45), transparent 62%); filter: blur(16px); }
+    .price-card.featured .price-features svg { color: #8b5cf6; }
+    .price-badge { position: absolute; top: 24px; right: 28px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #fff; background: #8b5cf6; padding: 5px 12px; border-radius: 999px; }
     .price-billing { color:var(--muted); font-size:14px; margin:4px 0 18px; min-height:20px; }
     @media (max-width:680px){ .price-duo{ grid-template-columns:1fr; } }
     /* ---- Billing toggle ---- */
