@@ -459,11 +459,17 @@
 
         // ---- netwerk / API-helper ----
         const NET_MSG = 'Geen internetverbinding. Controleer je verbinding en probeer opnieuw.';
-        // Wrap fetch zodat netwerkfouten (geen internet) begrijpelijk en herkenbaar zijn.
-        async function apiCall(url, opts) {
+        // Het token dat bij het koppelen is opgeslagen (winkelier of vestigingsmanager).
+        function authToken() { return localStorage.getItem(LS.token) || ''; }
+        // Wrap fetch zodat (a) netwerkfouten begrijpelijk zijn en (b) élke API-call het
+        // Authorization-token meestuurt — de stempel-endpoints weigeren anders met 401.
+        async function apiCall(url, opts = {}) {
             if (!navigator.onLine) { const e = new Error(NET_MSG); e.network = true; throw e; }
+            const token = authToken();
+            const headers = Object.assign({}, opts.headers || {});
+            if (token && !headers.Authorization) headers.Authorization = 'Bearer ' + token;
             try {
-                return await fetch(url, opts);
+                return await fetch(url, Object.assign({}, opts, { headers }));
             } catch (_) {
                 const e = new Error(NET_MSG); e.network = true; throw e;
             }
@@ -497,11 +503,17 @@
             if (!email || !password) return showAlert('pairAlert', 'Vul e-mail en wachtwoord in.');
             btn.disabled = true; btn.textContent = 'Inloggen…';
             try {
-                const res = await apiCall(API_BASE + '/api/stamp/login', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password }),
-                });
-                const data = await res.json().catch(() => ({}));
+                // De scan-app wordt gekoppeld met een winkelier- óf een manageraccount:
+                // eerst als owner proberen, daarna als vestigingsmanager.
+                const body = JSON.stringify({ email, password });
+                const jsonHeaders = { 'Content-Type': 'application/json' };
+                let res = await apiCall(API_BASE + '/api/stamp/login', { method: 'POST', headers: jsonHeaders, body });
+                let data = await res.json().catch(() => ({}));
+                if (!res.ok || !data.token) {
+                    const mgrRes = await apiCall(API_BASE + '/api/stamp/manager/login', { method: 'POST', headers: jsonHeaders, body });
+                    const mgrData = await mgrRes.json().catch(() => ({}));
+                    if (mgrRes.ok && mgrData.token) { res = mgrRes; data = mgrData; }
+                }
                 if (!res.ok || !data.token || !data.card_id) {
                     showAlert('pairAlert', data.error || 'Inloggen mislukt. Controleer je gegevens.');
                     return;
