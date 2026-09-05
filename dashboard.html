@@ -632,6 +632,31 @@
     }
     .bar-label { font-size: 11.5px; color: var(--faint); }
 
+    /* ---------- Demografie (premium) ---------- */
+    .demo-list { display: grid; gap: 16px; }
+    .demo-row { display: grid; gap: 7px; }
+    .demo-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+    .demo-lbl { font-size: 13.5px; font-weight: 500; color: var(--text-strong); min-width: 0;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .demo-val { display: flex; align-items: baseline; gap: 7px; flex-shrink: 0; }
+    .demo-val strong { font-size: 13.5px; font-weight: 600; color: var(--text-strong); letter-spacing: -.015em; }
+    .demo-val small { font-size: 12px; color: var(--muted); }
+    .demo-bar { height: 8px; border-radius: 999px; background: rgba(var(--ink), .07); overflow: hidden; }
+    .demo-bar > span { display: block; height: 100%; border-radius: 999px; background: var(--accent-grad);
+      transition: width .6s var(--ease); min-width: 3px; }
+    /* Representativiteit: hoeveel klanten dit daadwerkelijk invulden. */
+    .demo-note { display: flex; align-items: flex-start; gap: 8px; margin-top: 20px; padding-top: 16px;
+      border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); line-height: 1.5; }
+    .demo-note svg { width: 13px; height: 13px; flex-shrink: 0; margin-top: 2px; opacity: .8; }
+    .demo-note strong { color: var(--pearl); font-weight: 600; }
+    .demo-more { font-size: 12px; color: var(--muted); margin-top: 14px; }
+    /* Premium-slot: verkoopargument, geen kale foutmelding. */
+    .demo-lock .es-ic { background: var(--accent-soft); }
+    .demo-lock ul { list-style: none; display: grid; gap: 7px; margin: 0 0 18px; text-align: left; }
+    .demo-lock li { display: flex; align-items: flex-start; gap: 9px; font-size: 12.5px; color: var(--muted); }
+    .demo-lock li::before { content: ""; flex: none; width: 15px; height: 15px; margin-top: 2px; border-radius: 50%;
+      background: var(--accent-soft) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238b5cf6' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E") center / 9px no-repeat; }
+
     /* ---------- Klanten ---------- */
     .cust-search { position: relative; margin-bottom: 22px; }
     .cust-search svg { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--muted); pointer-events: none; }
@@ -1796,6 +1821,13 @@
             </div>
             <div class="chart" id="chart"></div>
           </div>
+
+          <!-- Klantdemografie (premium) -->
+          <div class="sec-lead" style="margin-top:34px">
+            <h3>Wie zijn je klanten?</h3>
+            <p>Inzicht in je doelgroep, op basis van wat klanten zelf deelden.</p>
+          </div>
+          <div id="demoWrap"></div>
         </section>
 
         <!-- ===== Mijn Abonnement ===== -->
@@ -2173,7 +2205,7 @@
       if (tab === 'abonnement') renderSubscriptionPanel();
       if (tab === 'facturen') loadInvoices();
       if (tab === 'bedrijfsgegevens') loadBusinessProfile();
-      if (tab === 'statistieken') renderChart(currentRange);
+      if (tab === 'statistieken') { renderChart(currentRange); loadDemographics(); }
       if (tab !== 'stempel') { stopScanner(); resetScanFlow(); } // camera vrijgeven + flow resetten bij verlaten van de scan-tab
     }
     links.forEach(l => l.addEventListener('click', () => activateTab(l.dataset.tab)));
@@ -4410,6 +4442,149 @@
 
     custSearch.addEventListener('input', renderCustomers);
 
+    // ---- Klantdemografie (premium) ----
+    let demographicsLoaded = false;
+
+    const INFO_MINI = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>';
+    const PEOPLE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+    const PIN_MINI = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+    const MAX_CITY_ROWS = 8;
+
+    // Getal met NL-scheiding; percentages zonder overbodige decimaal.
+    function demoPct(n) {
+      const v = Number(n) || 0;
+      return (Math.round(v * 10) / 10).toString().replace('.', ',') + '%';
+    }
+    function demoCount(n) { return Number(n || 0).toLocaleString('nl-NL'); }
+
+    // Eén balk per categorie. De breedte is het percentage zélf, niet relatief aan
+    // de grootste: een balk die half vol staat betekent ook echt de helft. Minimaal
+    // 2% breed zodat een kleine categorie zichtbaar blijft.
+    function demoRowsHtml(rows) {
+      return '<div class="demo-list">' + rows.map(r => {
+        const pct = Number(r.percentage) || 0;
+        const w = Math.max(2, Math.min(100, pct));
+        return `<div class="demo-row">
+            <div class="demo-top">
+              <span class="demo-lbl">${escapeHtml(r.value)}</span>
+              <span class="demo-val"><strong>${demoPct(pct)}</strong><small>${demoCount(r.count)}</small></span>
+            </div>
+            <div class="demo-bar"><span style="width:${w}%"></span></div>
+          </div>`;
+      }).join('') + '</div>';
+    }
+    // Zonder deze regel zegt een percentage niets: 60% van 5 klanten is iets anders dan 60% van 500.
+    function demoNoteHtml(answered, total) {
+      const rate = total ? Math.round((answered / total) * 1000) / 10 : 0;
+      return `<div class="demo-note">${INFO_MINI}<span>Gebaseerd op <strong>${demoCount(answered)}</strong>
+          van ${demoCount(total)} klanten (${demoPct(rate)} ingevuld).</span></div>`;
+    }
+    function demoEmptyHtml(icon, title, text) {
+      return `<div class="empty-state">
+          <span class="es-ic">${icon}</span>
+          <h4>${escapeHtml(title)}</h4>
+          <p>${escapeHtml(text)}</p>
+        </div>`;
+    }
+    function demoBlock(title, sub, body) {
+      return `<div class="block glass">
+          <h3>${escapeHtml(title)}</h3>
+          <p class="b-sub">${escapeHtml(sub)}</p>
+          ${body}
+        </div>`;
+    }
+    // Eén melding over de volle breedte (slot, fout, of nog geen klanten).
+    function demoNotice(html) { return `<div class="block glass">${html}</div>`; }
+
+    function renderDemographics(data) {
+      const wrap = document.getElementById('demoWrap');
+      const total = Number(data.total_customers) || 0;
+      const occ = data.occupation || {};
+      const city = data.city_region || {};
+      const occRows = Array.isArray(occ.breakdown) ? occ.breakdown : [];
+      const cityRows = Array.isArray(city.breakdown) ? city.breakdown : [];
+
+      if (!total) {
+        wrap.innerHTML = demoNotice(demoEmptyHtml(PEOPLE_SVG, 'Nog geen klanten',
+          'Zodra klanten gaan sparen, zie je hier wie je doelgroep is.'));
+        return;
+      }
+      if (!occRows.length && !cityRows.length) {
+        wrap.innerHTML = demoNotice(demoEmptyHtml(PEOPLE_SVG, 'Nog geen inzichten',
+          'Zodra klanten hun gegevens delen zie je hier wie je doelgroep is.'));
+        return;
+      }
+
+      const occBody = occRows.length
+        ? demoRowsHtml(occRows) + demoNoteHtml(Number(occ.answered) || 0, total)
+        : demoEmptyHtml(PEOPLE_SVG, 'Nog niets ingevuld', 'Klanten kunnen dit optioneel delen bij het aanmaken van hun kaart.');
+
+      const shown = cityRows.slice(0, MAX_CITY_ROWS);
+      const rest = cityRows.length - shown.length;
+      const cityBody = cityRows.length
+        ? demoRowsHtml(shown)
+          + (rest > 0 ? `<div class="demo-more">+ ${demoCount(rest)} andere ${rest === 1 ? 'plaats' : 'plaatsen'}</div>` : '')
+          + demoNoteHtml(Number(city.answered) || 0, total)
+        : demoEmptyHtml(PIN_MINI, 'Nog niets ingevuld', 'Klanten kunnen hun plaats optioneel delen bij het aanmaken van hun kaart.');
+
+      wrap.innerHTML = '<div class="two-col">'
+        + demoBlock('Bezigheid', 'Wat je klanten doen op een doordeweekse dag.', occBody)
+        + demoBlock('Waar komen je klanten vandaan?',
+            city.distinct_cities ? `Verdeeld over ${demoCount(city.distinct_cities)} ${Number(city.distinct_cities) === 1 ? 'plaats' : 'plaatsen'}.` : 'De plaatsen die je klanten opgaven.',
+            cityBody)
+        + '</div>';
+    }
+
+    // Premium-slot: dit is een verkoopargument, dus geen kale foutmelding.
+    function renderDemoLock(message) {
+      document.getElementById('demoWrap').innerHTML = demoNotice(
+        `<div class="empty-state demo-lock">
+          <span class="es-ic">${PEOPLE_SVG}</span>
+          <h4>Klantinzichten is een Premium-functie</h4>
+          <p>${escapeHtml(message || 'Upgrade om te zien wie je klanten zijn.')}</p>
+          <ul>
+            <li>Zie welke bezigheid je klanten hebben</li>
+            <li>Ontdek uit welke plaatsen ze komen</li>
+            <li>Stem je aanbod af op je échte doelgroep</li>
+          </ul>
+          <button type="button" class="btn btn-primary" data-open-sub>Upgrade naar Premium</button>
+        </div>`);
+    }
+
+    async function loadDemographics(force) {
+      const wrap = document.getElementById('demoWrap');
+      if (!wrap) return;
+      if (demographicsLoaded && !force) return;
+      if (!cardId) {
+        wrap.innerHTML = demoNotice(demoEmptyHtml(PEOPLE_SVG, 'Nog geen inzichten',
+          'Zodra klanten hun gegevens delen zie je hier wie je doelgroep is.'));
+        demographicsLoaded = true;
+        return;
+      }
+      wrap.innerHTML = '<div class="block glass"><div class="loader"><span class="spinner"></span> Inzichten laden…</div></div>';
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/demographics/' + encodeURIComponent(cardId) + locQuery('?'),
+          { headers: authHeaders() });
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 403) { renderDemoLock(data.error); demographicsLoaded = true; return; }
+        if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+        renderDemographics(data);
+        demographicsLoaded = true;
+      } catch (err) {
+        // Eerlijk zijn over wat er misging; de winkelier kan het opnieuw proberen.
+        wrap.innerHTML = demoNotice(`<div class="empty-state">
+            <span class="es-ic">${PEOPLE_SVG}</span>
+            <h4>Inzichten niet geladen</h4>
+            <p>${escapeHtml(isNetworkError(err) ? NET_MSG : (err.message || 'Probeer het later opnieuw.'))}</p>
+            <button type="button" class="btn btn-ghost" data-demo-retry>Opnieuw proberen</button>
+          </div>`);
+      }
+    }
+    document.getElementById('demoWrap').addEventListener('click', (e) => {
+      if (e.target.closest('[data-open-sub]')) { openSubModal(); return; }
+      if (e.target.closest('[data-demo-retry]')) loadDemographics(true);
+    });
+
     // ---- Grafiek ----
     let currentRange = 'day';
     let chartData = { day: [], week: [] };
@@ -4592,6 +4767,8 @@
       toggleLocMenu(false);
       // Dashboard-data opnieuw laden voor de gekozen vestiging.
       customersLoaded = false;
+      demographicsLoaded = false;
+      if (document.getElementById('panel-statistieken').classList.contains('active')) loadDemographics(true);
       refreshOverview();
       if (document.getElementById('panel-klanten').classList.contains('active')) loadCustomers();
     }
