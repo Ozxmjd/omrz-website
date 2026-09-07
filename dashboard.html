@@ -632,15 +632,55 @@
     }
     .bar-label { font-size: 11.5px; color: var(--faint); }
 
+    /* ---------- Schakelaars (kaartinstellingen) ---------- */
+    .switch-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+    .switch-row + .switch-row { margin-top: 16px; }
+    .switch-tx { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+    .switch-tx strong { font-size: 13.5px; font-weight: 500; color: var(--pearl); }
+    .switch-tx small { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+    .switch { -webkit-appearance: none; appearance: none; flex-shrink: 0; margin: 2px 0 0;
+      width: 40px; height: 23px; border-radius: 999px; position: relative; cursor: pointer;
+      background: rgba(var(--ink), .12); border: 1px solid var(--border-strong);
+      transition: background .25s var(--ease), border-color .25s var(--ease); }
+    .switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 17px; height: 17px;
+      border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3);
+      transition: transform .25s var(--ease); }
+    .switch:checked { background: var(--accent-grad); border-color: transparent; }
+    .switch:checked::after { transform: translateX(17px); }
+    .switch:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(99,102,241,.2); }
+    .switch:disabled { opacity: .45; cursor: not-allowed; }
+    /* Sub-opties springen in onder de hoofdschakelaar. */
+    .switch-sub { margin: 18px 0 0 0; padding: 16px 0 0 16px; border-top: 1px solid var(--border);
+      border-left: 2px solid var(--accent-soft); }
+    .switch-sub[hidden] { display: none; }
+    /* Premium-slot binnen een editor-sectie. */
+    .ed-lock { display: flex; align-items: flex-start; gap: 11px; padding: 13px 15px; border-radius: 12px;
+      background: var(--accent-soft); border: 1px solid rgba(139,92,246,.2); font-size: 12.5px;
+      color: var(--muted); line-height: 1.55; margin-bottom: 18px; }
+    .ed-lock[hidden] { display: none; }
+    .ed-lock svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 2px; color: var(--accent-2); }
+    .ed-lock b { color: var(--pearl); }
+    .ed-lock button { margin-top: 9px; }
+
     /* ---------- Demografie (premium) ---------- */
-    .demo-list { display: grid; gap: 16px; }
-    .demo-row { display: grid; gap: 7px; }
-    .demo-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-    .demo-lbl { font-size: 13.5px; font-weight: 500; color: var(--text-strong); min-width: 0;
+    /* Tabel: naam · verdeling · aandeel · aantal, netjes uitgelijnd. */
+    .demo-scroll { overflow-x: auto; margin: 0 -2px; }
+    .demo-table { width: 100%; border-collapse: collapse; }
+    .demo-table th { font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em;
+      color: var(--muted); text-align: left; padding: 0 12px 10px 0; white-space: nowrap; }
+    .demo-table th:last-child, .demo-table td:last-child { padding-right: 0; text-align: right; }
+    .demo-table th.dt-num, .demo-table td.dt-num { text-align: right; }
+    .demo-table td { padding: 11px 12px 11px 0; border-top: 1px solid var(--border); vertical-align: middle; }
+    .demo-table tbody tr:first-child td { border-top: 1px solid var(--border-strong); }
+    .demo-table tbody tr { transition: background .2s var(--ease); }
+    .demo-table tbody tr:hover { background: rgba(var(--ink), .022); }
+    .dt-name { font-size: 13.5px; font-weight: 500; color: var(--text-strong); max-width: 150px;
       overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .demo-val { display: flex; align-items: baseline; gap: 7px; flex-shrink: 0; }
-    .demo-val strong { font-size: 13.5px; font-weight: 600; color: var(--text-strong); letter-spacing: -.015em; }
-    .demo-val small { font-size: 12px; color: var(--muted); }
+    .dt-barcell { width: 42%; min-width: 90px; }
+    .dt-pct { font-size: 13.5px; font-weight: 600; color: var(--text-strong); letter-spacing: -.015em; white-space: nowrap; }
+    .dt-count { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+    /* De koploper krijgt een subtiel accent, zodat de tabel meteen leesbaar is. */
+    .demo-table tbody tr:first-child .dt-name { font-weight: 600; }
     .demo-bar { height: 8px; border-radius: 999px; background: rgba(var(--ink), .07); overflow: hidden; }
     .demo-bar > span { display: block; height: 100%; border-radius: 999px; background: var(--accent-grad);
       transition: width .6s var(--ease); min-width: 3px; }
@@ -1585,6 +1625,44 @@
                 <div class="preset-grid" id="accentPresets"></div>
               </section>
 
+              <section class="ed-section glass" id="demoSection">
+                <h3><span class="sec-num">8</span> Klantinzichten <span class="part-badge">Premium</span></h3>
+                <p class="b-sub">Verzamel optioneel extra gegevens van je klanten (bezigheid, herkomst) om inzicht te krijgen in je doelgroep. Klanten vullen dit vrijwillig in bij het aanmaken van hun kaart.</p>
+
+                <div class="ed-lock" id="demoLockNote" hidden>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+                  <div>
+                    <b>Premium-functie.</b> Upgrade om klantinzichten te verzamelen en te zien wie je doelgroep is.
+                    <div><button type="button" class="btn btn-primary" id="demoUpgradeBtn">Upgrade naar Premium</button></div>
+                  </div>
+                </div>
+
+                <div class="switch-row">
+                  <span class="switch-tx">
+                    <strong>Klantinzichten verzamelen</strong>
+                    <small>Klanten krijgen twee extra, optionele vragen bij het aanmaken van hun kaart.</small>
+                  </span>
+                  <input type="checkbox" class="switch" id="demoEnabled" aria-label="Klantinzichten verzamelen" />
+                </div>
+
+                <div class="switch-sub" id="demoSubOptions" hidden>
+                  <div class="switch-row">
+                    <span class="switch-tx">
+                      <strong>Vraag naar bezigheid</strong>
+                      <small>Student, werknemer, ondernemer, gepensioneerd of anders.</small>
+                    </span>
+                    <input type="checkbox" class="switch" id="askOccupation" aria-label="Vraag naar bezigheid" />
+                  </div>
+                  <div class="switch-row">
+                    <span class="switch-tx">
+                      <strong>Vraag naar herkomst</strong>
+                      <small>De plaats waar je klant vandaan komt.</small>
+                    </span>
+                    <input type="checkbox" class="switch" id="askCity" aria-label="Vraag naar herkomst" />
+                  </div>
+                </div>
+              </section>
+
               <!-- Opslaan -->
               <div class="save-bar glass">
                 <button type="submit" class="btn btn-primary" id="saveCardBtn">
@@ -2162,6 +2240,10 @@
       stamp_type: 'shape',
       stamp_logo_url: '',
       outline_width: 2.5,
+      // Klantinzichten (premium): worden alleen gesteld als de winkelier ze aanzet.
+      demographics_enabled: false,
+      ask_occupation: true,
+      ask_city: true,
     };
     let stats = { total_customers: 0, total_stamps: 0, total_rewards: 0 };
 
@@ -2238,6 +2320,7 @@
     function applySubscription() {
       renderSubBanner();
       renderPlanCard();
+      applyDemoGating();
       applyLockIcons();
       // Zonder toegang: toon direct het grote abonnement-scherm.
       if (!subscription.has_access) openSubModal();
@@ -3313,6 +3396,7 @@
 
     // ---- Formulier vullen vanuit state ----
     function fillForm() {
+      fillDemoSettings();
       // BELANGRIJK: setPrimary() hieronder zet background_type op 'color'. Bewaar de gewenste
       // achtergrond-modus dus vóór die aanroep, anders valt een foto-achtergrond na laden terug op kleur.
       const wantPhoto = card.background_type === 'photo' && !!card.background_url;
@@ -3422,6 +3506,49 @@
       );
     });
 
+    // ---- Klantinzichten (kaartinstelling, premium) ----
+    // Trial telt als premium: dan kan de winkelier de functie tijdens de proef uitproberen.
+    function isPremiumNow() {
+      return subscription.plan === 'premium' || subscription.access_status === 'trial';
+    }
+    function syncDemoSubOptions() {
+      const on = document.getElementById('demoEnabled');
+      const sub = document.getElementById('demoSubOptions');
+      if (sub && on) sub.hidden = !on.checked;
+    }
+    // Basic: schakelaars uit én op slot, met een upgrade-uitnodiging erboven.
+    function applyDemoGating() {
+      const premium = isPremiumNow();
+      const lock = document.getElementById('demoLockNote');
+      if (lock) lock.hidden = premium;
+      ['demoEnabled', 'askOccupation', 'askCity'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = !premium;
+      });
+      // Stand altijd afleiden uit de kaart én het pakket: de abonnementstatus komt
+      // vaak ná de kaartgegevens binnen, en mag een aangezette instelling niet wissen.
+      const on = document.getElementById('demoEnabled');
+      if (on) on.checked = premium && !!card.demographics_enabled;
+      syncDemoSubOptions();
+    }
+    function fillDemoSettings() {
+      const on = document.getElementById('demoEnabled');
+      const occ = document.getElementById('askOccupation');
+      const city = document.getElementById('askCity');
+      if (on) on.checked = !!card.demographics_enabled;
+      if (occ) occ.checked = card.ask_occupation !== false;
+      if (city) city.checked = card.ask_city !== false;
+      syncDemoSubOptions();
+      applyDemoGating();
+    }
+    document.getElementById('demoEnabled').addEventListener('change', (e) => {
+      card.demographics_enabled = e.target.checked;
+      syncDemoSubOptions();
+    });
+    document.getElementById('askOccupation').addEventListener('change', (e) => { card.ask_occupation = e.target.checked; });
+    document.getElementById('askCity').addEventListener('change', (e) => { card.ask_city = e.target.checked; });
+    document.getElementById('demoUpgradeBtn').addEventListener('click', openSubModal);
+
     // ---- Kaart opslaan ----
     document.getElementById('cardForm').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -3455,6 +3582,9 @@
         stamp_type: card.stamp_type,
         stamp_logo_url: card.stamp_logo_url,
         outline_width: card.outline_width,
+        demographics_enabled: isPremiumNow() && !!card.demographics_enabled,
+        ask_occupation: card.ask_occupation !== false,
+        ask_city: card.ask_city !== false,
       };
       try {
         const url = cardId
@@ -4457,21 +4587,29 @@
     }
     function demoCount(n) { return Number(n || 0).toLocaleString('nl-NL'); }
 
-    // Eén balk per categorie. De breedte is het percentage zélf, niet relatief aan
-    // de grootste: een balk die half vol staat betekent ook echt de helft. Minimaal
+    // Tabel met een balk per rij. De balkbreedte is het percentage zélf, niet relatief
+    // aan de grootste: een balk die half vol staat betekent ook echt de helft. Minimaal
     // 2% breed zodat een kleine categorie zichtbaar blijft.
-    function demoRowsHtml(rows) {
-      return '<div class="demo-list">' + rows.map(r => {
+    function demoTableHtml(label, rows) {
+      const body = rows.map(r => {
         const pct = Number(r.percentage) || 0;
         const w = Math.max(2, Math.min(100, pct));
-        return `<div class="demo-row">
-            <div class="demo-top">
-              <span class="demo-lbl">${escapeHtml(r.value)}</span>
-              <span class="demo-val"><strong>${demoPct(pct)}</strong><small>${demoCount(r.count)}</small></span>
-            </div>
-            <div class="demo-bar"><span style="width:${w}%"></span></div>
-          </div>`;
-      }).join('') + '</div>';
+        return `<tr>
+            <td class="dt-name" title="${escapeHtml(r.value)}">${escapeHtml(r.value)}</td>
+            <td class="dt-barcell"><div class="demo-bar"><span style="width:${w}%"></span></div></td>
+            <td class="dt-num dt-pct">${demoPct(pct)}</td>
+            <td class="dt-num dt-count">${demoCount(r.count)}</td>
+          </tr>`;
+      }).join('');
+      return `<div class="demo-scroll"><table class="demo-table">
+          <thead><tr>
+            <th>${escapeHtml(label)}</th>
+            <th class="dt-barcell">Verdeling</th>
+            <th class="dt-num">Aandeel</th>
+            <th class="dt-num">Aantal</th>
+          </tr></thead>
+          <tbody>${body}</tbody>
+        </table></div>`;
     }
     // Zonder deze regel zegt een percentage niets: 60% van 5 klanten is iets anders dan 60% van 500.
     function demoNoteHtml(answered, total) {
@@ -4496,40 +4634,63 @@
     // Eén melding over de volle breedte (slot, fout, of nog geen klanten).
     function demoNotice(html) { return `<div class="block glass">${html}</div>`; }
 
+    // De winkelier heeft de vragen uitgezet: geen fout, maar een instelling.
+    function demoOffHtml() {
+      return `<div class="empty-state">
+          <span class="es-ic">${PEOPLE_SVG}</span>
+          <h4>Geen data beschikbaar</h4>
+          <p>Zet "Klantinzichten" aan in Mijn Kaart om deze gegevens te verzamelen.</p>
+          <button type="button" class="btn btn-primary" data-goto-kaart>Naar Mijn Kaart</button>
+        </div>`;
+    }
     function renderDemographics(data) {
       const wrap = document.getElementById('demoWrap');
+      const occTitle = 'Type klant', cityTitle = 'Herkomst';
+
+      // Functie staat uit → beide tabellen leggen uit hoe je hem aanzet.
+      if (data.enabled === false) {
+        wrap.innerHTML = '<div class="two-col">'
+          + demoBlock(occTitle, 'Bezigheid van je klanten.', demoOffHtml())
+          + demoBlock(cityTitle, 'Waar je klanten vandaan komen.', demoOffHtml())
+          + '</div>';
+        return;
+      }
+
       const total = Number(data.total_customers) || 0;
       const occ = data.occupation || {};
       const city = data.city_region || {};
       const occRows = Array.isArray(occ.breakdown) ? occ.breakdown : [];
       const cityRows = Array.isArray(city.breakdown) ? city.breakdown : [];
+      // Losse vraag uitgezet? Dan is "niets ingevuld" niet het hele verhaal.
+      const asksOcc = data.ask_occupation !== false;
+      const asksCity = data.ask_city !== false;
 
       if (!total) {
         wrap.innerHTML = demoNotice(demoEmptyHtml(PEOPLE_SVG, 'Nog geen klanten',
           'Zodra klanten gaan sparen, zie je hier wie je doelgroep is.'));
         return;
       }
-      if (!occRows.length && !cityRows.length) {
-        wrap.innerHTML = demoNotice(demoEmptyHtml(PEOPLE_SVG, 'Nog geen inzichten',
-          'Zodra klanten hun gegevens delen zie je hier wie je doelgroep is.'));
-        return;
-      }
 
+      const noAnswers = 'Nog geen gegevens. Zodra klanten hun info delen zie je hier de verdeling.';
       const occBody = occRows.length
-        ? demoRowsHtml(occRows) + demoNoteHtml(Number(occ.answered) || 0, total)
-        : demoEmptyHtml(PEOPLE_SVG, 'Nog niets ingevuld', 'Klanten kunnen dit optioneel delen bij het aanmaken van hun kaart.');
+        ? demoTableHtml(occTitle, occRows) + demoNoteHtml(Number(occ.answered) || 0, total)
+        : (asksOcc
+            ? demoEmptyHtml(PEOPLE_SVG, 'Nog geen gegevens', noAnswers)
+            : demoEmptyHtml(PEOPLE_SVG, 'Deze vraag staat uit', 'Zet "Vraag naar bezigheid" aan in Mijn Kaart om dit te verzamelen.'));
 
       const shown = cityRows.slice(0, MAX_CITY_ROWS);
       const rest = cityRows.length - shown.length;
       const cityBody = cityRows.length
-        ? demoRowsHtml(shown)
+        ? demoTableHtml(cityTitle, shown)
           + (rest > 0 ? `<div class="demo-more">+ ${demoCount(rest)} andere ${rest === 1 ? 'plaats' : 'plaatsen'}</div>` : '')
           + demoNoteHtml(Number(city.answered) || 0, total)
-        : demoEmptyHtml(PIN_MINI, 'Nog niets ingevuld', 'Klanten kunnen hun plaats optioneel delen bij het aanmaken van hun kaart.');
+        : (asksCity
+            ? demoEmptyHtml(PIN_MINI, 'Nog geen gegevens', noAnswers)
+            : demoEmptyHtml(PIN_MINI, 'Deze vraag staat uit', 'Zet "Vraag naar herkomst" aan in Mijn Kaart om dit te verzamelen.'));
 
       wrap.innerHTML = '<div class="two-col">'
-        + demoBlock('Bezigheid', 'Wat je klanten doen op een doordeweekse dag.', occBody)
-        + demoBlock('Waar komen je klanten vandaan?',
+        + demoBlock(occTitle, 'Wat je klanten doen op een doordeweekse dag.', occBody)
+        + demoBlock(cityTitle,
             city.distinct_cities ? `Verdeeld over ${demoCount(city.distinct_cities)} ${Number(city.distinct_cities) === 1 ? 'plaats' : 'plaatsen'}.` : 'De plaatsen die je klanten opgaven.',
             cityBody)
         + '</div>';
@@ -4582,6 +4743,7 @@
     }
     document.getElementById('demoWrap').addEventListener('click', (e) => {
       if (e.target.closest('[data-open-sub]')) { openSubModal(); return; }
+      if (e.target.closest('[data-goto-kaart]')) { activateTab('kaart'); return; }
       if (e.target.closest('[data-demo-retry]')) loadDemographics(true);
     });
 
@@ -4642,6 +4804,9 @@
           card.stamp_type = c.stamp_type ?? card.stamp_type;
           card.stamp_logo_url = c.stamp_logo_url ?? card.stamp_logo_url;
           card.outline_width = c.outline_width ?? card.outline_width;
+          card.demographics_enabled = c.demographics_enabled === true;
+          card.ask_occupation = c.ask_occupation !== false;
+          card.ask_city = c.ask_city !== false;
 
           const s = data.stats || {};
           document.getElementById('statCustomers').textContent = s.total_customers ?? s.customers ?? 0;
