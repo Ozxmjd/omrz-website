@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verwerkersovereenkomst · OMRZ Digital</title>
+  <meta name="description" content="Verwerkersovereenkomst (AVG) tussen OMRZ Digital als verwerker en de winkelier als verwerkingsverantwoordelijke, voor de digitale stempelkaart." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    /* ===== Shared theme kit CSS ===== */
+    :root {
+      --bg: #0a0a0a;
+      --text: #ffffff;
+      --muted: #a0a0a0;
+      --pearl: #e8e8e8;
+      --card: rgba(255, 255, 255, .05);
+      --border: rgba(255, 255, 255, .1);
+      --border-strong: rgba(255, 255, 255, .18);
+      --radius: 18px;
+      --maxw: 1180px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; font-size: 17px; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+    .container { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: 24px; }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; font-size: 15px; font-weight: 600; line-height: 1; padding: 14px 24px; border-radius: 10px; border: 1px solid transparent; cursor: pointer; white-space: nowrap; transition: transform .25s var(--ease), background .25s var(--ease), border-color .25s var(--ease), color .25s var(--ease), box-shadow .3s var(--ease); }
+    .btn-outline { background: transparent; color: var(--text); border-color: var(--border-strong); }
+    .btn-outline:hover { background: #fff; color: #0a0a0a; border-color: #fff; }
+
+    .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,10,10,.6); backdrop-filter: saturate(160%) blur(16px); -webkit-backdrop-filter: saturate(160%) blur(16px); border-bottom: 1px solid transparent; transition: border-color .3s var(--ease), background .3s var(--ease); }
+    .nav.scrolled { border-color: var(--border); background: rgba(10,10,10,.82); }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 66px; }
+    .brand { font-size: 20px; font-weight: 800; letter-spacing: -.02em; color: #fff; display: inline-flex; align-items: center; gap: 10px; }
+    .brand-logo { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; object-position: center; flex-shrink: 0; }
+    .nav-links { display: flex; gap: 30px; list-style: none; }
+    .nav-links a { font-size: 14.5px; font-weight: 500; color: var(--muted); transition: color .2s var(--ease); }
+    .nav-links a:hover, .nav-links a.active { color: #fff; }
+    .nav-right { display: flex; align-items: center; gap: 8px; }
+    .nav-login { font-size: 14.5px; font-weight: 500; color: var(--muted); padding: 0 6px; transition: color .2s var(--ease); }
+    .nav-login:hover { color: #fff; }
+    .nav-toggle { display: none; flex-direction: column; gap: 5px; background: none; border: 0; cursor: pointer; padding: 8px; }
+    .nav-toggle span { width: 22px; height: 2px; background: #fff; border-radius: 2px; }
+
+    .footer { border-top: 1px solid var(--border); padding: 54px 0 40px; }
+    .footer-top { display: flex; flex-wrap: wrap; gap: 40px; justify-content: space-between; margin-bottom: 40px; }
+    .footer-brand { max-width: 300px; }
+    .footer-brand .brand { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .footer-brand p { color: var(--muted); font-size: 15px; }
+    .footer-cols { display: flex; gap: 60px; flex-wrap: wrap; }
+    .footer-col h4 { font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #6a6a6a; margin-bottom: 16px; }
+    .footer-col ul { list-style: none; display: grid; gap: 11px; }
+    .footer-col a { color: var(--muted); font-size: 15px; transition: color .2s var(--ease); }
+    .footer-col a:hover { color: #fff; }
+    .footer-bottom { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: center; padding-top: 28px; border-top: 1px solid var(--border); color: #6a6a6a; font-size: 14px; }
+    .footer-legal { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
+    .footer-bottom a { color: var(--muted); transition: color .2s var(--ease); }
+    .footer-bottom a:hover { color: #fff; }
+
+    /* ===== Legal page ===== */
+    .legal { padding: 128px 0 90px; }
+    .legal-head { max-width: 780px; margin: 0 auto 44px; }
+    .legal-head .eyebrow { display: inline-block; font-size: 12.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--pearl); margin-bottom: 16px; }
+    .legal-head h1 { font-size: clamp(30px, 5vw, 46px); font-weight: 800; letter-spacing: -.03em; line-height: 1.1; }
+    .legal-head .updated { color: var(--muted); font-size: 14.5px; margin-top: 16px; }
+    .legal-body { max-width: 780px; margin: 0 auto; }
+    .legal-body section { margin-bottom: 36px; scroll-margin-top: 90px; }
+    .legal-body h2 { font-size: 21px; font-weight: 800; letter-spacing: -.02em; margin-bottom: 12px; }
+    .legal-body h2 .num { color: #6a6a6a; font-weight: 700; margin-right: 8px; }
+    .legal-body h3 { font-size: 16px; font-weight: 700; color: var(--pearl); margin: 18px 0 8px; }
+    .legal-body p { color: var(--muted); font-size: 16px; margin-bottom: 12px; }
+    .legal-body ul { color: var(--muted); font-size: 16px; margin: 0 0 12px; padding-left: 4px; display: grid; gap: 9px; list-style: none; }
+    /* Hangend streepje i.p.v. flex: bij flex wordt élk inline-element (een <strong>,
+       een link) een eigen kolom, waardoor labels afbreken en leestekens losraken. */
+    .legal-body ul li { display: block; position: relative; padding-left: 24px; }
+    .legal-body ul li::before { content: "—"; position: absolute; left: 0; top: 0; color: #6a6a6a; }
+    .legal-body a { color: #fff; text-decoration: underline; text-underline-offset: 2px; }
+    .legal-body strong { color: var(--pearl); }
+    .legal-table-wrap { overflow-x: auto; margin: 4px 0 12px; }
+    .legal-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+    .legal-table th { text-align: left; font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #6a6a6a; padding: 0 16px 10px 0; white-space: nowrap; }
+    .legal-table td { color: var(--muted); padding: 12px 16px 12px 0; border-top: 1px solid var(--border); vertical-align: top; }
+    .legal-table td:first-child { color: var(--pearl); font-weight: 600; white-space: nowrap; }
+    .legal-table tr td:last-child, .legal-table tr th:last-child { padding-right: 0; }
+    .legal-note { max-width: 780px; margin: 8px auto 0; padding: 18px 20px; font-size: 14.5px; color: var(--muted); }
+    .legal-note strong { color: var(--pearl); }
+
+    @media (max-width: 900px) {
+      .nav-links { display: none; }
+      .nav-toggle { display: flex; }
+      .nav-links.open { display: flex; position: absolute; top: 66px; left: 0; right: 0; flex-direction: column; gap: 4px; padding: 16px 24px 24px; background: rgba(10,10,10,.97); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
+      .nav-links.open a { padding: 12px 0; font-size: 17px; }
+      .legal { padding: 104px 0 70px; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  </style>
+</head>
+<body>
+
+  <!-- ===== Navbar ===== -->
+  <header class="nav" id="nav">
+    <div class="container nav-inner">
+      <a href="index.html" class="brand"><img class="brand-logo" src="images/gold-logo.png" alt="OMRZ Digital logo" />OMRZ Digital</a>
+      <nav>
+        <ul class="nav-links" id="navLinks">
+          <li><a href="index.html#showcase">Producten</a></li>
+          <li><a href="stempelkaart.html">Stempelkaart</a></li>
+          <li><a href="index.html#tools">Review Bot</a></li>
+          <li><a href="index.html#prijzen">Prijzen</a></li>
+        </ul>
+      </nav>
+      <div class="nav-right">
+        <a href="login.html" class="nav-login">Inloggen</a>
+        <a href="aanmelden.html" class="btn btn-outline">Start gratis</a>
+        <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== Content ===== -->
+  <main class="legal">
+    <div class="container">
+      <div class="legal-head">
+        <span class="eyebrow">Juridisch</span>
+        <h1>Verwerkersovereenkomst</h1>
+        <p class="updated">Laatst bijgewerkt: 9 september 2026 · Deze overeenkomst hoort bij de <a href="voorwaarden.html" style="color:#fff;text-decoration:underline;text-underline-offset:2px;">algemene voorwaarden</a></p>
+      </div>
+
+      <div class="legal-body">
+
+        <section id="partijen">
+          <h2><span class="num">1.</span>Partijen</h2>
+          <p>Deze verwerkersovereenkomst (hierna: <strong>overeenkomst</strong>) is aangegaan tussen:</p>
+          <ul>
+            <li><strong>De winkelier</strong> — de ondernemer die een abonnement afneemt op de digitale stempelkaart van OMRZ Digital, zoals geregistreerd in zijn account. Hij handelt hierbij als <strong>verwerkingsverantwoordelijke</strong> in de zin van artikel 4 lid 7 AVG.</li>
+            <li><strong>OMRZ Digital</strong> — de aanbieder van de dienst, gevestigd in Nederland en bereikbaar via <a href="mailto:info@omrzdigital.nl">info@omrzdigital.nl</a>. OMRZ Digital handelt als <strong>verwerker</strong> in de zin van artikel 4 lid 8 AVG.</li>
+          </ul>
+          <p>De gegevens van de winkelier (bedrijfsnaam, KvK-nummer, btw-nummer, adres en contactpersoon) zoals opgegeven in het dashboard onder <strong>Bedrijfsgegevens</strong> gelden als de partijgegevens bij deze overeenkomst.</p>
+          <p>Deze overeenkomst wordt van kracht op het moment dat de winkelier de dienst in gebruik neemt en maakt onderdeel uit van de overeenkomst tussen partijen. Bij tegenstrijdigheid tussen deze verwerkersovereenkomst en de algemene voorwaarden gaat deze verwerkersovereenkomst voor, voor zover het de verwerking van persoonsgegevens betreft.</p>
+        </section>
+
+        <section id="onderwerp">
+          <h2><span class="num">2.</span>Onderwerp</h2>
+          <p>OMRZ Digital verwerkt in het kader van de digitale stempelkaart persoonsgegevens van de klanten van de winkelier (hierna: <strong>eindklanten</strong>). Dit gebeurt uitsluitend <strong>namens en in opdracht van de winkelier</strong>.</p>
+          <p>De winkelier bepaalt het doel en de middelen van de verwerking. Hij is verantwoordelijk voor een geldige grondslag onder artikel 6 AVG — bij een loyaliteitsprogramma in de regel toestemming van de eindklant of de uitvoering van de overeenkomst — en voor een eigen privacyverklaring richting zijn klanten.</p>
+          <p>OMRZ Digital is verantwoordelijk voor de technische uitvoering en beveiliging van de verwerking, en verwerkt de gegevens niet voor eigen doeleinden.</p>
+        </section>
+
+        <section id="gegevens">
+          <h2><span class="num">3.</span>Soorten persoonsgegevens en betrokkenen</h2>
+          <p><strong>Betrokkenen:</strong> de eindklanten van de winkelier die deelnemen aan het loyaliteitsprogramma.</p>
+          <p><strong>Categorieën persoonsgegevens:</strong></p>
+          <ul>
+            <li><strong>Naam</strong> — voor- en achternaam, zoals opgegeven bij het aanmaken van de spaarkaart.</li>
+            <li><strong>E-mailadres</strong> — voor het aanmaken en terugvinden van de kaart en voor kaartgerelateerde berichten.</li>
+            <li><strong>Telefoonnummer</strong> — optioneel, indien de eindklant dit opgeeft.</li>
+            <li><strong>Spaargegevens</strong> — het aantal verzamelde stempels, verdiende en ingewisselde beloningen, het tijdstip van bezoeken en de vestiging waar werd gespaard.</li>
+            <li><strong>Technische identificatoren</strong> — een unieke, willekeurig gegenereerde QR-code per eindklant, zodat de kaart gescand kan worden.</li>
+            <li><strong>Demografische gegevens (optioneel, premium)</strong> — bezigheid (student, werknemer, ondernemer, gepensioneerd of anders) en herkomst (plaats of &ldquo;buiten Nederland&rdquo;). Deze velden worden alleen getoond wanneer de winkelier de functie <strong>Klantinzichten</strong> heeft ingeschakeld, en de eindklant vult ze <strong>vrijwillig</strong> in. Hij kan de vragen leeg laten en toch een kaart aanmaken.</li>
+          </ul>
+          <p>Er worden <strong>geen bijzondere categorieën van persoonsgegevens</strong> in de zin van artikel 9 AVG verwerkt. De winkelier voert dergelijke gegevens ook niet in via de dienst.</p>
+        </section>
+
+        <section id="doeleinden">
+          <h2><span class="num">4.</span>Doeleinden en instructies</h2>
+          <p>OMRZ Digital verwerkt de persoonsgegevens uitsluitend voor de volgende doeleinden:</p>
+          <ul>
+            <li>het aanmaken, tonen en bijhouden van de digitale stempelkaart van de eindklant;</li>
+            <li>het registreren van stempels en het uitkeren van beloningen;</li>
+            <li>het aanbieden van de kaart in Apple Wallet en Google Wallet;</li>
+            <li>het tonen van statistieken en klantinzichten aan de winkelier in zijn dashboard;</li>
+            <li>het versturen van kaartgerelateerde berichten aan de eindklant namens de winkelier.</li>
+          </ul>
+          <p>OMRZ Digital verwerkt de gegevens <strong>uitsluitend op basis van schriftelijke instructies</strong> van de winkelier. Het gebruik van de dienst en de instellingen die de winkelier in zijn dashboard kiest, gelden als zulke instructies. OMRZ Digital gebruikt de gegevens van eindklanten <strong>niet voor eigen doeleinden</strong>, verkoopt ze niet, verhuurt ze niet en gebruikt ze niet voor eigen marketing of voor het trainen van modellen.</p>
+          <p>Meent OMRZ Digital dat een instructie in strijd is met de AVG of andere wetgeving, dan meldt zij dit onverwijld aan de winkelier. Verplicht Unierecht of Nederlands recht OMRZ Digital tot een verwerking, dan informeert zij de winkelier daarover vooraf, tenzij dat recht die kennisgeving verbiedt.</p>
+        </section>
+
+        <section id="verplichtingen">
+          <h2><span class="num">5.</span>Verplichtingen van de verwerker</h2>
+          <p>OMRZ Digital verplicht zich tot het volgende:</p>
+          <ul>
+            <li><strong>Alleen volgens instructies verwerken</strong> — zoals beschreven in artikel 4.</li>
+            <li><strong>Vertrouwelijkheid</strong> — personen die toegang hebben tot de gegevens zijn tot geheimhouding verplicht en krijgen alleen toegang voor zover dat nodig is voor hun werk.</li>
+            <li><strong>Passende beveiliging</strong> — het treffen en onderhouden van de technische en organisatorische maatregelen uit artikel 6, conform artikel 32 AVG.</li>
+            <li><strong>Bijstand bij verzoeken van betrokkenen</strong> — het verlenen van redelijke medewerking bij verzoeken om inzage, correctie, verwijdering, beperking of overdraagbaarheid, zoals beschreven in artikel 8.</li>
+            <li><strong>Bijstand bij verplichtingen</strong> — het verlenen van redelijke medewerking bij beveiligingsmaatregelen, datalekmeldingen en een eventuele gegevensbeschermingseffectbeoordeling (DPIA).</li>
+            <li><strong>Melden van datalekken</strong> — zoals beschreven in artikel 9.</li>
+            <li><strong>Informatieplicht en audits</strong> — het op verzoek beschikbaar stellen van de informatie die nodig is om aan te tonen dat aan deze overeenkomst wordt voldaan. De winkelier mag ten hoogste eenmaal per jaar een audit laten uitvoeren door een onafhankelijke, aan geheimhouding gebonden deskundige, na een aankondiging van ten minste dertig dagen en op een moment dat de dienstverlening niet verstoort. De kosten van de audit komen voor rekening van de winkelier, tenzij daaruit een wezenlijke tekortkoming van OMRZ Digital blijkt.</li>
+            <li><strong>Verwijderen of teruggeven</strong> — na beëindiging, zoals beschreven in artikel 10.</li>
+          </ul>
+        </section>
+
+        <section id="beveiliging">
+          <h2><span class="num">6.</span>Beveiligingsmaatregelen</h2>
+          <p>OMRZ Digital treft passende technische en organisatorische maatregelen om persoonsgegevens te beschermen tegen verlies, misbruik en onrechtmatige verwerking. Daaronder vallen in ieder geval:</p>
+          <ul>
+            <li><strong>Versleuteld transport</strong> — al het verkeer tussen de eindklant, de winkelier en onze servers verloopt via HTTPS/TLS.</li>
+            <li><strong>Gehashte wachtwoorden</strong> — wachtwoorden van winkeliers en medewerkers worden nooit leesbaar opgeslagen, maar uitsluitend als cryptografische hash.</li>
+            <li><strong>Opslag binnen de EU</strong> — de database en bestandsopslag draaien op servers binnen de Europese Unie.</li>
+            <li><strong>Row-Level Security</strong> — op databaseniveau is afgedwongen dat een winkelier uitsluitend de gegevens van zijn eigen kaart en vestigingen kan benaderen.</li>
+            <li><strong>Toegangscontrole</strong> — toegang tot de dienst verloopt via persoonlijke accounts met tokens die na verloop van tijd verlopen. Medewerkers van een winkelier (vestigingsmanagers) zien uitsluitend de gegevens van hun eigen vestiging.</li>
+            <li><strong>Rate limiting</strong> — het aantal verzoeken per gebruiker is begrensd, om misbruik en geautomatiseerde aanvallen tegen te gaan.</li>
+            <li><strong>Dagelijkse back-ups</strong> — van de database worden dagelijks back-ups gemaakt, zodat gegevens na een storing hersteld kunnen worden.</li>
+            <li><strong>Dataminimalisatie</strong> — er worden niet meer gegevens gevraagd dan nodig; de demografische velden zijn optioneel en staan standaard uit.</li>
+          </ul>
+          <p>De maatregelen worden periodiek geëvalueerd en kunnen worden aangepast aan de stand van de techniek, mits het beschermingsniveau daarmee gelijk blijft of verbetert.</p>
+        </section>
+
+        <section id="subverwerkers">
+          <h2><span class="num">7.</span>Subverwerkers</h2>
+          <p>De winkelier geeft OMRZ Digital <strong>algemene toestemming</strong> om subverwerkers in te schakelen. OMRZ Digital sluit met elke subverwerker een overeenkomst met ten minste dezelfde verplichtingen als in deze overeenkomst, en blijft jegens de winkelier verantwoordelijk voor hun handelen.</p>
+          <p>Op dit moment worden de volgende subverwerkers ingeschakeld:</p>
+          <div class="legal-table-wrap">
+            <table class="legal-table">
+              <thead><tr><th>Subverwerker</th><th>Doel</th><th>Locatie</th></tr></thead>
+              <tbody>
+                <tr><td>Supabase</td><td>Database en bestandsopslag</td><td>Europese Unie</td></tr>
+                <tr><td>Railway</td><td>Hosting van de applicatie</td><td>Europese Unie</td></tr>
+                <tr><td>Stripe</td><td>Verwerking van abonnementsbetalingen van de winkelier</td><td>EU / VS, met passende waarborgen</td></tr>
+                <tr><td>Resend</td><td>Versturen van transactionele e-mail</td><td>EU / VS, met passende waarborgen</td></tr>
+                <tr><td>Apple</td><td>Aanbieden van de kaart in Apple Wallet</td><td>EU / VS, met passende waarborgen</td></tr>
+                <tr><td>Google</td><td>Aanbieden van de kaart in Google Wallet</td><td>EU / VS, met passende waarborgen</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>Voor doorgiften buiten de Europese Economische Ruimte gelden passende waarborgen, zoals de standaardcontractbepalingen van de Europese Commissie of een geldig adequaatheidsbesluit.</p>
+          <p>Wil OMRZ Digital een subverwerker toevoegen of vervangen, dan meldt zij dit ten minste <strong>dertig dagen vooraf</strong>. De winkelier kan daartegen op redelijke gronden bezwaar maken. Komen partijen er niet uit, dan mag de winkelier het abonnement opzeggen tegen de datum waarop de wijziging ingaat.</p>
+        </section>
+
+        <section id="rechten">
+          <h2><span class="num">8.</span>Rechten van betrokkenen</h2>
+          <p>Eindklanten hebben op grond van de AVG recht op inzage, correctie, verwijdering, beperking van de verwerking, bezwaar en overdraagbaarheid van hun gegevens. De <strong>winkelier is het eerste aanspreekpunt</strong> voor deze verzoeken, omdat hij de verwerkingsverantwoordelijke is.</p>
+          <ul>
+            <li>Een eindklant kan zijn gegevens en spaarsaldo zelf inzien via zijn digitale kaart.</li>
+            <li>De winkelier kan gegevens van een eindklant inzien en verwijderen via zijn dashboard.</li>
+            <li>Kan de winkelier een verzoek niet zelf afhandelen, dan verleent OMRZ Digital daarbij kosteloos redelijke technische medewerking, in beginsel <strong>binnen tien werkdagen</strong> na het verzoek.</li>
+            <li>Komt een verzoek van een eindklant rechtstreeks bij OMRZ Digital binnen, dan handelt OMRZ Digital dit niet zelfstandig af, maar stuurt zij het onverwijld door naar de betreffende winkelier — tenzij zij daartoe wettelijk verplicht is.</li>
+          </ul>
+        </section>
+
+        <section id="datalekken">
+          <h2><span class="num">9.</span>Datalekken</h2>
+          <p>Constateert OMRZ Digital een inbreuk in verband met persoonsgegevens (een datalek), dan informeert zij de betrokken winkelier <strong>onverwijld en uiterlijk binnen 48 uur</strong> na ontdekking. De melding bevat, voor zover bekend:</p>
+          <ul>
+            <li>de aard van de inbreuk en, zo mogelijk, de betrokken categorieën en aantallen personen en gegevens;</li>
+            <li>de waarschijnlijke gevolgen van de inbreuk;</li>
+            <li>de maatregelen die zijn of worden genomen om de inbreuk aan te pakken en de gevolgen te beperken;</li>
+            <li>de contactgegevens voor nadere informatie.</li>
+          </ul>
+          <p>Is nog niet alle informatie beschikbaar, dan meldt OMRZ Digital wat bekend is en vult zij dit zo spoedig mogelijk aan. OMRZ Digital houdt een registratie van datalekken bij.</p>
+          <p>De <strong>winkelier</strong> beoordeelt vervolgens of melding aan de Autoriteit Persoonsgegevens (binnen 72 uur) en aan de betrokken eindklanten nodig is, en doet die melding. OMRZ Digital verleent daarbij redelijke medewerking. OMRZ Digital doet geen zelfstandige melding namens de winkelier, tenzij dat uitdrukkelijk is afgesproken.</p>
+        </section>
+
+        <section id="duur">
+          <h2><span class="num">10.</span>Duur en beëindiging</h2>
+          <p>Deze overeenkomst gaat in op het moment dat OMRZ Digital voor het eerst persoonsgegevens verwerkt namens de winkelier, en loopt zolang het abonnement duurt. Zij eindigt van rechtswege zodra de onderliggende overeenkomst eindigt.</p>
+          <p>Na beëindiging:</p>
+          <ul>
+            <li>kan de winkelier gedurende <strong>dertig dagen</strong> een export van de gegevens van zijn eindklanten opvragen via <a href="mailto:info@omrzdigital.nl">info@omrzdigital.nl</a>;</li>
+            <li>verwijdert OMRZ Digital de persoonsgegevens daarna uit de productieomgeving, in beginsel <strong>binnen dertig dagen</strong> na afloop van die termijn;</li>
+            <li>verdwijnen resterende kopieën in back-ups zodra die back-ups volgens de reguliere cyclus verlopen;</li>
+            <li>blijven gegevens die OMRZ Digital wettelijk moet bewaren — zoals facturatiegegevens van de winkelier voor de fiscale bewaarplicht van zeven jaar — bewaard, uitsluitend voor dat doel.</li>
+          </ul>
+          <p>Bepalingen die naar hun aard bedoeld zijn om na beëindiging voort te duren, zoals geheimhouding, blijven van kracht.</p>
+        </section>
+
+        <section id="overig">
+          <h2><span class="num">11.</span>Aansprakelijkheid, toepasselijk recht en contact</h2>
+          <p>Op deze overeenkomst is <strong>Nederlands recht</strong> van toepassing. Geschillen worden voorgelegd aan de bevoegde rechter in Nederland. De aansprakelijkheidsregeling uit de <a href="voorwaarden.html">algemene voorwaarden</a> is van overeenkomstige toepassing, voor zover dwingend recht dat toelaat. Artikel 82 AVG blijft onverkort gelden.</p>
+          <p>OMRZ Digital kan deze overeenkomst wijzigen wanneer wet- of regelgeving, de dienst of de ingeschakelde subverwerkers daartoe aanleiding geven. Wezenlijke wijzigingen worden ten minste dertig dagen vooraf aangekondigd.</p>
+          <p>Vragen over deze verwerkersovereenkomst, of behoefte aan een ondertekend exemplaar op naam van je bedrijf? Neem contact op via <a href="mailto:info@omrzdigital.nl">info@omrzdigital.nl</a>. Zie ook ons <a href="privacy.html">privacybeleid</a> en onze <a href="voorwaarden.html">algemene voorwaarden</a>.</p>
+        </section>
+
+      </div>
+
+      <div class="legal-note">
+        <p><strong>Let op.</strong> Dit is een professioneel opgesteld concept dat de gebruikelijke onderdelen van een verwerkersovereenkomst onder de AVG bevat. Het is <strong>geen individueel juridisch advies</strong> en niet toegesneden op de specifieke situatie van jouw onderneming. Twijfel je of deze overeenkomst voor jouw situatie volstaat, of heb je een eigen model dat je wilt gebruiken? Leg dit dan voor aan een jurist en neem gerust contact met ons op via <a href="mailto:info@omrzdigital.nl">info@omrzdigital.nl</a>.</p>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <a href="index.html" class="brand"><img class="brand-logo" src="images/gold-logo.png" alt="OMRZ Digital logo" />OMRZ Digital</a>
+          <p>Slimme AI-tools die het Nederlandse MKB laten groeien.</p>
+        </div>
+        <div class="footer-cols">
+          <div class="footer-col"><h4>Producten</h4><ul><li><a href="index.html#tools">AI Review Bot</a></li><li><a href="stempelkaart.html">Digitale Stempelkaart</a></li><li><a href="index.html#prijzen">Prijzen</a></li></ul></div>
+          <div class="footer-col"><h4>Bedrijf</h4><ul><li><a href="index.html">Home</a></li><li><a href="contact.html">Contact</a></li><li><a href="mailto:info@omrzdigital.nl">info@omrzdigital.nl</a></li></ul></div>
+          <div class="footer-col"><h4>Juridisch</h4><ul><li><a href="privacy.html">Privacybeleid</a></li><li><a href="voorwaarden.html">Algemene voorwaarden</a></li><li><a href="verwerkersovereenkomst.html">Verwerkersovereenkomst</a></li></ul></div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span id="year">2026</span> OMRZ Digital · Alle rechten voorbehouden</span>
+        <div class="footer-legal">
+          <a href="privacy.html">Privacybeleid</a>
+          <a href="voorwaarden.html">Algemene voorwaarden</a>
+          <a href="verwerkersovereenkomst.html">Verwerkersovereenkomst</a>
+          <a href="mailto:info@omrzdigital.nl">info@omrzdigital.nl</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+  (function () {
+    'use strict';
+    var nav = document.getElementById('nav');
+    function onScroll() { nav.classList.toggle('scrolled', window.scrollY > 8); }
+    onScroll(); window.addEventListener('scroll', onScroll, { passive: true });
+    var toggle = document.getElementById('navToggle'), links = document.getElementById('navLinks');
+    toggle.addEventListener('click', function () { var open = links.classList.toggle('open'); toggle.setAttribute('aria-expanded', open ? 'true' : 'false'); });
+    links.addEventListener('click', function (e) { if (e.target.tagName === 'A') { links.classList.remove('open'); toggle.setAttribute('aria-expanded', 'false'); } });
+    var y = document.getElementById('year'); if (y) y.textContent = new Date().getFullYear();
+  })();
+  </script>
+</body>
+</html>

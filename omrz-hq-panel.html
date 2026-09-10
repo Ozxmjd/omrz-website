@@ -227,6 +227,36 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .empty-state { text-align: center; padding: 50px 24px; color: var(--muted); font-size: 15px; }
 
+    /* ---------- Beheer: archiveren & verwijderen ---------- */
+    .cm-admin-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      margin-top: 6px; padding-top: 18px; border-top: 1px solid var(--border); }
+    .cm-admin-row .btn { font-size: 13px; padding: 9px 15px; }
+    .cm-admin-hint { font-size: 12.5px; color: var(--muted); flex-basis: 100%; line-height: 1.5; }
+    .btn-danger { background: transparent; color: #ff9b9b; border-color: rgba(255,80,80,.35); }
+    .btn-danger:hover:not(:disabled) { background: rgba(255,80,80,.1); border-color: #ff9b9b; }
+    .btn-danger-solid { background: #dc2626; color: #fff; border-color: #dc2626; }
+    .btn-danger-solid:hover:not(:disabled) { background: #b91c1c; border-color: #b91c1c; }
+    .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    /* Verwijder-bevestiging */
+    .danger-box { border: 1px solid rgba(255,80,80,.35); background: rgba(255,80,80,.07);
+      border-radius: 14px; padding: 16px 18px; margin-bottom: 18px; }
+    .danger-box h4 { font-size: 14.5px; font-weight: 800; color: #ffb4b4; margin-bottom: 6px; }
+    .danger-box p { font-size: 13.5px; color: var(--muted); line-height: 1.55; }
+    .del-list { list-style: none; display: grid; gap: 8px; margin: 14px 0 0; }
+    .del-list li { display: flex; align-items: baseline; justify-content: space-between; gap: 14px;
+      font-size: 13.5px; color: var(--muted); padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+    .del-list li:last-child { border-bottom: 0; padding-bottom: 0; }
+    .del-list strong { color: var(--pearl); font-weight: 700; white-space: nowrap; }
+    .del-confirm { margin-top: 16px; }
+    .del-confirm label { display: block; font-size: 13px; font-weight: 600; color: var(--pearl); margin-bottom: 8px; }
+    .del-confirm code { font-family: ui-monospace, Menlo, Consolas, monospace; color: #fff;
+      background: rgba(255,255,255,.08); border-radius: 5px; padding: 1px 6px; }
+    .del-confirm input { width: 100%; font-family: inherit; font-size: 14.5px; color: #fff;
+      background: rgba(255,255,255,.04); border: 1px solid var(--border-strong);
+      border-radius: 10px; padding: 11px 13px; }
+    .del-confirm input:focus { outline: none; border-color: #ff9b9b; background: rgba(255,80,80,.06); }
+
     /* ---------- CRM: filter segment ---------- */
     .seg { display: inline-flex; padding: 4px; border-radius: 12px; border: 1px solid var(--border); background: rgba(255,255,255,.03); flex-wrap: wrap; }
     .seg button { font-family: inherit; font-size: 13.5px; font-weight: 600; color: var(--muted); padding: 8px 16px; border-radius: 9px; border: 0; background: none; cursor: pointer; transition: color .2s var(--ease), background .2s var(--ease); }
@@ -434,9 +464,10 @@
 
           <div class="seg" id="statusSeg" style="margin-bottom:18px;">
             <button class="active" data-f="all">Alle</button>
-            <button data-f="trial">Trial</button>
             <button data-f="active">Actief</button>
-            <button data-f="canceled">Opgezegd</button>
+            <button data-f="trial">Trial</button>
+            <button data-f="expired">Verlopen</button>
+            <button data-f="archived">Gearchiveerd</button>
           </div>
 
           <div id="bizTableWrap">
@@ -584,7 +615,39 @@
           <button type="button" class="btn btn-ghost" id="crmCancelBtn">Annuleren</button>
           <span class="save-note" id="crmNote"></span>
         </div>
+
+        <div class="cm-admin-row full">
+          <button type="button" class="btn btn-ghost" id="crmArchiveBtn"><span class="btn-label">Archiveren</span></button>
+          <button type="button" class="btn btn-danger" id="crmDeleteBtn">Verwijderen…</button>
+          <span class="save-note" id="crmAdminNote"></span>
+          <span class="cm-admin-hint" id="crmAdminHint"></span>
+        </div>
       </form>
+    </div>
+  </div>
+
+  <!-- ===== Winkelier verwijderen (dubbele bevestiging) ===== -->
+  <div class="modal-overlay" id="delModal" hidden>
+    <div class="modal glass" role="dialog" aria-modal="true" aria-labelledby="delModalTitle">
+      <div class="modal-head">
+        <div>
+          <h3 id="delModalTitle">Winkelier verwijderen</h3>
+          <div class="mh-sub" id="delModalSub">Dit kan niet ongedaan gemaakt worden</div>
+        </div>
+        <button class="modal-close" id="delClose" aria-label="Sluiten">✕</button>
+      </div>
+
+      <div id="delBody">
+        <div class="loader" style="padding:16px 0;"><span class="spinner"></span> Controleren wat er verwijderd wordt…</div>
+      </div>
+
+      <div class="cm-modal-foot" style="margin-top:18px;">
+        <button type="button" class="btn btn-danger-solid" id="delConfirmBtn" disabled>
+          <span class="btn-label">Definitief verwijderen</span>
+        </button>
+        <button type="button" class="btn btn-ghost" id="delCancelBtn">Annuleren</button>
+        <span class="save-note" id="delNote"></span>
+      </div>
     </div>
   </div>
 
@@ -758,7 +821,13 @@
         createdRaw,
         created: parseDate(createdRaw),
         status: normalizeStatus(raw),
+        // De rauwe access_status is leidend voor verwijderen: de backend laat dat
+        // alleen toe bij none/expired/canceled, niet bij een actief of proefaccount.
+        accessStatus: String(raw.access_status || '').trim().toLowerCase(),
+        archived: raw.archived === true,
+        archivedAt: raw.archived_at || null,
         get active() { return this.status.key === 'active'; },
+        get deletable() { return DELETABLE_STATUSES.has(this.accessStatus); },
       };
     }
     // Maandelijkse omzet-equivalent van één winkelier.
@@ -846,10 +915,20 @@
     let statusFilter = 'all';
     const CHEV = '<svg class="crm-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>';
 
+    // Verwijderen mag alleen bij deze statussen — exact de set die de backend accepteert.
+    const DELETABLE_STATUSES = new Set(['none', 'expired', 'canceled']);
+
     function filteredBusinesses() {
       const q = (bizSearch.value || '').trim().toLowerCase();
       return businesses.filter(b => {
-        if (statusFilter !== 'all' && b.status.key !== statusFilter) return false;
+        // Gearchiveerde accounts staan in hun eigen tabblad en nergens anders tussen.
+        if (statusFilter === 'archived') {
+          if (!b.archived) return false;
+        } else {
+          if (b.archived) return false;
+          if (statusFilter === 'expired') { if (!b.deletable) return false; }
+          else if (statusFilter !== 'all' && b.status.key !== statusFilter) return false;
+        }
         if (!q) return true;
         return b.name.toLowerCase().includes(q)
           || (b.email || '').toLowerCase().includes(q)
@@ -862,7 +941,12 @@
       const wrap = document.getElementById('bizTableWrap');
       if (!businesses.length) { wrap.innerHTML = '<div class="empty-state">Nog geen winkeliers aangemeld.</div>'; return; }
       const rows = filteredBusinesses();
-      if (!rows.length) { wrap.innerHTML = '<div class="empty-state">Geen winkeliers gevonden. Pas je zoekopdracht of filter aan.</div>'; return; }
+      if (!rows.length) {
+        wrap.innerHTML = '<div class="empty-state">' + (statusFilter === 'archived'
+          ? 'Geen gearchiveerde winkeliers.'
+          : 'Geen winkeliers gevonden. Pas je zoekopdracht of filter aan.') + '</div>';
+        return;
+      }
 
       wrap.innerHTML = '<div class="crm-list">' + rows.map(b => `
         <button type="button" class="crm-card" data-id="${escapeHtml(String(b.id))}">
@@ -872,6 +956,7 @@
             <div class="crm-sub">${escapeHtml(b.email || 'Geen e-mail')}${b.city ? ' · ' + escapeHtml(b.city) : ''}</div>
           </div>
           <div class="crm-tags">
+            ${b.archived ? '<span class="pill none">Gearchiveerd</span>' : ''}
             <span class="pill ${b.status.cls}">${b.status.label}</span>
             <span class="crm-price">${b.price ? euro(b.price) + (b.billing === 'yearly' ? '/jr' : '/mnd') : '—'}</span>
             <span class="crm-locs">${b.locations} ${b.locations === 1 ? 'vestiging' : 'vestigingen'}</span>
@@ -933,9 +1018,163 @@
       setVal('cmNotes', b.notes);
 
       const note = document.getElementById('crmNote'); note.className = 'save-note'; note.textContent = '';
+      renderAdminActions(b);
       crmModal.hidden = false;
     }
     function closeCrm() { crmModal.hidden = true; editingBiz = null; }
+
+    // ============================================================
+    //  Archiveren, terughalen en verwijderen
+    // ============================================================
+    // Nette Nederlandse namen bij de tabellen uit de dry-run.
+    const DELETE_LABELS = {
+      stamp_business_users: 'Winkelier-account',
+      stamp_cards: 'Stempelkaarten',
+      stamp_holders: 'Klanten (spaarders)',
+      stamp_transactions: 'Stempeltransacties',
+      stamp_locations: 'Vestigingen',
+      stamp_location_managers: 'Vestigingsmanagers',
+      stamp_invoices: 'Facturen',
+      apple_pass_registrations: 'Apple Wallet-registraties',
+    };
+    function adminNote(msg, kind) {
+      const el = document.getElementById('crmAdminNote');
+      if (!el) return;
+      el.textContent = msg || '';
+      el.className = 'save-note' + (msg ? ' ' + (kind || '') : '');
+      if (msg) setTimeout(() => { el.textContent = ''; el.className = 'save-note'; }, 4000);
+    }
+    // Knoppen afstemmen op de status van deze winkelier.
+    function renderAdminActions(b) {
+      const arch = document.getElementById('crmArchiveBtn');
+      const del = document.getElementById('crmDeleteBtn');
+      const hint = document.getElementById('crmAdminHint');
+      arch.querySelector('.btn-label').textContent = b.archived ? 'Terughalen' : 'Archiveren';
+      // Verwijderen kan alleen bij een niet-actief account; de backend weigert de rest.
+      del.disabled = !b.deletable;
+      hint.textContent = b.deletable
+        ? 'Verwijderen wist het account en alle bijbehorende gegevens definitief.'
+        : 'Een actieve klant of proefaccount kan niet verwijderd worden. Archiveer deze klant eerst, of wacht tot het abonnement is opgezegd.';
+    }
+
+    async function toggleArchive() {
+      const b = editingBiz;
+      if (!b) return;
+      const btn = document.getElementById('crmArchiveBtn');
+      const target = b.archived ? 'unarchive' : 'archive';
+      btn.classList.add('loading'); btn.disabled = true;
+      try {
+        const res = await fetch(API_BASE + '/api/admin/businesses/' + encodeURIComponent(b.id) + '/' + target,
+          { method: 'POST', headers: adminHeaders() });
+        if (res.status === 401 || res.status === 403) {
+          localStorage.removeItem('admin_token'); window.location.replace('omrz-hq-control.html'); return;
+        }
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Actie mislukt');
+        b.archived = (target === 'archive');
+        b.archivedAt = b.archived ? new Date().toISOString() : null;
+        renderAdminActions(b);
+        renderBusinessList();
+        adminNote(b.archived ? 'Klant gearchiveerd' : 'Klant teruggehaald', 'ok');
+      } catch (err) {
+        adminNote(err.message || 'Actie mislukt', 'error');
+      } finally {
+        btn.classList.remove('loading'); btn.disabled = false;
+      }
+    }
+
+    // ---- Verwijderen: dry-run tonen, daarna naam laten typen ----
+    const delModal = document.getElementById('delModal');
+    let deletingBiz = null;
+    function closeDel() { delModal.hidden = true; deletingBiz = null; }
+
+    async function openDelete() {
+      const b = editingBiz;
+      if (!b || !b.deletable) return;
+      deletingBiz = b;
+      document.getElementById('delModalTitle').textContent = 'Verwijder ' + b.name;
+      document.getElementById('delModalSub').textContent = b.email || 'Dit kan niet ongedaan gemaakt worden';
+      document.getElementById('delNote').textContent = '';
+      document.getElementById('delConfirmBtn').disabled = true;
+      document.getElementById('delBody').innerHTML =
+        '<div class="loader" style="padding:16px 0;"><span class="spinner"></span> Controleren wat er verwijderd wordt…</div>';
+      delModal.hidden = false;
+
+      try {
+        const res = await fetch(API_BASE + '/api/admin/businesses/' + encodeURIComponent(b.id) + '?dry_run=true',
+          { method: 'DELETE', headers: adminHeaders() });
+        if (res.status === 401) {
+          localStorage.removeItem('admin_token'); window.location.replace('omrz-hq-control.html'); return;
+        }
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Kon de controle niet uitvoeren');
+        renderDeletePreview(b, data.would_delete || {});
+      } catch (err) {
+        document.getElementById('delBody').innerHTML =
+          `<div class="danger-box"><h4>Controle mislukt</h4><p>${escapeHtml(err.message || 'Onbekende fout')}</p></div>`;
+      }
+    }
+
+    function renderDeletePreview(b, counts) {
+      // Alleen tabellen met daadwerkelijk iets erin; het account zelf staat er altijd bij.
+      const rows = Object.keys(DELETE_LABELS)
+        .filter(k => k === 'stamp_business_users' || Number(counts[k]) > 0)
+        .map(k => `<li><span>${escapeHtml(DELETE_LABELS[k])}</span><strong>${Number(counts[k] || 0).toLocaleString('nl-NL')}</strong></li>`)
+        .join('');
+      document.getElementById('delBody').innerHTML = `
+        <div class="danger-box">
+          <h4>Dit verwijdert alles van deze winkelier</h4>
+          <p>Het account, de stempelkaart en alle onderstaande gegevens worden definitief gewist.
+             <strong>Dit kan NIET ongedaan gemaakt worden.</strong> Wil je de klant alleen uit de lijst halen, gebruik dan Archiveren.</p>
+          <ul class="del-list">${rows}</ul>
+        </div>
+        <div class="del-confirm">
+          <label for="delConfirmInput">Typ ter bevestiging de bedrijfsnaam <code>${escapeHtml(b.name)}</code></label>
+          <input type="text" id="delConfirmInput" autocomplete="off" spellcheck="false" placeholder="${escapeHtml(b.name)}" />
+        </div>`;
+      const input = document.getElementById('delConfirmInput');
+      const btn = document.getElementById('delConfirmBtn');
+      const match = () => input.value.trim().toLowerCase() === b.name.trim().toLowerCase();
+      input.addEventListener('input', () => { btn.disabled = !match(); });
+      input.addEventListener('keydown', (e) => { if (e.key === 'Enter' && match()) confirmDelete(); });
+      input.focus();
+    }
+
+    async function confirmDelete() {
+      const b = deletingBiz;
+      const btn = document.getElementById('delConfirmBtn');
+      const note = document.getElementById('delNote');
+      const input = document.getElementById('delConfirmInput');
+      // Laatste controle: de naam moet nog steeds exact kloppen.
+      if (!b || !input || input.value.trim().toLowerCase() !== b.name.trim().toLowerCase()) return;
+      note.className = 'save-note'; note.textContent = 'Verwijderen…';
+      btn.classList.add('loading'); btn.disabled = true;
+      try {
+        const res = await fetch(API_BASE + '/api/admin/businesses/' + encodeURIComponent(b.id),
+          { method: 'DELETE', headers: adminHeaders() });
+        if (res.status === 401) {
+          localStorage.removeItem('admin_token'); window.location.replace('omrz-hq-control.html'); return;
+        }
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Verwijderen mislukt');
+        businesses = businesses.filter(x => String(x.id) !== String(b.id));
+        closeDel(); closeCrm();
+        renderBusinessList();
+        renderAll();
+        adminNote('Klant verwijderd', 'ok');
+      } catch (err) {
+        note.textContent = err.message || 'Verwijderen mislukt'; note.className = 'save-note error';
+        btn.classList.remove('loading'); btn.disabled = false;
+      }
+    }
+
+    document.getElementById('crmArchiveBtn').addEventListener('click', toggleArchive);
+    document.getElementById('crmDeleteBtn').addEventListener('click', openDelete);
+    document.getElementById('delConfirmBtn').addEventListener('click', confirmDelete);
+    document.getElementById('delClose').addEventListener('click', closeDel);
+    document.getElementById('delCancelBtn').addEventListener('click', closeDel);
+    delModal.addEventListener('click', (e) => { if (e.target === delModal) closeDel(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !delModal.hidden) closeDel(); });
     document.getElementById('crmClose').addEventListener('click', closeCrm);
     document.getElementById('crmCancelBtn').addEventListener('click', closeCrm);
     crmModal.addEventListener('click', (e) => { if (e.target === crmModal) closeCrm(); });

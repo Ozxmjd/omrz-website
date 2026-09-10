@@ -75,8 +75,10 @@
     .legal-body h3 { font-size: 16px; font-weight: 700; color: var(--pearl); margin: 18px 0 8px; }
     .legal-body p { color: var(--muted); font-size: 16px; margin-bottom: 12px; }
     .legal-body ul { color: var(--muted); font-size: 16px; margin: 0 0 12px; padding-left: 4px; display: grid; gap: 9px; list-style: none; }
-    .legal-body ul li { display: flex; gap: 12px; }
-    .legal-body ul li::before { content: "—"; color: #6a6a6a; flex-shrink: 0; }
+    /* Hangend streepje i.p.v. flex: bij flex wordt élk inline-element (een <strong>,
+       een link) een eigen kolom, waardoor labels afbreken en leestekens losraken. */
+    .legal-body ul li { display: block; position: relative; padding-left: 24px; }
+    .legal-body ul li::before { content: "—"; position: absolute; left: 0; top: 0; color: #6a6a6a; }
     .legal-body a { color: #fff; text-decoration: underline; text-underline-offset: 2px; }
     .legal-body strong { color: var(--pearl); }
     .legal-note { max-width: 780px; margin: 8px auto 0; padding: 18px 20px; font-size: 14.5px; color: var(--muted); }
@@ -227,7 +229,7 @@
         <div class="footer-cols">
           <div class="footer-col"><h4>Producten</h4><ul><li><a href="index.html#tools">AI Review Bot</a></li><li><a href="stempelkaart.html">Digitale Stempelkaart</a></li><li><a href="index.html#prijzen">Prijzen</a></li></ul></div>
           <div class="footer-col"><h4>Bedrijf</h4><ul><li><a href="index.html">Home</a></li><li><a href="contact.html">Contact</a></li><li><a href="mailto:info@omrzdigital.nl">info@omrzdigital.nl</a></li></ul></div>
-          <div class="footer-col"><h4>Juridisch</h4><ul><li><a href="privacy.html">Privacybeleid</a></li><li><a href="voorwaarden.html">Algemene voorwaarden</a></li></ul></div>
+          <div class="footer-col"><h4>Juridisch</h4><ul><li><a href="privacy.html">Privacybeleid</a></li><li><a href="voorwaarden.html">Algemene voorwaarden</a></li><li><a href="verwerkersovereenkomst.html">Verwerkersovereenkomst</a></li></ul></div>
         </div>
       </div>
       <div class="footer-bottom">
@@ -235,6 +237,7 @@
         <div class="footer-legal">
           <a href="privacy.html">Privacybeleid</a>
           <a href="voorwaarden.html">Algemene voorwaarden</a>
+          <a href="verwerkersovereenkomst.html">Verwerkersovereenkomst</a>
           <a href="mailto:info@omrzdigital.nl">info@omrzdigital.nl</a>
         </div>
       </div>
