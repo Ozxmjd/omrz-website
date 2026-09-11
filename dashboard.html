@@ -1075,18 +1075,39 @@
     .sm-features li::before { content: ""; flex: none; width: 17px; height: 17px; margin-top: 2px; border-radius: 50%; background: rgba(110,231,160,.16); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236ee7a0' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: center; background-size: 10px; }
     .sm-features li.hl { color: var(--text-strong); font-weight: 600; }
 
-    /* Begeleiding: optionele eenmalige dienst, onder de pakketten. */
-    .sm-addon { margin-top: 18px; padding: 16px 18px; border-radius: 14px;
+    /* Begeleiding: verplichte ja/nee-keuze onder de pakketten. */
+    .sm-addon { margin-top: 20px; padding: 18px; border-radius: 14px;
       border: 1px solid var(--border); background: rgba(var(--ink), .022);
-      transition: border-color .25s var(--ease), background .25s var(--ease); }
-    .sm-addon.on { border-color: rgba(139,92,246,.3); background: var(--accent-soft); }
-    .sm-addon-main { display: flex; align-items: flex-start; gap: 13px; cursor: pointer; }
-    .sm-addon-main input { width: 19px; height: 19px; flex-shrink: 0; margin-top: 2px;
-      accent-color: var(--accent); cursor: pointer; }
-    .sm-addon-tx { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-    .sm-addon-tx strong { font-size: 14.5px; font-weight: 600; color: var(--text-strong); }
-    .sm-addon-tx strong .excl { font-weight: 500; color: var(--muted); }
-    .sm-addon-tx small { font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+      transition: border-color .3s var(--ease), box-shadow .3s var(--ease); }
+    .sm-addon-q { font-size: 15px; font-weight: 600; color: var(--text-strong); margin-bottom: 3px; }
+    .sm-addon-hint { font-size: 12.5px; color: var(--muted); margin-bottom: 14px; }
+    .sm-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .sm-choice { position: relative; display: flex; align-items: flex-start; gap: 12px;
+      padding: 15px 16px; border-radius: 12px; cursor: pointer; text-align: left;
+      border: 1px solid var(--border-strong); background: rgba(var(--ink), .022);
+      transition: border-color .2s var(--ease), background .2s var(--ease), box-shadow .2s var(--ease); }
+    .sm-choice:hover { border-color: rgba(139,92,246,.3); background: var(--card-hover); }
+    .sm-choice input { position: absolute; opacity: 0; pointer-events: none; }
+    /* Eigen radioknop, zodat de staat in beide thema's even duidelijk is. */
+    .sm-radio2 { width: 19px; height: 19px; flex-shrink: 0; margin-top: 1px; border-radius: 50%;
+      border: 2px solid var(--border-strong); position: relative; transition: border-color .2s var(--ease); }
+    .sm-choice-tx { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .sm-choice-tx strong { font-size: 14px; font-weight: 600; color: var(--text-strong); line-height: 1.35; }
+    .sm-choice-price { font-size: 13px; font-weight: 600; color: var(--accent-2); }
+    .sm-choice-price.free { color: var(--muted); }
+    .sm-choice-tx small { font-size: 12px; color: var(--muted); line-height: 1.5; }
+    .sm-choice.selected { border-color: rgba(139,92,246,.55); background: var(--accent-soft);
+      box-shadow: inset 0 0 0 1px rgba(139,92,246,.25); }
+    .sm-choice.selected .sm-radio2 { border-color: var(--accent-2); }
+    .sm-choice.selected .sm-radio2::after { content: ""; position: absolute; inset: 3px;
+      border-radius: 50%; background: var(--accent-grad); }
+    .sm-choice:focus-within { outline: none; box-shadow: 0 0 0 3px rgba(99,102,241,.18); }
+    /* Vergeten te kiezen → het blok trekt de aandacht. */
+    .sm-addon.missing { border-color: rgba(255,80,80,.5); box-shadow: 0 0 0 3px rgba(255,80,80,.12); }
+    .sm-addon.missing .sm-choice { border-color: rgba(255,80,80,.35); }
+    .sm-addon-error { display: none; margin-top: 12px; font-size: 13px; color: #f0a8a8; }
+    .sm-addon.missing .sm-addon-error { display: block; }
+    @media (max-width: 720px) { .sm-choices { grid-template-columns: 1fr; } }
     /* Kostenoverzicht zodra de begeleiding is aangevinkt. */
     .sm-summary { margin-top: 15px; padding-top: 14px; border-top: 1px solid var(--border); display: grid; gap: 8px; }
     .sm-summary[hidden] { display: none; }
@@ -2188,13 +2209,29 @@
 
       <!-- Begeleiding & installatie (optioneel, eenmalig) -->
       <div class="sm-addon" id="smAddon">
-        <label class="sm-addon-main" for="smOnboarding">
-          <input type="checkbox" id="smOnboarding" />
-          <span class="sm-addon-tx">
-            <strong>Begeleiding &amp; installatie — €149 eenmalig <span class="excl">(excl. BTW)</span></strong>
-            <small>Wij komen langs voor persoonlijke uitleg, training van je personeel en volledige activatie van het systeem in je winkel.</small>
-          </span>
-        </label>
+        <div class="sm-addon-q" id="smAddonQ">Wil je begeleiding &amp; installatie?</div>
+        <p class="sm-addon-hint">Maak een keuze om verder te gaan.</p>
+        <div class="sm-choices" role="radiogroup" aria-labelledby="smAddonQ">
+          <label class="sm-choice" data-choice="yes">
+            <input type="radio" name="smOnboardingChoice" value="yes" id="smOnboardingYes" />
+            <span class="sm-radio2" aria-hidden="true"></span>
+            <span class="sm-choice-tx">
+              <strong>Ja, kom langs voor uitleg &amp; installatie</strong>
+              <span class="sm-choice-price">€149 eenmalig (excl. BTW)</span>
+              <small>Persoonlijke uitleg, training van je personeel en volledige activatie van het systeem in je winkel.</small>
+            </span>
+          </label>
+          <label class="sm-choice" data-choice="no">
+            <input type="radio" name="smOnboardingChoice" value="no" id="smOnboardingNo" />
+            <span class="sm-radio2" aria-hidden="true"></span>
+            <span class="sm-choice-tx">
+              <strong>Nee, ik zet het zelf op</strong>
+              <span class="sm-choice-price free">Geen extra kosten</span>
+              <small>Je regelt de installatie zelf. Je kunt de begeleiding later alsnog aanvragen.</small>
+            </span>
+          </label>
+        </div>
+        <div class="sm-addon-error" id="smAddonError">Maak eerst een keuze over begeleiding om verder te gaan.</div>
         <div class="sm-summary" id="smSummary" hidden></div>
       </div>
 
@@ -2456,19 +2493,26 @@
       const period = smBilling === 'yearly' ? 'jaar' : 'maand';
       if (pr) el.innerHTML = 'Na 14 dagen proefperiode wordt automatisch <b>' + pr.amount + ' per ' + period + '</b> (excl. BTW) voor ' + name + ' afgeschreven';
     }
-    // Wil de winkelier begeleiding? Alleen waar als het vakje daadwerkelijk aan staat.
-    function wantsOnboarding() {
-      const el = document.getElementById('smOnboarding');
-      return !!(el && el.checked);
+    // De keuze is verplicht: null zolang de winkelier niets heeft aangeklikt.
+    function onboardingChoice() {
+      const el = document.querySelector('input[name="smOnboardingChoice"]:checked');
+      return el ? el.value : null;
+    }
+    function wantsOnboarding() { return onboardingChoice() === 'yes'; }
+    // Vorige waarschuwing intrekken zodra er wél een keuze is.
+    function clearAddonError() {
+      const box = document.getElementById('smAddon');
+      if (box) box.classList.remove('missing');
     }
     // Overzichtje zodat duidelijk is wat er straks op de factuur staat.
     function renderAddonSummary() {
       const box = document.getElementById('smSummary');
-      const addon = document.getElementById('smAddon');
-      if (!box || !addon) return;
-      const on = wantsOnboarding();
-      addon.classList.toggle('on', on);
-      if (!on) { box.hidden = true; box.innerHTML = ''; return; }
+      if (!box) return;
+      // De kaarten markeren op basis van de gemaakte keuze.
+      const choice = onboardingChoice();
+      document.querySelectorAll('.sm-choice').forEach(c =>
+        c.classList.toggle('selected', c.dataset.choice === choice));
+      if (choice !== 'yes') { box.hidden = true; box.innerHTML = ''; return; }
 
       const period = smBilling === 'yearly' ? 'jaar' : 'maand';
       // Bij een proefperiode betaalt de winkelier het abonnement nu nog niet.
@@ -2494,7 +2538,8 @@
         `</div>`;
       box.hidden = false;
     }
-    document.getElementById('smOnboarding').addEventListener('change', renderAddonSummary);
+    document.querySelectorAll('input[name="smOnboardingChoice"]').forEach(r =>
+      r.addEventListener('change', () => { clearAddonError(); renderAddonSummary(); }));
 
     function setSelectedPlan(plan) {
       smSelectedPlan = plan;
@@ -2515,6 +2560,9 @@
       else { trial.hidden = true; plans.classList.remove('selectable'); }
 
       smClearMsg();
+      // Geen voorselectie: de winkelier moet elke keer zelf kiezen.
+      document.querySelectorAll('input[name="smOnboardingChoice"]').forEach(r => { r.checked = false; });
+      clearAddonError();
       renderSmPrices();
       renderAddonSummary();
       subModal.hidden = false;
@@ -2544,6 +2592,22 @@
     async function startCheckout(plan, withTrial, btn) {
       if (btn.disabled) return;
       if (!localStorage.getItem('omrz_token')) { smShowMsg('Je bent niet ingelogd. Log opnieuw in.', 'error'); return; }
+      // Verplichte keuze: zonder ja of nee gaan we niet door naar de betaling.
+      if (onboardingChoice() === null) {
+        const box = document.getElementById('smAddon');
+        box.classList.add('missing');
+        smShowMsg('Maak eerst een keuze over begeleiding om verder te gaan.', 'error');
+        // Scrollen is een extraatje: het mag de melding zelf nooit onderuithalen.
+        if (typeof box.scrollIntoView === 'function') {
+          try { box.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+          catch (e) { try { box.scrollIntoView(); } catch (e2) { /* niet ondersteund */ } }
+        }
+        const first = document.getElementById('smOnboardingYes');
+        if (first && typeof first.focus === 'function') {
+          try { first.focus({ preventScroll: true }); } catch (e) { /* oudere browsers */ }
+        }
+        return;
+      }
       smClearMsg();
       const original = btn.textContent;
       const allBtns = [...document.querySelectorAll('#smPlans .sm-choose'), document.getElementById('smStartTrial')];
