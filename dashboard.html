@@ -1075,6 +1075,29 @@
     .sm-features li::before { content: ""; flex: none; width: 17px; height: 17px; margin-top: 2px; border-radius: 50%; background: rgba(110,231,160,.16); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236ee7a0' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: center; background-size: 10px; }
     .sm-features li.hl { color: var(--text-strong); font-weight: 600; }
 
+    /* Begeleiding: optionele eenmalige dienst, onder de pakketten. */
+    .sm-addon { margin-top: 18px; padding: 16px 18px; border-radius: 14px;
+      border: 1px solid var(--border); background: rgba(var(--ink), .022);
+      transition: border-color .25s var(--ease), background .25s var(--ease); }
+    .sm-addon.on { border-color: rgba(139,92,246,.3); background: var(--accent-soft); }
+    .sm-addon-main { display: flex; align-items: flex-start; gap: 13px; cursor: pointer; }
+    .sm-addon-main input { width: 19px; height: 19px; flex-shrink: 0; margin-top: 2px;
+      accent-color: var(--accent); cursor: pointer; }
+    .sm-addon-tx { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .sm-addon-tx strong { font-size: 14.5px; font-weight: 600; color: var(--text-strong); }
+    .sm-addon-tx strong .excl { font-weight: 500; color: var(--muted); }
+    .sm-addon-tx small { font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+    /* Kostenoverzicht zodra de begeleiding is aangevinkt. */
+    .sm-summary { margin-top: 15px; padding-top: 14px; border-top: 1px solid var(--border); display: grid; gap: 8px; }
+    .sm-summary[hidden] { display: none; }
+    .sm-sum-row { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; font-size: 13.5px; color: var(--muted); }
+    .sm-sum-row strong { color: var(--pearl); font-weight: 600; white-space: nowrap; }
+    .sm-sum-row.total { padding-top: 9px; border-top: 1px solid var(--border); color: var(--pearl); }
+    .sm-sum-row.total strong { color: var(--text-strong); font-size: 15px; letter-spacing: -.015em; }
+    .sm-sum-note { font-size: 12px; color: var(--muted); line-height: 1.5; }
+    .sm-vat { text-align: center; font-size: 12.5px; color: var(--muted); margin-top: 16px; line-height: 1.55; }
+    .sm-plan .amount .vat { display: block; margin-top: 5px; font-size: 12px; font-weight: 500; color: var(--muted); letter-spacing: 0; }
+
     .sm-trial { display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap; margin-top: 20px; padding: 20px 22px; border-radius: 16px; border: 1px dashed var(--border-strong); background: rgba(var(--ink), .03); }
     .sm-trial[hidden] { display: none; }
     .sm-trial-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
@@ -2163,6 +2186,20 @@
         </div>
       </div>
 
+      <!-- Begeleiding & installatie (optioneel, eenmalig) -->
+      <div class="sm-addon" id="smAddon">
+        <label class="sm-addon-main" for="smOnboarding">
+          <input type="checkbox" id="smOnboarding" />
+          <span class="sm-addon-tx">
+            <strong>Begeleiding &amp; installatie — €149 eenmalig <span class="excl">(excl. BTW)</span></strong>
+            <small>Wij komen langs voor persoonlijke uitleg, training van je personeel en volledige activatie van het systeem in je winkel.</small>
+          </span>
+        </label>
+        <div class="sm-summary" id="smSummary" hidden></div>
+      </div>
+
+      <p class="sm-vat">Alle prijzen zijn exclusief 21% BTW. De BTW wordt bij de betaling berekend.</p>
+
       <!-- Proefperiode-optie (alleen als can_use_trial = true) -->
       <div class="sm-trial" id="smTrial" hidden>
         <div class="sm-trial-text">
@@ -2385,10 +2422,14 @@
     }
 
     // ====== Groot abonnement-scherm (modal) ======
+    // value = bedrag excl. BTW, om het kostenoverzicht te kunnen optellen.
     const SUB_PRICES = {
-      basic:   { monthly: { amount: '€34,99', per: '/maand', sub: 'Altijd maandelijks opzegbaar' }, yearly: { amount: '€349', per: '/jaar', sub: '€29,08 per maand · <span class="save-inline">bespaar €71</span>' } },
-      premium: { monthly: { amount: '€44,99', per: '/maand', sub: 'Altijd maandelijks opzegbaar' }, yearly: { amount: '€449', per: '/jaar', sub: '€37,42 per maand · <span class="save-inline">bespaar €91</span>' } },
+      basic:   { monthly: { amount: '€34,99', value: 34.99, per: '/maand', sub: 'Altijd maandelijks opzegbaar' }, yearly: { amount: '€349', value: 349, per: '/jaar', sub: '€29,08 per maand · <span class="save-inline">bespaar €71</span>' } },
+      premium: { monthly: { amount: '€44,99', value: 44.99, per: '/maand', sub: 'Altijd maandelijks opzegbaar' }, yearly: { amount: '€449', value: 449, per: '/jaar', sub: '€37,42 per maand · <span class="save-inline">bespaar €91</span>' } },
     };
+    // Eenmalige begeleiding; het bedrag staat ook in de backend (ONBOARDING_PRICE_LABEL).
+    const ONBOARDING_PRICE = 149;
+    const euroNL = (n) => '€' + Number(n).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     let smBilling = 'monthly';
     let smSelectedPlan = 'premium';
     const subModal = document.getElementById('subModal');
@@ -2398,11 +2439,13 @@
 
     function renderSmPrices() {
       const b = SUB_PRICES.basic[smBilling], p = SUB_PRICES.premium[smBilling];
-      document.getElementById('smBasicAmount').innerHTML = b.amount + '<small>' + b.per + '</small>';
+      const vat = '<span class="vat">excl. BTW</span>';
+      document.getElementById('smBasicAmount').innerHTML = b.amount + '<small>' + b.per + '</small>' + vat;
       document.getElementById('smBasicSub').innerHTML = b.sub;
-      document.getElementById('smPremAmount').innerHTML = p.amount + '<small>' + p.per + '</small>';
+      document.getElementById('smPremAmount').innerHTML = p.amount + '<small>' + p.per + '</small>' + vat;
       document.getElementById('smPremSub').innerHTML = p.sub;
       updateTrialNote();
+      renderAddonSummary();
     }
     // De trial-uitleg weerspiegelt het gekozen pakket én de gekozen cyclus (maandelijks óf jaarlijks).
     function updateTrialNote() {
@@ -2411,12 +2454,53 @@
       const pr = SUB_PRICES[smSelectedPlan] && SUB_PRICES[smSelectedPlan][smBilling];
       const name = smSelectedPlan === 'premium' ? 'Premium' : 'Basic';
       const period = smBilling === 'yearly' ? 'jaar' : 'maand';
-      if (pr) el.innerHTML = 'Na 14 dagen proefperiode wordt automatisch <b>' + pr.amount + ' per ' + period + '</b> voor ' + name + ' afgeschreven';
+      if (pr) el.innerHTML = 'Na 14 dagen proefperiode wordt automatisch <b>' + pr.amount + ' per ' + period + '</b> (excl. BTW) voor ' + name + ' afgeschreven';
     }
+    // Wil de winkelier begeleiding? Alleen waar als het vakje daadwerkelijk aan staat.
+    function wantsOnboarding() {
+      const el = document.getElementById('smOnboarding');
+      return !!(el && el.checked);
+    }
+    // Overzichtje zodat duidelijk is wat er straks op de factuur staat.
+    function renderAddonSummary() {
+      const box = document.getElementById('smSummary');
+      const addon = document.getElementById('smAddon');
+      if (!box || !addon) return;
+      const on = wantsOnboarding();
+      addon.classList.toggle('on', on);
+      if (!on) { box.hidden = true; box.innerHTML = ''; return; }
+
+      const period = smBilling === 'yearly' ? 'jaar' : 'maand';
+      // Bij een proefperiode betaalt de winkelier het abonnement nu nog niet.
+      const trialActive = !document.getElementById('smTrial').hidden;
+      // Alleen optellen wanneer het pakket daadwerkelijk gekozen ís. Zonder proefoptie
+      // bepaalt pas de "Kies …"-knop het pakket, dus dan noemen we er geen.
+      const chosen = document.getElementById('smPlans').classList.contains('selectable');
+      const pr = SUB_PRICES[smSelectedPlan] && SUB_PRICES[smSelectedPlan][smBilling];
+      const name = smSelectedPlan === 'premium' ? 'Premium' : 'Basic';
+      const sub = pr ? pr.value : 0;
+
+      const planRows = chosen
+        ? `<div class="sm-sum-row"><span>${name} — per ${escapeHtml(period)}</span><strong>${euroNL(sub)}</strong></div>`
+          + `<div class="sm-sum-row"><span>Begeleiding &amp; installatie (eenmalig)</span><strong>${euroNL(ONBOARDING_PRICE)}</strong></div>`
+          + `<div class="sm-sum-row total"><span>Subtotaal excl. BTW</span><strong>${euroNL(sub + ONBOARDING_PRICE)}</strong></div>`
+        : `<div class="sm-sum-row total"><span>Begeleiding &amp; installatie (eenmalig)</span><strong>${euroNL(ONBOARDING_PRICE)}</strong></div>`;
+
+      box.innerHTML = planRows +
+        `<div class="sm-sum-note">` +
+          (chosen ? '' : 'Dit bedrag komt bovenop het pakket dat je hierboven kiest. ') +
+          'Hier komt nog 21% BTW bij; die wordt bij de betaling berekend.' +
+          (trialActive ? ' Start je met een proefperiode, dan wordt de begeleiding samen met je eerste factuur in rekening gebracht.' : '') +
+        `</div>`;
+      box.hidden = false;
+    }
+    document.getElementById('smOnboarding').addEventListener('change', renderAddonSummary);
+
     function setSelectedPlan(plan) {
       smSelectedPlan = plan;
       document.querySelectorAll('#smPlans .sm-plan').forEach(c => c.classList.toggle('selected', c.dataset.plan === plan));
       updateTrialNote();
+      renderAddonSummary();
     }
     function openSubModal() {
       const s = subscription;
@@ -2432,6 +2516,7 @@
 
       smClearMsg();
       renderSmPrices();
+      renderAddonSummary();
       subModal.hidden = false;
     }
     function closeSubModal() { subModal.hidden = true; }
@@ -2469,7 +2554,13 @@
         const res = await fetch(API_BASE + '/api/stamp/create-checkout-session', {
           method: 'POST', headers: authHeaders(),
           // with_trial expliciet boolean: true bij de proefknop, false bij direct een pakket kiezen.
-          body: JSON.stringify({ plan, billing_cycle: smBilling, with_trial: !!withTrial }),
+          // with_onboarding volgt het vinkje: de backend zet er dan een eenmalige regel bij.
+          body: JSON.stringify({
+            plan,
+            billing_cycle: smBilling,
+            with_trial: !!withTrial,
+            with_onboarding: wantsOnboarding(),
+          }),
         });
         if (res.status === 401 || res.status === 403) { smShowMsg('Je sessie is verlopen. Log opnieuw in.', 'error'); reset(); return; }
         const data = await res.json().catch(() => ({}));
@@ -2490,7 +2581,7 @@
     function planLabel(p) { return p === 'premium' ? 'Premium' : (p === 'basic' ? 'Basic' : '—'); }
     function priceLabel(plan, cycle) {
       const pr = SUB_PRICES[plan] && SUB_PRICES[plan][cycle === 'yearly' ? 'yearly' : 'monthly'];
-      return pr ? (pr.amount + pr.per) : '—';
+      return pr ? (pr.amount + pr.per + ' excl. BTW') : '—';
     }
     function renderSubscriptionPanel() {
       const wrap = document.getElementById('subInfoWrap');
