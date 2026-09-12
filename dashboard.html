@@ -631,6 +631,11 @@
       box-shadow: var(--shadow-md), 0 0 18px rgba(99,102,241,.25);
     }
     .bar-label { font-size: 11.5px; color: var(--faint); }
+    /* Melding binnen de grafiek: laden, fout of geen stempels. */
+    .chart-msg { margin: auto; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; }
+    .chart-msg p { font-size: 14.5px; color: var(--pearl); }
+    .chart-msg small { font-size: 12.5px; color: var(--muted); max-width: 340px; line-height: 1.55; }
+    .chart-msg .btn { margin-top: 6px; font-size: 13px; padding: 8px 14px; }
 
     /* ---------- Schakelaars (kaartinstellingen) ---------- */
     .switch-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
@@ -2254,6 +2259,10 @@
 
   <script>
     const API_BASE = 'https://api.omrzdigital.nl';
+    // Zet localStorage.omrz_debug = '1' om API-responsen in de console te zien.
+    function debugOn() {
+      try { return localStorage.getItem('omrz_debug') === '1'; } catch (e) { return false; }
+    }
 
     // ---- Sessie ----
     const cardId = localStorage.getItem('omrz_card_id');
@@ -2361,7 +2370,7 @@
       if (tab === 'abonnement') renderSubscriptionPanel();
       if (tab === 'facturen') loadInvoices();
       if (tab === 'bedrijfsgegevens') loadBusinessProfile();
-      if (tab === 'statistieken') { renderChart(currentRange); loadDemographics(); }
+      if (tab === 'statistieken') { loadChartStats(currentRange); loadDemographics(); }
       if (tab !== 'stempel') { stopScanner(); resetScanFlow(); } // camera vrijgeven + flow resetten bij verlaten van de scan-tab
     }
     links.forEach(l => l.addEventListener('click', () => activateTab(l.dataset.tab)));
@@ -2875,8 +2884,6 @@
         const rew = document.getElementById('statRewards');
         if (cust) cust.textContent = Number(s.total_customers ?? s.customers ?? 0).toLocaleString('nl-NL');
         if (rew) rew.textContent = Number(s.total_rewards ?? s.rewards ?? 0).toLocaleString('nl-NL');
-        if (Array.isArray(data.chart_day)) chartData.day = data.chart_day;
-        if (Array.isArray(data.chart_week)) chartData.week = data.chart_week;
       } catch (e) { /* stil falen */ }
     }
     // "Goedemorgen" tot 12:00, "Goedemiddag" tot 18:00, daarna "Goedenavond".
@@ -2912,7 +2919,7 @@
         let week = Number(data.week ?? data.this_week ?? data.stamps_week ?? data.week_stamps);
         if (!Number.isFinite(week)) {
           // Fallback: som van de week-grafiek als de backend geen week-veld levert.
-          week = (chartData.week || []).reduce((sum, d) => sum + (Number(d.value) || 0), 0) || today;
+          week = (chartData.week || []).reduce((sum, d) => sum + (Number(d.value) || 0), 0) || today;   // valt terug op vandaag zolang de grafiek niet geladen is
         }
         if (todayEl) todayEl.textContent = today.toLocaleString('nl-NL');
         if (weekEl) weekEl.textContent = week.toLocaleString('nl-NL');
@@ -4918,27 +4925,109 @@
     // ---- Grafiek ----
     let currentRange = 'day';
     let chartData = { day: [], week: [] };
+    let chartNotice = '';                       // uitleg van de backend (bv. vestigingfilter)
+    let chartState = { day: 'idle', week: 'idle' };   // idle | loading | ready | error
+    let chartError = '';
+    // Hoeveel historie per weergave. De backend rekent zelf in Europe/Amsterdam.
+    const CHART_RANGE = { day: { days: 14, group: 'day' }, week: { days: 84, group: 'week' } };
+
     document.querySelectorAll('#rangeSeg button').forEach(b =>
       b.addEventListener('click', () => {
         document.querySelectorAll('#rangeSeg button').forEach(x => x.classList.remove('active'));
         b.classList.add('active');
         currentRange = b.dataset.range;
-        renderChart(currentRange);
+        loadChartStats(currentRange);
       })
     );
+
+    // 'YYYY-MM-DD' → '8 sep'. Bewust niet via new Date(string) met tijd, want dat
+    // verschuift in een westelijke tijdzone naar de vorige dag.
+    function chartLabel(dateKey, group) {
+      const parts = String(dateKey || '').split('-').map(Number);
+      if (parts.length !== 3 || parts.some(isNaN)) return String(dateKey || '');
+      const d = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+      const short = d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+      return group === 'week' ? 'wk ' + short : short;
+    }
+
+    // De backend levert series[{date, stamps, …}]; de grafiek wil {label, value}.
+    function mapChartSeries(series, group) {
+      return (Array.isArray(series) ? series : []).map(p => ({
+        label: chartLabel(p.date, group),
+        value: Number(p.stamps ?? p.value ?? 0) || 0,
+        date: p.date,
+      }));
+    }
+
+    async function loadChartStats(range, force) {
+      const key = range === 'week' ? 'week' : 'day';
+      if (chartState[key] === 'ready' && !force) { renderChart(key); return; }
+      if (chartState[key] === 'loading') return;
+      if (!cardId) { chartState[key] = 'ready'; chartData[key] = []; renderChart(key); return; }
+
+      chartState[key] = 'loading';
+      renderChart(key);
+      const cfg = CHART_RANGE[key];
+      try {
+        const url = API_BASE + '/api/stamp/stats?card_id=' + encodeURIComponent(cardId)
+          + '&days=' + cfg.days + '&group=' + cfg.group + locQuery('&');
+        const res = await fetch(url, { headers: authHeaders() });
+        const data = await res.json().catch(() => ({}));
+        if (debugOn()) console.log('[OMRZ] /api/stamp/stats', { url, status: res.status, data });
+        if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+        chartData[key] = mapChartSeries(data.series, cfg.group);
+        chartNotice = data.notice || '';
+        chartState[key] = 'ready';
+        chartError = '';
+      } catch (err) {
+        chartState[key] = 'error';
+        chartError = isNetworkError(err) ? NET_MSG : (err.message || 'Onbekende fout');
+      }
+      renderChart(key);
+    }
+
     function renderChart(range) {
       const el = document.getElementById('chart');
-      const data = chartData[range] || [];
-      if (!data.length) {
-        el.innerHTML = '<div class="loader" style="margin:auto;">Nog geen stempeldata om te tonen.</div>';
+      if (!el) return;
+      const key = range === 'week' ? 'week' : 'day';
+      const state = chartState[key];
+
+      if (state === 'loading') {
+        el.innerHTML = '<div class="loader" style="margin:auto;"><span class="spinner"></span> Statistieken laden…</div>';
         return;
       }
+      // Een fout is géén "geen data" — dat verschil moet zichtbaar zijn.
+      if (state === 'error') {
+        el.innerHTML = `<div class="chart-msg">
+            <p>Statistieken konden niet geladen worden.</p>
+            <small>${escapeHtml(chartError)}</small>
+            <button type="button" class="btn btn-ghost" data-chart-retry>Opnieuw proberen</button>
+          </div>`;
+        return;
+      }
+
+      const data = chartData[key] || [];
+      const total = data.reduce((sum, d) => sum + d.value, 0);
+      // Reeks zonder enige stempel: zeg dát, in plaats van een rij platte balken.
+      if (!data.length || total === 0) {
+        const periode = key === 'week' ? 'de laatste 12 weken' : 'de laatste 14 dagen';
+        el.innerHTML = `<div class="chart-msg">
+            <p>Nog geen stempels in ${periode}.</p>
+            <small>${escapeHtml(chartNotice || 'Zodra je klanten stempels krijgen, zie je ze hier terug.')}</small>
+          </div>`;
+        return;
+      }
+
       const max = Math.max(...data.map(d => d.value), 1);
       el.innerHTML = data.map(d => {
         const h = Math.max(4, Math.round((d.value / max) * 200));
-        return `<div class="bar-col"><div class="bar" style="height:${h}px" data-val="${d.value}"></div><div class="bar-label">${d.label}</div></div>`;
+        return `<div class="bar-col"><div class="bar" style="height:${h}px" data-val="${d.value}"></div>` +
+               `<div class="bar-label">${escapeHtml(d.label)}</div></div>`;
       }).join('');
     }
+    document.getElementById('chart').addEventListener('click', (e) => {
+      if (e.target.closest('[data-chart-retry]')) loadChartStats(currentRange, true);
+    });
 
     // ---- Data ophalen van de API ----
     async function loadDashboard() {
@@ -4980,8 +5069,6 @@
           document.getElementById('statCustomers').textContent = s.total_customers ?? s.customers ?? 0;
           document.getElementById('statRewards').textContent = s.total_rewards ?? s.rewards ?? 0;
 
-          if (Array.isArray(data.chart_day)) chartData.day = data.chart_day;
-          if (Array.isArray(data.chart_week)) chartData.week = data.chart_week;
           if (data.owner_email) document.getElementById('userEmail').textContent = data.owner_email;
         }
       } catch (err) {
@@ -4990,7 +5077,6 @@
         fillForm();
         refreshPreviews();
         refreshOverview();
-        renderChart(currentRange);
       }
     }
 
@@ -5101,6 +5187,8 @@
       // Dashboard-data opnieuw laden voor de gekozen vestiging.
       customersLoaded = false;
       demographicsLoaded = false;
+      chartState = { day: 'idle', week: 'idle' };
+      if (document.getElementById('panel-statistieken').classList.contains('active')) loadChartStats(currentRange, true);
       if (document.getElementById('panel-statistieken').classList.contains('active')) loadDemographics(true);
       refreshOverview();
       if (document.getElementById('panel-klanten').classList.contains('active')) loadCustomers();
