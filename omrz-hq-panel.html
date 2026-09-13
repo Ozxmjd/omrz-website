@@ -109,7 +109,8 @@
     .panel-head p { color: var(--muted); font-size: 15px; }
 
     /* ---------- Stat cards ---------- */
-    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-bottom: 26px; }
+    /* Vijf tegels: iets smaller, zodat ze op een normaal adminscherm op één rij passen. */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(178px, 1fr)); gap: 14px; margin-bottom: 26px; }
     .stat { padding: 22px 22px; }
     .stat .s-top { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13.5px; font-weight: 500; margin-bottom: 14px; }
     .stat .s-top svg { width: 17px; height: 17px; }
@@ -226,6 +227,47 @@
     .btn.loading .btn-label { opacity: .6; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .empty-state { text-align: center; padding: 50px 24px; color: var(--muted); font-size: 15px; }
+
+    /* ---------- Onderbetaling: valt op, want het kost geld ---------- */
+    .warn-banner { display: flex; align-items: flex-start; gap: 12px; padding: 15px 18px; margin-bottom: 22px;
+      border-radius: 14px; border: 1px solid rgba(251,146,60,.42); background: rgba(251,146,60,.1);
+      font-size: 14px; color: #fdba74; line-height: 1.55; }
+    .warn-banner[hidden] { display: none; }
+    .warn-banner svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 2px; }
+    .warn-banner b { color: #ffd8ae; }
+    .warn-banner .btn { margin-top: 10px; font-size: 12.5px; padding: 8px 13px; }
+    .pill.underpaid { color: #fdba74; background: rgba(251,146,60,.14); border: 1px solid rgba(251,146,60,.5); }
+
+    /* ---------- Detail: abonnement & vestigingen ---------- */
+    .cm-section { margin-top: 4px; padding-top: 18px; border-top: 1px solid var(--border); }
+    .cm-section h4 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+      color: #6a6a6a; margin-bottom: 14px; }
+    .sub-box { padding: 15px 17px; border-radius: 13px; border: 1px solid var(--border-strong);
+      background: rgba(255,255,255,.03); margin-bottom: 14px; }
+    .sub-box.alert { border-color: rgba(251,146,60,.45); background: rgba(251,146,60,.08); }
+    .sub-amount { font-size: 23px; font-weight: 800; letter-spacing: -.02em; color: #fff; }
+    .sub-amount small { font-size: 13px; font-weight: 500; color: var(--muted); letter-spacing: 0; }
+    .sub-breakdown { font-size: 13px; color: var(--muted); margin-top: 5px; line-height: 1.55; }
+    .sub-usage { display: flex; align-items: center; gap: 9px; margin-top: 12px; padding-top: 11px;
+      border-top: 1px solid var(--border); font-size: 13.5px; color: var(--pearl); flex-wrap: wrap; }
+    .sub-usage .pill { font-size: 11px; }
+    .loc-rows { display: grid; gap: 8px; }
+    .loc-row { display: flex; align-items: flex-start; gap: 12px; padding: 11px 13px; border-radius: 11px;
+      border: 1px solid var(--border); background: rgba(255,255,255,.025); }
+    .loc-row .lr-n { width: 24px; height: 24px; flex-shrink: 0; border-radius: 7px; display: grid; place-items: center;
+      background: rgba(255,255,255,.07); font-size: 11px; font-weight: 800; color: var(--pearl); }
+    .loc-row .lr-tx { flex: 1; min-width: 0; }
+    .loc-row .lr-name { font-size: 13.5px; font-weight: 600; color: #fff; }
+    .loc-row .lr-addr { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+    .loc-row.inactive { opacity: .6; }
+    .loc-empty { font-size: 13px; color: var(--muted); padding: 10px 0; }
+    .id-rows { display: grid; gap: 9px; }
+    .id-row { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; font-size: 13px; }
+    .id-row span { color: var(--muted); flex-shrink: 0; }
+    .id-row code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; color: var(--pearl);
+      background: rgba(255,255,255,.06); border-radius: 5px; padding: 2px 7px; word-break: break-all; }
+    .id-row a { color: #a5c9ff; text-decoration: underline; text-underline-offset: 2px; }
+    .id-row .none { color: #6a6a6a; font-style: italic; }
 
     /* ---------- Beheer: archiveren & verwijderen ---------- */
     .cm-admin-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
@@ -434,11 +476,18 @@
               <div class="s-sub">Over alle winkeliers</div>
             </div>
             <div class="stat glass">
-              <div class="s-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Maandelijkse omzet</div>
+              <div class="s-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>MRR</div>
               <div class="s-val" id="statRevenue">—</div>
-              <div class="s-sub" id="statRevenueSub">Winkeliers × €29</div>
+              <div class="s-sub" id="statRevenueSub">Maandelijkse omzet, excl. BTW</div>
+            </div>
+            <div class="stat glass">
+              <div class="s-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18M7 15l4-4 3 3 5-6"/></svg>ARR</div>
+              <div class="s-val" id="statArr">—</div>
+              <div class="s-sub" id="statArrSub">Jaaromzet, excl. BTW</div>
             </div>
           </div>
+
+          <div class="warn-banner" id="underpaidBanner" hidden></div>
 
           <div class="block glass">
             <h3>Nieuwste winkeliers</h3>
@@ -579,7 +628,22 @@
       <div class="crm-meta-row">
         <div><div class="m-val" id="cmLocationsView">0</div><div class="m-lbl">Vestigingen</div></div>
         <div><div class="m-val" id="cmCustomersView">0</div><div class="m-lbl">Klanten</div></div>
-        <div><div class="m-val" id="cmStampsView">0</div><div class="m-lbl">Stempels</div></div>
+        <div><div class="m-val" id="cmStampsView">0</div><div class="m-lbl">Stempels uitgedeeld</div></div>
+      </div>
+
+      <div class="cm-section">
+        <h4>Abonnement</h4>
+        <div id="cmSubBox"></div>
+      </div>
+
+      <div class="cm-section">
+        <h4>Vestigingen</h4>
+        <div id="cmLocList"></div>
+      </div>
+
+      <div class="cm-section" style="margin-bottom:20px;">
+        <h4>Stripe</h4>
+        <div class="id-rows" id="cmStripe"></div>
       </div>
 
       <form class="form-grid2" id="crmForm">
@@ -769,7 +833,11 @@
       if (!parts.length) return '?';
       return (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
     }
-    function euro(n) { return '€' + Math.round(n).toLocaleString('nl-NL'); }
+    // Bedragen mét centen: een admin legt deze cijfers naast Stripe-facturen, dus
+    // €127,47 mag niet als €127 op het scherm komen.
+    function euro(n) {
+      return '€' + Number(n || 0).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
     function parseDate(v) { if (!v) return null; const d = new Date(v); return isNaN(d.getTime()) ? null : d; }
     function formatDate(v) {
       const d = parseDate(v);
@@ -817,7 +885,19 @@
         paymentMethod: normalizePayment(raw),
         notes: raw.notes || raw.opmerkingen || raw.remarks || '',
         customers: Number(raw.customer_count ?? raw.customers ?? raw.total_customers ?? raw.holders ?? 0) || 0,
-        stamps: Number(raw.total_stamps ?? raw.stamps ?? raw.stamps_given ?? 0) || 0,
+        // Uitgedeelde stempels (stamp_count). Het oude veld total_stamps bestaat niet
+        // meer in de API — daardoor stond deze teller altijd op 0.
+        stamps: Number(raw.stamp_count ?? raw.total_stamps ?? raw.stamps ?? raw.stamps_given ?? 0) || 0,
+        stampBalance: Number(raw.stamp_balance ?? 0) || 0,
+        // Volledige prijsopbouw uit de backend; het bedrag hoeft hier niet herrekend.
+        pricing: raw.pricing || null,
+        // De vestigingen zelf, met naam, adres en actief-status.
+        locationsList: Array.isArray(raw.locations) ? raw.locations : [],
+        subscribedLocations: Number(raw.subscribed_locations ?? 0) || 0,
+        activeLocations: Number(raw.active_location_count ?? 0) || 0,
+        overSubscribed: Number(raw.over_subscribed_locations ?? 0) || 0,
+        stripeSubId: raw.stripe_subscription_id || null,
+        stripeCustomerId: raw.stripe_customer_id || null,
         createdRaw,
         created: parseDate(createdRaw),
         status: normalizeStatus(raw),
@@ -830,8 +910,12 @@
         get deletable() { return DELETABLE_STATUSES.has(this.accessStatus); },
       };
     }
-    // Maandelijkse omzet-equivalent van één winkelier.
+    // Maandelijkse omzet-equivalent van één winkelier. De backend rekent dit al uit
+    // (inclusief vestigingen en staffelkorting); alleen zonder die opbouw zelf rekenen.
     function monthlyOf(b) {
+      if (b.pricing && Number.isFinite(b.pricing.monthly_equivalent_cents)) {
+        return b.pricing.monthly_equivalent_cents / 100;
+      }
       const p = b.price || PRICE_PER_MONTH;
       return b.billing === 'yearly' ? p / 12 : p;
     }
@@ -839,6 +923,18 @@
     // ---- State ----
     let businesses = [];
     let loaded = false;
+    // Officiële cijfers uit /api/admin/stats; die telt alleen écht betalende winkeliers.
+    let adminStats = null;
+
+    async function loadStats() {
+      try {
+        const res = await fetch(API_BASE + '/api/admin/stats', { headers: adminHeaders() });
+        if (!res.ok) return;                       // geen stats → we rekenen zelf
+        const data = await res.json().catch(() => ({}));
+        adminStats = data.totals || data || null;
+      } catch (e) { /* stil falen; renderOverview valt terug op de lijst */ }
+      if (loaded) renderOverview();
+    }
 
     // ---- Data laden ----
     async function loadBusinesses() {
@@ -855,6 +951,7 @@
         businesses = list.map(normalizeBusiness);
         loaded = true;
         renderAll();
+        loadStats();
       } catch (err) {
         loaded = true;
         renderError();
@@ -887,11 +984,35 @@
       const payingBiz = payingList.length;
       const revenue = payingList.reduce((s, b) => s + monthlyOf(b), 0);
 
+      // De backend is leidend waar die cijfers levert; anders rekenen we uit de lijst.
+      const st = adminStats || {};
+      const mrr = Number.isFinite(st.mrr) ? st.mrr : revenue;
+      const arr = Number.isFinite(st.arr) ? st.arr : revenue * 12;
+      const stamps = Number.isFinite(st.total_stamps) ? st.total_stamps : totalStamps;
+      const custs = Number.isFinite(st.total_customers) ? st.total_customers : totalCust;
+      const paying = Number.isFinite(st.paying_businesses) ? st.paying_businesses : payingBiz;
+
       document.getElementById('statBusinesses').textContent = totalBiz.toLocaleString('nl-NL');
-      document.getElementById('statCustomers').textContent = totalCust.toLocaleString('nl-NL');
-      document.getElementById('statStamps').textContent = totalStamps.toLocaleString('nl-NL');
-      document.getElementById('statRevenue').textContent = euro(revenue);
-      document.getElementById('statRevenueSub').textContent = `${payingBiz} actieve ${payingBiz === 1 ? 'winkelier' : 'winkeliers'}`;
+      document.getElementById('statCustomers').textContent = custs.toLocaleString('nl-NL');
+      document.getElementById('statStamps').textContent = stamps.toLocaleString('nl-NL');
+      document.getElementById('statRevenue').textContent = euro(mrr);
+      document.getElementById('statRevenueSub').textContent =
+        `${paying} betalende ${paying === 1 ? 'winkelier' : 'winkeliers'} · excl. BTW`;
+      document.getElementById('statArr').textContent = euro(arr);
+      document.getElementById('statArrSub').textContent = 'Jaaromzet, excl. BTW';
+
+      // Onderbetaling: welke klanten gebruiken meer vestigingen dan ze betalen?
+      const under = businesses.filter(b => !b.archived && b.overSubscribed > 0);
+      const warn = document.getElementById('underpaidBanner');
+      if (warn) {
+        if (under.length) {
+          warn.innerHTML = UNDERPAID_SVG + `<div><b>${under.length} ${under.length === 1 ? 'winkelier gebruikt' : 'winkeliers gebruiken'} meer vestigingen dan betaald.</b> ` +
+            under.slice(0, 4).map(b => escapeHtml(b.name) + ' (+' + b.overSubscribed + ')').join(' · ') +
+            (under.length > 4 ? ' en nog ' + (under.length - 4) : '') +
+            `<div><button type="button" class="btn btn-ghost" data-show-underpaid>Bekijk winkeliers</button></div></div>`;
+          warn.hidden = false;
+        } else { warn.hidden = true; }
+      }
 
       // Nieuwste 5 winkeliers
       const recent = [...businesses]
@@ -957,6 +1078,7 @@
           </div>
           <div class="crm-tags">
             ${b.archived ? '<span class="pill none">Gearchiveerd</span>' : ''}
+            ${b.overSubscribed > 0 ? `<span class="pill underpaid">Onderbetaald +${b.overSubscribed}</span>` : ''}
             <span class="pill ${b.status.cls}">${b.status.label}</span>
             <span class="crm-price">${b.price ? euro(b.price) + (b.billing === 'yearly' ? '/jr' : '/mnd') : '—'}</span>
             <span class="crm-locs">${b.locations} ${b.locations === 1 ? 'vestiging' : 'vestigingen'}</span>
@@ -975,6 +1097,14 @@
         document.querySelectorAll('#statusSeg button').forEach(x => x.classList.toggle('active', x === btn));
         renderBusinessList();
       }));
+    document.getElementById('underpaidBanner').addEventListener('click', (e) => {
+      if (!e.target.closest('[data-show-underpaid]')) return;
+      document.querySelector('.side-link[data-tab="winkeliers"]').click();
+      // Zoeken op niets, maar wél het filter op 'alle' zetten zodat ze allemaal zichtbaar zijn.
+      const all = document.querySelector('#statusSeg button[data-f="all"]');
+      if (all) all.click();
+    });
+
     document.getElementById('refreshBtn').addEventListener('click', () => {
       document.getElementById('bizTableWrap').innerHTML = '<div class="loader" style="padding:20px 4px;"><span class="spinner"></span> Vernieuwen…</div>';
       loadBusinesses();
@@ -997,6 +1127,9 @@
       document.getElementById('cmLocationsView').textContent = b.locations.toLocaleString('nl-NL');
       document.getElementById('cmCustomersView').textContent = b.customers.toLocaleString('nl-NL');
       document.getElementById('cmStampsView').textContent = b.stamps.toLocaleString('nl-NL');
+      renderSubscriptionBox(b);
+      renderLocationList(b);
+      renderStripeIds(b);
 
       setVal('cmName', b.name);
       setVal('cmContact', b.contact);
@@ -1022,6 +1155,77 @@
       crmModal.hidden = false;
     }
     function closeCrm() { crmModal.hidden = true; editingBiz = null; }
+
+    const UNDERPAID_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>';
+    const vestWoord = (n) => n === 1 ? 'vestiging' : 'vestigingen';
+
+    // Abonnement: het bedrag dat de backend berekende, met de opbouw eronder.
+    function renderSubscriptionBox(b) {
+      const el = document.getElementById('cmSubBox');
+      if (!el) return;
+      const pr = b.pricing;
+      const under = b.overSubscribed > 0;
+      const cycleLabel = (pr ? pr.billing_cycle : b.billing) === 'yearly' ? 'per jaar' : 'per maand';
+      const planLabel = (pr && pr.plan === 'basic') || b.plan === 'basic' ? 'Basic' : 'Premium';
+
+      // Zonder pricing-object terugvallen op het losse bedrag uit de lijst.
+      const total = pr ? pr.total_cents / 100 : (b.price || 0);
+      const perLoc = pr ? pr.per_location_cents / 100 : null;
+      const subLocs = b.subscribedLocations || (pr ? pr.subscribed_locations : 0) || 0;
+      const discount = pr ? (pr.discount_per_location_cents || 0) / 100 : 0;
+
+      const breakdown = (perLoc !== null && subLocs > 1)
+        ? `${subLocs} × ${euro(perLoc)}${discount > 0 ? ' · incl. ' + euro(discount) + ' staffelkorting per vestiging' : ''}`
+        : (perLoc !== null ? `${subLocs || 1} ${vestWoord(subLocs || 1)} × ${euro(perLoc)}` : '');
+      const monthly = pr ? pr.monthly_equivalent_cents / 100 : null;
+
+      el.innerHTML = `<div class="sub-box${under ? ' alert' : ''}">
+          <div class="sub-amount">${euro(total)}<small> ${escapeHtml(cycleLabel)} · excl. BTW</small></div>
+          <div class="sub-breakdown">${escapeHtml(planLabel)}${breakdown ? ' · ' + escapeHtml(breakdown) : ''}` +
+            (monthly !== null && cycleLabel === 'per jaar' ? ` · ${escapeHtml(euro(monthly))} per maand` : '') +
+          `</div>
+          <div class="sub-usage">
+            <span>Betaald voor <b>${subLocs}</b> ${vestWoord(subLocs)}, gebruikt <b>${b.activeLocations}</b></span>
+            ${under ? `<span class="pill underpaid">Onderbetaald · ${b.overSubscribed} te veel</span>` : ''}
+          </div>
+          ${under ? `<div class="sub-breakdown" style="margin-top:10px;">Deze winkelier draait meer vestigingen dan waarvoor betaald wordt. Laat het abonnement aanpassen naar ${b.activeLocations} ${vestWoord(b.activeLocations)}.</div>` : ''}
+        </div>`;
+    }
+
+    // Alle vestigingen met naam, adres en actief-status.
+    function renderLocationList(b) {
+      const el = document.getElementById('cmLocList');
+      if (!el) return;
+      const list = b.locationsList || [];
+      if (!list.length) { el.innerHTML = '<div class="loc-empty">Nog geen vestigingen aangemaakt.</div>'; return; }
+      el.innerHTML = '<div class="loc-rows">' + list.map((l, i) => {
+        const name = l.location_name || l.name || ('Vestiging ' + (i + 1));
+        const addr = [l.address, l.postal_code, l.city].filter(Boolean).join(', ');
+        // Alleen expliciet uitgeschakelde vestigingen tellen als inactief.
+        const inactive = l.is_active === false || l.active === false;
+        return `<div class="loc-row${inactive ? ' inactive' : ''}">
+            <span class="lr-n">${i + 1}</span>
+            <span class="lr-tx">
+              <span class="lr-name">${escapeHtml(name)}</span>
+              <span class="lr-addr">${escapeHtml(addr || 'Geen adres opgegeven')}</span>
+            </span>
+            <span class="pill ${inactive ? 'none' : 'active'}">${inactive ? 'Inactief' : 'Actief'}</span>
+          </div>`;
+      }).join('') + '</div>';
+    }
+
+    // Stripe-id's, met doorklik naar het Stripe-dashboard.
+    function renderStripeIds(b) {
+      const el = document.getElementById('cmStripe');
+      if (!el) return;
+      const row = (label, id, path) => {
+        if (!id) return `<div class="id-row"><span>${label}</span><span class="none">niet gekoppeld</span></div>`;
+        const url = 'https://dashboard.stripe.com/' + path + '/' + encodeURIComponent(id);
+        return `<div class="id-row"><span>${label}</span>` +
+          `<a href="${url}" target="_blank" rel="noopener"><code>${escapeHtml(id)}</code></a></div>`;
+      };
+      el.innerHTML = row('Abonnement', b.stripeSubId, 'subscriptions') + row('Klant', b.stripeCustomerId, 'customers');
+    }
 
     // ============================================================
     //  Archiveren, terughalen en verwijderen
