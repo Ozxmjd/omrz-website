@@ -129,6 +129,44 @@
     .btn.loading .btn-label { opacity: .7; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* ---------- Stap 2: verificatiecode ---------- */
+    .step[hidden] { display: none; }
+    /* Introductie en voordelen horen bij stap 1; op het codescherm leiden ze af. */
+    .auth-card.on-code .auth-badge,
+    .auth-card.on-code > h1,
+    .auth-card.on-code > .auth-sub,
+    .auth-card.on-code > .benefits { display: none; }
+    .verify-head { text-align: center; margin-bottom: 24px; }
+    .verify-ic { width: 52px; height: 52px; margin: 0 auto 16px; border-radius: 14px; display: grid; place-items: center;
+      background: rgba(255,255,255,.06); border: 1px solid var(--border-strong); color: var(--pearl); }
+    .verify-ic svg { width: 24px; height: 24px; }
+    .verify-head h2 { font-size: 21px; font-weight: 800; letter-spacing: -.02em; margin-bottom: 8px; }
+    .verify-head p { color: var(--muted); font-size: 15px; line-height: 1.55; }
+    .verify-head strong { color: var(--pearl); word-break: break-all; }
+    /* Zes losse vakjes: één cijfer per vakje, groot en duidelijk. */
+    .code-boxes { display: flex; justify-content: center; gap: 10px; margin: 0 0 10px; }
+    .code-boxes input {
+      width: 52px; height: 62px; text-align: center; font-family: inherit;
+      font-size: 26px; font-weight: 700; color: #fff; caret-color: #fff;
+      background: rgba(255,255,255,.04); border: 1px solid var(--border-strong); border-radius: 12px;
+      -moz-appearance: textfield; transition: border-color .2s var(--ease), background .2s var(--ease);
+    }
+    .code-boxes input::-webkit-outer-spin-button, .code-boxes input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .code-boxes input:focus { outline: none; border-color: #fff; background: rgba(255,255,255,.08); }
+    .code-boxes input.filled { border-color: rgba(255,255,255,.45); }
+    .code-boxes input.invalid { border-color: #ff8f8f; background: rgba(255,80,80,.08); }
+    .code-hint { text-align: center; font-size: 13px; color: var(--muted); margin-bottom: 22px; }
+    .verify-actions { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 18px; }
+    .link-btn { background: none; border: 0; padding: 0; cursor: pointer; font-family: inherit;
+      font-size: 14px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px;
+      transition: color .2s var(--ease); }
+    .link-btn:hover:not(:disabled) { color: #fff; }
+    .link-btn:disabled { opacity: .5; cursor: default; text-decoration: none; }
+    @media (max-width: 420px) {
+      .code-boxes { gap: 7px; }
+      .code-boxes input { width: 44px; height: 56px; font-size: 22px; }
+    }
+
     @media (max-width: 480px) {
       .auth-card { padding: 32px 24px; }
       .field-row { grid-template-columns: 1fr; }
@@ -155,6 +193,7 @@
 
       <div class="auth-msg" id="authMsg"></div>
 
+      <div class="step" id="stepForm">
       <form id="registerForm" novalidate>
         <div class="field">
           <label for="business">Bedrijfsnaam</label>
@@ -190,6 +229,40 @@
       </form>
 
       <p class="auth-alt">Al een account? <a href="login.html">Inloggen</a></p>
+      </div>
+
+      <!-- Stap 2: verificatiecode uit de e-mail -->
+      <div class="step" id="stepCode" hidden>
+        <div class="verify-head">
+          <div class="verify-ic">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+          </div>
+          <h2>Controleer je e-mail</h2>
+          <p>We hebben een verificatiecode gestuurd naar <strong id="codeEmail">je e-mailadres</strong>.<br />Voer de 6-cijferige code hieronder in.</p>
+        </div>
+
+        <form id="codeForm" novalidate>
+          <div class="code-boxes" id="codeBoxes">
+            <input type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="1" aria-label="Cijfer 1" />
+            <input type="text" inputmode="numeric" maxlength="1" aria-label="Cijfer 2" />
+            <input type="text" inputmode="numeric" maxlength="1" aria-label="Cijfer 3" />
+            <input type="text" inputmode="numeric" maxlength="1" aria-label="Cijfer 4" />
+            <input type="text" inputmode="numeric" maxlength="1" aria-label="Cijfer 5" />
+            <input type="text" inputmode="numeric" maxlength="1" aria-label="Cijfer 6" />
+          </div>
+          <p class="code-hint">De code is 15 minuten geldig.</p>
+
+          <button type="submit" class="btn btn-primary btn-block" id="verifyBtn">
+            <span class="spinner"></span>
+            <span class="btn-label">Verifiëren &amp; account aanmaken</span>
+          </button>
+        </form>
+
+        <div class="verify-actions">
+          <button type="button" class="link-btn" id="resendBtn">Code opnieuw versturen</button>
+          <button type="button" class="link-btn" id="backBtn">Verkeerd e-mailadres? Ga terug</button>
+        </div>
+      </div>
     </div>
   </main>
 
@@ -207,6 +280,77 @@
     function clearInvalid() { form.querySelectorAll('input.invalid').forEach(el => el.classList.remove('invalid')); }
     const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+    // Gegevens van stap 1, bewaard tot de code is geverifieerd.
+    let pending = null;
+
+    // ---- Stap wisselen ----
+    function showStep(which) {
+      $('stepForm').hidden = which !== 'form';
+      $('stepCode').hidden = which !== 'code';
+      document.querySelector('.auth-card').classList.toggle('on-code', which === 'code');
+      clearMsg();
+      if (which === 'code') {
+        clearCode();
+        const first = codeInputs[0];
+        if (first && typeof first.focus === 'function') first.focus();
+      }
+      try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { /* niet ondersteund */ }
+    }
+
+    // ---- Code-invoer: zes vakjes die als één veld aanvoelen ----
+    const codeInputs = [...document.querySelectorAll('#codeBoxes input')];
+    function codeValue() { return codeInputs.map(i => i.value.trim()).join(''); }
+    function clearCode() {
+      codeInputs.forEach(i => { i.value = ''; i.classList.remove('filled', 'invalid'); });
+    }
+    function markCodeInvalid() { codeInputs.forEach(i => i.classList.add('invalid')); }
+
+    codeInputs.forEach((input, i) => {
+      input.addEventListener('input', () => {
+        // Alleen cijfers; plakken van een hele code vult de rest van de vakjes.
+        const digits = input.value.replace(/\D/g, '');
+        codeInputs.forEach(x => x.classList.remove('invalid'));
+        if (digits.length > 1) {
+          digits.split('').forEach((d, k) => {
+            const target = codeInputs[i + k];
+            if (target) { target.value = d; target.classList.add('filled'); }
+          });
+          const next = codeInputs[Math.min(codeInputs.length - 1, i + digits.length)];
+          if (next) next.focus();
+        } else {
+          input.value = digits;
+          input.classList.toggle('filled', !!digits);
+          if (digits && codeInputs[i + 1]) codeInputs[i + 1].focus();
+        }
+        // Compleet? Dan meteen verifiëren, dat scheelt een klik.
+        if (codeValue().length === 6) verifyAndRegister();
+      });
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && !input.value && codeInputs[i - 1]) {
+          codeInputs[i - 1].focus();
+          codeInputs[i - 1].value = '';
+          codeInputs[i - 1].classList.remove('filled');
+          e.preventDefault();
+        }
+        if (e.key === 'ArrowLeft' && codeInputs[i - 1]) { codeInputs[i - 1].focus(); e.preventDefault(); }
+        if (e.key === 'ArrowRight' && codeInputs[i + 1]) { codeInputs[i + 1].focus(); e.preventDefault(); }
+      });
+      input.addEventListener('paste', (e) => {
+        const text = (e.clipboardData || window.clipboardData).getData('text') || '';
+        const digits = text.replace(/\D/g, '').slice(0, 6);
+        if (!digits) return;
+        e.preventDefault();
+        clearCode();
+        digits.split('').forEach((d, k) => {
+          if (codeInputs[k]) { codeInputs[k].value = d; codeInputs[k].classList.add('filled'); }
+        });
+        const next = codeInputs[Math.min(5, digits.length)];
+        if (next) next.focus();
+        if (digits.length === 6) verifyAndRegister();
+      });
+    });
+
+    // ---- Stap 1: gegevens valideren en een code aanvragen ----
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       clearMsg(); clearInvalid();
@@ -224,27 +368,91 @@
       if (password !== password2) { markInvalid('password2'); return showMsg('De wachtwoorden komen niet overeen.', 'error'); }
       if (!agreed) { return showMsg('Ga akkoord met de voorwaarden en het privacybeleid om verder te gaan.', 'error'); }
 
+      // Gegevens vasthouden; het account wordt pas ná de code aangemaakt.
+      pending = { business_name: business, email: email, password: password };
+
       submitBtn.disabled = true;
       submitBtn.classList.add('loading');
+      const ok = await sendCode(email, business);
+      submitBtn.disabled = false;
+      submitBtn.classList.remove('loading');
+      if (ok) {
+        $('codeEmail').textContent = email;
+        showStep('code');
+        showMsg('We hebben een code gestuurd naar ' + email + '.', 'ok');
+      }
+    });
+
+    // ---- Code aanvragen (stap 1 én "opnieuw versturen") ----
+    async function sendCode(email, business) {
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/register/send-code', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email, business_name: business }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          let m = data.error || data.message || 'De verificatiecode kon niet verstuurd worden. Probeer het opnieuw.';
+          const low = String(m).toLowerCase();
+          if (low.includes('geregistreerd') || low.includes('in gebruik') || low.includes('already') || low.includes('exist')) {
+            m = 'Er bestaat al een account met dit e-mailadres. Log in of gebruik een ander e-mailadres.';
+            markInvalid('email');
+          }
+          showMsg(m, 'error');
+          return false;
+        }
+        return true;
+      } catch (err) {
+        showMsg('Kan geen verbinding maken met de server. Controleer je verbinding en probeer het later opnieuw.', 'error');
+        return false;
+      }
+    }
+
+    // ---- Stap 2: code verifiëren en het account aanmaken ----
+    let verifying = false;
+    async function verifyAndRegister() {
+      if (verifying) return;
+      if (!pending) { showStep('form'); return showMsg('Vul je gegevens opnieuw in.', 'error'); }
+      const code = codeValue();
+      if (code.length !== 6) { markCodeInvalid(); return showMsg('Vul de volledige 6-cijferige code in.', 'error'); }
+
+      verifying = true;
+      clearMsg();
+      const btn = $('verifyBtn');
+      btn.disabled = true; btn.classList.add('loading');
+      const done = () => { verifying = false; btn.disabled = false; btn.classList.remove('loading'); };
 
       try {
         const res = await fetch(API_BASE + '/api/stamp/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ business_name: business, email, password }),
+          // Alle gegevens uit stap 1 plus de ingevoerde code.
+          body: JSON.stringify({
+            business_name: pending.business_name,
+            email: pending.email,
+            password: pending.password,
+            code: code,
+          }),
         });
         const data = await res.json().catch(() => ({}));
 
         if (!res.ok) {
-          // Duidelijke melding, met een herkenbaar bericht voor "e-mail bestaat al".
           let m = data.error || data.message || 'Account aanmaken mislukt. Probeer het opnieuw.';
           const low = String(m).toLowerCase();
-          if (res.status === 409 || low.includes('exist') || low.includes('already') || low.includes('bestaat') || low.includes('in gebruik') || low.includes('geregistreerd')) {
+          if (data.code_required) {
+            m = 'Vraag eerst een nieuwe verificatiecode aan.';
+          } else if (res.status === 400 && (low.includes('code') || low.includes('verlopen'))) {
+            // Ongeldige of verlopen code: de code wissen zodat opnieuw typen vanzelf gaat.
+            m = 'Ongeldige of verlopen code. Controleer de code of vraag een nieuwe aan.';
+            markCodeInvalid();
+            clearCode();
+            if (codeInputs[0]) codeInputs[0].focus();
+          } else if (res.status === 409 || low.includes('bestaat') || low.includes('geregistreerd') || low.includes('in gebruik')) {
             m = 'Er bestaat al een account met dit e-mailadres. Log in of gebruik een ander e-mailadres.';
           }
           showMsg(m, 'error');
-          submitBtn.disabled = false;
-          submitBtn.classList.remove('loading');
+          done();
           return;
         }
 
@@ -259,17 +467,46 @@
           || (data.data && data.data.card_id);
         if (cardIdVal) localStorage.setItem('omrz_card_id', cardIdVal);
 
-        localStorage.setItem('omrz_business_name', business);
-        localStorage.setItem('omrz_email', email);
+        localStorage.setItem('omrz_business_name', pending.business_name);
+        localStorage.setItem('omrz_email', pending.email);
 
         showMsg('Account aangemaakt! Je wordt doorgestuurd…', 'ok');
         window.location.href = 'dashboard.html';
       } catch (err) {
         showMsg('Kan geen verbinding maken met de server. Controleer je verbinding en probeer het later opnieuw.', 'error');
-        submitBtn.disabled = false;
-        submitBtn.classList.remove('loading');
+        done();
       }
+    }
+
+    document.getElementById('codeForm').addEventListener('submit', (e) => { e.preventDefault(); verifyAndRegister(); });
+
+    // ---- Code opnieuw versturen, met een korte wachttijd tegen dubbelklikken ----
+    const resendBtn = $('resendBtn');
+    resendBtn.addEventListener('click', async () => {
+      if (!pending || resendBtn.disabled) return;
+      resendBtn.disabled = true;
+      const original = resendBtn.textContent;
+      resendBtn.textContent = 'Versturen…';
+      clearMsg();
+      const ok = await sendCode(pending.email, pending.business_name);
+      if (ok) { clearCode(); showMsg('We hebben een nieuwe code gestuurd naar ' + pending.email + '.', 'ok'); }
+      let left = 30;
+      const tick = () => {
+        resendBtn.textContent = left > 0 ? 'Opnieuw versturen (' + left + 's)' : original;
+        if (left <= 0) { resendBtn.disabled = false; return; }
+        left -= 1;
+        setTimeout(tick, 1000);
+      };
+      tick();
     });
+
+    // ---- Terug naar het formulier ----
+    $('backBtn').addEventListener('click', () => {
+      showStep('form');
+      const em = $('email');
+      if (em && typeof em.focus === 'function') em.focus();
+    });
+
   </script>
 </body>
 </html>
