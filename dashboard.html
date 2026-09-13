@@ -1113,8 +1113,15 @@
       font-size: 15px; font-weight: 600; color: var(--text-strong); -moz-appearance: textfield; }
     .sm-stepper input::-webkit-outer-spin-button, .sm-stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .sm-stepper input:focus { outline: none; }
-    .sm-plan .per-loc { display: block; margin-top: 4px; font-size: 12.5px; font-weight: 500; color: var(--muted); letter-spacing: 0; }
-    .sm-plan .per-loc .save-inline { font-weight: 700; }
+    /* Voordeelbalk: opvallend oranje, los van de prijs zelf. */
+    .sm-benefit { display: flex; align-items: center; gap: 8px; margin: 0 0 16px;
+      padding: 9px 13px; border-radius: 10px; font-size: 13.5px; font-weight: 600;
+      background: rgba(251, 146, 60, .13); border: 1px solid rgba(251, 146, 60, .32); color: #eab68a; }
+    .sm-benefit[hidden] { display: none; }
+    .sm-benefit svg { width: 15px; height: 15px; flex-shrink: 0; }
+    .sm-benefit strong { font-weight: 700; }
+    /* Op een lichte ondergrond heeft de tekst een donkerder oranje nodig. */
+    [data-theme="light"] .sm-benefit { background: rgba(251, 146, 60, .14); border-color: rgba(217, 119, 6, .3); color: #b45309; }
 
     /* Begeleiding: verplichte ja/nee-keuze onder de pakketten. */
     .sm-addon { margin-top: 16px; padding: 16px 18px; border-radius: 14px;
@@ -2233,6 +2240,7 @@
           <div class="tier">Basic</div>
           <div class="amount" id="smBasicAmount">€34,99<small>/maand</small></div>
           <div class="amount-sub" id="smBasicSub">Altijd maandelijks opzegbaar</div>
+          <div class="sm-benefit" id="smBasicBenefit" hidden></div>
           <ul class="sm-features">
             <li>Digitale stempelkaart</li>
             <li>Onbeperkt klanten</li>
@@ -2251,6 +2259,7 @@
           <div class="tier">Premium</div>
           <div class="amount" id="smPremAmount">€44,99<small>/maand</small></div>
           <div class="amount-sub" id="smPremSub">Altijd maandelijks opzegbaar</div>
+          <div class="sm-benefit" id="smPremBenefit" hidden></div>
           <ul class="sm-features">
             <li class="hl">Alles van Basic</li>
             <li>Locatie meldingen: klanten krijgen een melding als ze in de buurt van je winkel zijn</li>
@@ -2523,8 +2532,8 @@
     // ====== Groot abonnement-scherm (modal) ======
     // value = bedrag excl. BTW, om het kostenoverzicht te kunnen optellen.
     const SUB_PRICES = {
-      basic:   { monthly: { amount: '€34,99', value: 34.99, per: '/maand', sub: 'Altijd maandelijks opzegbaar' }, yearly: { amount: '€349', value: 349, per: '/jaar', sub: '€29,08 per maand · <span class="save-inline">bespaar €71</span>' } },
-      premium: { monthly: { amount: '€44,99', value: 44.99, per: '/maand', sub: 'Altijd maandelijks opzegbaar' }, yearly: { amount: '€449', value: 449, per: '/jaar', sub: '€37,42 per maand · <span class="save-inline">bespaar €91</span>' } },
+      basic:   { monthly: { amount: '€34,99', value: 34.99, per: '/maand', sub: 'Altijd maandelijks opzegbaar' }, yearly: { amount: '€349', value: 349, per: '/jaar', sub: '€29,08 per maand' } },
+      premium: { monthly: { amount: '€44,99', value: 44.99, per: '/maand', sub: 'Altijd maandelijks opzegbaar' }, yearly: { amount: '€449', value: 449, per: '/jaar', sub: '€37,42 per maand' } },
     };
     // Eenmalige begeleiding; het bedrag staat ook in de backend (ONBOARDING_PRICE_LABEL).
     const ONBOARDING_PRICE = 149;
@@ -2536,6 +2545,26 @@
     const PREMIUM_MULTI_MIN = 2;
     const MAX_LOCATIONS = 100;
     let smLocations = 1;
+    const BENEFIT_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>';
+
+    // Wat levert deze keuze op? Twee soorten voordeel:
+    //  · jaarlijks betalen scheelt (12 × maandprijs) − jaarprijs per vestiging;
+    //  · Premium geeft vanaf 2 vestigingen korting per vestiging.
+    // Maandelijks met één vestiging is er niets te melden — dan geen balk.
+    const round2 = (v) => Math.round(v * 100) / 100;
+    function stampBenefit(plan, cycle, count) {
+      const n = Math.min(MAX_LOCATIONS, Math.max(1, parseInt(count, 10) || 1));
+      const base = STAMP_BASE[plan] || STAMP_BASE.basic;
+      const multi = n >= PREMIUM_MULTI_MIN;
+
+      if (cycle !== 'yearly') {
+        const perLoc = (plan === 'premium' && multi) ? PREMIUM_MULTI_DISCOUNT.monthly : 0;
+        return { amount: round2(perLoc * n), period: 'maand' };
+      }
+      const yearlySavePerLoc = round2(base.monthly * 12 - base.yearly);   // Basic €70,88 · Premium €90,88
+      const multiPerLoc = (plan === 'premium' && multi) ? PREMIUM_MULTI_DISCOUNT.yearly : 0;
+      return { amount: round2((yearlySavePerLoc + multiPerLoc) * n), period: 'jaar' };
+    }
 
     function stampPricing(plan, cycle, count) {
       const n = Math.min(MAX_LOCATIONS, Math.max(1, parseInt(count, 10) || 1));
@@ -2570,19 +2599,22 @@
         const subEl = document.getElementById(plan === 'basic' ? 'smBasicSub' : 'smPremSub');
         const fallback = SUB_PRICES[plan][smBilling];
 
-        if (n === 1) {
-          amountEl.innerHTML = euroNL(pr.total) + '<small>' + per + '</small>' + vat;
-          subEl.innerHTML = fallback.sub;
-        } else {
-          // Bij meerdere vestigingen is het totaal het bedrag dat telt; de opbouw staat eronder.
-          // De korting tonen we per vestiging — dat is het bedrag waarop de winkelier stuurt,
-          // en het sluit aan bij de feature-regel in de Premium-lijst.
-          const saved = pr.discount > 0
-            ? ' · <span class="save-inline">' + euroKort(pr.discount) + ' korting per vestiging</span>'
-            : '';
-          amountEl.innerHTML = euroNL(pr.total) + '<small>' + per + '</small>' + vat
-            + '<span class="per-loc">' + n + ' vestigingen × ' + euroNL(pr.unit) + saved + '</span>';
-          subEl.innerHTML = fallback.sub;
+        // De prijs blijft het totaal voor het gekozen aantal vestigingen.
+        amountEl.innerHTML = euroNL(pr.total) + '<small>' + per + '</small>' + vat;
+        subEl.innerHTML = fallback.sub;
+
+        // Voordeel als losse balk, alleen wanneer er écht iets te winnen valt.
+        const benefitEl = document.getElementById(plan === 'basic' ? 'smBasicBenefit' : 'smPremBenefit');
+        const benefit = stampBenefit(plan, smBilling, n);
+        if (benefitEl) {
+          if (benefit.amount > 0) {
+            benefitEl.innerHTML = BENEFIT_SVG + '<span>Uw voordeel: <strong>' + euroNL(benefit.amount)
+              + '</strong> per ' + benefit.period + '</span>';
+            benefitEl.hidden = false;
+          } else {
+            benefitEl.hidden = true;
+            benefitEl.innerHTML = '';
+          }
         }
       });
 
