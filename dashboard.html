@@ -1123,6 +1123,17 @@
     /* Op een lichte ondergrond heeft de tekst een donkerder oranje nodig. */
     [data-theme="light"] .sm-benefit { background: rgba(251, 146, 60, .14); border-color: rgba(217, 119, 6, .3); color: #b45309; }
 
+    /* Wijzig-modus: wat verandert er ten opzichte van nu. */
+    .sm-change { margin-top: 16px; padding: 14px 18px; border-radius: 12px;
+      border: 1px solid rgba(139,92,246,.28); background: var(--accent-soft); }
+    .sm-change[hidden] { display: none; }
+    .sm-change-row { display: flex; align-items: baseline; justify-content: space-between; gap: 14px;
+      font-size: 13.5px; color: var(--muted); }
+    .sm-change-row + .sm-change-row { margin-top: 7px; }
+    .sm-change-row strong { color: var(--text-strong); font-weight: 600; white-space: nowrap; }
+    .sm-change-note { margin-top: 11px; padding-top: 10px; border-top: 1px solid var(--border);
+      font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+
     /* Begeleiding: verplichte ja/nee-keuze onder de pakketten. */
     .sm-addon { margin-top: 16px; padding: 16px 18px; border-radius: 14px;
       border: 1px solid var(--border); background: rgba(var(--ink), .022);
@@ -2300,6 +2311,8 @@
         <div class="sm-summary" id="smSummary" hidden></div>
       </div>
 
+      <div class="sm-change" id="smChange" hidden></div>
+
       <p class="sm-vat">Alle prijzen zijn exclusief 21% BTW. De BTW wordt bij de betaling berekend.</p>
 
       <!-- Proefperiode-optie (alleen als can_use_trial = true) -->
@@ -2403,8 +2416,14 @@
     let subscription = {
       access_status: 'active', plan: 'basic', billing_cycle: null,
       days_left_in_trial: 0, is_trial_expired: false, has_access: true, can_use_trial: false,
-      trial_used: false, payment_failed: false,
+      trial_used: false, payment_failed: false, subscribed_locations: null,
     };
+    // Aantal vestigingen waarvoor betaald wordt, uit de bron die het weet.
+    function subscribedLocations() {
+      return subscription.subscribed_locations
+        || (locQuota.known ? locQuota.subscribed : 0)
+        || Math.max(1, locations.length || 1);
+    }
     const LOCKED_TABS = new Set(['stempel', 'kaart', 'klanten', 'vestigingen']);
     function tabLock(tab) {
       if (isManager && OWNER_ONLY_TABS.has(tab)) return 'owner';
@@ -2455,6 +2474,9 @@
           can_use_trial: !!(s.can_use_trial ?? s.canUseTrial),
           // Heeft dit account ooit een proefperiode gebruikt?
           trial_used: !!(s.trial_used ?? s.trialUsed ?? s.has_used_trial ?? s.trial_ended),
+          // Waarvoor wordt er betaald? /subscription geeft dit (nog) niet mee,
+          // dus subscribedLocations() valt terug op wat GET /locations meestuurt.
+          subscribed_locations: Number(s.subscribed_locations ?? s.locations ?? 0) || null,
           // Verlopen door een mislukte betaling (paid subscriber, betaling faalde)?
           payment_failed: !!(s.payment_failed ?? s.paymentFailed)
             || ['past_due', 'unpaid', 'failed'].includes(String(s.payment_status || '').toLowerCase()),
@@ -2626,6 +2648,7 @@
       }
       updateTrialNote();
       renderAddonSummary();
+      renderChangeSummary();
     }
 
     // ---- Stepper ----
@@ -2725,16 +2748,62 @@
       document.querySelectorAll('#smPlans .sm-plan').forEach(c => c.classList.toggle('selected', c.dataset.plan === plan));
       updateTrialNote();
       renderAddonSummary();
+      renderChangeSummary();
     }
-    function openSubModal() {
+    // 'new' = abonnement afsluiten · 'change' = lopend abonnement wijzigen.
+    let smMode = 'new';
+    let smBefore = null;      // situatie bij openen, om het verschil te tonen
+
+    function openSubModal(opts) {
+      // Deze functie hangt ook direct aan knoppen; een Event is geen optie-object.
+      const o = (opts && typeof opts === 'object' && !opts.type) ? opts : {};
       const s = subscription;
+      smMode = (o.mode === 'change' && s.has_access) ? 'change' : 'new';
+
+      const trial = document.getElementById('smTrial');
+      const plans = document.getElementById('smPlans');
+      const addon = document.getElementById('smAddon');
+
+      if (smMode === 'change') {
+        const cur = subscribedLocations();
+        smBefore = {
+          plan: s.plan === 'basic' ? 'basic' : 'premium',
+          cycle: s.billing_cycle === 'yearly' ? 'yearly' : 'monthly',
+          locations: cur,
+        };
+        document.getElementById('smTitle').textContent = 'Abonnement wijzigen';
+        document.getElementById('smSub').textContent = 'Pas je pakket, facturatie of aantal vestigingen aan.';
+        smBilling = smBefore.cycle;
+        document.querySelectorAll('#smBilling button').forEach(x =>
+          x.classList.toggle('active', x.dataset.cycle === smBilling));
+        plans.classList.add('selectable');
+        setSelectedPlan(smBefore.plan);
+        setLocationCount(o.locations || cur);
+        // Proefperiode en begeleiding horen bij een nieuw abonnement, niet bij wijzigen.
+        trial.hidden = true;
+        addon.hidden = true;
+        document.querySelectorAll('#smPlans .sm-choose .btn-label')
+          .forEach(l => { l.textContent = 'Wijziging bevestigen'; });
+        smClearMsg();
+        document.querySelectorAll('input[name="smOnboardingChoice"]').forEach(r => { r.checked = false; });
+        clearAddonError();
+        renderSmPrices();
+        renderAddonSummary();
+        subModal.hidden = false;
+        return;
+      }
+
+      smBefore = null;
+      addon.hidden = false;
+      document.querySelectorAll('#smPlans .sm-choose').forEach(b => {
+        const l = b.querySelector('.btn-label');
+        if (l) l.textContent = b.dataset.plan === 'premium' ? 'Kies Premium' : 'Kies Basic';
+      });
       let title = 'Kies je abonnement', sub = 'Kies het pakket dat bij jouw zaak past.';
       if (!s.has_access) { const m = subMessage(); title = m.title; sub = m.text; }
       document.getElementById('smTitle').textContent = title;
       document.getElementById('smSub').textContent = sub;
 
-      const trial = document.getElementById('smTrial');
-      const plans = document.getElementById('smPlans');
       if (s.can_use_trial) { trial.hidden = false; plans.classList.add('selectable'); setSelectedPlan(smSelectedPlan || 'premium'); }
       else { trial.hidden = true; plans.classList.remove('selectable'); }
 
@@ -2768,9 +2837,84 @@
     }));
     // "Kies Basic/Premium" → direct afrekenen (zonder trial).
     document.querySelectorAll('#smPlans .sm-choose').forEach(btn =>
-      btn.addEventListener('click', (e) => { e.stopPropagation(); startCheckout(btn.dataset.plan, false, btn); }));
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        // In wijzig-modus voert dezelfde knop de wijziging door in plaats van een checkout.
+        if (smMode === 'change') confirmSubscriptionChange(btn.dataset.plan, btn);
+        else startCheckout(btn.dataset.plan, false, btn);
+      }));
     // "Start 14 dagen gratis" → afrekenen met trial, voor het geselecteerde pakket.
     document.getElementById('smStartTrial').addEventListener('click', (e) => startCheckout(smSelectedPlan, true, e.currentTarget));
+
+    // Wat verandert er ten opzichte van de huidige situatie?
+    function renderChangeSummary() {
+      const box = document.getElementById('smChange');
+      if (!box) return;
+      if (smMode !== 'change' || !smBefore) { box.hidden = true; box.innerHTML = ''; return; }
+
+      const before = stampPricing(smBefore.plan, smBefore.cycle, smBefore.locations);
+      const after = stampPricing(smSelectedPlan, smBilling, smLocations);
+      const perBefore = smBefore.cycle === 'yearly' ? 'jaar' : 'maand';
+      const perAfter = smBilling === 'yearly' ? 'jaar' : 'maand';
+      const name = (p) => p === 'premium' ? 'Premium' : 'Basic';
+      const loc = (n) => n + ' ' + (n === 1 ? 'vestiging' : 'vestigingen');
+
+      const unchanged = smBefore.plan === smSelectedPlan
+        && smBefore.cycle === smBilling && smBefore.locations === smLocations;
+      // Per maand vergelijken, anders zet je een jaarbedrag naast een maandbedrag.
+      const monthly = (pr, cycle) => cycle === 'yearly' ? pr.total / 12 : pr.total;
+      const up = monthly(after, smBilling) > monthly(before, smBefore.cycle);
+      const isTrial = subscription.access_status === 'trial';
+
+      let note;
+      if (unchanged) note = 'Dit is je huidige abonnement — er verandert niets.';
+      else if (isTrial) note = 'Tijdens je proefperiode wordt er niets afgeschreven. Daarna geldt het nieuwe bedrag.';
+      else if (up) note = 'Het verschil voor de resterende periode wordt direct gefactureerd.';
+      else note = 'Het tegoed wordt verrekend met je volgende factuur.';
+
+      box.innerHTML =
+        '<div class="sm-change-row"><span>Nu: ' + name(smBefore.plan) + ' · ' + loc(smBefore.locations) + '</span>' +
+          '<strong>' + euroNL(before.total) + ' per ' + perBefore + '</strong></div>' +
+        '<div class="sm-change-row"><span>Nieuw: ' + name(smSelectedPlan) + ' · ' + loc(smLocations) + '</span>' +
+          '<strong>' + euroNL(after.total) + ' per ' + perAfter + '</strong></div>' +
+        '<div class="sm-change-note">' + escapeHtml(note) + '</div>';
+      box.hidden = false;
+    }
+
+    // De wijziging doorvoeren op het lopende abonnement.
+    async function confirmSubscriptionChange(plan, btn) {
+      if (btn.disabled) return;
+      if (!localStorage.getItem('omrz_token')) { smShowMsg('Je bent niet ingelogd. Log opnieuw in.', 'error'); return; }
+      smClearMsg();
+      const label = btn.querySelector('.btn-label');
+      const original = label ? label.textContent : btn.textContent;
+      const allBtns = [...document.querySelectorAll('#smPlans .sm-choose')];
+      allBtns.forEach(b => { b.disabled = true; });
+      if (label) label.textContent = 'Bezig met wijzigen…';
+      const reset = () => { allBtns.forEach(b => { b.disabled = false; }); if (label) label.textContent = original; };
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/update-subscription', {
+          method: 'POST', headers: authHeaders(),
+          body: JSON.stringify({ plan: plan, billing_cycle: smBilling, location_count: smLocations }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 401) { smShowMsg('Je sessie is verlopen. Log opnieuw in.', 'error'); reset(); return; }
+        // 409 = verlagen onder het aantal actieve vestigingen; de backend legt uit waarom.
+        if (!res.ok) throw new Error(data.error || data.message || 'De wijziging is niet doorgevoerd.');
+
+        smShowMsg(data.message || 'Je abonnement is gewijzigd.', 'ok');
+        // Verse cijfers, zodat paneel, banner en vestigingenrem meteen kloppen.
+        await loadSubscription();
+        await loadLocations();
+        renderSubscriptionPanel();
+        reset();
+        setTimeout(() => { if (!subModal.hidden) closeSubModal(); }, 2500);
+      } catch (err) {
+        const net = (!navigator.onLine || err instanceof TypeError);
+        smShowMsg(net ? NET_MSG : (err.message || 'Er ging iets mis. Probeer het opnieuw.'), 'error');
+        reset();
+      }
+    }
 
     async function startCheckout(plan, withTrial, btn) {
       if (btn.disabled) return;
@@ -2823,9 +2967,12 @@
 
     // ====== Mijn Abonnement ======
     function planLabel(p) { return p === 'premium' ? 'Premium' : (p === 'basic' ? 'Basic' : '—'); }
-    function priceLabel(plan, cycle) {
-      const pr = SUB_PRICES[plan] && SUB_PRICES[plan][cycle === 'yearly' ? 'yearly' : 'monthly'];
-      return pr ? (pr.amount + pr.per + ' excl. BTW') : '—';
+    // Prijs voor het daadwerkelijke aantal vestigingen, inclusief de Premium-staffel.
+    function priceLabel(plan, cycle, count) {
+      const c = cycle === 'yearly' ? 'yearly' : 'monthly';
+      if (!STAMP_BASE[plan]) return '—';
+      const pr = stampPricing(plan, c, count || 1);
+      return euroNL(pr.total) + (c === 'yearly' ? '/jaar' : '/maand') + ' excl. BTW';
     }
     function renderSubscriptionPanel() {
       const wrap = document.getElementById('subInfoWrap');
@@ -2848,30 +2995,36 @@
         : { cls: 'active', label: 'Actief' };
       const cycle = (s.billing_cycle === 'yearly') ? 'Jaarlijks' : 'Maandelijks';
       const days = Math.max(0, s.days_left_in_trial);
+      const locCount = subscribedLocations();
 
       wrap.innerHTML =
         '<div class="block glass sub-card">' +
           '<div class="sub-top">' +
             '<div><div class="sub-plan-name">' + planLabel(s.plan) + '</div>' +
-              '<div class="sub-plan-sub">Je huidige OMRZ Digital-abonnement</div></div>' +
+              '<div class="sub-plan-sub">' + locCount + ' ' + (locCount === 1 ? 'vestiging' : 'vestigingen')
+                + ' · ' + planLabel(s.plan) + ' · ' + priceLabel(s.plan, s.billing_cycle, locCount) + '</div></div>' +
             '<span class="sub-status ' + status.cls + '">' + status.label + '</span>' +
           '</div>' +
           '<div class="sub-detail-grid">' +
             '<div class="sub-detail"><div class="sd-lbl">Pakket</div><div class="sd-val">' + planLabel(s.plan) + '</div></div>' +
             '<div class="sub-detail"><div class="sd-lbl">Facturatie</div><div class="sd-val">' + cycle + '</div></div>' +
-            '<div class="sub-detail"><div class="sd-lbl">Prijs</div><div class="sd-val">' + priceLabel(s.plan, s.billing_cycle) + '</div></div>' +
+            '<div class="sub-detail"><div class="sd-lbl">Vestigingen</div><div class="sd-val">' + locCount + '</div></div>' +
+            '<div class="sub-detail"><div class="sd-lbl">Prijs</div><div class="sd-val">' + priceLabel(s.plan, s.billing_cycle, locCount) + '</div></div>' +
           '</div>' +
           (isTrial ? '<div class="sub-trial-line">Nog ' + days + ' ' + (days === 1 ? 'dag' : 'dagen') + ' proefperiode</div>' : '') +
           '<div class="sub-actions">' +
-            '<button type="button" class="btn btn-primary" id="managePortalBtn"><span class="btn-label">Beheer abonnement</span></button>' +
-            (!s.has_access ? '<button type="button" class="btn btn-ghost" id="subChooseBtn2">Kies een abonnement</button>' : '') +
+            (s.has_access ? '<button type="button" class="btn btn-primary" id="subChangeBtn">Abonnement wijzigen</button>' : '') +
+            '<button type="button" class="btn btn-ghost" id="managePortalBtn"><span class="btn-label">Beheer abonnement</span></button>' +
+            (!s.has_access ? '<button type="button" class="btn btn-primary" id="subChooseBtn2">Kies een abonnement</button>' : '') +
           '</div>' +
           '<span class="save-note" id="portalNote" style="display:block;margin-top:14px;"></span>' +
         '</div>';
 
       document.getElementById('managePortalBtn').addEventListener('click', (e) => openPortal(e.currentTarget));
+      const chg = document.getElementById('subChangeBtn');
+      if (chg) chg.addEventListener('click', () => openSubModal({ mode: 'change' }));
       const cb = document.getElementById('subChooseBtn2');
-      if (cb) cb.addEventListener('click', openSubModal);
+      if (cb) cb.addEventListener('click', () => openSubModal());
     }
 
     // Stripe Customer Portal openen (opzeggen, betaalmethode / pakket wijzigen).
@@ -5468,7 +5621,13 @@
       box.hidden = false;
     }
     document.getElementById('locQuota').addEventListener('click', (e) => {
-      if (e.target.closest('[data-goto-abo]')) activateTab('abonnement');
+      if (!e.target.closest('[data-goto-abo]')) return;
+      activateTab('abonnement');
+      // Direct naar de wijziging die nodig is: één vestiging meer dan er nu zijn.
+      if (subscription.has_access) {
+        const wanted = Math.max(subscribedLocations(), locQuota.current || locations.length || 0) + 1;
+        openSubModal({ mode: 'change', locations: wanted });
+      }
     });
 
     function renderLocationsPanel() {
