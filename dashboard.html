@@ -2254,6 +2254,7 @@
           <ul class="sm-features">
             <li class="hl">Alles van Basic</li>
             <li>Locatie meldingen: klanten krijgen een melding als ze in de buurt van je winkel zijn</li>
+            <li>&euro;2,50 korting per maand per vestiging bij meerdere vestigingen</li>
             <li>Prioriteit support</li>
           </ul>
           <button type="button" class="btn btn-primary btn-block sm-choose" data-plan="premium">
@@ -2547,6 +2548,10 @@
       return { count: n, base, discount, unit: round2(unit), total: round2(unit * n), saved: round2(discount * n) };
     }
     const euroNL = (n) => '€' + Number(n).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    // Zelfde opmaak, maar zonder ',00' bij ronde bedragen: €30 leest prettiger dan €30,00.
+    const euroKort = (n) => Number.isInteger(Number(n))
+      ? '€' + Number(n).toLocaleString('nl-NL')
+      : euroNL(n);
     let smBilling = 'monthly';
     let smSelectedPlan = 'premium';
     const subModal = document.getElementById('subModal');
@@ -2570,8 +2575,10 @@
           subEl.innerHTML = fallback.sub;
         } else {
           // Bij meerdere vestigingen is het totaal het bedrag dat telt; de opbouw staat eronder.
-          const saved = pr.saved > 0
-            ? ' · <span class="save-inline">bespaar ' + euroNL(pr.saved) + '</span>'
+          // De korting tonen we per vestiging — dat is het bedrag waarop de winkelier stuurt,
+          // en het sluit aan bij de feature-regel in de Premium-lijst.
+          const saved = pr.discount > 0
+            ? ' · <span class="save-inline">' + euroKort(pr.discount) + ' korting per vestiging</span>'
             : '';
           amountEl.innerHTML = euroNL(pr.total) + '<small>' + per + '</small>' + vat
             + '<span class="per-loc">' + n + ' vestigingen × ' + euroNL(pr.unit) + saved + '</span>';
@@ -2582,7 +2589,7 @@
       const hint = document.getElementById('smLocsHint');
       if (hint) {
         hint.textContent = n >= PREMIUM_MULTI_MIN
-          ? 'Vanaf 2 vestigingen krijg je bij Premium ' + euroNL(PREMIUM_MULTI_DISCOUNT[smBilling === 'yearly' ? 'yearly' : 'monthly']) + ' korting per vestiging.'
+          ? 'Vanaf 2 vestigingen krijg je bij Premium ' + euroKort(PREMIUM_MULTI_DISCOUNT[smBilling === 'yearly' ? 'yearly' : 'monthly']) + ' korting per vestiging.'
           : 'Je betaalt per vestiging. Vanaf 2 vestigingen geeft Premium korting.';
       }
       updateTrialNote();
