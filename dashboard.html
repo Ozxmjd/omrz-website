@@ -924,6 +924,21 @@
     .share-mode .sm-tx strong { font-size: 14.5px; font-weight: 700; }
     .share-mode .sm-tx small { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
 
+    /* Vestiging-limiet: uitleg boven de lijst. */
+    .loc-quota { display: flex; align-items: flex-start; gap: 11px; padding: 14px 16px; border-radius: 12px;
+      border: 1px solid var(--border); background: rgba(var(--ink), .022); margin-bottom: 16px;
+      font-size: 13px; color: var(--muted); line-height: 1.55; }
+    .loc-quota[hidden] { display: none; }
+    .loc-quota svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 2px; }
+    .loc-quota b { color: var(--pearl); }
+    .loc-quota .lq-tx { flex: 1; min-width: 0; }
+    .loc-quota .btn { margin-top: 10px; font-size: 12.5px; padding: 8px 13px; }
+    .loc-quota.limit { border-color: rgba(255,80,80,.3); background: rgba(255,80,80,.06); }
+    .loc-quota.limit svg { color: #f0a8a8; }
+    .loc-quota.trial { border-color: rgba(251,146,60,.3); background: rgba(251,146,60,.07); }
+    .loc-quota.trial svg { color: #eab68a; }
+    .loc-quota.ok svg { color: var(--accent-2); }
+
     /* ---------- Vestiging-lijst ---------- */
     .loc-list-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 16px; }
     .loc-list-head h3 { font-size: 17px; font-weight: 700; }
@@ -1079,6 +1094,27 @@
     .sm-features li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--pearl); }
     .sm-features li::before { content: ""; flex: none; width: 17px; height: 17px; margin-top: 2px; border-radius: 50%; background: rgba(110,231,160,.16); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236ee7a0' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: center; background-size: 10px; }
     .sm-features li.hl { color: var(--text-strong); font-weight: 600; }
+
+    /* Aantal vestigingen: bepaalt de prijs van beide pakketten. */
+    .sm-locs { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;
+      margin-bottom: 18px; padding: 13px 18px; border-radius: 12px;
+      border: 1px solid var(--border); background: rgba(var(--ink), .022); }
+    .sm-locs-tx { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .sm-locs-tx strong { font-size: 14px; font-weight: 600; color: var(--text-strong); }
+    .sm-locs-tx small { font-size: 12px; color: var(--muted); }
+    .sm-stepper { display: inline-flex; align-items: center; gap: 2px; padding: 3px; flex-shrink: 0;
+      border-radius: 999px; border: 1px solid var(--border-strong); background: rgba(var(--ink), .03); }
+    .sm-stepper button { width: 30px; height: 30px; border-radius: 50%; border: 0; cursor: pointer;
+      font-family: inherit; font-size: 17px; line-height: 1; color: var(--pearl); background: none;
+      display: grid; place-items: center; transition: background .2s var(--ease), color .2s var(--ease); }
+    .sm-stepper button:hover:not(:disabled) { background: var(--accent-soft); color: var(--accent-2); }
+    .sm-stepper button:disabled { opacity: .35; cursor: not-allowed; }
+    .sm-stepper input { width: 46px; border: 0; background: none; text-align: center; font-family: inherit;
+      font-size: 15px; font-weight: 600; color: var(--text-strong); -moz-appearance: textfield; }
+    .sm-stepper input::-webkit-outer-spin-button, .sm-stepper input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .sm-stepper input:focus { outline: none; }
+    .sm-plan .per-loc { display: block; margin-top: 4px; font-size: 12.5px; font-weight: 500; color: var(--muted); letter-spacing: 0; }
+    .sm-plan .per-loc .save-inline { font-weight: 700; }
 
     /* Begeleiding: verplichte ja/nee-keuze onder de pakketten. */
     .sm-addon { margin-top: 16px; padding: 16px 18px; border-radius: 14px;
@@ -1889,6 +1925,8 @@
             </button>
           </div>
 
+          <div class="loc-quota" id="locQuota" hidden></div>
+
           <!-- Toevoeg-/bewerk-formulier -->
           <div class="block glass" id="locFormWrap" hidden style="margin-bottom:18px;">
             <h3 id="locFormTitle">Nieuwe vestiging</h3>
@@ -2175,6 +2213,18 @@
         </div>
       </div>
 
+      <div class="sm-locs">
+        <span class="sm-locs-tx">
+          <strong>Aantal vestigingen</strong>
+          <small id="smLocsHint">Je betaalt per vestiging.</small>
+        </span>
+        <span class="sm-stepper">
+          <button type="button" id="smLocsMinus" aria-label="Eén vestiging minder">−</button>
+          <input type="number" id="smLocsCount" value="1" min="1" max="100" step="1" inputmode="numeric" aria-label="Aantal vestigingen" />
+          <button type="button" id="smLocsPlus" aria-label="Eén vestiging meer">+</button>
+        </span>
+      </div>
+
       <div class="sm-msg" id="smMsg"></div>
 
       <div class="sm-plans" id="smPlans">
@@ -2281,6 +2331,8 @@
     let locations = [];               // alle vestigingen
     let currentLocationId = null;     // null = "Alle vestigingen"
     let sharingMode = 'shared';       // 'shared' | 'separate'
+    // Vestiging-limiet uit GET /api/stamp/locations (alleen voor de eigenaar).
+    let locQuota = { current: null, subscribed: null, canAdd: true, trial: false, known: false };
     // Voeg location_id als query-parameter toe wanneer een specifieke vestiging is gekozen.
     function locQuery(prefix) {
       return currentLocationId ? `${prefix}location_id=${encodeURIComponent(currentLocationId)}` : '';
@@ -2475,6 +2527,25 @@
     };
     // Eenmalige begeleiding; het bedrag staat ook in de backend (ONBOARDING_PRICE_LABEL).
     const ONBOARDING_PRICE = 149;
+
+    // Prijs per vestiging, spiegel van stampSubscriptionPricing() in de backend.
+    // Premium krijgt vanaf 2 vestigingen korting op álle vestigingen; Basic niet.
+    const STAMP_BASE = { basic: { monthly: 34.99, yearly: 349 }, premium: { monthly: 44.99, yearly: 449 } };
+    const PREMIUM_MULTI_DISCOUNT = { monthly: 2.50, yearly: 30 };
+    const PREMIUM_MULTI_MIN = 2;
+    const MAX_LOCATIONS = 100;
+    let smLocations = 1;
+
+    function stampPricing(plan, cycle, count) {
+      const n = Math.min(MAX_LOCATIONS, Math.max(1, parseInt(count, 10) || 1));
+      const base = (STAMP_BASE[plan] || STAMP_BASE.basic)[cycle === 'yearly' ? 'yearly' : 'monthly'];
+      const discount = (plan === 'premium' && n >= PREMIUM_MULTI_MIN)
+        ? PREMIUM_MULTI_DISCOUNT[cycle === 'yearly' ? 'yearly' : 'monthly'] : 0;
+      const unit = base - discount;
+      // Op centen afronden; anders levert 3 × 42,49 een staart van floating-point cijfers op.
+      const round2 = (v) => Math.round(v * 100) / 100;
+      return { count: n, base, discount, unit: round2(unit), total: round2(unit * n), saved: round2(discount * n) };
+    }
     const euroNL = (n) => '€' + Number(n).toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     let smBilling = 'monthly';
     let smSelectedPlan = 'premium';
@@ -2484,23 +2555,67 @@
     function smClearMsg() { smMsgEl.className = 'sm-msg'; smMsgEl.textContent = ''; }
 
     function renderSmPrices() {
-      const b = SUB_PRICES.basic[smBilling], p = SUB_PRICES.premium[smBilling];
       const vat = '<span class="vat">excl. BTW</span>';
-      document.getElementById('smBasicAmount').innerHTML = b.amount + '<small>' + b.per + '</small>' + vat;
-      document.getElementById('smBasicSub').innerHTML = b.sub;
-      document.getElementById('smPremAmount').innerHTML = p.amount + '<small>' + p.per + '</small>' + vat;
-      document.getElementById('smPremSub').innerHTML = p.sub;
+      const per = smBilling === 'yearly' ? '/jaar' : '/maand';
+      const n = smLocations;
+
+      ['basic', 'premium'].forEach(plan => {
+        const pr = stampPricing(plan, smBilling, n);
+        const amountEl = document.getElementById(plan === 'basic' ? 'smBasicAmount' : 'smPremAmount');
+        const subEl = document.getElementById(plan === 'basic' ? 'smBasicSub' : 'smPremSub');
+        const fallback = SUB_PRICES[plan][smBilling];
+
+        if (n === 1) {
+          amountEl.innerHTML = euroNL(pr.total) + '<small>' + per + '</small>' + vat;
+          subEl.innerHTML = fallback.sub;
+        } else {
+          // Bij meerdere vestigingen is het totaal het bedrag dat telt; de opbouw staat eronder.
+          const saved = pr.saved > 0
+            ? ' · <span class="save-inline">bespaar ' + euroNL(pr.saved) + '</span>'
+            : '';
+          amountEl.innerHTML = euroNL(pr.total) + '<small>' + per + '</small>' + vat
+            + '<span class="per-loc">' + n + ' vestigingen × ' + euroNL(pr.unit) + saved + '</span>';
+          subEl.innerHTML = fallback.sub;
+        }
+      });
+
+      const hint = document.getElementById('smLocsHint');
+      if (hint) {
+        hint.textContent = n >= PREMIUM_MULTI_MIN
+          ? 'Vanaf 2 vestigingen krijg je bij Premium ' + euroNL(PREMIUM_MULTI_DISCOUNT[smBilling === 'yearly' ? 'yearly' : 'monthly']) + ' korting per vestiging.'
+          : 'Je betaalt per vestiging. Vanaf 2 vestigingen geeft Premium korting.';
+      }
       updateTrialNote();
       renderAddonSummary();
     }
+
+    // ---- Stepper ----
+    function setLocationCount(n) {
+      smLocations = Math.min(MAX_LOCATIONS, Math.max(1, parseInt(n, 10) || 1));
+      const input = document.getElementById('smLocsCount');
+      if (input) input.value = smLocations;
+      document.getElementById('smLocsMinus').disabled = smLocations <= 1;
+      document.getElementById('smLocsPlus').disabled = smLocations >= MAX_LOCATIONS;
+      renderSmPrices();
+    }
+    document.getElementById('smLocsMinus').addEventListener('click', () => setLocationCount(smLocations - 1));
+    document.getElementById('smLocsPlus').addEventListener('click', () => setLocationCount(smLocations + 1));
+    document.getElementById('smLocsCount').addEventListener('input', (e) => {
+      // Tijdens typen niet corrigeren; pas bij blur/enter terugduwen naar een geldig getal.
+      const v = parseInt(e.target.value, 10);
+      if (Number.isInteger(v) && v >= 1 && v <= MAX_LOCATIONS) setLocationCount(v);
+    });
+    document.getElementById('smLocsCount').addEventListener('blur', (e) => setLocationCount(e.target.value));
     // De trial-uitleg weerspiegelt het gekozen pakket én de gekozen cyclus (maandelijks óf jaarlijks).
     function updateTrialNote() {
       const el = document.getElementById('smTrialCharge');
       if (!el) return;
-      const pr = SUB_PRICES[smSelectedPlan] && SUB_PRICES[smSelectedPlan][smBilling];
+      const pr = stampPricing(smSelectedPlan, smBilling, smLocations);
       const name = smSelectedPlan === 'premium' ? 'Premium' : 'Basic';
       const period = smBilling === 'yearly' ? 'jaar' : 'maand';
-      if (pr) el.innerHTML = 'Na 14 dagen proefperiode wordt automatisch <b>' + pr.amount + ' per ' + period + '</b> (excl. BTW) voor ' + name + ' afgeschreven';
+      const locs = smLocations > 1 ? ' (' + smLocations + ' vestigingen)' : '';
+      el.innerHTML = 'Na 14 dagen proefperiode wordt automatisch <b>' + euroNL(pr.total) + ' per ' + period
+        + '</b> (excl. BTW) voor ' + name + locs + ' afgeschreven';
     }
     // De keuze is verplicht: null zolang de winkelier niets heeft aangeklikt.
     function onboardingChoice() {
@@ -2544,12 +2659,13 @@
       // Alleen optellen wanneer het pakket daadwerkelijk gekozen ís. Zonder proefoptie
       // bepaalt pas de "Kies …"-knop het pakket, dus dan noemen we er geen.
       const chosen = document.getElementById('smPlans').classList.contains('selectable');
-      const pr = SUB_PRICES[smSelectedPlan] && SUB_PRICES[smSelectedPlan][smBilling];
+      const pr = stampPricing(smSelectedPlan, smBilling, smLocations);
       const name = smSelectedPlan === 'premium' ? 'Premium' : 'Basic';
-      const sub = pr ? pr.value : 0;
+      const sub = pr.total;
+      const locLabel = smLocations > 1 ? ` · ${smLocations} vestigingen` : '';
 
       const planRows = chosen
-        ? `<div class="sm-sum-row"><span>${name} — per ${escapeHtml(period)}</span><strong>${euroNL(sub)}</strong></div>`
+        ? `<div class="sm-sum-row"><span>${name}${locLabel} — per ${escapeHtml(period)}</span><strong>${euroNL(sub)}</strong></div>`
           + `<div class="sm-sum-row"><span>Begeleiding &amp; installatie (eenmalig)</span><strong>${euroNL(ONBOARDING_PRICE)}</strong></div>`
           + `<div class="sm-sum-row total"><span>Subtotaal excl. BTW</span><strong>${euroNL(sub + ONBOARDING_PRICE)}</strong></div>`
         : `<div class="sm-sum-row total"><span>Begeleiding &amp; installatie (eenmalig)</span><strong>${euroNL(ONBOARDING_PRICE)}</strong></div>`;
@@ -2584,6 +2700,8 @@
       else { trial.hidden = true; plans.classList.remove('selectable'); }
 
       smClearMsg();
+      // Begin bij wat de winkelier daadwerkelijk heeft, dat scheelt tellen.
+      setLocationCount(Math.max(1, locations.length || 1));
       // Geen voorselectie: de winkelier moet elke keer zelf kiezen.
       document.querySelectorAll('input[name="smOnboardingChoice"]').forEach(r => { r.checked = false; });
       clearAddonError();
@@ -2646,6 +2764,7 @@
             billing_cycle: smBilling,
             with_trial: !!withTrial,
             with_onboarding: wantsOnboarding(),
+            location_count: smLocations,
           }),
         });
         if (res.status === 401 || res.status === 403) { smShowMsg('Je sessie is verlopen. Log opnieuw in.', 'error'); reset(); return; }
@@ -5135,6 +5254,15 @@
         const list = Array.isArray(data) ? data : (data.locations || data.vestigingen || []);
         locations = list.map(normalizeLocation);
         sharingMode = data.sharing_mode || data.mode || sharingMode;
+        // De backend stuurt deze velden alleen mee voor een owner; ontbreken ze,
+        // dan laten we de knop gewoon werken en vangt de 402 het af.
+        locQuota = data.subscribed_locations === undefined ? { ...locQuota, known: false } : {
+          current: Number(data.current_locations) || 0,
+          subscribed: Number(data.subscribed_locations) || 0,
+          canAdd: data.can_add_location !== false,
+          trial: data.trial === true,
+          known: true,
+        };
       } catch (e) {
         locations = [];
       }
@@ -5254,7 +5382,58 @@
         }));
       });
     }
+    const QUOTA_INFO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>';
+    const QUOTA_LOCK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+    const vestiging = (n) => n === 1 ? 'vestiging' : 'vestigingen';
+
+    // De knop "Nieuwe vestiging" volgt de limiet, zodat de winkelier niet tegen
+    // een 402 aanloopt nadat hij het formulier al heeft ingevuld.
+    function renderLocQuota() {
+      const box = document.getElementById('locQuota');
+      const addBtn = document.getElementById('addLocBtn');
+      if (!box || !addBtn) return;
+      const q = locQuota;
+      if (!q.known) { box.hidden = true; addBtn.disabled = false; return; }
+
+      const limitReached = !q.canAdd;
+      const overSubscribed = q.current > q.subscribed;
+      addBtn.disabled = limitReached;
+      addBtn.title = limitReached ? 'Je abonnement is voor ' + q.subscribed + ' ' + vestiging(q.subscribed) : '';
+
+      if (limitReached) {
+        box.className = 'loc-quota limit';
+        box.innerHTML = QUOTA_LOCK + `<div class="lq-tx">
+            <b>Je abonnement is voor ${q.subscribed} ${vestiging(q.subscribed)}.</b>
+            Wijzig je abonnement naar meer vestigingen om er een toe te voegen.
+            <div><button type="button" class="btn btn-primary" data-goto-abo>Naar Mijn Abonnement</button></div>
+          </div>`;
+        box.hidden = false;
+        return;
+      }
+      if (q.trial && overSubscribed) {
+        // Tijdens de proefperiode mag het wél, maar het kost straks geld.
+        box.className = 'loc-quota trial';
+        box.innerHTML = QUOTA_INFO + `<div class="lq-tx">
+            <b>Je hebt ${q.current} ${vestiging(q.current)} tijdens je proefperiode,</b>
+            terwijl je abonnement op ${q.subscribed} ${vestiging(q.subscribed)} staat.
+            Pas je abonnement aan vóór het einde van je proefperiode, anders worden de extra vestigingen niet meegefactureerd.
+            <div><button type="button" class="btn btn-ghost" data-goto-abo>Abonnement aanpassen</button></div>
+          </div>`;
+        box.hidden = false;
+        return;
+      }
+      // Ruimte over: één rustige regel, geen waarschuwing.
+      box.className = 'loc-quota ok';
+      box.innerHTML = QUOTA_INFO + `<div class="lq-tx">Je abonnement is voor
+          <b>${q.subscribed} ${vestiging(q.subscribed)}</b> — je gebruikt er ${q.current}.</div>`;
+      box.hidden = false;
+    }
+    document.getElementById('locQuota').addEventListener('click', (e) => {
+      if (e.target.closest('[data-goto-abo]')) activateTab('abonnement');
+    });
+
     function renderLocationsPanel() {
+      renderLocQuota();
       // Spaarmodus reflecteren en alleen tonen bij meerdere vestigingen.
       document.querySelectorAll('#shareModes .share-mode').forEach(b =>
         b.classList.toggle('active', b.dataset.mode === sharingMode));
@@ -5377,9 +5556,30 @@
         const method = editingLocId ? 'PUT' : 'POST';
         const res = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(payload) });
         const data = await res.json().catch(() => ({}));
+        // 402: de limiet is bereikt. Geen technische fout, maar een abonnementskwestie.
+        if (res.status === 402 || data.upgrade_required) {
+          locQuota = {
+            current: Number(data.current_locations) || locQuota.current,
+            subscribed: Number(data.subscribed_locations) || locQuota.subscribed,
+            canAdd: false, trial: locQuota.trial, known: true,
+          };
+          renderLocQuota();
+          note.textContent = data.error || 'Je abonnement staat geen extra vestiging toe.';
+          note.classList.add('error');
+          return;
+        }
         if (!res.ok) throw new Error(data.error || data.message || ('HTTP ' + res.status));
         note.textContent = geo ? 'Opgeslagen · locatie bepaald' : 'Opgeslagen'; note.classList.add('ok');
         await loadLocations();
+        // De backend waarschuwt als een proefaccount boven zijn abonnement uitkomt.
+        if (data.warning) {
+          const box = document.getElementById('locQuota');
+          box.className = 'loc-quota trial';
+          box.innerHTML = QUOTA_INFO + `<div class="lq-tx">${escapeHtml(data.warning)}
+              <div><button type="button" class="btn btn-ghost" data-goto-abo>Abonnement aanpassen</button></div>
+            </div>`;
+          box.hidden = false;
+        }
         setTimeout(() => { locFormWrap.hidden = true; }, 700);
       } catch (err) {
         note.textContent = 'Kon niet opslaan: ' + (err.message || 'onbekende fout'); note.classList.add('error');
