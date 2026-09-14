@@ -289,6 +289,14 @@
         .cust-name { font-size: 27px; font-weight: 600; letter-spacing: -.035em; color: var(--text-strong); margin-bottom: 7px; }
         .cust-meta { font-size: 15px; color: var(--muted); margin-bottom: 28px; line-height: 1.55; }
 
+        /* Voortgang: balk met de huidige stand plus (groen) wat er nu bij komt. */
+        .prog { position: relative; height: 8px; border-radius: 99px; background: rgba(var(--ink), .06);
+            max-width: 480px; margin: 0 auto 22px; overflow: hidden; }
+        .prog i { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 99px;
+            transition: width .34s var(--ease), left .34s var(--ease); }
+        .prog .prog-have { background: var(--accent-grad); }
+        .prog .prog-add { background: var(--green-grad); }
+
         /* Stempels: gevuld met accent, leeg als rustige omtrek. */
         .circles { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: 0 auto 30px; max-width: 480px; }
         .circle {
@@ -312,11 +320,20 @@
             color: var(--text-strong); font-family: inherit; font-size: 28px; font-weight: 400; line-height: 1;
             transition: background .15s var(--ease), transform .1s var(--ease), border-color .15s var(--ease);
         }
-        .amount-btn:hover { background: rgba(var(--ink), .08); border-color: rgba(139,92,246,.35); }
-        .amount-btn:active { transform: scale(.93); }
+        .amount-btn:hover:not(:disabled) { background: rgba(var(--ink), .08); border-color: rgba(139,92,246,.35); }
+        .amount-btn:active:not(:disabled) { transform: scale(.93); }
+        /* Op de grens (1 of "kaart vol") is de knop zichtbaar uitgeschakeld. */
+        .amount-btn:disabled { opacity: .3; cursor: not-allowed; transform: none; }
         .amount-val { min-width: 96px; display: flex; flex-direction: column; align-items: center; gap: 3px; }
         .amount-val span { font-size: 42px; font-weight: 600; letter-spacing: -.04em; line-height: 1; color: #fff; }
         .amount-val small { font-size: 12.5px; color: var(--muted); }
+        /* Live projectie: "Wordt 5 van 6 stempels". */
+        .amount-preview { font-size: 15px; font-weight: 500; letter-spacing: -.01em; color: var(--muted);
+            margin: -6px 0 22px; min-height: 21px; transition: color .25s var(--ease); }
+        .amount-preview b { color: var(--text-strong); font-weight: 600; }
+        .amount-preview.full { color: var(--green); }
+        .amount-preview.full b { color: var(--green); }
+        .amount-room { font-size: 13px; color: var(--faint); margin: -14px 0 20px; min-height: 18px; }
         .amount-bump { animation: bump .28s var(--ease); }
         @keyframes bump { 0% { transform: scale(1); } 45% { transform: scale(1.16); } 100% { transform: scale(1); } }
 
@@ -473,14 +490,17 @@
                         <div class="cust-avatar" id="custAvatar">?</div>
                         <div class="cust-name" id="custName">Klant</div>
                         <div class="cust-meta" id="custMeta"></div>
+                        <div class="prog"><i class="prog-have" id="progHave"></i><i class="prog-add" id="progAdd"></i></div>
                         <div class="circles" id="circles"></div>
 
                         <div id="giveControls">
                             <div class="amount-row">
-                                <button class="amount-btn" onclick="changeAmount(-1)">−</button>
-                                <div class="amount-val"><span id="amountVal">1</span><small>stempels</small></div>
-                                <button class="amount-btn" onclick="changeAmount(1)">+</button>
+                                <button class="amount-btn" id="amountMinus" type="button" aria-label="Eén stempel minder" onclick="changeAmount(-1)">−</button>
+                                <div class="amount-val"><span id="amountVal">1</span><small id="amountUnit">stempel</small></div>
+                                <button class="amount-btn" id="amountPlus" type="button" aria-label="Eén stempel meer" onclick="changeAmount(1)">+</button>
                             </div>
+                            <div class="amount-room" id="amountRoom"></div>
+                            <div class="amount-preview" id="amountPreview"></div>
                             <button class="btn btn-green" id="giveBtn" onclick="giveStamps()">Geef 1 stempel</button>
                         </div>
 
@@ -498,7 +518,10 @@
                         <div class="success-icon" id="successIcon"></div>
                         <div class="success-title" id="successTitle">Gelukt!</div>
                         <div class="cust-meta" id="successMeta"></div>
-                        <button class="btn btn-gold" onclick="resetToScan()">Volgende klant →</button>
+                        <div id="successReward" style="display:none;">
+                            <button class="btn btn-green" onclick="redeemReward(event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>Beloning uitreiken</button>
+                        </div>
+                        <button class="btn btn-gold" id="nextCustomerBtn" onclick="resetToScan()">Volgende klant →</button>
                     </div>
                 </div>
             </div>
@@ -734,6 +757,7 @@
         function resetToScan() {
             stopCamera();
             current = null; amount = 1;
+            showRewardOnSuccess(false);
             $('scanStage').style.display = 'block';
             $('resultStage').classList.remove('on');
             $('successStage').classList.remove('on');
@@ -953,6 +977,33 @@
             }
         }
 
+        // ===== Stempel-rekenwerk =====
+        // Eén bron van waarheid voor "hoeveel heeft de klant" en "hoeveel past er nog".
+        // Alle knoppen rekenen hiermee, zodat de teller, de bolletjes en de API nooit uiteenlopen.
+        const NO_TARGET_MAX = 10;                   // vangnet als het kaartdoel onbekend is
+
+        function currentCollected() {
+            if (!current) return 0;
+            const n = Number(current.stamps_collected ?? current.current_stamps ?? current.stamps ?? 0);
+            return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
+        }
+        function currentRequired() {
+            const n = Number((current && current.stamps_required) ?? store.required ?? 0);
+            return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
+        }
+        // Hoeveel stempels er nog PASSEN tot de kaart vol is. 0 = kaart is al vol.
+        function roomLeft() {
+            const req = currentRequired();
+            if (req <= 0) return NO_TARGET_MAX;      // doel onbekend → vangnet
+            return Math.max(0, req - currentCollected());
+        }
+        function isCardFull() {
+            if (!current) return false;
+            if (current.reward_available === true) return true;
+            const req = currentRequired();
+            return req > 0 && currentCollected() >= req;
+        }
+
         function showCustomer() {
             $('scanStage').style.display = 'none';
             $('successStage').classList.remove('on');
@@ -965,55 +1016,118 @@
             $('custName').textContent = name;
             $('custAvatar').textContent = (name.trim()[0] || '?').toUpperCase();
 
-            const req = current.stamps_required || store.required || 0;
-            const col = Number(current.stamps_collected ?? current.current_stamps ?? current.stamps ?? 0) || 0;
-            $('custMeta').textContent = col + ' / ' + req + ' stempels' +
-                (current.total_rewards_earned ? ' · ' + current.total_rewards_earned + ' beloningen ontvangen' : '');
+            // Stand normaliseren en terugschrijven, zodat elke latere berekening dezelfde getallen ziet.
+            const col = currentCollected();
+            const req = currentRequired();
+            current.stamps_collected = col;
+            current.stamps_required = req;
 
-            renderCircles(col, req, 0);
+            const rewards = current.total_rewards_earned
+                ? ' · ' + current.total_rewards_earned + (current.total_rewards_earned === 1 ? ' beloning ontvangen' : ' beloningen ontvangen')
+                : '';
 
             // Volle kaart (reward_available OF stand ≥ vereist) → uitreiken tonen i.p.v. stempel geven.
-            const full = current.reward_available === true || (req > 0 && col >= req);
-            if (full) {
-                // Kaart is vol: verberg de +/- teller, toon "Beloning uitreiken"
+            if (isCardFull()) {
+                $('custMeta').textContent = 'Kaart is vol — ' + col + ' van ' + (req || col) + ' stempels' + rewards;
+                renderCircles(col, req, 0);
+                renderProgress(col, req, 0);
                 $('giveControls').style.display = 'none';
                 $('rewardControls').style.display = 'block';
-            } else {
-                $('giveControls').style.display = 'block';
-                $('rewardControls').style.display = 'none';
-                updateGiveButton();
+                return;
             }
+
+            $('custMeta').textContent = req > 0
+                ? (col + ' van ' + req + ' stempels' + rewards)
+                : (col + (col === 1 ? ' stempel' : ' stempels') + rewards);
+            $('giveControls').style.display = 'block';
+            $('rewardControls').style.display = 'none';
+            amount = 1;                              // elke klant start op 1
+            updateGiveButton();                      // vult teller, bolletjes, balk en knopteksten
         }
 
+        // Bolletjes: gevuld (accent) + wat er nu bij komt (groen) + leeg. Nooit méér dan het kaartdoel.
         function renderCircles(collected, required, adding) {
             const el = $('circles');
+            if (!el) return;
+            const total = required > 0 ? required : Math.max(collected + adding, 1);
+            const have = Math.min(collected, total);
+            const plus = Math.max(0, Math.min(adding, total - have));
             el.innerHTML = '';
-            const total = Math.max(required, collected + adding, 1);
             for (let i = 0; i < total; i++) {
                 const d = document.createElement('div');
                 let cls = 'circle';
-                if (i < collected) cls += ' filled';
-                else if (i < collected + adding) cls += ' new';
+                if (i < have) cls += ' filled';
+                else if (i < have + plus) cls += ' new';
                 d.className = cls;
-                d.textContent = (i < collected + adding) ? '★' : (i + 1);
+                d.textContent = (i < have + plus) ? '★' : (i + 1);
                 el.appendChild(d);
             }
         }
 
+        // Voortgangsbalk: blauw = al verdiend, groen = wat er nu bij komt.
+        function renderProgress(collected, required, adding) {
+            const have = $('progHave'), add = $('progAdd');
+            if (!have || !add) return;
+            const total = required > 0 ? required : Math.max(collected + adding, 1);
+            const pct = n => Math.max(0, Math.min(100, (n / total) * 100));
+            const hv = Math.min(collected, total);
+            const pl = Math.max(0, Math.min(adding, total - hv));
+            have.style.width = pct(hv) + '%';
+            add.style.left = pct(hv) + '%';
+            add.style.width = pct(pl) + '%';
+        }
+
         function changeAmount(delta) {
-            amount = Math.min(10, Math.max(1, amount + delta));
+            const max = roomLeft();
+            if (max <= 0) return;                    // kaart al vol: niets toe te voegen
+            const next = Math.min(max, Math.max(1, amount + delta));
+            if (next === amount) return;             // al op de grens → geen animatie
+            amount = next;
             updateGiveButton();
-            renderCircles(current.stamps_collected || 0, current.stamps_required || store.required, amount);
             const av = $('amountVal');
             av.classList.remove('amount-bump'); void av.offsetWidth; av.classList.add('amount-bump');
         }
+
+        // Zet de hele "stempel geven"-UI in één keer goed: teller, +/- grenzen,
+        // live projectie, bolletjes, balk en de tekst op de groene knop.
         function updateGiveButton() {
+            const col = currentCollected();
+            const req = currentRequired();
+            const max = roomLeft();
+
+            // Harde grens: nooit meer dan er nog past (ook niet als amount van buitenaf is gezet).
+            amount = Math.min(Math.max(1, amount), Math.max(1, max));
+
             $('amountVal').textContent = amount;
-            const req = current.stamps_required || store.required || 0;
-            const willReach = (current.stamps_collected || 0) + amount >= req && req > 0;
-            $('giveBtn').textContent = willReach
-                ? ('Geef ' + amount + (amount === 1 ? ' stempel · kaart wordt vol' : ' stempels · kaart wordt vol'))
-                : ('Geef ' + amount + (amount === 1 ? ' stempel' : ' stempels'));
+            const unit = $('amountUnit');
+            if (unit) unit.textContent = amount === 1 ? 'stempel' : 'stempels';
+
+            // +/- uitschakelen op de grenzen, zodat de medewerker ziet dat er niets meer bij kan.
+            const minus = $('amountMinus'), plus = $('amountPlus');
+            if (minus) minus.disabled = amount <= 1;
+            if (plus) plus.disabled = amount >= max;
+
+            const total = col + amount;
+            const willBeFull = req > 0 && total >= req;
+
+            const room = $('amountRoom');
+            if (room) {
+                // Op het maximum leggen we uit waarom de +-knop niet verder kan.
+                room.textContent = req <= 0 ? ''
+                    : amount >= max ? 'Maximum — meer past er niet op deze kaart'
+                    : (max === 1 ? 'Er past nog 1 stempel op deze kaart' : 'Er passen nog ' + max + ' stempels op deze kaart');
+            }
+            const prev = $('amountPreview');
+            if (prev) {
+                prev.classList.toggle('full', willBeFull);
+                if (willBeFull) prev.innerHTML = '<b>Kaart wordt vol</b> — beloning beschikbaar';
+                else if (req > 0) prev.innerHTML = 'Wordt <b>' + total + ' van ' + req + '</b> stempels';
+                else prev.innerHTML = 'Wordt <b>' + total + '</b> ' + (total === 1 ? 'stempel' : 'stempels');
+            }
+
+            $('giveBtn').textContent = 'Geef ' + amount + (amount === 1 ? ' stempel' : ' stempels');
+            renderCircles(col, req, amount);
+            renderProgress(col, req, amount);
         }
 
         async function giveStamps() {
@@ -1022,6 +1136,17 @@
             const cid = activeCardId();
 
             // Validatie: toon precies welk verplicht veld ontbreekt.
+            // Veiligheidsklem: ook als 'amount' op een andere manier is veranderd,
+            // gaat er nooit meer naar de server dan er nog op de kaart past.
+            const roomNow = roomLeft();
+            if (roomNow <= 0) {
+                showAlert('scanAlert', 'Deze kaart is al vol — reik eerst de beloning uit.');
+                $('giveControls').style.display = 'none';
+                $('rewardControls').style.display = 'block';
+                return;
+            }
+            if (amount > roomNow) { amount = roomNow; updateGiveButton(); }
+
             const missing = [];
             if (!cid) missing.push('card_id (winkelier-kaart)');
             if (!current || !current.customer_qr_code) missing.push('customer_qr_code (QR-code)');
@@ -1049,18 +1174,27 @@
                 }
                 // Onthoud voor dubbele-scan bescherming (3s dezelfde kaart blokkeren).
                 lastStampedQr = current.customer_qr_code; lastStampAt = Date.now();
-                const req = data.stamps_required || store.required || 0;
-                const now = data.current_stamps || 0;
-                const full = data.reward_earned || (now >= req && req > 0);
+                const given = amount;
+                const req = Number(data.stamps_required ?? current.stamps_required ?? store.required ?? 0) || 0;
+                // Nieuwe stand: wat de server zegt, anders zelf doortellen (veldnamen verschillen per backend).
+                const fallback = currentCollected() + given;
+                let now = Number(data.current_stamps ?? data.stamps_collected ?? data.stamps ?? fallback);
+                if (!Number.isFinite(now) || now < 0) now = fallback;
+                const full = data.reward_earned === true || (req > 0 && now >= req);
+                // Stand bijwerken, zodat "Beloning uitreiken" met de nieuwe situatie werkt.
+                current.stamps_collected = now;
+                current.stamps_required = req || current.stamps_required;
+                current.reward_available = full;
                 loadTodayStats();
                 if (full) {
                     showSuccess('reward', 'Kaart is vol!',
-                        (current.customer_name ? current.customer_name + ' — ' : '') + now + '/' + req + ' stempels · beloning beschikbaar');
+                        (current.customer_name ? current.customer_name + ' — ' : '') + now + ' van ' + req + ' stempels · beloning beschikbaar');
+                    showRewardOnSuccess(true);       // direct uitreiken vanaf dit scherm
                     fireConfetti();
                 } else {
                     showSuccess('stamp', 'Gelukt!',
-                        (current.customer_name ? current.customer_name + ' — ' : '') + amount + (amount === 1 ? ' stempel' : ' stempels') +
-                        ' gegeven · ' + now + '/' + req);
+                        (current.customer_name ? current.customer_name + ' — ' : '') + given + (given === 1 ? ' stempel' : ' stempels') +
+                        ' gegeven · ' + now + ' van ' + req + ' stempels');
                 }
             } catch (err) {
                 btn.disabled = false; btn.textContent = original;
@@ -1110,6 +1244,15 @@
                 : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
             $('successTitle').textContent = title;
             $('successMeta').textContent = meta;
+            showRewardOnSuccess(false);              // standaard uit; giveStamps zet 'm aan bij een volle kaart
+        }
+
+        // Bij een volle kaart staat "Beloning uitreiken" op het bevestigingsscherm;
+        // "Volgende klant" wordt dan de rustige tweede keuze.
+        function showRewardOnSuccess(on) {
+            const wrap = $('successReward'), next = $('nextCustomerBtn');
+            if (wrap) wrap.style.display = on ? 'block' : 'none';
+            if (next) next.className = on ? 'btn btn-ghost' : 'btn btn-gold';
         }
 
         // ================= CONFETTI =================
