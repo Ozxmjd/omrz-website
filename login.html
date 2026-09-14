@@ -119,6 +119,21 @@
     .btn.loading .btn-label { opacity: .7; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* Eén kaart, drie stappen: inloggen → e-mail invullen → bevestiging. */
+    [hidden] { display: none !important; }
+    .auth-icon {
+      width: 56px; height: 56px; margin-bottom: 20px; border-radius: 16px;
+      display: grid; place-items: center;
+      background: rgba(255,255,255,.06); border: 1px solid var(--border-strong);
+    }
+    .auth-icon svg { width: 26px; height: 26px; stroke: #fff; }
+    .auth-hint { color: var(--muted); font-size: 13.5px; line-height: 1.6; margin-bottom: 24px; }
+    .auth-hint strong { color: var(--pearl); overflow-wrap: anywhere; }   /* lang e-mailadres mag afbreken */
+    .auth-hint a { color: #fff; font-weight: 600; text-decoration: underline; }
+    .auth-back { text-align: center; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
+    .auth-back a { color: var(--muted); font-size: 14px; font-weight: 500; transition: color .2s var(--ease); }
+    .auth-back a:hover { color: #fff; }
+
     @media (max-width: 480px) {
       .auth-card { padding: 32px 24px; }
     }
@@ -132,6 +147,9 @@
 
   <main class="auth-wrap">
     <div class="auth-card">
+
+      <!-- ===== Stap 1: inloggen ===== -->
+      <section id="loginView">
       <span class="auth-badge">Winkelier portaal</span>
       <h1>Welkom terug</h1>
       <p class="auth-sub">Log in om je stempelkaart te beheren.</p>
@@ -161,6 +179,43 @@
 
       <p class="auth-alt">Nog geen account? <a href="aanmelden.html">Registreer hier</a></p>
       <p class="auth-alt">Ben je vestigingsmanager? Log hier in met de gegevens die je van je werkgever hebt gekregen.</p>
+      </section>
+
+      <!-- ===== Stap 2: e-mailadres voor de herstel-link ===== -->
+      <section id="forgotView" hidden>
+        <span class="auth-badge">Wachtwoord herstellen</span>
+        <h1>Wachtwoord vergeten</h1>
+        <p class="auth-sub">Vul het e-mailadres van je account in. We sturen je een link waarmee je een nieuw wachtwoord instelt.</p>
+
+        <div class="auth-msg" id="forgotMsg"></div>
+
+        <form id="forgotForm" novalidate>
+          <div class="field">
+            <label for="forgotEmail">E-mailadres</label>
+            <input type="email" id="forgotEmail" name="forgotEmail" placeholder="jij@zaak.nl" autocomplete="email" required />
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block" id="forgotBtn">
+            <span class="spinner"></span>
+            <span class="btn-label">Verstuur reset link</span>
+          </button>
+        </form>
+
+        <p class="auth-back"><a href="#" id="backToLogin">← Terug naar inloggen</a></p>
+      </section>
+
+      <!-- ===== Stap 3: bevestiging ===== -->
+      <section id="sentView" hidden>
+        <div class="auth-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="m3 7 8.1 5.4a1.6 1.6 0 0 0 1.8 0L21 7"/></svg>
+        </div>
+        <h1>Check je e-mail</h1>
+        <p class="auth-sub">Als dit e-mailadres bij ons bekend is, ontvang je een reset link. Check je e-mail.</p>
+        <p class="auth-hint">Verstuurd naar <strong id="sentTo">je e-mailadres</strong>. Niets ontvangen? Kijk ook even in je spam-map, of <a href="#" id="retryLink">probeer een ander e-mailadres</a>.</p>
+
+        <a href="#" class="btn btn-primary btn-block" id="backToLogin2">Terug naar inloggen</a>
+      </section>
+
     </div>
   </main>
 
@@ -255,15 +310,83 @@
       }
     });
 
-    document.getElementById('forgotLink').addEventListener('click', (e) => {
+    // ================= WACHTWOORD VERGETEN =================
+    const loginView = document.getElementById('loginView');
+    const forgotView = document.getElementById('forgotView');
+    const sentView = document.getElementById('sentView');
+    const forgotForm = document.getElementById('forgotForm');
+    const forgotBtn = document.getElementById('forgotBtn');
+    const forgotEmail = document.getElementById('forgotEmail');
+    const forgotMsg = document.getElementById('forgotMsg');
+
+    function showForgotMsg(text, type) { forgotMsg.textContent = text; forgotMsg.className = 'auth-msg ' + type; }
+    function clearForgotMsg() { forgotMsg.textContent = ''; forgotMsg.className = 'auth-msg'; }
+
+    // Eén kaart, drie stappen. 'view' is 'login', 'forgot' of 'sent'.
+    function showView(view) {
+      loginView.hidden = view !== 'login';
+      forgotView.hidden = view !== 'forgot';
+      sentView.hidden = view !== 'sent';
+      if (view === 'forgot') setTimeout(() => forgotEmail.focus(), 40);
+    }
+
+    function openForgot() {
+      clearMsg(); clearForgotMsg();
+      // Al ingevuld op het inlogscherm? Neem dat over, scheelt typen.
+      const typed = document.getElementById('email').value.trim();
+      if (typed && !forgotEmail.value) forgotEmail.value = typed;
+      showView('forgot');
+    }
+
+    document.getElementById('forgotLink').addEventListener('click', (e) => { e.preventDefault(); openForgot(); });
+    document.getElementById('backToLogin').addEventListener('click', (e) => { e.preventDefault(); clearForgotMsg(); showView('login'); });
+    document.getElementById('backToLogin2').addEventListener('click', (e) => { e.preventDefault(); clearForgotMsg(); showView('login'); });
+    document.getElementById('retryLink').addEventListener('click', (e) => { e.preventDefault(); clearForgotMsg(); showView('forgot'); });
+
+    forgotForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const email = document.getElementById('email').value.trim();
-      if (!email) {
-        showMsg('Vul eerst je e-mailadres in, dan sturen we een herstel-link.', 'error');
-        return;
+      clearForgotMsg();
+
+      const email = forgotEmail.value.trim();
+      if (!email) { showForgotMsg('Vul je e-mailadres in.', 'error'); forgotEmail.focus(); return; }
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email)) {
+        showForgotMsg('Dit lijkt geen geldig e-mailadres.', 'error'); forgotEmail.focus(); return;
       }
-      showMsg('Als dit e-mailadres bekend is, ontvang je zo een herstel-link.', 'ok');
+
+      forgotBtn.disabled = true; forgotBtn.classList.add('loading');
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/forgot-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+        const data = await res.json().catch(() => ({}));
+
+        // Te veel pogingen: dat moet de winkelier wél weten.
+        if (res.status === 429) {
+          showForgotMsg(data.error || data.message || 'Te veel pogingen. Wacht even en probeer het opnieuw.', 'error');
+          return;
+        }
+        // Serverfout: eerlijk melden, anders wacht iemand op een mail die nooit komt.
+        if (res.status >= 500) {
+          showForgotMsg('Er ging iets mis aan onze kant. Probeer het over een paar minuten opnieuw.', 'error');
+          return;
+        }
+        // Verder altijd dezelfde bevestiging — of het adres bestaat verraden we niet.
+        document.getElementById('sentTo').textContent = email;
+        showView('sent');
+      } catch (err) {
+        showForgotMsg('Kan geen verbinding maken met de server. Probeer het later opnieuw.', 'error');
+      } finally {
+        forgotBtn.disabled = false; forgotBtn.classList.remove('loading');
+      }
     });
+
+    // Vanaf de resetpagina ("vraag een nieuwe aan") meteen op stap 2 binnenkomen.
+    (function () {
+      const q = new URLSearchParams(window.location.search);
+      if (q.get('forgot') === '1' || window.location.hash === '#wachtwoord-vergeten') openForgot();
+    })();
   </script>
 </body>
 </html>
