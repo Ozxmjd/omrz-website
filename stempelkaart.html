@@ -384,12 +384,19 @@
       .emp-smile { opacity: 1; }
       .rope, .coffee-give, .coffee-hold, .bubble-cust, .bubble-emp { opacity: 0; }
     }
-    .price-duo { display:grid; grid-template-columns:repeat(2,1fr); gap:24px; max-width:840px; margin:0 auto; align-items:stretch; }
+    .price-duo { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; max-width:1140px; margin:0 auto; align-items:stretch; }
+    @media (max-width:1040px){ .price-duo{ grid-template-columns:1fr; max-width:520px; } }
     /* Premium uitgelicht in paars — identiek aan de prijskaart op de homepage. */
     .price-card.featured { border-color: rgba(139,92,246,.5); }
     .price-card.featured::before { content: ""; position: absolute; inset: -1px; border-radius: var(--radius); z-index: -1; background: radial-gradient(circle at 50% 0%, rgba(139,92,246,.45), transparent 62%); filter: blur(16px); }
     .price-card.featured .price-features svg { color: #8b5cf6; }
-    .price-badge { position: absolute; top: 24px; right: 28px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #fff; background: #8b5cf6; padding: 5px 12px; border-radius: 999px; }
+    /* Deze kaarten zijn gecentreerd: de badge staat daarom bovenaan in het midden,
+       anders botst hij met een lange pakketnaam als "Premium Plus". */
+    .price-badge { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #fff; background: #8b5cf6; padding: 5px 12px; border-radius: 999px; white-space: nowrap; }
+    .price-duo .price-card { padding-top: 60px; }
+    /* Premium Plus: herkenbaar, maar zonder de paarse gloed — die hoort bij Premium. */
+    .price-card.plus { border-color: rgba(255,255,255,.2); }
+    .price-badge.soft { color: var(--pearl); background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.2); font-weight: 600; }
     .price-billing { color:var(--muted); font-size:14px; margin:4px 0 18px; min-height:20px; }
     @media (max-width:680px){ .price-duo{ grid-template-columns:1fr; } }
     /* ---- Billing toggle ---- */
@@ -682,7 +689,8 @@
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Digitale stempelkaart in Apple &amp; Google Wallet</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Onbeperkt aantal klanten</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Eigen huisstijl &amp; beloningen</li>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Klantinzicht dashboard &amp; e-mail support</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Dashboard &amp; statistieken</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Meerdere vestigingen mogelijk</li>
           </ul>
           <a href="aanmelden.html?pakket=basic" class="btn btn-outline btn-block btn-lg">Kies Basic</a>
         </div>
@@ -694,10 +702,25 @@
           <p class="price-desc">Alles van Basic, met meer bereik en support.</p>
           <ul class="price-features">
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Alles van Basic</li>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Locatie meldingen als klanten in de buurt zijn</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Locatie meldingen: klanten krijgen bericht als ze in de buurt zijn</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Klantinzichten: wie zijn je klanten</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Prioriteit support</li>
           </ul>
           <a href="aanmelden.html?pakket=premium" class="btn btn-primary btn-block btn-lg">Kies Premium</a>
+        </div>
+        <div class="price-card glass plus reveal">
+          <span class="price-badge soft">Meest compleet</span>
+          <div class="price-tier">Premium Plus</div>
+          <div class="price-amount js-amount" data-m="€59,99" data-y="€599,88" data-mper=" /maand" data-yper=" /jaar">€59,99<small> /maand</small></div>
+          <div class="price-billing js-sub" data-m="Altijd maandelijks opzegbaar" data-y="€49,99/maand · <span class=&quot;save-inline&quot;>bespaar €120</span>">Altijd maandelijks opzegbaar</div>
+          <p class="price-desc">Alles van Premium, plus je eigen klantonderzoek.</p>
+          <ul class="price-features">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Alles van Premium</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Klantonderzoek: stel je eigen enquête samen</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Klanten vullen hem in bij het aanmaken van hun kaart</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Uitgebreide statistieken en inzichten</li>
+          </ul>
+          <a href="aanmelden.html?pakket=premium_plus" class="btn btn-outline btn-block btn-lg">Kies Premium Plus</a>
         </div>
       </div>
     </div>

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Prijzen · OMRZ Digital</title>
-  <meta name="description" content="Overzichtelijke pakketten voor Nederlandse ondernemers. Basic vanaf €34,99/maand, Premium vanaf €44,99/maand. Altijd maandelijks opzegbaar." />
+  <meta name="description" content="Overzichtelijke pakketten voor Nederlandse ondernemers. Basic €34,99, Premium €44,99 en Premium Plus €59,99 per maand. Altijd maandelijks opzegbaar." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -93,15 +93,16 @@
     .pricing-hero h1 .accent { color: var(--pearl); }
     .pricing-hero p { color: var(--muted); font-size: 18px; max-width: 600px; margin: 0 auto; }
 
-    .pricing-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 26px; max-width: 820px; margin: 56px auto 0; align-items: stretch; }
+    .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; max-width: 1140px; margin: 56px auto 0; align-items: stretch; }
+    @media (max-width: 1040px) { .pricing-grid { grid-template-columns: 1fr; max-width: 520px; } }
 
-    .price-card { position: relative; padding: 40px 34px; display: flex; flex-direction: column; }
+    .price-card { position: relative; padding: 36px 30px; display: flex; flex-direction: column; }
     .price-card .tier { font-size: 15px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
-    .price-card .amount { margin: 14px 0 4px; font-size: 46px; font-weight: 800; letter-spacing: -.03em; color: #fff; line-height: 1; }
+    .price-card .amount { margin: 14px 0 4px; font-size: 40px; font-weight: 800; letter-spacing: -.03em; color: #fff; line-height: 1; }
     .price-card .amount small { font-size: 16px; font-weight: 500; color: var(--muted); letter-spacing: 0; }
     .price-card .amount-sub { color: var(--muted); font-size: 15px; margin-bottom: 24px; }
     .price-card .feature-list { list-style: none; display: grid; gap: 13px; margin-bottom: 30px; flex: 1; }
-    .price-card .feature-list li { display: flex; align-items: flex-start; gap: 11px; font-size: 15.5px; color: var(--pearl); }
+    .price-card .feature-list li { display: flex; align-items: flex-start; gap: 11px; font-size: 14.5px; line-height: 1.5; color: var(--pearl); }
     .price-card .feature-list li::before { content: ""; flex: none; width: 18px; height: 18px; margin-top: 2px; border-radius: 50%; background: rgba(255,255,255,.1); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: center; background-size: 12px; }
 
     /* Premium uitgelicht in paars — identiek aan de prijskaart op de homepage. */
@@ -121,6 +122,11 @@
     .price-card { position: relative; }
     .price-card.featured > .badge-pop { position: absolute; }
     .badge-pop { position: absolute; top: 20px; right: 20px; z-index: 2; background: #ffffff; color: #0a0a0a; font-size: 12px; font-weight: 700; letter-spacing: .03em; padding: 6px 12px; border-radius: 999px; }
+    /* Premium Plus: herkenbaar met een eigen label, maar bewust zónder de paarse gloed —
+       die hoort bij Premium, de aanbevolen keuze. */
+    .price-card.plus { border-color: rgba(255,255,255,.2); }
+    .price-card.plus > .badge-pop { position: absolute; background: rgba(255,255,255,.07); color: var(--pearl);
+      border: 1px solid rgba(255,255,255,.2); font-weight: 600; }
 
     .pricing-note { text-align: center; color: var(--muted); font-size: 15px; margin-top: 34px; }
     .pricing-note span { color: var(--pearl); }
@@ -205,7 +211,8 @@
             <li>Digitale stempelkaart in Apple &amp; Google Wallet</li>
             <li>Onbeperkt aantal klanten</li>
             <li>Eigen huisstijl &amp; beloningen</li>
-            <li>Klantinzicht dashboard</li>
+            <li>Dashboard &amp; statistieken</li>
+            <li>Meerdere vestigingen mogelijk</li>
             <li>E-mail support</li>
           </ul>
           <a href="aanmelden.html?pakket=basic" class="btn btn-outline btn-block btn-lg">Kies Basic</a>
@@ -220,9 +227,25 @@
           <ul class="feature-list">
             <li>Alles van Basic</li>
             <li>Locatie meldingen als klanten in de buurt zijn</li>
+            <li>Klantinzichten: wie zijn je klanten</li>
             <li>Prioriteit support</li>
           </ul>
           <a href="aanmelden.html?pakket=premium" class="btn btn-primary btn-block btn-lg">Kies Premium</a>
+        </div>
+
+        <!-- Premium Plus -->
+        <div class="price-card glass plus reveal" data-delay="2">
+          <div class="badge-pop">Meest compleet</div>
+          <div class="tier">Premium Plus</div>
+          <div class="amount js-amount" data-m="€59,99" data-y="€599,88" data-mper="/maand" data-yper="/jaar">€59,99<small>/maand</small></div>
+          <div class="amount-sub js-sub" data-m="Altijd maandelijks opzegbaar" data-y="€49,99/maand · <span class=&quot;save-inline&quot;>bespaar €120</span>">Altijd maandelijks opzegbaar</div>
+          <ul class="feature-list">
+            <li>Alles van Premium</li>
+            <li>Klantonderzoek: stel je eigen enquête samen</li>
+            <li>Klanten vullen hem in bij het aanmaken van hun kaart</li>
+            <li>Uitgebreide statistieken en inzichten</li>
+          </ul>
+          <a href="aanmelden.html?pakket=premium_plus" class="btn btn-outline btn-block btn-lg">Kies Premium Plus</a>
         </div>
       </div>
 
@@ -238,8 +261,9 @@
           <h3>Wat zit er in elk pakket?</h3>
           <ul class="info-list">
             <li><strong>Basic (€34,99/mnd)</strong>: de digitale stempelkaart om klanten te binden.</li>
-            <li><strong>Premium (€44,99/mnd)</strong>: alles van Basic plus locatie meldingen en prioriteit support.</li>
-            <li><strong>Later upgraden</strong>: je stapt op elk moment over van Basic naar Premium.</li>
+            <li><strong>Premium (€44,99/mnd)</strong>: alles van Basic plus locatie meldingen, klantinzichten en prioriteit support.</li>
+            <li><strong>Premium Plus (€59,99/mnd)</strong>: alles van Premium plus je eigen klantonderzoek en uitgebreide statistieken.</li>
+            <li><strong>Later upgraden</strong>: je stapt op elk moment over naar een hoger pakket.</li>
           </ul>
         </div>
         <div class="info-card glass reveal" data-delay="1">
@@ -247,7 +271,7 @@
           <ul class="info-list">
             <li><strong>Kan ik maandelijks opzeggen?</strong> Ja, bij het maandabonnement zit je nergens aan vast.</li>
             <li><strong>Zijn er opstartkosten?</strong> Nee, en de eerste 14 dagen zijn gratis.</li>
-            <li><strong>Kan ik later upgraden?</strong> Zeker, je stapt op elk moment over van Basic naar Premium.</li>
+            <li><strong>Kan ik later upgraden?</strong> Zeker, je stapt op elk moment over naar Premium of Premium Plus.</li>
           </ul>
         </div>
       </div>

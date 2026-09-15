@@ -279,7 +279,8 @@
     .feature p { color: var(--muted); font-size: 15.5px; }
 
     /* ---------- Pricing ---------- */
-    .pricing-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; max-width: 820px; margin: 0 auto; }
+    .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 1140px; margin: 0 auto; }
+    @media (max-width: 1040px) { .pricing-grid { grid-template-columns: 1fr; max-width: 520px; } }
     .price-card { padding: 38px 34px; position: relative; transition: transform .35s var(--ease); }
     .price-card:hover { transform: translateY(-5px); }
     .price-card.starter { border-color: rgba(59,130,246,.4); }
@@ -288,6 +289,9 @@
     .price-card.featured::before { content: ""; position: absolute; inset: -1px; border-radius: var(--radius); z-index: -1; background: radial-gradient(circle at 50% 0%, rgba(139,92,246,.45), transparent 62%); filter: blur(16px); }
     .price-tier { font-size: 15px; font-weight: 600; color: var(--pearl); letter-spacing: .04em; }
     .price-badge { position: absolute; top: 24px; right: 28px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #fff; background: #8b5cf6; padding: 5px 12px; border-radius: 999px; }
+    /* Premium Plus: herkenbaar, maar zonder de paarse gloed — die hoort bij Premium. */
+    .price-card.plus { border-color: rgba(255,255,255,.2); }
+    .price-badge.soft { color: var(--pearl); background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.2); font-weight: 600; }
     .price-card.starter .price-features svg { color: #3b82f6; }
     .price-card.featured .price-features svg { color: #8b5cf6; }
     .price-amount { font-size: 52px; font-weight: 800; letter-spacing: -.03em; margin: 14px 0 4px; }
@@ -740,8 +744,8 @@
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Digitale stempelkaart in Apple &amp; Google Wallet</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Onbeperkt aantal klanten</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Eigen huisstijl &amp; beloningen</li>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Klantinzicht dashboard</li>
-            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>E-mail support</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Dashboard &amp; statistieken</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Meerdere vestigingen mogelijk</li>
           </ul>
           <a href="aanmelden.html?pakket=basic" class="btn btn-outline btn-block">Kies Basic</a>
         </div>
@@ -754,9 +758,24 @@
           <ul class="price-features">
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Alles van Basic</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Locatie meldingen: klanten krijgen bericht als ze in de buurt zijn</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Klantinzichten: wie zijn je klanten</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Prioriteit support</li>
           </ul>
           <a href="aanmelden.html?pakket=premium" class="btn btn-primary btn-block">Kies Premium</a>
+        </div>
+        <div class="price-card glass plus reveal">
+          <span class="price-badge soft">Meest compleet</span>
+          <div class="price-tier">Premium Plus</div>
+          <div class="price-amount js-amount" data-m="€59,99" data-y="€599,88" data-mper=" /maand" data-yper=" /jaar">€59,99<small> /maand</small></div>
+          <div class="price-billing js-sub" data-m="Altijd maandelijks opzegbaar" data-y="€49,99/maand · <span class=&quot;save-inline&quot;>bespaar €120</span>">Altijd maandelijks opzegbaar</div>
+          <p class="price-desc">Alles van Premium, plus je eigen klantonderzoek.</p>
+          <ul class="price-features">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Alles van Premium</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Klantonderzoek: stel je eigen enquête samen</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Klanten vullen hem in bij het aanmaken van hun kaart</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Uitgebreide statistieken en inzichten</li>
+          </ul>
+          <a href="aanmelden.html?pakket=premium_plus" class="btn btn-outline btn-block">Kies Premium Plus</a>
         </div>
       </div>
     </div>
