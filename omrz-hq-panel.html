@@ -163,6 +163,8 @@
     .pill.paid { color: #e0c489; background: rgba(201,164,92,.14); border: 1px solid rgba(201,164,92,.45); }
     .pill.trial { color: #a5c9ff; background: rgba(96,150,255,.12); border: 1px solid rgba(96,150,255,.4); }
     .pill.none { color: var(--muted); background: rgba(255,255,255,.05); border: 1px solid var(--border-strong); }
+    /* .pill zet display:inline-flex en wint van de UA-regel voor [hidden]; expliciet verbergen dus. */
+    .pill[hidden] { display: none; }
 
     /* ---------- Charts ---------- */
     .chart { display: flex; align-items: flex-end; gap: 10px; height: 220px; padding-top: 10px; }
@@ -237,6 +239,38 @@
     .warn-banner b { color: #ffd8ae; }
     .warn-banner .btn { margin-top: 10px; font-size: 12.5px; padding: 8px 13px; }
     .pill.underpaid { color: #fdba74; background: rgba(251,146,60,.14); border: 1px solid rgba(251,146,60,.5); }
+    /* Gratis-badge: als enige pill volledig gevuld, zodat comp-accounts er meteen uitspringen. */
+    .pill.free { color: #04231a; background: linear-gradient(135deg, #6ee7a0, #34d399);
+      border: 1px solid transparent; font-weight: 800; }
+    .pill.free::before { background: rgba(4,35,26,.55); }
+
+    /* ---------- Gratis toegang (comp account) ---------- */
+    .mh-title { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .free-box { padding: 15px 17px; border-radius: 13px; border: 1px solid var(--border-strong);
+      background: rgba(255,255,255,.03); transition: border-color .25s ease, background .25s ease; }
+    .free-box.on { border-color: rgba(52,211,153,.45); background: rgba(52,211,153,.07); }
+    .switch-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; cursor: pointer; }
+    .sw-text { flex: 1; min-width: 0; }
+    .sw-title { display: block; font-size: 14.5px; font-weight: 700; color: #fff; }
+    .sw-desc { display: block; font-size: 12.5px; color: var(--muted); margin-top: 5px; line-height: 1.55; }
+    .switch { position: relative; flex-shrink: 0; margin-top: 2px; }
+    .switch input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; margin: 0; cursor: pointer; }
+    .sw-track { display: block; width: 50px; height: 29px; border-radius: 999px; padding: 3px;
+      background: rgba(255,255,255,.09); border: 1px solid var(--border-strong);
+      transition: background .25s ease, border-color .25s ease; }
+    .sw-knob { display: block; width: 21px; height: 21px; border-radius: 50%; background: #d8d8d8;
+      transition: transform .25s cubic-bezier(.22,1,.36,1), background .25s ease; }
+    .switch input:checked + .sw-track { background: linear-gradient(135deg, #34d399, #10b981); border-color: transparent; }
+    .switch input:checked + .sw-track .sw-knob { transform: translateX(21px); background: #fff; }
+    .switch input:focus-visible + .sw-track { outline: 2px solid #6ee7a0; outline-offset: 2px; }
+    .switch input:disabled { cursor: default; }
+    .switch input:disabled + .sw-track { opacity: .5; }
+    .free-foot { display: flex; align-items: center; gap: 10px; margin-top: 13px; padding-top: 12px;
+      border-top: 1px solid var(--border); font-size: 12.5px; color: var(--muted); min-height: 20px; }
+    .free-foot.ok { color: #6ee7a0; }
+    .free-foot.error { color: #ff9b9b; }
+    .sub-box.free { border-color: rgba(52,211,153,.45); background: rgba(52,211,153,.07); }
+    .crm-price.free { color: #6ee7a0; font-weight: 700; }
 
     /* ---------- Detail: abonnement & vestigingen ---------- */
     .cm-section { margin-top: 4px; padding-top: 18px; border-top: 1px solid var(--border); }
@@ -619,7 +653,10 @@
     <div class="modal glass" role="dialog" aria-modal="true" aria-labelledby="crmName">
       <div class="modal-head">
         <div>
-          <h3 id="crmModalTitle">Winkelier</h3>
+          <div class="mh-title">
+            <h3 id="crmModalTitle">Winkelier</h3>
+            <span class="pill free" id="cmFreeBadge" hidden>Gratis</span>
+          </div>
           <div class="mh-sub" id="crmModalSub">Klantgegevens bewerken</div>
         </div>
         <button class="modal-close" id="crmClose" aria-label="Sluiten">✕</button>
@@ -634,6 +671,23 @@
       <div class="cm-section">
         <h4>Abonnement</h4>
         <div id="cmSubBox"></div>
+      </div>
+
+      <div class="cm-section">
+        <h4>Toegang</h4>
+        <div class="free-box" id="cmFreeBox">
+          <label class="switch-row" for="cmFreeAccess">
+            <span class="sw-text">
+              <span class="sw-title">Gratis toegang (comp account)</span>
+              <span class="sw-desc">Geef dit account gratis volledige premium toegang zonder betaling. Voor eigen gebruik of speciale partners.</span>
+            </span>
+            <span class="switch">
+              <input type="checkbox" id="cmFreeAccess" role="switch" />
+              <span class="sw-track"><span class="sw-knob"></span></span>
+            </span>
+          </label>
+          <div class="free-foot" id="cmFreeNote"></div>
+        </div>
       </div>
 
       <div class="cm-section">
@@ -904,6 +958,8 @@
         // De rauwe access_status is leidend voor verwijderen: de backend laat dat
         // alleen toe bij none/expired/canceled, niet bij een actief of proefaccount.
         accessStatus: String(raw.access_status || '').trim().toLowerCase(),
+        // Comp-account: gratis volledige premium toegang, zonder betaling.
+        freeAccess: raw.free_access === true || raw.free_access === 1 || raw.free_access === 'true',
         archived: raw.archived === true,
         archivedAt: raw.archived_at || null,
         get active() { return this.status.key === 'active'; },
@@ -980,7 +1036,8 @@
       const totalBiz = businesses.length;
       const totalCust = businesses.reduce((s, b) => s + b.customers, 0);
       const totalStamps = businesses.reduce((s, b) => s + b.stamps, 0);
-      const payingList = businesses.filter(b => b.active);
+      // Comp-accounts betalen niets: die mogen de omzet niet opblazen.
+      const payingList = businesses.filter(b => b.active && !b.freeAccess);
       const payingBiz = payingList.length;
       const revenue = payingList.reduce((s, b) => s + monthlyOf(b), 0);
 
@@ -1002,7 +1059,7 @@
       document.getElementById('statArrSub').textContent = 'Jaaromzet, excl. BTW';
 
       // Onderbetaling: welke klanten gebruiken meer vestigingen dan ze betalen?
-      const under = businesses.filter(b => !b.archived && b.overSubscribed > 0);
+      const under = businesses.filter(b => !b.archived && !b.freeAccess && b.overSubscribed > 0);
       const warn = document.getElementById('underpaidBanner');
       if (warn) {
         if (under.length) {
@@ -1078,9 +1135,12 @@
           </div>
           <div class="crm-tags">
             ${b.archived ? '<span class="pill none">Gearchiveerd</span>' : ''}
-            ${b.overSubscribed > 0 ? `<span class="pill underpaid">Onderbetaald +${b.overSubscribed}</span>` : ''}
+            ${b.freeAccess ? '<span class="pill free">Gratis</span>' : ''}
+            ${(b.overSubscribed > 0 && !b.freeAccess) ? `<span class="pill underpaid">Onderbetaald +${b.overSubscribed}</span>` : ''}
             <span class="pill ${b.status.cls}">${b.status.label}</span>
-            <span class="crm-price">${b.price ? euro(b.price) + (b.billing === 'yearly' ? '/jr' : '/mnd') : '—'}</span>
+            <span class="crm-price${b.freeAccess ? ' free' : ''}">${b.freeAccess
+              ? 'Gratis toegang'
+              : (b.price ? euro(b.price) + (b.billing === 'yearly' ? '/jr' : '/mnd') : '—')}</span>
             <span class="crm-locs">${b.locations} ${b.locations === 1 ? 'vestiging' : 'vestigingen'}</span>
           </div>
           ${CHEV}
@@ -1127,6 +1187,7 @@
       document.getElementById('cmLocationsView').textContent = b.locations.toLocaleString('nl-NL');
       document.getElementById('cmCustomersView').textContent = b.customers.toLocaleString('nl-NL');
       document.getElementById('cmStampsView').textContent = b.stamps.toLocaleString('nl-NL');
+      renderFreeAccess(b);
       renderSubscriptionBox(b);
       renderLocationList(b);
       renderStripeIds(b);
@@ -1163,6 +1224,21 @@
     function renderSubscriptionBox(b) {
       const el = document.getElementById('cmSubBox');
       if (!el) return;
+
+      // Comp-account: geen bedrag, geen onderbetaling — er wordt hier niets gefactureerd.
+      if (b.freeAccess) {
+        const used = b.activeLocations || b.locations || 0;
+        el.innerHTML = `<div class="sub-box free">
+            <div class="sub-amount">Gratis toegang<small> · comp account</small></div>
+            <div class="sub-breakdown">Premium zonder betaling. Dit account wordt niet gefactureerd en telt niet mee in de omzet.</div>
+            <div class="sub-usage">
+              <span>Gebruikt <b>${used}</b> ${vestWoord(used)}</span>
+              <span class="pill free">Gratis</span>
+            </div>
+          </div>`;
+        return;
+      }
+
       const pr = b.pricing;
       const under = b.overSubscribed > 0;
       const cycleLabel = (pr ? pr.billing_cycle : b.billing) === 'yearly' ? 'per jaar' : 'per maand';
@@ -1226,6 +1302,68 @@
       };
       el.innerHTML = row('Abonnement', b.stripeSubId, 'subscriptions') + row('Klant', b.stripeCustomerId, 'customers');
     }
+
+    // ============================================================
+    //  Gratis toegang (comp account)
+    // ============================================================
+    // Eén schakelaar die direct opslaat: aanzetten = gratis volledige premium
+    // toegang, zonder abonnement en zonder facturatie.
+    function freeNote(msg, kind) {
+      const el = document.getElementById('cmFreeNote');
+      if (!el) return;
+      el.textContent = msg || '';
+      el.className = 'free-foot' + (kind ? ' ' + kind : '');
+    }
+    function paintFree(on) {
+      const box = document.getElementById('cmFreeBox');
+      const badge = document.getElementById('cmFreeBadge');
+      if (box) box.classList.toggle('on', !!on);
+      if (badge) badge.hidden = !on;
+    }
+    function renderFreeAccess(b) {
+      const input = document.getElementById('cmFreeAccess');
+      if (!input) return;
+      input.checked = !!b.freeAccess;
+      input.disabled = false;
+      paintFree(b.freeAccess);
+      freeNote(b.freeAccess
+        ? 'Dit account heeft gratis premium toegang en wordt niet gefactureerd.'
+        : 'Dit account volgt het normale abonnement.', b.freeAccess ? 'ok' : '');
+    }
+
+    async function saveFreeAccess() {
+      const b = editingBiz;
+      const input = document.getElementById('cmFreeAccess');
+      if (!b || !input) return;
+      const want = input.checked;
+      paintFree(want);                         // meteen meebewegen, ook al loopt het opslaan nog
+      input.disabled = true;
+      freeNote(want ? 'Gratis toegang aanzetten…' : 'Gratis toegang uitzetten…', '');
+      try {
+        const res = await fetch(API_BASE + '/api/admin/businesses/' + encodeURIComponent(b.id), {
+          method: 'PUT', headers: adminHeaders(), body: JSON.stringify({ free_access: want }),
+        });
+        if (res.status === 401 || res.status === 403) {
+          localStorage.removeItem('admin_token'); window.location.replace('omrz-hq-control.html'); return;
+        }
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || data.message || 'Opslaan mislukt');
+
+        b.freeAccess = want;
+        renderSubscriptionBox(b);              // prijs → "Gratis toegang" (of terug)
+        renderBusinessList();                  // badge in de lijst
+        renderOverview();                      // comp-account telt niet mee in de omzet
+        freeNote(want ? 'Gratis toegang aangezet ✓' : 'Gratis toegang uitgezet ✓', 'ok');
+      } catch (err) {
+        // Mislukt: de schakelaar terugzetten, anders lijkt het gelukt terwijl de server er niets van weet.
+        input.checked = !want;
+        paintFree(!want);
+        freeNote('Kon niet opslaan: ' + (err.message || 'onbekende fout'), 'error');
+      } finally {
+        input.disabled = false;
+      }
+    }
+    document.getElementById('cmFreeAccess').addEventListener('change', saveFreeAccess);
 
     // ============================================================
     //  Archiveren, terughalen en verwijderen
@@ -1415,6 +1553,8 @@
         last_payment: v('cmLastPay') || null,
         next_payment: v('cmNextPay') || null,
         notes: v('cmNotes'),
+        // Meesturen zodat een gewone opslagronde de comp-status niet per ongeluk wist.
+        free_access: !!document.getElementById('cmFreeAccess').checked,
       };
 
       note.className = 'save-note'; btn.classList.add('loading'); btn.disabled = true;
@@ -1437,6 +1577,7 @@
           price, billing, paymentMethod: payment,
           startDate: payload.subscription_start, lastPayment: payload.last_payment, nextPayment: payload.next_payment,
           notes: payload.notes, status: normalizeStatus({ subscription_status: statusKey }),
+          freeAccess: payload.free_access,
         });
         note.textContent = 'Opgeslagen ✓'; note.classList.add('ok');
         document.getElementById('crmModalTitle').textContent = b.name;
