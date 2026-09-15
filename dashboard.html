@@ -1167,7 +1167,7 @@
 
     .sub-modal-overlay { position: fixed; inset: 0; z-index: 300; display: flex; align-items: flex-start; justify-content: center; padding: 28px 20px; overflow-y: auto; background: var(--overlay-strong); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); animation: fade .3s var(--ease); }
     .sub-modal-overlay[hidden] { display: none; }
-    .sub-modal { position: relative; width: 100%; max-width: 860px; margin: auto; border-radius: 20px; padding: 30px 32px 26px; box-shadow: var(--shadow-lg); }
+    .sub-modal { position: relative; width: 100%; max-width: 1040px; margin: auto; border-radius: 20px; padding: 30px 32px 26px; box-shadow: var(--shadow-lg); }
     .sub-modal-close { position: absolute; top: 18px; right: 18px; width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border-strong); background: rgba(var(--ink), .04); color: var(--text-strong); font-size: 16px; cursor: pointer; z-index: 2; transition: background .2s var(--ease); }
     .sub-modal-close:hover { background: rgba(var(--ink), .1); }
     .sm-head { text-align: center; max-width: 560px; margin: 0 auto 18px; }
@@ -1184,20 +1184,26 @@
     .sm-msg.error { display: block; color: #ffb4b4; background: rgba(255,80,80,.08); border: 1px solid rgba(255,80,80,.25); }
     .sm-msg.ok { display: block; color: #b4ffcf; background: rgba(80,255,140,.08); border: 1px solid rgba(80,255,140,.25); }
 
-    .sm-plans { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+    .sm-plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: start; }
+    /* Onder ~900px worden drie kolommen te smal; dan onder elkaar. */
+    @media (max-width: 900px) { .sm-plans { grid-template-columns: 1fr; } }
     .sm-plan { position: relative; padding: 22px 22px 20px; border-radius: 16px; border: 1px solid var(--border); background: rgba(var(--ink), .022); display: flex; flex-direction: column; overflow: hidden; }
     .sm-plan.featured { border-color: var(--border-strong); background: rgba(var(--ink), .04); }
     .sm-plans.selectable .sm-plan { cursor: pointer; transition: border-color .2s var(--ease), box-shadow .2s var(--ease); }
     .sm-plans.selectable .sm-plan:hover { border-color: var(--border-strong); }
     .sm-plans.selectable .sm-plan.selected { border-color: var(--text-strong); box-shadow: inset 0 0 0 1px var(--text-strong); }
+    .sm-plan.plus { border-color: rgba(139,92,246,.32); background: linear-gradient(180deg, var(--accent-soft), rgba(var(--ink), .022) 62%); }
+    .sm-plan .badge-plus { position: absolute; top: 16px; right: 16px; font-size: 10.5px; font-weight: 700;
+      letter-spacing: .06em; text-transform: uppercase; color: var(--accent-2);
+      border: 1px solid rgba(139,92,246,.4); background: var(--accent-soft); padding: 3px 10px; border-radius: 999px; }
     .sm-plan .badge-pop { position: absolute; top: 16px; right: 16px; font-size: 11px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: #0a0a0a; background: var(--text-strong); padding: 4px 11px; border-radius: 999px; }
     .sm-plan .tier { font-size: 12.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-    .sm-plan .amount { margin: 12px 0 3px; font-size: 34px; font-weight: 600; letter-spacing: -.035em; color: var(--text-strong); line-height: 1; }
+    .sm-plan .amount { margin: 12px 0 3px; font-size: 30px; font-weight: 600; letter-spacing: -.035em; color: var(--text-strong); line-height: 1; }
     .sm-plan .amount small { font-size: 15px; font-weight: 500; color: var(--muted); letter-spacing: 0; }
     .sm-plan .amount-sub { color: var(--muted); font-size: 13.5px; margin-bottom: 16px; min-height: 19px; }
     .sm-plan .amount-sub .save-inline { color: #6ee7a0; font-weight: 700; }
     .sm-features { list-style: none; display: grid; gap: 9px; margin-bottom: 18px; flex: 1; }
-    .sm-features li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--pearl); }
+    .sm-features li { display: flex; align-items: flex-start; gap: 9px; font-size: 13.5px; line-height: 1.5; color: var(--pearl); }
     .sm-features li::before { content: ""; flex: none; width: 17px; height: 17px; margin-top: 2px; border-radius: 50%; background: rgba(110,231,160,.16); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236ee7a0' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: center; background-size: 10px; }
     .sm-features li.hl { color: var(--text-strong); font-weight: 600; }
 
@@ -1349,6 +1355,11 @@
       .sm-trial { flex-direction: column; align-items: stretch; text-align: center; }
       .sm-trial-btn { width: 100%; }
     }
+
+    /* Proefperiode: het gekozen pakket expliciet benoemen. */
+    .sm-trial-plan { display: inline-flex; align-self: flex-start; width: fit-content; align-items: center; gap: 7px; font-size: 12px; font-weight: 600;
+      color: var(--accent-2); background: var(--accent-soft); border: 1px solid rgba(139,92,246,.28);
+      padding: 4px 11px; border-radius: 999px; margin-bottom: 9px; }
 
     /* ---------- Responsive ---------- */
     @media (max-width: 900px) {
@@ -2445,6 +2456,23 @@
             <span class="btn-label">Kies Premium</span>
           </button>
         </div>
+        <!-- Premium Plus -->
+        <div class="sm-plan plus" data-plan="premium_plus">
+          <span class="badge-plus">Meest compleet</span>
+          <div class="tier">Premium Plus</div>
+          <div class="amount" id="smPlusAmount">€59,99<small>/maand</small></div>
+          <div class="amount-sub" id="smPlusSub">Altijd maandelijks opzegbaar</div>
+          <div class="sm-benefit" id="smPlusBenefit" hidden></div>
+          <ul class="sm-features">
+            <li class="hl">Alles van Premium</li>
+            <li>Klantonderzoek: stel je eigen enquête samen die klanten invullen</li>
+            <li>Uitgebreide statistieken en inzichten</li>
+            <li>&euro;2,50 korting per maand per vestiging bij meerdere vestigingen</li>
+          </ul>
+          <button type="button" class="btn btn-outline btn-block sm-choose" data-plan="premium_plus">
+            <span class="btn-label">Kies Premium Plus</span>
+          </button>
+        </div>
       </div>
 
       <!-- Begeleiding & installatie (optioneel, eenmalig) -->
@@ -2482,6 +2510,7 @@
       <!-- Proefperiode-optie (alleen als can_use_trial = true) -->
       <div class="sm-trial" id="smTrial" hidden>
         <div class="sm-trial-text">
+          <span class="sm-trial-plan" id="smTrialPlan">Proefperiode voor Premium</span>
           <strong>Of probeer eerst 14 dagen gratis</strong>
           <ul class="sm-trial-points">
             <li><span class="tp-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span>Vandaag betaal je <b>€0</b></span></li>
@@ -2489,7 +2518,7 @@
             <li><span class="tp-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><span>Je kunt altijd opzeggen tijdens de proefperiode</span></li>
           </ul>
         </div>
-        <button type="button" class="btn btn-primary sm-trial-btn" id="smStartTrial">Start 14 dagen gratis proefperiode</button>
+        <button type="button" class="btn btn-primary sm-trial-btn" id="smStartTrial">Start 14 dagen gratis met Premium</button>
       </div>
     </div>
   </div>
@@ -2630,7 +2659,7 @@
         const s = (d && (d.subscription || d.data || d)) || {};
         subscription = {
           access_status: s.access_status || s.status || subscription.access_status,
-          plan: (s.plan || s.plan_name || subscription.plan || 'basic').toString().toLowerCase(),
+          plan: normalizePlan(s.plan || s.plan_name || subscription.plan || 'basic'),
           billing_cycle: s.billing_cycle || s.billing || null,
           days_left_in_trial: Number(s.days_left_in_trial ?? s.trial_days_left ?? 0) || 0,
           is_trial_expired: !!(s.is_trial_expired ?? s.trial_expired),
@@ -2720,17 +2749,35 @@
     // ====== Groot abonnement-scherm (modal) ======
     // value = bedrag excl. BTW, om het kostenoverzicht te kunnen optellen.
     const SUB_PRICES = {
-      basic:   { monthly: { amount: '€34,99', value: 34.99, per: '/maand', sub: 'Altijd maandelijks opzegbaar' }, yearly: { amount: '€349', value: 349, per: '/jaar', sub: '€29,08 per maand' } },
-      premium: { monthly: { amount: '€44,99', value: 44.99, per: '/maand', sub: 'Altijd maandelijks opzegbaar' }, yearly: { amount: '€449', value: 449, per: '/jaar', sub: '€37,42 per maand' } },
+      basic:        { monthly: { amount: '€34,99', value: 34.99, per: '/maand', sub: 'Altijd maandelijks opzegbaar' }, yearly: { amount: '€349', value: 349, per: '/jaar', sub: '€29,08 per maand' } },
+      premium:      { monthly: { amount: '€44,99', value: 44.99, per: '/maand', sub: 'Altijd maandelijks opzegbaar' }, yearly: { amount: '€449', value: 449, per: '/jaar', sub: '€37,42 per maand' } },
+      premium_plus: { monthly: { amount: '€59,99', value: 59.99, per: '/maand', sub: 'Altijd maandelijks opzegbaar' }, yearly: { amount: '€599,88', value: 599.88, per: '/jaar', sub: '€49,99 per maand' } },
     };
+    // Eén plek voor de weergavenaam van een pakket.
+    const PLAN_LABELS = { basic: 'Basic', premium: 'Premium', premium_plus: 'Premium Plus' };
+    // De backend kan 'premium_plus', 'premium-plus' of 'premiumplus' sturen.
+    function normalizePlan(v) {
+      const p = String(v == null ? '' : v).toLowerCase().replace(/[^a-z+]/g, '');
+      if (p === 'premiumplus' || p === 'premium+' || p === 'plus') return 'premium_plus';
+      if (p === 'premium' || p === 'pro') return 'premium';
+      return 'basic';
+    }
+    function planName(v) { return PLAN_LABELS[normalizePlan(v)] || 'Basic'; }
     // Eenmalige begeleiding; het bedrag staat ook in de backend (ONBOARDING_PRICE_LABEL).
     const ONBOARDING_PRICE = 149;
 
     // Prijs per vestiging, spiegel van stampSubscriptionPricing() in de backend.
     // Premium krijgt vanaf 2 vestigingen korting op álle vestigingen; Basic niet.
-    const STAMP_BASE = { basic: { monthly: 34.99, yearly: 349 }, premium: { monthly: 44.99, yearly: 449 } };
+    const STAMP_BASE = {
+      basic:        { monthly: 34.99, yearly: 349 },
+      premium:      { monthly: 44.99, yearly: 449 },
+      premium_plus: { monthly: 59.99, yearly: 599.88 },
+    };
     const PREMIUM_MULTI_DISCOUNT = { monthly: 2.50, yearly: 30 };
     const PREMIUM_MULTI_MIN = 2;
+    // De vestigingskorting geldt voor Premium én Premium Plus, niet voor Basic.
+    const MULTI_DISCOUNT_PLANS = new Set(['premium', 'premium_plus']);
+    function hasMultiDiscount(plan) { return MULTI_DISCOUNT_PLANS.has(normalizePlan(plan)); }
     const MAX_LOCATIONS = 100;
     let smLocations = 1;
     const BENEFIT_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 22V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>';
@@ -2742,22 +2789,23 @@
     const round2 = (v) => Math.round(v * 100) / 100;
     function stampBenefit(plan, cycle, count) {
       const n = Math.min(MAX_LOCATIONS, Math.max(1, parseInt(count, 10) || 1));
-      const base = STAMP_BASE[plan] || STAMP_BASE.basic;
+      const base = STAMP_BASE[normalizePlan(plan)] || STAMP_BASE.basic;
       const multi = n >= PREMIUM_MULTI_MIN;
 
       if (cycle !== 'yearly') {
-        const perLoc = (plan === 'premium' && multi) ? PREMIUM_MULTI_DISCOUNT.monthly : 0;
+        const perLoc = (hasMultiDiscount(plan) && multi) ? PREMIUM_MULTI_DISCOUNT.monthly : 0;
         return { amount: round2(perLoc * n), period: 'maand' };
       }
-      const yearlySavePerLoc = round2(base.monthly * 12 - base.yearly);   // Basic €70,88 · Premium €90,88
-      const multiPerLoc = (plan === 'premium' && multi) ? PREMIUM_MULTI_DISCOUNT.yearly : 0;
+      // Basic €70,88 · Premium €90,88 · Premium Plus €120,00 per vestiging per jaar.
+      const yearlySavePerLoc = round2(base.monthly * 12 - base.yearly);
+      const multiPerLoc = (hasMultiDiscount(plan) && multi) ? PREMIUM_MULTI_DISCOUNT.yearly : 0;
       return { amount: round2((yearlySavePerLoc + multiPerLoc) * n), period: 'jaar' };
     }
 
     function stampPricing(plan, cycle, count) {
       const n = Math.min(MAX_LOCATIONS, Math.max(1, parseInt(count, 10) || 1));
-      const base = (STAMP_BASE[plan] || STAMP_BASE.basic)[cycle === 'yearly' ? 'yearly' : 'monthly'];
-      const discount = (plan === 'premium' && n >= PREMIUM_MULTI_MIN)
+      const base = (STAMP_BASE[normalizePlan(plan)] || STAMP_BASE.basic)[cycle === 'yearly' ? 'yearly' : 'monthly'];
+      const discount = (hasMultiDiscount(plan) && n >= PREMIUM_MULTI_MIN)
         ? PREMIUM_MULTI_DISCOUNT[cycle === 'yearly' ? 'yearly' : 'monthly'] : 0;
       const unit = base - discount;
       // Op centen afronden; anders levert 3 × 42,49 een staart van floating-point cijfers op.
@@ -2781,18 +2829,20 @@
       const per = smBilling === 'yearly' ? '/jaar' : '/maand';
       const n = smLocations;
 
-      ['basic', 'premium'].forEach(plan => {
+      // Elke pakketkaart vult zichzelf, zodat er niets vergeten wordt als er een pakket bij komt.
+      document.querySelectorAll('#smPlans .sm-plan').forEach(card => {
+        const plan = normalizePlan(card.dataset.plan);
         const pr = stampPricing(plan, smBilling, n);
-        const amountEl = document.getElementById(plan === 'basic' ? 'smBasicAmount' : 'smPremAmount');
-        const subEl = document.getElementById(plan === 'basic' ? 'smBasicSub' : 'smPremSub');
+        const amountEl = card.querySelector('.amount');
+        const subEl = card.querySelector('.amount-sub');
         const fallback = SUB_PRICES[plan][smBilling];
 
         // De prijs blijft het totaal voor het gekozen aantal vestigingen.
-        amountEl.innerHTML = euroNL(pr.total) + '<small>' + per + '</small>' + vat;
-        subEl.innerHTML = fallback.sub;
+        if (amountEl) amountEl.innerHTML = euroNL(pr.total) + '<small>' + per + '</small>' + vat;
+        if (subEl) subEl.innerHTML = fallback.sub;
 
         // Voordeel als losse balk, alleen wanneer er écht iets te winnen valt.
-        const benefitEl = document.getElementById(plan === 'basic' ? 'smBasicBenefit' : 'smPremBenefit');
+        const benefitEl = card.querySelector('.sm-benefit');
         const benefit = stampBenefit(plan, smBilling, n);
         if (benefitEl) {
           if (benefit.amount > 0) {
@@ -2809,8 +2859,8 @@
       const hint = document.getElementById('smLocsHint');
       if (hint) {
         hint.textContent = n >= PREMIUM_MULTI_MIN
-          ? 'Vanaf 2 vestigingen krijg je bij Premium ' + euroKort(PREMIUM_MULTI_DISCOUNT[smBilling === 'yearly' ? 'yearly' : 'monthly']) + ' korting per vestiging.'
-          : 'Je betaalt per vestiging. Vanaf 2 vestigingen geeft Premium korting.';
+          ? 'Vanaf 2 vestigingen krijg je bij Premium en Premium Plus ' + euroKort(PREMIUM_MULTI_DISCOUNT[smBilling === 'yearly' ? 'yearly' : 'monthly']) + ' korting per vestiging.'
+          : 'Je betaalt per vestiging. Vanaf 2 vestigingen geven Premium en Premium Plus korting.';
       }
       updateTrialNote();
       renderAddonSummary();
@@ -2839,11 +2889,16 @@
       const el = document.getElementById('smTrialCharge');
       if (!el) return;
       const pr = stampPricing(smSelectedPlan, smBilling, smLocations);
-      const name = smSelectedPlan === 'premium' ? 'Premium' : 'Basic';
+      const name = planName(smSelectedPlan);
       const period = smBilling === 'yearly' ? 'jaar' : 'maand';
       const locs = smLocations > 1 ? ' (' + smLocations + ' vestigingen)' : '';
       el.innerHTML = 'Na 14 dagen proefperiode wordt automatisch <b>' + euroNL(pr.total) + ' per ' + period
         + '</b> (excl. BTW) voor ' + name + locs + ' afgeschreven';
+      // De proefperiode geldt voor het pakket dat hierboven is aangeklikt — dat mag geen verrassing zijn.
+      const badge = document.getElementById('smTrialPlan');
+      if (badge) badge.textContent = 'Proefperiode voor ' + name;
+      const trialBtn = document.getElementById('smStartTrial');
+      if (trialBtn && !trialBtn.disabled) trialBtn.textContent = 'Start 14 dagen gratis met ' + name;
     }
     // De keuze is verplicht: null zolang de winkelier niets heeft aangeklikt.
     function onboardingChoice() {
@@ -2888,7 +2943,7 @@
       // bepaalt pas de "Kies …"-knop het pakket, dus dan noemen we er geen.
       const chosen = document.getElementById('smPlans').classList.contains('selectable');
       const pr = stampPricing(smSelectedPlan, smBilling, smLocations);
-      const name = smSelectedPlan === 'premium' ? 'Premium' : 'Basic';
+      const name = planName(smSelectedPlan);
       const sub = pr.total;
       const locLabel = smLocations > 1 ? ` · ${smLocations} vestigingen` : '';
 
@@ -2933,7 +2988,7 @@
       if (smMode === 'change') {
         const cur = subscribedLocations();
         smBefore = {
-          plan: s.plan === 'basic' ? 'basic' : 'premium',
+          plan: normalizePlan(s.plan),
           cycle: s.billing_cycle === 'yearly' ? 'yearly' : 'monthly',
           locations: cur,
         };
@@ -2963,7 +3018,7 @@
       addon.hidden = false;
       document.querySelectorAll('#smPlans .sm-choose').forEach(b => {
         const l = b.querySelector('.btn-label');
-        if (l) l.textContent = b.dataset.plan === 'premium' ? 'Kies Premium' : 'Kies Basic';
+        if (l) l.textContent = 'Kies ' + planName(b.dataset.plan);
       });
       let title = 'Kies je abonnement', sub = 'Kies het pakket dat bij jouw zaak past.';
       if (!s.has_access) { const m = subMessage(); title = m.title; sub = m.text; }
@@ -3022,7 +3077,7 @@
       const after = stampPricing(smSelectedPlan, smBilling, smLocations);
       const perBefore = smBefore.cycle === 'yearly' ? 'jaar' : 'maand';
       const perAfter = smBilling === 'yearly' ? 'jaar' : 'maand';
-      const name = (p) => p === 'premium' ? 'Premium' : 'Basic';
+      const name = planName;
       const loc = (n) => n + ' ' + (n === 1 ? 'vestiging' : 'vestigingen');
 
       const unchanged = smBefore.plan === smSelectedPlan
@@ -3132,7 +3187,7 @@
     }
 
     // ====== Mijn Abonnement ======
-    function planLabel(p) { return p === 'premium' ? 'Premium' : (p === 'basic' ? 'Basic' : '—'); }
+    function planLabel(p) { return p ? planName(p) : '—'; }
     // Prijs voor het daadwerkelijke aantal vestigingen, inclusief de Premium-staffel.
     function priceLabel(plan, cycle, count) {
       const c = cycle === 'yearly' ? 'yearly' : 'monthly';
@@ -3315,14 +3370,14 @@
             </div>
           </div>`;
       } else {
-        const premium = s.plan === 'premium';
+        const plan = normalizePlan(s.plan);
         ic = PLAN_ICONS.active;
         title = 'Abonnement actief';
-        sub = (premium ? 'Premium' : 'Basic') + (cycle ? ' · ' + cycle : '');
+        sub = planName(plan) + (cycle ? ' · ' + cycle : '');
         // Upgraden is een actie (accent); beheren is bekijken (neutraal).
-        btn = premium
-          ? '<button type="button" class="btn btn-ghost" data-open-portal>Beheer abonnement</button>'
-          : '<button type="button" class="btn btn-primary" data-open-sub>Upgrade naar Premium</button>';
+        btn = plan === 'basic'
+          ? '<button type="button" class="btn btn-primary" data-open-sub>Upgrade naar Premium</button>'
+          : '<button type="button" class="btn btn-ghost" data-open-portal>Beheer abonnement</button>';
       }
 
       el.innerHTML = `<div class="pc-main">
@@ -4161,7 +4216,9 @@
     // ---- Klantinzichten (kaartinstelling, premium) ----
     // Trial telt als premium: dan kan de winkelier de functie tijdens de proef uitproberen.
     function isPremiumNow() {
-      return subscription.plan === 'premium' || subscription.access_status === 'trial';
+      // Premium Plus bevat alles van Premium; trial geeft tijdelijk volledige toegang.
+      const p = normalizePlan(subscription.plan);
+      return p === 'premium' || p === 'premium_plus' || subscription.access_status === 'trial';
     }
     function syncDemoSubOptions() {
       const on = document.getElementById('demoEnabled');
@@ -5445,10 +5502,7 @@
     }
     // Premium Plus volgens het pakket. De backend blijft leidend; dit is alleen
     // om het slotje in het menu meteen goed te zetten.
-    function isPremiumPlusPlan() {
-      const p = String(subscription.plan || '').toLowerCase().replace(/[^a-z+]/g, '');
-      return p === 'premiumplus' || p === 'premium+' || p === 'plus';
-    }
+    function isPremiumPlusPlan() { return normalizePlan(subscription.plan) === 'premium_plus'; }
     function applySurveyLockIcon() {
       const el = document.getElementById('navEnquete');
       if (!el) return;
