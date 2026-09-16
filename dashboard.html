@@ -813,6 +813,29 @@
     .sat-note strong { color: var(--pearl); font-weight: 600; }
     .sat-off { opacity: .5; pointer-events: none; }
 
+    /* ---------- Klantfeedback ---------- */
+    .fb-top { display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+      flex-wrap: wrap; margin-bottom: 20px; }
+    .fb-top h3 { margin-bottom: 0; }
+    .fb-count { font-size: 12.5px; color: var(--muted); white-space: nowrap; }
+    .fb-count b { color: var(--pearl); font-weight: 600; }
+    .fb-list { display: grid; gap: 12px; }
+    .fb-card { display: flex; gap: 14px; padding: 17px 19px; border-radius: 14px;
+      border: 1px solid var(--border); background: rgba(var(--ink), .022);
+      transition: border-color .2s var(--ease); }
+    .fb-card:hover { border-color: var(--border-strong); }
+    .fb-av { width: 36px; height: 36px; flex-shrink: 0; border-radius: 50%; display: grid; place-items: center;
+      font-size: 12.5px; font-weight: 600; color: #fff; background: var(--accent-grad); }
+    .fb-main { flex: 1; min-width: 0; }
+    .fb-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 7px; }
+    .fb-name { font-size: 14px; font-weight: 600; color: var(--text-strong); }
+    .fb-mail { font-size: 12.5px; color: var(--muted); overflow-wrap: anywhere; }
+    .fb-mail a { color: var(--accent-2); text-decoration: none; }
+    .fb-mail a:hover { text-decoration: underline; text-underline-offset: 2px; }
+    .fb-date { margin-left: auto; font-size: 12px; color: var(--faint, var(--muted)); white-space: nowrap; }
+    .fb-text { font-size: 14px; line-height: 1.6; color: var(--pearl); white-space: pre-wrap; overflow-wrap: anywhere; }
+    .fb-more { display: block; margin: 16px auto 0; }
+
     /* Upgrade-scherm */
     .sv-lock { text-align: center; padding: 40px 26px 36px; max-width: 460px; margin: 0 auto; }
     .sv-lock .sv-lock-ic { width: 54px; height: 54px; margin: 0 auto 20px; border-radius: 16px; display: grid; place-items: center;
@@ -2196,6 +2219,7 @@
             <button type="button" class="active" data-sv-view="builder">Vragen samenstellen</button>
             <button type="button" data-sv-view="results">Resultaten</button>
             <button type="button" data-sv-view="satisfaction">Tevredenheid</button>
+            <button type="button" data-sv-view="feedback">Klanten feedback</button>
           </div>
 
           <div id="surveyWrap">
@@ -2203,6 +2227,7 @@
           </div>
           <div id="surveyStatsWrap" hidden></div>
           <div id="surveySatWrap" hidden></div>
+          <div id="surveyFbWrap" hidden></div>
         </section>
 
         <!-- ===== Mijn Abonnement ===== -->
@@ -2650,6 +2675,7 @@
       satisfaction_enabled: false,
       satisfaction_website_enabled: false,
       website_url: '',
+      feedback_enabled: false,
       ask_occupation: true,
       ask_city: true,
     };
@@ -5913,16 +5939,23 @@
       if (seg) seg.hidden = !on;
     }
     function setSvView(view) {
-      svView = (view === 'results' || view === 'satisfaction') ? view : 'builder';
+      svView = ['results', 'satisfaction', 'feedback'].includes(view) ? view : 'builder';
       document.querySelectorAll('#svViewSeg button').forEach(b =>
         b.classList.toggle('active', b.dataset.svView === svView));
       const b = document.getElementById('surveyWrap');
       const r = document.getElementById('surveyStatsWrap');
       const t = document.getElementById('surveySatWrap');
+      const f = document.getElementById('surveyFbWrap');
       if (b) b.hidden = svView !== 'builder';
       if (r) r.hidden = svView !== 'results';
       if (t) t.hidden = svView !== 'satisfaction';
+      if (f) f.hidden = svView !== 'feedback';
       if (svView === 'results') loadSurveyStats();
+      // Zonder verzamelen valt er niets op te halen; dan alleen de uitleg tonen.
+      if (svView === 'feedback') {
+        if (card.feedback_enabled) loadFeedback();
+        else renderFeedback();
+      }
       // De instelling staat er altijd; de cijfers halen we alleen op als de meting aanstaat.
       if (svView === 'satisfaction') {
         if (card.satisfaction_enabled || card.satisfaction_website_enabled) loadSatisfaction();
@@ -6321,9 +6354,24 @@
           <div class="save-note" id="satWebNote" style="margin-top:12px"></div>
 
           <div class="sat-sub" ${on && webOn ? '' : 'hidden'}>${satBadgeHtml(d)}</div>
+        </div>
+
+        <div class="block glass" style="margin-top:20px">
+          <h3>Feedback verzamelen</h3>
+          <p class="b-sub">Losse opmerkingen van klanten, in hun eigen woorden.</p>
+
+          <div class="switch-row">
+            <span class="switch-tx">
+              <strong>Feedback verzamelen</strong>
+              <small>Klanten kunnen bij het aanmaken van hun kaart optioneel opmerkingen of suggesties achterlaten.</small>
+            </span>
+            <input type="checkbox" class="switch" id="satFeedback" ${card.feedback_enabled ? 'checked' : ''} />
+          </div>
+          <div class="save-note" id="satFbNote" style="margin-top:12px"></div>
+          ${card.feedback_enabled ? '<div class="sat-hint">Wat klanten schrijven lees je onder <b>Klanten feedback</b>.</div>' : ''}
         </div>`;
 
-      ['satNote', 'satWebNote', 'satUrlNote'].forEach(applySatNote);
+      ['satNote', 'satWebNote', 'satUrlNote', 'satFbNote'].forEach(applySatNote);
     }
 
     // ---- Opslaan ----
@@ -6381,6 +6429,19 @@
         card.satisfaction_website_enabled = want;
         if (want && !satLoaded) { await loadSatisfaction(true); return; }
         renderSatisfaction();
+        return;
+      }
+      if (el.id === 'satFeedback') {
+        const want = el.checked;
+        el.disabled = true;
+        const ok = await saveSatisfactionField('feedback_enabled', want, 'satFbNote',
+          { ok: want ? 'Feedback verzamelen aangezet ✓' : 'Feedback verzamelen uitgezet ✓' });
+        el.disabled = false;
+        if (!ok) { el.checked = !want; return; }
+        card.feedback_enabled = want;
+        feedbackLoaded = false;          // volgende keer verse berichten ophalen
+        renderSatisfaction();
+        renderFeedback();
       }
     });
 
@@ -6413,6 +6474,149 @@
         const code = document.getElementById('satShareUrl');
         if (code) copyToClipboard(code.textContent, linkBtn, 'Link gekopieerd ✓');
       }
+    });
+
+    // ============================================================
+    //  Klanten feedback (Premium Plus)
+    // ============================================================
+    const FB_PAGE = 20;                // hoeveel berichten er in één keer verschijnen
+    let feedbackList = [];
+    let feedbackLoaded = false;
+    let feedbackError = '';
+    let fbShown = FB_PAGE;
+
+    const FB_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9 9 0 0 1-3.9-.9L3 20.5l1.5-4.6A8.4 8.4 0 0 1 3.6 11.5 8.4 8.4 0 0 1 12 3.1a8.4 8.4 0 0 1 9 8.4z"/></svg>';
+
+    function normalizeFeedback(raw) {
+      const name = String(raw.customer_name ?? raw.name ?? [raw.first_name, raw.last_name].filter(Boolean).join(' ') ?? '').trim();
+      return {
+        text: String(raw.feedback_text ?? raw.feedback ?? raw.text ?? raw.message ?? raw.comment ?? '').trim(),
+        name: name,
+        email: String(raw.customer_email ?? raw.email ?? '').trim(),
+        date: raw.created_at ?? raw.date ?? raw.submitted_at ?? raw.datum ?? raw.timestamp ?? null,
+      };
+    }
+    // "Vandaag, 14:32" leest prettiger dan een datum die je zelf moet omrekenen.
+    function fbDate(value) {
+      if (!value) return '';
+      const d = new Date(value);
+      if (isNaN(d.getTime())) return '';
+      const now = new Date();
+      const sameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+      const yest = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+      let time = '';
+      try { time = d.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }); } catch (e) { time = ''; }
+      if (sameDay(d, now)) return time ? 'Vandaag, ' + time : 'Vandaag';
+      if (sameDay(d, yest)) return time ? 'Gisteren, ' + time : 'Gisteren';
+      return formatVisitDate(value) || '';
+    }
+
+    async function loadFeedback(force) {
+      const wrap = document.getElementById('surveyFbWrap');
+      if (!wrap) return;
+      if (feedbackLoaded && !force) { renderFeedback(); return; }
+      if (!cardId) { feedbackError = 'Geen stempelkaart gevonden. Log opnieuw in.'; feedbackLoaded = true; renderFeedback(); return; }
+      wrap.innerHTML = '<div class="block glass"><div class="loader"><span class="spinner"></span> Feedback laden…</div></div>';
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/feedback/' + encodeURIComponent(cardId),
+          { headers: authHeaders() });
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 403) {
+          surveyAccess = 'no'; feedbackLoaded = true;
+          applySurveyLockIcon(); renderSurveyLock();
+          return;
+        }
+        if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+        const list = Array.isArray(data) ? data : (data.feedback || data.items || data.results || data.data || []);
+        feedbackList = list.map(normalizeFeedback).filter(f => f.text);
+        // De backend levert nieuwste eerst; voor de zekerheid zelf ook sorteren.
+        feedbackList.sort((a, b) => {
+          const ta = a.date ? new Date(a.date).getTime() : 0;
+          const tb = b.date ? new Date(b.date).getTime() : 0;
+          return (Number.isFinite(tb) ? tb : 0) - (Number.isFinite(ta) ? ta : 0);
+        });
+        feedbackError = '';
+        feedbackLoaded = true;
+        fbShown = FB_PAGE;
+      } catch (err) {
+        feedbackError = isNetworkError(err) ? NET_MSG : (err.message || 'Probeer het later opnieuw.');
+        feedbackLoaded = true;
+      }
+      renderFeedback();
+    }
+
+    function fbEmptyBlock(title, text, btn) {
+      return `<div class="block glass">
+          <div class="empty-state">
+            <span class="es-ic">${FB_SVG}</span>
+            <h4>${escapeHtml(title)}</h4>
+            <p>${escapeHtml(text)}</p>
+            ${btn || ''}
+          </div>
+        </div>`;
+    }
+
+    function fbCardHtml(f) {
+      const name = f.name || 'Klant zonder naam';
+      const date = fbDate(f.date);
+      const mail = f.email
+        ? `<span class="fb-mail"><a href="mailto:${escapeHtml(f.email)}">${escapeHtml(f.email)}</a></span>`
+        : '';
+      return `<div class="fb-card">
+          <span class="fb-av">${escapeHtml(customerInitials(name))}</span>
+          <div class="fb-main">
+            <div class="fb-head">
+              <span class="fb-name">${escapeHtml(name)}</span>
+              ${mail}
+              ${date ? '<span class="fb-date">' + escapeHtml(date) + '</span>' : ''}
+            </div>
+            <div class="fb-text">${escapeHtml(f.text)}</div>
+          </div>
+        </div>`;
+    }
+
+    function renderFeedback() {
+      const wrap = document.getElementById('surveyFbWrap');
+      if (!wrap) return;
+
+      // Staat het verzamelen uit, dan is een lege lijst geen verrassing maar een instelling.
+      if (!card.feedback_enabled) {
+        wrap.innerHTML = fbEmptyBlock('Feedback staat uit',
+          "Zet 'Feedback verzamelen' aan om feedback van klanten te ontvangen.",
+          '<button type="button" class="btn btn-primary" data-fb-settings>Naar de instelling</button>');
+        return;
+      }
+      if (feedbackError) {
+        wrap.innerHTML = fbEmptyBlock('Feedback niet geladen', feedbackError,
+          '<button type="button" class="btn btn-ghost" data-fb-retry>Opnieuw proberen</button>');
+        return;
+      }
+      if (!feedbackList.length) {
+        wrap.innerHTML = fbEmptyBlock('Nog geen feedback',
+          'Nog geen feedback. Zodra klanten opmerkingen achterlaten verschijnen ze hier.');
+        return;
+      }
+
+      const total = feedbackList.length;
+      const shown = Math.min(fbShown, total);
+      const rest = total - shown;
+      wrap.innerHTML = `<div class="block glass">
+          <div class="fb-top">
+            <div>
+              <h3>Wat klanten schrijven</h3>
+              <div class="b-sub" style="margin-bottom:0">De opmerkingen die klanten achterlieten bij het aanmaken van hun kaart, nieuwste eerst.</div>
+            </div>
+            <span class="fb-count"><b>${total.toLocaleString('nl-NL')}</b> ${total === 1 ? 'bericht' : 'berichten'}</span>
+          </div>
+          <div class="fb-list">${feedbackList.slice(0, shown).map(fbCardHtml).join('')}</div>
+          ${rest > 0 ? `<button type="button" class="btn btn-ghost fb-more" data-fb-more>Toon ${Math.min(FB_PAGE, rest)} ${rest === 1 ? 'ouder bericht' : 'oudere berichten'}</button>` : ''}
+        </div>`;
+    }
+
+    document.getElementById('surveyFbWrap').addEventListener('click', (e) => {
+      if (e.target.closest('[data-fb-retry]')) { loadFeedback(true); return; }
+      if (e.target.closest('[data-fb-settings]')) { setSvView('satisfaction'); return; }
+      if (e.target.closest('[data-fb-more]')) { fbShown += FB_PAGE; renderFeedback(); }
     });
 
     // ---- Grafiek ----
@@ -6560,6 +6764,7 @@
           card.satisfaction_enabled = c.satisfaction_enabled === true;
           card.satisfaction_website_enabled = c.satisfaction_website_enabled === true;
           card.website_url = c.website_url ?? card.website_url ?? '';
+          card.feedback_enabled = c.feedback_enabled === true;
 
           const s = data.stats || {};
           document.getElementById('statCustomers').textContent = s.total_customers ?? s.customers ?? 0;
