@@ -765,6 +765,54 @@
       .sv-sum-cell:last-child { grid-column: 1 / -1; }
     }
 
+    /* ---------- Klanttevredenheid ---------- */
+    .sat-score { display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+      padding: 20px 22px; border-radius: 14px; border: 1px solid var(--border);
+      background: rgba(var(--ink), .022); margin-top: 20px; }
+    .sat-big { display: flex; align-items: baseline; gap: 4px; font-size: 44px; font-weight: 600;
+      letter-spacing: -.04em; line-height: 1; color: var(--text-strong); }
+    .sat-big small { font-size: 17px; font-weight: 500; color: var(--muted); letter-spacing: 0; }
+    .sat-big.good { color: #34d399; }
+    .sat-big.ok { color: var(--accent-2); }
+    .sat-big.low { color: #e0b98f; }
+    .sat-meta { flex: 1; min-width: 190px; }
+    .sat-meta-lbl { font-size: 13.5px; color: var(--pearl); }
+    .sat-meta-sub { font-size: 12.5px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+    .sat-dist { display: grid; gap: 5px; margin-top: 18px; }
+    .sat-row { display: grid; grid-template-columns: 22px 1fr 44px; align-items: center; gap: 11px; }
+    .sat-row .sd-n { font-size: 12px; font-weight: 600; color: var(--muted); text-align: right; }
+    .sat-row .sd-bar { height: 7px; border-radius: 999px; background: rgba(var(--ink), .06); overflow: hidden; }
+    .sat-row .sd-bar span { display: block; height: 100%; border-radius: 999px; background: var(--accent-grad);
+      transition: width .5s var(--ease); }
+    .sat-row .sd-c { font-size: 12px; color: var(--muted); text-align: right; }
+    .sat-row.top .sd-n { color: var(--text-strong); }
+
+    /* Website-badge */
+    .sat-sub { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--border); }
+    .sat-sub[hidden] { display: none; }
+    .sat-field { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
+    .sat-field .field { flex: 1; min-width: 220px; margin: 0; }
+    .sat-code { position: relative; margin-top: 8px; }
+    .sat-code pre { margin: 0; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border-strong);
+      background: rgba(var(--ink), .04); font-family: ui-monospace, Menlo, Consolas, monospace;
+      font-size: 12px; line-height: 1.6; color: var(--pearl); overflow-x: auto; white-space: pre-wrap;
+      overflow-wrap: anywhere; max-height: 180px; overflow-y: auto; }
+    .sat-link { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+    .sat-link code { flex: 1; min-width: 200px; font-family: ui-monospace, Menlo, Consolas, monospace;
+      font-size: 12.5px; color: var(--pearl); background: rgba(var(--ink), .04);
+      border: 1px solid var(--border); border-radius: 10px; padding: 10px 13px; overflow-wrap: anywhere; }
+    .sat-prev { margin-top: 8px; border-radius: 14px; border: 1px solid var(--border);
+      background: rgba(var(--ink), .02); padding: 16px; display: flex; justify-content: center; }
+    .sat-prev iframe { width: 100%; max-width: 320px; height: 132px; border: 0; display: block; }
+    .sat-lbl { font-size: 12.5px; font-weight: 500; color: var(--pearl); margin: 18px 0 2px; }
+    .sat-hint { font-size: 12.5px; color: var(--muted); line-height: 1.55; margin-top: 6px; }
+    .sat-note { display: flex; align-items: flex-start; gap: 9px; margin-top: 16px; padding: 12px 14px;
+      border-radius: 11px; background: var(--accent-soft); border: 1px solid rgba(139,92,246,.2);
+      font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+    .sat-note svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 2px; color: var(--accent-2); }
+    .sat-note strong { color: var(--pearl); font-weight: 600; }
+    .sat-off { opacity: .5; pointer-events: none; }
+
     /* Upgrade-scherm */
     .sv-lock { text-align: center; padding: 40px 26px 36px; max-width: 460px; margin: 0 auto; }
     .sv-lock .sv-lock-ic { width: 54px; height: 54px; margin: 0 auto 20px; border-radius: 16px; display: grid; place-items: center;
@@ -2147,12 +2195,14 @@
           <div class="seg sv-seg" id="svViewSeg" hidden>
             <button type="button" class="active" data-sv-view="builder">Vragen samenstellen</button>
             <button type="button" data-sv-view="results">Resultaten</button>
+            <button type="button" data-sv-view="satisfaction">Tevredenheid</button>
           </div>
 
           <div id="surveyWrap">
             <div class="block glass"><div class="loader"><span class="spinner"></span> Enquête laden…</div></div>
           </div>
           <div id="surveyStatsWrap" hidden></div>
+          <div id="surveySatWrap" hidden></div>
         </section>
 
         <!-- ===== Mijn Abonnement ===== -->
@@ -2597,6 +2647,9 @@
       outline_width: 2.5,
       // Klantinzichten (premium): worden alleen gesteld als de winkelier ze aanzet.
       demographics_enabled: false,
+      satisfaction_enabled: false,
+      satisfaction_website_enabled: false,
+      website_url: '',
       ask_occupation: true,
       ask_city: true,
     };
@@ -5860,14 +5913,21 @@
       if (seg) seg.hidden = !on;
     }
     function setSvView(view) {
-      svView = view === 'results' ? 'results' : 'builder';
+      svView = (view === 'results' || view === 'satisfaction') ? view : 'builder';
       document.querySelectorAll('#svViewSeg button').forEach(b =>
         b.classList.toggle('active', b.dataset.svView === svView));
       const b = document.getElementById('surveyWrap');
       const r = document.getElementById('surveyStatsWrap');
+      const t = document.getElementById('surveySatWrap');
       if (b) b.hidden = svView !== 'builder';
       if (r) r.hidden = svView !== 'results';
+      if (t) t.hidden = svView !== 'satisfaction';
       if (svView === 'results') loadSurveyStats();
+      // De instelling staat er altijd; de cijfers halen we alleen op als de meting aanstaat.
+      if (svView === 'satisfaction') {
+        if (card.satisfaction_enabled || card.satisfaction_website_enabled) loadSatisfaction();
+        else renderSatisfaction();
+      }
     }
     document.getElementById('svViewSeg').addEventListener('click', (e) => {
       const btn = e.target.closest('[data-sv-view]');
@@ -6056,6 +6116,305 @@
       }
     });
 
+    // ============================================================
+    //  Klanttevredenheid (Premium Plus)
+    // ============================================================
+    const SAT_MIN_REVIEWS = 10;        // onder dit aantal toont de badge zich niet
+    let satData = null;
+    let satLoaded = false;
+    let satBusy = false;
+
+    const SAT_STAR_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>';
+    const SAT_INFO_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>';
+
+    // Veldnamen verschillen per backend; alles wat hetzelfde betekent herkennen.
+    function normalizeSatisfaction(raw) {
+      const d = (raw && (raw.satisfaction || raw.data)) || raw || {};
+      const num = v => { const n = Number(v); return Number.isFinite(n) ? n : null; };
+      const avg = num(d.average ?? d.avg ?? d.gemiddelde ?? d.score ?? d.rating);
+      const count = num(d.count ?? d.total ?? d.aantal ?? d.responses ?? d.ratings ?? 0) || 0;
+
+      // Verdeling kan een object ({"9": 12}) of een lijst ([{score, count}]) zijn.
+      const rawDist = d.distribution ?? d.verdeling ?? d.breakdown ?? d.scores ?? null;
+      const dist = {};
+      if (Array.isArray(rawDist)) {
+        rawDist.forEach(r => {
+          const sc = num(r && (r.score ?? r.rating ?? r.value ?? r.cijfer));
+          if (sc !== null) dist[sc] = (dist[sc] || 0) + (num(r.count ?? r.aantal ?? r.total) || 0);
+        });
+      } else if (rawDist && typeof rawDist === 'object') {
+        Object.keys(rawDist).forEach(k => {
+          const sc = num(k);
+          if (sc !== null) dist[sc] = num(rawDist[k]) || 0;
+        });
+      }
+
+      // Zichtbaarheid van de badge: de backend beslist, anders zelf de drempel toepassen.
+      const minReviews = num(d.min_reviews ?? d.minimum_reviews ?? d.threshold) || SAT_MIN_REVIEWS;
+      const visibleRaw = d.badge_visible ?? d.visible ?? d.is_visible ?? d.badge_active ?? null;
+
+      return {
+        averageText: String(d.average_text ?? d.averageText ?? (avg === null ? '' : avg.toFixed(1).replace('.', ','))).trim(),
+        average: avg,
+        count: count,
+        distribution: dist,
+        embedCode: String(d.embed_code ?? d.embedCode ?? '').trim(),
+        embedUrl: String(d.embed_url ?? d.embedUrl ?? '').trim(),
+        shareUrl: String(d.share_url ?? d.shareUrl ?? '').trim(),
+        minReviews: minReviews,
+        badgeVisible: visibleRaw === null ? (count >= minReviews) : visibleRaw === true,
+      };
+    }
+
+    async function loadSatisfaction(force) {
+      if (!cardId) { satData = null; satLoaded = true; renderSatisfaction(); return; }
+      if (satLoaded && !force) { renderSatisfaction(); return; }
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/satisfaction/' + encodeURIComponent(cardId),
+          { headers: authHeaders() });
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 403) {
+          surveyAccess = 'no'; satLoaded = true;
+          applySurveyLockIcon(); renderSurveyLock();
+          return;
+        }
+        satData = res.ok ? normalizeSatisfaction(data) : null;
+        satLoaded = true;
+      } catch (err) {
+        satData = null; satLoaded = true;   // zonder cijfers blijft de instelling wél bruikbaar
+      }
+      renderSatisfaction();
+    }
+
+    // Het paneel wordt na elke wijziging opnieuw opgebouwd; meldingen worden daarom
+    // apart bewaard en na het hertekenen teruggezet.
+    const satNotes = {};
+    function applySatNote(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const n = satNotes[id];
+      el.textContent = n ? n.msg : '';
+      el.className = 'save-note' + (n && n.kind ? ' ' + n.kind : '');
+      if (n && n.kind === 'ok') setTimeout(() => {
+        if (satNotes[id] === n) { satNotes[id] = null; applySatNote(id); }
+      }, 4000);
+    }
+    function satNote(id, msg, kind) {
+      satNotes[id] = msg ? { msg: msg, kind: kind || '' } : null;
+      applySatNote(id);
+    }
+
+    // Het cijferblok: groot gemiddelde, waarop het gebaseerd is en de verdeling 10 → 1.
+    function satScoreHtml(d) {
+      if (!d || !d.count) {
+        return `<div class="sat-score">
+            <div class="sat-big">—</div>
+            <div class="sat-meta">
+              <div class="sat-meta-lbl">Nog geen beoordelingen</div>
+              <div class="sat-meta-sub">Zodra klanten een cijfer geven zie je hier het gemiddelde.</div>
+            </div>
+          </div>`;
+      }
+      const avg = d.average;
+      const tone = avg === null ? '' : (avg >= 9 ? ' good' : (avg >= 7 ? ' ok' : ' low'));
+      const text = d.averageText || (avg === null ? '—' : String(avg).replace('.', ','));
+      const max = Math.max(1, ...Object.values(d.distribution));
+      const rows = [];
+      for (let n = 10; n >= 1; n--) {
+        const c = Number(d.distribution[n]) || 0;
+        const w = Math.round((c / max) * 100);
+        rows.push(`<div class="sat-row${c === max && c > 0 ? ' top' : ''}">
+            <span class="sd-n">${n}</span>
+            <span class="sd-bar">${c > 0 ? '<span style="width:' + Math.max(3, w) + '%"></span>' : ''}</span>
+            <span class="sd-c">${c.toLocaleString('nl-NL')}</span>
+          </div>`);
+      }
+      const hasDist = Object.keys(d.distribution).length > 0;
+      return `<div class="sat-score">
+          <div class="sat-big${tone}">${escapeHtml(text)}<small>/ 10</small></div>
+          <div class="sat-meta">
+            <div class="sat-meta-lbl">Gemiddeld: <strong>${escapeHtml(text)}</strong> op basis van ${d.count.toLocaleString('nl-NL')} ${d.count === 1 ? 'klant' : 'klanten'}</div>
+            <div class="sat-meta-sub">Klanten beoordelen service, sfeer en product met een cijfer van 1 tot 10.</div>
+          </div>
+        </div>
+        ${hasDist ? '<div class="sat-dist">' + rows.join('') + '</div>' : ''}`;
+    }
+
+    function satBadgeHtml(d) {
+      const url = card.website_url || '';
+      const code = d && d.embedCode ? d.embedCode : '';
+      const share = d && d.shareUrl ? d.shareUrl : '';
+      const embed = d && d.embedUrl ? d.embedUrl : '';
+      const count = d ? d.count : 0;
+      const min = d ? d.minReviews : SAT_MIN_REVIEWS;
+      const left = Math.max(0, min - count);
+
+      const threshold = `<div class="sat-note">${SAT_INFO_SVG}<span>` +
+        (left > 0
+          ? `De badge verschijnt pas bij minimaal <strong>${min} beoordelingen</strong> — dat houdt het cijfer betrouwbaar. Nog <strong>${left}</strong> te gaan.`
+          : `Je hebt <strong>${count} beoordelingen</strong>; de badge is zichtbaar op je website.`) +
+        '</span></div>';
+
+      return `<div class="sat-field">
+          <div class="field">
+            <label for="satWebsite">Jouw website</label>
+            <input type="text" id="satWebsite" placeholder="https://jouwzaak.nl" value="${escapeHtml(url)}" />
+          </div>
+          <button type="button" class="btn btn-primary" id="satUrlBtn"><span class="btn-label">Opslaan</span></button>
+        </div>
+        <div class="save-note" id="satUrlNote" style="margin-top:8px"></div>
+
+        ${code ? `<div class="sat-lbl">Code voor je website</div>
+        <div class="sat-hint">Plak deze code op je website waar je het keurmerk wilt tonen. Of deel de link hieronder.</div>
+        <div class="sat-code"><pre id="satEmbedCode">${escapeHtml(code)}</pre></div>
+        <div style="margin-top:10px"><button type="button" class="btn btn-ghost" id="satCopyCode"><span class="btn-label">Kopieer code</span></button></div>` : ''}
+
+        ${share ? `<div class="sat-lbl">Deelbare link</div>
+        <div class="sat-link">
+          <code id="satShareUrl">${escapeHtml(share)}</code>
+          <button type="button" class="btn btn-ghost" id="satCopyLink"><span class="btn-label">Kopieer link</span></button>
+        </div>` : ''}
+
+        ${embed ? `<div class="sat-lbl">Zo ziet het eruit</div>
+        <div class="sat-prev"><iframe src="${escapeHtml(embed)}" title="Voorbeeld van de tevredenheidsbadge" loading="lazy"></iframe></div>` : ''}
+
+        ${threshold}`;
+    }
+
+    function renderSatisfaction() {
+      const wrap = document.getElementById('surveySatWrap');
+      if (!wrap) return;
+      const on = !!card.satisfaction_enabled;
+      const webOn = !!card.satisfaction_website_enabled;
+      const d = satData;
+
+      wrap.innerHTML = `<div class="block glass">
+          <h3>Klanttevredenheid meten</h3>
+          <p class="b-sub">Weet wat je klanten van je zaak vinden, zonder ze apart te hoeven vragen.</p>
+
+          <div class="switch-row">
+            <span class="switch-tx">
+              <strong>Tevredenheidsvraag in enquête</strong>
+              <small>Klanten geven bij het aanmaken van hun kaart een cijfer (1-10) voor service, sfeer en product.</small>
+            </span>
+            <input type="checkbox" class="switch" id="satEnabled" ${on ? 'checked' : ''} />
+          </div>
+          <div class="save-note" id="satNote" style="margin-top:12px"></div>
+
+          ${on ? satScoreHtml(d) : ''}
+        </div>
+
+        <div class="block glass" style="margin-top:20px">
+          <h3>Website badge</h3>
+          <p class="b-sub">Laat je cijfer zien op je eigen site — nieuwe klanten zien meteen wat anderen van je vinden.</p>
+
+          <div class="${on ? '' : 'sat-off'}">
+            <div class="switch-row">
+              <span class="switch-tx">
+                <strong>Toon klanttevredenheid op mijn website</strong>
+                <small>Je krijgt een stukje code en een deelbare link met je actuele cijfer.</small>
+              </span>
+              <input type="checkbox" class="switch" id="satWebEnabled" ${webOn ? 'checked' : ''} ${on ? '' : 'disabled'} />
+            </div>
+          </div>
+          ${on ? '' : '<div class="sat-hint">Zet eerst de tevredenheidsvraag hierboven aan; zonder cijfers valt er niets te tonen.</div>'}
+          <div class="save-note" id="satWebNote" style="margin-top:12px"></div>
+
+          <div class="sat-sub" ${on && webOn ? '' : 'hidden'}>${satBadgeHtml(d)}</div>
+        </div>`;
+
+      ['satNote', 'satWebNote', 'satUrlNote'].forEach(applySatNote);
+    }
+
+    // ---- Opslaan ----
+    // Alleen de tevredenheidsvelden meesturen; de kaartopmaak blijft onaangeroerd.
+    async function saveSatisfactionField(field, value, noteId, labels) {
+      if (satBusy) return false;
+      if (!cardId) { satNote(noteId, 'Geen stempelkaart gevonden. Log opnieuw in.', 'error'); return false; }
+      satBusy = true;
+      satNote(noteId, 'Opslaan…', '');
+      try {
+        const payload = {};
+        payload[field] = value;
+        const res = await fetch(API_BASE + '/api/stamp/cards/' + encodeURIComponent(cardId), {
+          method: 'PUT',
+          headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 403) {
+          surveyAccess = 'no'; applySurveyLockIcon(); renderSurveyLock(); return false;
+        }
+        if (!res.ok) throw new Error(data.error || data.message || 'Opslaan mislukt');
+        satNote(noteId, labels && labels.ok ? labels.ok : 'Opgeslagen ✓', 'ok');
+        return true;
+      } catch (err) {
+        satNote(noteId, isNetworkError(err) ? NET_MSG : ('Kon niet opslaan: ' + (err.message || 'onbekende fout')), 'error');
+        return false;
+      } finally {
+        satBusy = false;
+      }
+    }
+
+    document.getElementById('surveySatWrap').addEventListener('change', async (e) => {
+      const el = e.target;
+      if (el.id === 'satEnabled') {
+        const want = el.checked;
+        el.disabled = true;
+        const ok = await saveSatisfactionField('satisfaction_enabled', want, 'satNote',
+          { ok: want ? 'Tevredenheidsvraag aangezet ✓' : 'Tevredenheidsvraag uitgezet ✓' });
+        el.disabled = false;
+        if (!ok) { el.checked = !want; return; }
+        card.satisfaction_enabled = want;
+        // Cijfers pas ophalen wanneer de meting daadwerkelijk aanstaat.
+        if (want && !satLoaded) { await loadSatisfaction(true); return; }
+        renderSatisfaction();
+        return;
+      }
+      if (el.id === 'satWebEnabled') {
+        const want = el.checked;
+        el.disabled = true;
+        const ok = await saveSatisfactionField('satisfaction_website_enabled', want, 'satWebNote',
+          { ok: want ? 'Badge aangezet ✓' : 'Badge uitgezet ✓' });
+        el.disabled = false;
+        if (!ok) { el.checked = !want; return; }
+        card.satisfaction_website_enabled = want;
+        if (want && !satLoaded) { await loadSatisfaction(true); return; }
+        renderSatisfaction();
+      }
+    });
+
+    document.getElementById('surveySatWrap').addEventListener('click', async (e) => {
+      const urlBtn = e.target.closest('#satUrlBtn');
+      if (urlBtn) {
+        const input = document.getElementById('satWebsite');
+        let url = (input.value || '').trim();
+        if (!url) { satNote('satUrlNote', 'Vul het adres van je website in.', 'error'); input.focus(); return; }
+        // Zonder protocol werkt de link nergens; https:// is de veilige aanname.
+        if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+        if (!/^https?:\/\/[^\s.]+\.[^\s]{2,}$/i.test(url)) {
+          satNote('satUrlNote', 'Dit lijkt geen geldig webadres.', 'error'); input.focus(); return;
+        }
+        input.value = url;
+        urlBtn.disabled = true;
+        const ok = await saveSatisfactionField('website_url', url, 'satUrlNote', { ok: 'Website opgeslagen ✓' });
+        urlBtn.disabled = false;
+        if (ok) card.website_url = url;
+        return;
+      }
+      const codeBtn = e.target.closest('#satCopyCode');
+      if (codeBtn) {
+        const pre = document.getElementById('satEmbedCode');
+        if (pre) copyToClipboard(pre.textContent, codeBtn, 'Code gekopieerd ✓');
+        return;
+      }
+      const linkBtn = e.target.closest('#satCopyLink');
+      if (linkBtn) {
+        const code = document.getElementById('satShareUrl');
+        if (code) copyToClipboard(code.textContent, linkBtn, 'Link gekopieerd ✓');
+      }
+    });
+
     // ---- Grafiek ----
     let currentRange = 'day';
     let chartData = { day: [], week: [] };
@@ -6198,6 +6557,9 @@
           card.demographics_enabled = c.demographics_enabled === true;
           card.ask_occupation = c.ask_occupation !== false;
           card.ask_city = c.ask_city !== false;
+          card.satisfaction_enabled = c.satisfaction_enabled === true;
+          card.satisfaction_website_enabled = c.satisfaction_website_enabled === true;
+          card.website_url = c.website_url ?? card.website_url ?? '';
 
           const s = data.stats || {};
           document.getElementById('statCustomers').textContent = s.total_customers ?? s.customers ?? 0;
