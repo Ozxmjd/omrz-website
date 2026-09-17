@@ -700,6 +700,11 @@
     .sv-add { margin-top: 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
     .sv-add .sv-hint { font-size: 12.5px; color: var(--muted); }
 
+    /* Introductietekst boven de vragen */
+    .sv-intro-foot { display: flex; justify-content: flex-end; margin-top: 7px; }
+    .sv-intro-count { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .sv-intro-count.near { color: #e0b98f; }
+
     /* Voorbeeldvragen */
     .sv-sugg { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
     .sv-sugg-card { display: flex; flex-direction: column; gap: 10px; padding: 16px 17px; border-radius: 14px;
@@ -2676,6 +2681,7 @@
       satisfaction_website_enabled: false,
       website_url: '',
       feedback_enabled: false,
+      survey_intro_text: '',
       ask_occupation: true,
       ask_city: true,
     };
@@ -5544,6 +5550,9 @@
     // ============================================================
     const SURVEY_MAX = 10;             // backend-limiet: maximaal 10 vragen
     const SURVEY_MAX_OPTIONS = 10;
+    const SURVEY_INTRO_MAX = 300;      // backend-limiet op de introductietekst
+    // Wat de klant te zien krijgt zolang de winkelier zelf niets invult.
+    const SURVEY_INTRO_DEFAULT = 'Nog een paar korte vragen — optioneel, het helpt ons je een betere ervaring te geven';
     let surveyQuestions = [];
     let surveyLoaded = false;
     let surveyAccess = 'unknown';      // unknown | yes | no  (de backend is leidend)
@@ -5708,7 +5717,23 @@
           </div>`;
       }).join('');
 
+      const intro = String(card.survey_intro_text || '');
       wrap.innerHTML = `<div class="block glass">
+          <h3>Introductietekst</h3>
+          <p class="b-sub">Deze tekst zien klanten boven de vragen. Laat leeg voor de standaardtekst.</p>
+          <div class="field">
+            <label for="svIntro">Welkomsttekst enquête</label>
+            <textarea id="svIntro" rows="3" maxlength="${SURVEY_INTRO_MAX}"
+              placeholder="${escapeHtml(SURVEY_INTRO_DEFAULT)}">${escapeHtml(intro)}</textarea>
+            <div class="sv-intro-foot"><span class="sv-intro-count" id="svIntroCount"></span></div>
+          </div>
+          <div class="save-row">
+            <button type="button" class="btn btn-primary" id="svIntroBtn"><span class="btn-label">Opslaan</span></button>
+            <span class="save-note" id="svIntroNote"></span>
+          </div>
+        </div>
+
+        <div class="block glass" style="margin-top:20px">
           <div class="sv-top">
             <div>
               <h3>Jouw enquête</h3>
@@ -5731,9 +5756,39 @@
           <p>Geen inspiratie? Voeg een kant-en-klare vraag toe met één klik en pas hem daarna aan.</p>
         </div>
         <div class="block glass"><div class="sv-sugg">${sugg}</div></div>`;
+
+      updateIntroCount();
+      applySatNote('svIntroNote');
     }
 
+    // "120 / 300" — en een waarschuwingskleur zodra de ruimte opraakt.
+    function updateIntroCount() {
+      const ta = document.getElementById('svIntro');
+      const el = document.getElementById('svIntroCount');
+      if (!ta || !el) return;
+      const n = ta.value.length;
+      el.textContent = n + ' / ' + SURVEY_INTRO_MAX;
+      el.classList.toggle('near', n >= SURVEY_INTRO_MAX - 20);
+    }
+
+    // Alleen dit veld meesturen; de rest van de kaart blijft onaangeroerd.
+    async function saveSurveyIntro(btn) {
+      const ta = document.getElementById('svIntro');
+      if (!ta) return;
+      const value = ta.value.trim().slice(0, SURVEY_INTRO_MAX);
+      if (btn) btn.disabled = true;
+      const ok = await saveCardField('survey_intro_text', value, 'svIntroNote',
+        { ok: value ? 'Introductietekst opgeslagen ✓' : 'Standaardtekst wordt weer gebruikt ✓' });
+      if (btn) btn.disabled = false;
+      if (ok) { card.survey_intro_text = value; ta.value = value; updateIntroCount(); }
+    }
+
+    document.getElementById('surveyWrap').addEventListener('input', (e) => {
+      if (e.target && e.target.id === 'svIntro') updateIntroCount();
+    });
     document.getElementById('surveyWrap').addEventListener('click', (e) => {
+      const introBtn = e.target.closest('#svIntroBtn');
+      if (introBtn) { saveSurveyIntro(introBtn); return; }
       if (e.target.closest('[data-open-sub]')) { openSubModal(); return; }
       if (e.target.closest('[data-sv-retry]')) { loadSurvey(true); return; }
       if (e.target.closest('[data-sv-add]')) { openSvModal(null); return; }
@@ -6376,7 +6431,7 @@
 
     // ---- Opslaan ----
     // Alleen de tevredenheidsvelden meesturen; de kaartopmaak blijft onaangeroerd.
-    async function saveSatisfactionField(field, value, noteId, labels) {
+    async function saveCardField(field, value, noteId, labels) {
       if (satBusy) return false;
       if (!cardId) { satNote(noteId, 'Geen stempelkaart gevonden. Log opnieuw in.', 'error'); return false; }
       satBusy = true;
@@ -6409,7 +6464,7 @@
       if (el.id === 'satEnabled') {
         const want = el.checked;
         el.disabled = true;
-        const ok = await saveSatisfactionField('satisfaction_enabled', want, 'satNote',
+        const ok = await saveCardField('satisfaction_enabled', want, 'satNote',
           { ok: want ? 'Tevredenheidsvraag aangezet ✓' : 'Tevredenheidsvraag uitgezet ✓' });
         el.disabled = false;
         if (!ok) { el.checked = !want; return; }
@@ -6422,7 +6477,7 @@
       if (el.id === 'satWebEnabled') {
         const want = el.checked;
         el.disabled = true;
-        const ok = await saveSatisfactionField('satisfaction_website_enabled', want, 'satWebNote',
+        const ok = await saveCardField('satisfaction_website_enabled', want, 'satWebNote',
           { ok: want ? 'Badge aangezet ✓' : 'Badge uitgezet ✓' });
         el.disabled = false;
         if (!ok) { el.checked = !want; return; }
@@ -6434,7 +6489,7 @@
       if (el.id === 'satFeedback') {
         const want = el.checked;
         el.disabled = true;
-        const ok = await saveSatisfactionField('feedback_enabled', want, 'satFbNote',
+        const ok = await saveCardField('feedback_enabled', want, 'satFbNote',
           { ok: want ? 'Feedback verzamelen aangezet ✓' : 'Feedback verzamelen uitgezet ✓' });
         el.disabled = false;
         if (!ok) { el.checked = !want; return; }
@@ -6458,7 +6513,7 @@
         }
         input.value = url;
         urlBtn.disabled = true;
-        const ok = await saveSatisfactionField('website_url', url, 'satUrlNote', { ok: 'Website opgeslagen ✓' });
+        const ok = await saveCardField('website_url', url, 'satUrlNote', { ok: 'Website opgeslagen ✓' });
         urlBtn.disabled = false;
         if (ok) card.website_url = url;
         return;
@@ -6765,6 +6820,7 @@
           card.satisfaction_website_enabled = c.satisfaction_website_enabled === true;
           card.website_url = c.website_url ?? card.website_url ?? '';
           card.feedback_enabled = c.feedback_enabled === true;
+          card.survey_intro_text = String(c.survey_intro_text ?? card.survey_intro_text ?? '');
 
           const s = data.stats || {};
           document.getElementById('statCustomers').textContent = s.total_customers ?? s.customers ?? 0;
