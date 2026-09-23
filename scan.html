@@ -289,6 +289,31 @@
         .cust-name { font-size: 27px; font-weight: 600; letter-spacing: -.035em; color: var(--text-strong); margin-bottom: 7px; }
         .cust-meta { font-size: 15px; color: var(--muted); margin-bottom: 28px; line-height: 1.55; }
 
+        /* ===== VIP-status =====
+           De medewerker moet in één oogopslag zien of er korting af moet. */
+        .vip-box { display: flex; align-items: center; gap: 14px; max-width: 480px; margin: 0 auto 22px;
+            padding: 15px 18px; border-radius: 16px; text-align: left;
+            border: 1px solid rgba(139,92,246,.42); background: linear-gradient(135deg, rgba(99,102,241,.16), rgba(139,92,246,.1));
+            box-shadow: 0 10px 30px rgba(99,102,241,.16); }
+        .vip-box .vb-ic { width: 42px; height: 42px; flex: none; border-radius: 13px; display: grid; place-items: center;
+            background: var(--accent-grad); color: #fff; box-shadow: 0 6px 18px rgba(99,102,241,.34); }
+        .vip-box .vb-ic svg { width: 21px; height: 21px; }
+        .vip-box .vb-tx { flex: 1; min-width: 0; }
+        /* Spans in een flex-kind blijven inline; blokken maken zodat naam en punten onder elkaar staan. */
+        .vip-box .vb-tier, .vip-box .vb-pts { display: block; }
+        .vip-box .vb-tier { font-size: 17px; font-weight: 600; letter-spacing: -.02em; color: #fff;
+            text-transform: uppercase; }
+        .vip-box .vb-pts { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+        .vip-box .vb-pts b { color: var(--pearl, #d4d4dd); font-weight: 600; }
+        .vip-box .vb-disc { flex: none; text-align: right; }
+        .vip-box .vb-disc span { display: block; font-size: 27px; font-weight: 600; letter-spacing: -.035em;
+            line-height: 1; color: #fff; font-variant-numeric: tabular-nums; }
+        .vip-box .vb-disc small { display: block; font-size: 11px; font-weight: 500; color: var(--muted);
+            margin-top: 4px; text-transform: uppercase; letter-spacing: .06em; }
+        /* Nog geen status: alleen een rustige voortgangsregel. */
+        .vip-next { max-width: 480px; margin: -6px auto 20px; font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+        .vip-next b { color: var(--text-strong); font-weight: 600; }
+
         /* Voortgang: balk met de huidige stand plus (groen) wat er nu bij komt. */
         .prog { position: relative; height: 8px; border-radius: 99px; background: rgba(var(--ink), .06);
             max-width: 480px; margin: 0 auto 22px; overflow: hidden; }
@@ -490,6 +515,8 @@
                         <div class="cust-avatar" id="custAvatar">?</div>
                         <div class="cust-name" id="custName">Klant</div>
                         <div class="cust-meta" id="custMeta"></div>
+                        <div class="vip-box" id="custVip" style="display:none;"></div>
+                        <div class="vip-next" id="custVipNext" style="display:none;"></div>
                         <div class="prog"><i class="prog-have" id="progHave"></i><i class="prog-add" id="progAdd"></i></div>
                         <div class="circles" id="circles"></div>
 
@@ -1027,6 +1054,8 @@
                 : '';
 
             // Volle kaart (reward_available OF stand ≥ vereist) → uitreiken tonen i.p.v. stempel geven.
+            renderVip();
+
             if (isCardFull()) {
                 $('custMeta').textContent = 'Kaart is vol — ' + col + ' van ' + (req || col) + ' stempels' + rewards;
                 renderCircles(col, req, 0);
@@ -1043,6 +1072,74 @@
             $('rewardControls').style.display = 'none';
             amount = 1;                              // elke klant start op 1
             updateGiveButton();                      // vult teller, bolletjes, balk en knopteksten
+        }
+
+        // ===== VIP-status =====
+        // De backend stuurt dit alleen mee als loyaliteit aanstaat; ontbreekt het, dan tonen we niets.
+        const VIP_CROWN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l4.5 3L12 4l4.5 6L21 7l-2 11H5z"/><path d="M5 21h14"/></svg>';
+
+        // Een tier kan een tekst zijn ("Gold") of een object ({ name, discount_percent }).
+        function tierName(v) {
+            if (!v) return '';
+            if (typeof v === 'string') return v.trim();
+            return String(v.name ?? v.tier_name ?? v.title ?? '').trim();
+        }
+        function tierDiscount(v) {
+            if (!v || typeof v === 'string') return null;
+            const n = Number(v.discount_percent ?? v.discount ?? v.percentage);
+            return Number.isFinite(n) ? n : null;
+        }
+        function loyaltyOf(raw) {
+            const d = raw || {};
+            const num = v => { const n = Number(v); return Number.isFinite(n) ? n : null; };
+            const cur = d.current_tier ?? d.tier ?? null;
+            const name = tierName(cur) || String(d.tier_name ?? '').trim();
+            const disc = num(d.discount_percent ?? d.discount) ?? tierDiscount(cur);
+            const next = d.next_tier ?? null;
+            return {
+                name: name,
+                discount: disc === null ? null : Math.round(disc),
+                points: num(d.lifetime_points ?? d.total_points ?? d.points ?? d.loyalty_points),
+                nextName: tierName(next),
+                toNext: num(d.points_to_next ?? d.points_until_next ?? d.points_to_next_tier),
+            };
+        }
+        const puntenTxt = n => n + ' ' + (n === 1 ? 'punt' : 'punten');
+
+        function renderVip() {
+            const box = $('custVip'), next = $('custVipNext');
+            if (!box || !next) return;
+            const l = loyaltyOf(current);
+
+            // Status én korting: dit is wat de medewerker moet toepassen.
+            if (l.name) {
+                box.innerHTML = '<span class="vb-ic">' + VIP_CROWN + '</span>' +
+                    '<span class="vb-tx">' +
+                        '<span class="vb-tier">' + esc(l.name) + '</span>' +
+                        (l.points !== null ? '<span class="vb-pts">Totaal gespaard: <b>' + esc(puntenTxt(l.points)) + '</b></span>' : '') +
+                    '</span>' +
+                    (l.discount !== null && l.discount > 0
+                        ? '<span class="vb-disc"><span>' + l.discount + '%</span><small>korting</small></span>' : '');
+                box.style.display = 'flex';
+                // Ook met een status kan er een volgend niveau zijn.
+                if (l.nextName && l.toNext !== null && l.toNext > 0) {
+                    next.innerHTML = 'Nog <b>' + esc(puntenTxt(l.toNext)) + '</b> tot ' + esc(l.nextName) + '.';
+                    next.style.display = 'block';
+                } else { next.style.display = 'none'; next.innerHTML = ''; }
+                return;
+            }
+
+            box.style.display = 'none'; box.innerHTML = '';
+
+            // Nog geen status, maar er valt wel iets te sparen → rustige voortgangsregel.
+            if (l.points !== null && (l.nextName || l.points > 0)) {
+                next.innerHTML = 'Totaal: <b>' + esc(puntenTxt(l.points)) + '</b>'
+                    + (l.nextName && l.toNext !== null && l.toNext > 0
+                        ? ' — nog <b>' + esc(puntenTxt(l.toNext)) + '</b> tot ' + esc(l.nextName) : '');
+                next.style.display = 'block';
+                return;
+            }
+            next.style.display = 'none'; next.innerHTML = '';
         }
 
         // Bolletjes: gevuld (accent) + wat er nu bij komt (groen) + leeg. Nooit méér dan het kaartdoel.

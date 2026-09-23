@@ -721,6 +721,32 @@
     .sv-modal-foot { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 22px;
       padding-top: 18px; border-top: 1px solid var(--border); }
 
+    /* ---------- VIP-status bij het scannen ---------- */
+    /* De medewerker moet in één oogopslag zien of er korting af moet. */
+    .vip-box { display: flex; align-items: center; gap: 14px; margin: 0 0 18px; padding: 15px 17px;
+      border-radius: 15px; text-align: left; border: 1px solid rgba(139,92,246,.42);
+      background: linear-gradient(135deg, rgba(99,102,241,.14), rgba(139,92,246,.09));
+      box-shadow: 0 8px 26px rgba(99,102,241,.14); }
+    .vip-box[hidden] { display: none; }
+    .vip-box .vb-ic { width: 40px; height: 40px; flex: none; border-radius: 13px; display: grid; place-items: center;
+      background: var(--accent-grad); color: #fff; box-shadow: 0 6px 18px rgba(99,102,241,.3); }
+    .vip-box .vb-ic svg { width: 20px; height: 20px; }
+    .vip-box .vb-tx { flex: 1; min-width: 0; }
+    /* Spans in een flex-kind blijven inline; blokken maken zodat naam en punten onder elkaar staan. */
+    .vip-box .vb-tier, .vip-box .vb-pts { display: block; }
+    .vip-box .vb-tier { font-size: 16px; font-weight: 600; letter-spacing: -.02em; color: var(--text-strong);
+      text-transform: uppercase; }
+    .vip-box .vb-pts { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+    .vip-box .vb-pts b { color: var(--pearl); font-weight: 600; }
+    .vip-box .vb-disc { flex: none; text-align: right; }
+    .vip-box .vb-disc span { display: block; font-size: 25px; font-weight: 600; letter-spacing: -.035em;
+      line-height: 1; color: var(--text-strong); font-variant-numeric: tabular-nums; }
+    .vip-box .vb-disc small { display: block; font-size: 10.5px; font-weight: 500; color: var(--muted);
+      margin-top: 4px; text-transform: uppercase; letter-spacing: .06em; }
+    .vip-next { font-size: 12.5px; color: var(--muted); line-height: 1.55; margin: -6px 0 16px; }
+    .vip-next[hidden] { display: none; }
+    .vip-next b { color: var(--text-strong); font-weight: 600; }
+
     /* ---------- VIP & Loyaliteit ---------- */
     .vip-list { display: grid; gap: 12px; }
     .vip-card { display: flex; align-items: center; gap: 15px; padding: 16px 18px; border-radius: 14px;
@@ -2062,6 +2088,9 @@
             <!-- STAP 2 · Klantkaart + teller -->
             <div class="customer-view" id="customerView" hidden>
               <p class="cust-name" id="custName">Klant</p>
+
+              <div class="vip-box" id="custVip" hidden></div>
+              <div class="vip-next" id="custVipNext" hidden></div>
 
               <div class="stampcard" id="custCard">
                 <div class="sc-top">
@@ -4851,6 +4880,7 @@
     let selectedAmount = 1;        // gekozen aantal toe te voegen stempels
     let newCount = 0;              // stand na toevoegen (uit API-respons)
     let rewardAvailable = false;   // kaart is vol → beloning kan uitgereikt worden (uit lookup)
+    let holderLoyalty = null;      // VIP-status van deze klant (alleen als loyaliteit aanstaat)
 
     const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -4991,6 +5021,8 @@
       // Volle kaart? Uit reward_available (of afgeleid uit de stand).
       rewardAvailable = (h.reward_available ?? h.rewardAvailable ?? h.reward_ready ?? h.is_full ?? false) === true
         || currentStamps >= stampsRequired;
+      // VIP-status: de backend stuurt dit alleen mee als loyaliteit aanstaat.
+      holderLoyalty = readLoyalty(h);
 
       stopScanner();                     // camera verdwijnt in stap 2
       scanStage.classList.remove('found');
@@ -5018,6 +5050,66 @@
       } catch (e) { return null; }
     }
 
+    // ===== VIP-status van de klant =====
+    const VIP_CROWN_MINI = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l4.5 3L12 4l4.5 6L21 7l-2 11H5z"/><path d="M5 21h14"/></svg>';
+
+    // Een tier kan een tekst zijn ("Gold") of een object ({ name, discount_percent }).
+    function loyaltyTierName(v) {
+      if (!v) return '';
+      if (typeof v === 'string') return v.trim();
+      return String(v.name ?? v.tier_name ?? v.title ?? '').trim();
+    }
+    function readLoyalty(raw) {
+      const d = raw || {};
+      const num = v => { const n = Number(v); return Number.isFinite(n) ? n : null; };
+      const cur = d.current_tier ?? d.tier ?? null;
+      const objDisc = (cur && typeof cur === 'object') ? num(cur.discount_percent ?? cur.discount ?? cur.percentage) : null;
+      return {
+        name: loyaltyTierName(cur) || String(d.tier_name ?? '').trim(),
+        discount: num(d.discount_percent ?? d.discount) ?? objDisc,
+        points: num(d.lifetime_points ?? d.total_points ?? d.points ?? d.loyalty_points),
+        nextName: loyaltyTierName(d.next_tier ?? null),
+        toNext: num(d.points_to_next ?? d.points_until_next ?? d.points_to_next_tier),
+      };
+    }
+    const loyaltyPoints = n => n + ' ' + (n === 1 ? 'punt' : 'punten');
+
+    function renderHolderVip() {
+      const box = document.getElementById('custVip');
+      const next = document.getElementById('custVipNext');
+      if (!box || !next) return;
+      const l = holderLoyalty;
+      if (!l) { box.hidden = true; next.hidden = true; return; }
+
+      // Status én korting: dit is wat de medewerker moet toepassen.
+      if (l.name) {
+        const disc = l.discount !== null && l.discount > 0 ? Math.round(l.discount) : null;
+        box.innerHTML = '<span class="vb-ic">' + VIP_CROWN_MINI + '</span>'
+          + '<span class="vb-tx"><span class="vb-tier">' + escapeHtml(l.name) + '</span>'
+          + (l.points !== null ? '<span class="vb-pts">Totaal gespaard: <b>' + escapeHtml(loyaltyPoints(l.points)) + '</b></span>' : '')
+          + '</span>'
+          + (disc !== null ? '<span class="vb-disc"><span>' + disc + '%</span><small>korting</small></span>' : '');
+        box.hidden = false;
+        if (l.nextName && l.toNext !== null && l.toNext > 0) {
+          next.innerHTML = 'Nog <b>' + escapeHtml(loyaltyPoints(l.toNext)) + '</b> tot ' + escapeHtml(l.nextName) + '.';
+          next.hidden = false;
+        } else { next.hidden = true; next.innerHTML = ''; }
+        return;
+      }
+
+      box.hidden = true; box.innerHTML = '';
+
+      // Nog geen status, maar er valt wel iets te sparen → rustige voortgangsregel.
+      if (l.points !== null && (l.nextName || l.points > 0)) {
+        next.innerHTML = 'Totaal: <b>' + escapeHtml(loyaltyPoints(l.points)) + '</b>'
+          + (l.nextName && l.toNext !== null && l.toNext > 0
+            ? ' — nog <b>' + escapeHtml(loyaltyPoints(l.toNext)) + '</b> tot ' + escapeHtml(l.nextName) : '');
+        next.hidden = false;
+        return;
+      }
+      next.hidden = true; next.innerHTML = '';
+    }
+
     // ===== STAP 2 · Klantkaart + teller =====
     function showCustomerView() {
       scanView.hidden = true;
@@ -5033,6 +5125,8 @@
       custTitle.textContent = card.card_title || 'Stempelkaart';
       custReward.textContent =
         `Spaar ${stampsRequired} stempels → ${card.reward_description || 'gratis product'}`;
+
+      renderHolderVip();
 
       custRedeemError.hidden = true;
       const full = rewardAvailable === true || currentStamps >= stampsRequired;
@@ -5247,6 +5341,8 @@
 
     // ===== Navigatie / reset =====
     function resetScanFlow() {
+      holderLoyalty = null;
+      renderHolderVip();               // geen VIP-blok van de vorige klant laten staan
       customerView.hidden = true;
       stampResult.hidden = true;
       rewardBlock.hidden = true;
