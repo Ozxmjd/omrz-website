@@ -666,6 +666,14 @@
     .ed-lock svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 2px; color: var(--accent-2); }
     .ed-lock b { color: var(--pearl); }
     .ed-lock button { margin-top: 9px; }
+    /* Basic-pakket: uploader vervangen door een Premium-slot. */
+    .uploader[hidden] { display: none; }
+    .ed-tabs button .plan-tag { font-size: 9.5px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
+      margin-left: 6px; padding: 1px 6px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-2); }
+    .ed-tabs button .plan-tag[hidden] { display: none; }
+    /* Basic-pakket: vergrendelde tab toont alleen de kop en de upgrade-melding. */
+    .plan-lock[hidden] { display: none; }
+    .panel.plan-locked > :not(.panel-head):not(.plan-lock) { display: none !important; }
 
     /* ---------- Klantonderzoek (enquête builder) ---------- */
     .sv-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
@@ -1833,7 +1841,14 @@
               <section class="ed-section glass">
                 <h3><span class="sec-num">2</span> Logo</h3>
                 <p class="b-sub">Verschijnt linksboven op de pas, naast je winkelnaam.</p>
-                <div class="uploader">
+                <div class="ed-lock" id="logoLockNote" hidden>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+                  <div>
+                    <b>Logo is beschikbaar vanaf Premium.</b> Upgrade je abonnement om je eigen logo op de pas te zetten.
+                    <div><button type="button" class="btn btn-primary" data-plan-upgrade>Upgrade naar Premium</button></div>
+                  </div>
+                </div>
+                <div class="uploader" id="logoUploader">
                   <div class="upload-prev" id="logoPrev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div>
                   <div class="upload-main">
                     <label class="btn btn-ghost btn-upload">
@@ -1875,7 +1890,7 @@
                 <div class="ed-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>Dit is het middelste deel waar je stempels op staan. Kies de achtergrond áchter de stempels: een kleur of een foto.</span></div>
                 <div class="ed-tabs" id="bgTabs">
                   <button type="button" data-bg="color" class="active">Kleur</button>
-                  <button type="button" data-bg="photo">Foto</button>
+                  <button type="button" data-bg="photo">Foto<span class="plan-tag" id="bgPhotoTag" hidden>Premium</span></button>
                 </div>
 
                 <div class="ed-tabpane active" id="bgPaneColor">
@@ -1890,7 +1905,14 @@
                 </div>
 
                 <div class="ed-tabpane" id="bgPanePhoto">
-                  <div class="uploader">
+                  <div class="ed-lock" id="bgLockNote" hidden>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+                    <div>
+                      <b>Achtergrondfoto is beschikbaar vanaf Premium.</b> Met Basic kies je een kleur als achtergrond. Upgrade om een eigen foto te gebruiken.
+                      <div><button type="button" class="btn btn-primary" data-plan-upgrade>Upgrade naar Premium</button></div>
+                    </div>
+                  </div>
+                  <div class="uploader" id="bgUploader">
                     <div class="upload-prev bg" id="bgPrev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div>
                     <div class="upload-main">
                       <label class="btn btn-ghost btn-upload">
@@ -1929,7 +1951,14 @@
                     <button type="button" data-stamptype="shape" class="active">Kleur</button>
                     <button type="button" data-stamptype="logo" id="stampTypeLogoBtn" hidden>Mijn logo</button>
                   </div>
-                  <div class="uploader" style="margin-bottom:18px;">
+                  <div class="ed-lock" id="stampLogoLockNote" hidden>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+                    <div>
+                      <b>Eigen afbeelding in stempels is beschikbaar vanaf Premium.</b> Met Basic vul je de stempels met een kleur.
+                      <div><button type="button" class="btn btn-primary" data-plan-upgrade>Upgrade naar Premium</button></div>
+                    </div>
+                  </div>
+                  <div class="uploader" id="stampLogoUploader" style="margin-bottom:18px;">
                     <div class="upload-prev" id="stampLogoPrev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div>
                     <div class="upload-main">
                       <label class="btn btn-ghost btn-upload">
@@ -2186,6 +2215,15 @@
             <p>Iedereen die spaart op jouw stempelkaart.</p>
           </div>
 
+          <div class="block glass plan-lock" hidden>
+            <div class="sv-lock">
+              <div class="sv-lock-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+              <h3>Klanten is een Premium functie</h3>
+              <p>Deze functie is beschikbaar vanaf Premium. Upgrade je abonnement.</p>
+              <button type="button" class="btn btn-primary" data-plan-upgrade>Bekijk abonnementen</button>
+            </div>
+          </div>
+
           <div class="stat-grid">
             <div class="stat glass">
               <div class="s-top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Totaal klanten</div>
@@ -2270,6 +2308,15 @@
           <div class="panel-head">
             <h2>Statistieken</h2>
             <p>Uitgegeven stempels over tijd.</p>
+          </div>
+
+          <div class="block glass plan-lock" hidden>
+            <div class="sv-lock">
+              <div class="sv-lock-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+              <h3>Statistieken is een Premium functie</h3>
+              <p>Deze functie is beschikbaar vanaf Premium. Upgrade je abonnement.</p>
+              <button type="button" class="btn btn-primary" data-plan-upgrade>Bekijk abonnementen</button>
+            </div>
           </div>
 
           <div class="block glass">
@@ -2820,7 +2867,19 @@
       access_status: 'active', plan: 'basic', billing_cycle: null,
       days_left_in_trial: 0, is_trial_expired: false, has_access: true, can_use_trial: false,
       trial_used: false, payment_failed: false, subscribed_locations: null,
+      free_access: false,
+      // Pas true na een geslaagde /subscription: tot dan (of bij een fout) niets op Basic vergrendelen.
+      plan_known: false,
     };
+    // ---- Pakket-beperkingen (alleen Basic) ----
+    // Gratis toegang telt als Premium Plus. Premium en Premium Plus houden alles.
+    function effectivePlan() {
+      if (subscription.free_access) return 'premium_plus';
+      return normalizePlan(subscription.plan);
+    }
+    function isBasicPlan() { return subscription.plan_known && effectivePlan() === 'basic'; }
+    const BASIC_LOCKED_TABS = new Set(['statistieken', 'klanten']);
+    const basicTabLocked = tab => isBasicPlan() && BASIC_LOCKED_TABS.has(tab);
     // Aantal vestigingen waarvoor betaald wordt, uit de bron die het weet.
     function subscribedLocations() {
       return subscription.subscribed_locations
@@ -2847,6 +2906,8 @@
       const active = [...links].find(l => l.dataset.tab === tab);
       if (active) pageTitle.textContent = active.textContent.trim();
       closeSidebar();
+      // Basic: tab opent met alleen de upgrade-melding; niets laden.
+      if (basicTabLocked(tab)) { stopScanner(); resetScanFlow(); return; }
       if (tab === 'qr') renderQR();
       if (tab === 'klanten') loadCustomers();
       if (tab === 'overzicht') refreshOverview();   // header, stats, kaart-preview en recente activiteit verversen
@@ -2885,6 +2946,9 @@
           // Verlopen door een mislukte betaling (paid subscriber, betaling faalde)?
           payment_failed: !!(s.payment_failed ?? s.paymentFailed)
             || ['past_due', 'unpaid', 'failed'].includes(String(s.payment_status || '').toLowerCase()),
+          free_access: [s.free_access, s.freeAccess].some(v => v === true || v === 1 || v === 'true')
+            || ['free_access', 'free'].includes(String(s.access_status || s.status || '').toLowerCase()),
+          plan_known: true,
         };
       } catch (e) { /* fail open bij netwerkfout */ }
       applySubscription();
@@ -2895,6 +2959,7 @@
       applyDemoGating();
       applySurveyLockIcon();
       applyLockIcons();
+      applyPlanGating();
       // Zonder toegang: toon direct het grote abonnement-scherm.
       if (!subscription.has_access) openSubModal();
     }
@@ -2948,14 +3013,46 @@
     });
     function applyLockIcons() {
       // Basisfuncties vergrendelen wanneer er geen toegang is.
-      LOCKED_TABS.forEach(tab => {
+      // Basic: Statistieken en Klanten krijgen ook een slotje.
+      const isLocked = tab => (!subscription.has_access && LOCKED_TABS.has(tab)) || basicTabLocked(tab);
+      new Set([...LOCKED_TABS, ...BASIC_LOCKED_TABS]).forEach(tab => {
         const el = [...links].find(l => l.dataset.tab === tab);
-        if (el) el.classList.toggle('locked', !subscription.has_access);
+        if (el) el.classList.toggle('locked', isLocked(tab));
       });
       // Snelkoppelingen die naar een vergrendelde tab wijzen.
       document.querySelectorAll('.quick-btn[data-goto]').forEach(btn =>
-        btn.classList.toggle('locked', !subscription.has_access && LOCKED_TABS.has(btn.dataset.goto)));
+        btn.classList.toggle('locked', isLocked(btn.dataset.goto)));
     }
+    // Basic: vergrendelde tabs tonen een upgrade-melding; in Mijn Kaart geen logo/foto-uploads.
+    // Voor Premium en Premium Plus zet dit alles terug in de normale stand.
+    function applyPlanGating() {
+      const basic = isBasicPlan();
+      BASIC_LOCKED_TABS.forEach(tab => {
+        const panel = document.getElementById('panel-' + tab);
+        if (!panel) return;
+        const wasLocked = panel.classList.contains('plan-locked');
+        panel.classList.toggle('plan-locked', basic);
+        const lock = panel.querySelector('.plan-lock');
+        if (lock) lock.hidden = !basic;
+        // Net ontgrendeld (upgrade) terwijl de tab open staat: inhoud alsnog laden.
+        if (wasLocked && !basic && panel.classList.contains('active')) activateTab(tab);
+      });
+      [['logoLockNote', 'logoUploader', 'logoFile'],
+       ['bgLockNote', 'bgUploader', 'bgFile'],
+       ['stampLogoLockNote', 'stampLogoUploader', 'stampLogoFile']].forEach(([noteId, upId, inputId]) => {
+        const note = document.getElementById(noteId);
+        const up = document.getElementById(upId);
+        const input = document.getElementById(inputId);
+        if (note) note.hidden = !basic;
+        if (up) up.hidden = basic;
+        if (input) input.disabled = basic;
+      });
+      const tag = document.getElementById('bgPhotoTag');
+      if (tag) tag.hidden = !basic;
+    }
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('[data-plan-upgrade]')) openSubModal();
+    });
 
     // ====== Groot abonnement-scherm (modal) ======
     // value = bedrag excl. BTW, om het kostenoverzicht te kunnen optellen.
