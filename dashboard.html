@@ -710,6 +710,19 @@
 
     /* Introductietekst boven de vragen */
     .sv-intro-foot { display: flex; justify-content: flex-end; margin-top: 7px; }
+    /* Hoofdschakelaar enquête + melding wanneer die uit staat. */
+    .sv-off-note { display: flex; align-items: flex-start; gap: 10px; margin-top: 14px; padding: 12px 14px; border-radius: 12px;
+      background: rgba(251, 146, 60, .1); border: 1px solid rgba(251, 146, 60, .28); color: #fdba74; font-size: 12.5px; line-height: 1.55; }
+    .sv-off-note[hidden] { display: none; }
+    .sv-off-note svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 2px; }
+    .sv-off-note b { color: inherit; font-weight: 600; }
+    [data-theme="light"] .sv-off-note { background: rgba(251, 146, 60, .12); border-color: rgba(217, 119, 6, .3); color: #b45309; }
+    .sv-intro-sep { border: 0; border-top: 1px solid var(--border); margin: 22px 0 20px; }
+    .sv-state { font-size: 11px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; padding: 2px 8px;
+      border-radius: 999px; margin-left: 8px; vertical-align: 2px; background: rgba(34, 197, 94, .14); color: #4ade80; }
+    .sv-state.off { background: rgba(251, 146, 60, .14); color: #fdba74; }
+    [data-theme="light"] .sv-state { color: #15803d; }
+    [data-theme="light"] .sv-state.off { color: #b45309; }
     .sv-intro-count { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
     .sv-intro-count.near { color: #e0b98f; }
 
@@ -2849,6 +2862,8 @@
       website_url: '',
       feedback_enabled: false,
       survey_intro_text: '',
+      // Ontbreekt het veld, dan staat de enquête aan (zoals vóór de schakelaar).
+      survey_enabled: true,
       loyalty_enabled: false,
       ask_occupation: true,
       ask_city: true,
@@ -5926,6 +5941,9 @@
           ? [...list].sort((a, b) => Number(a[surveyOrderKey] || 0) - Number(b[surveyOrderKey] || 0))
           : list;
         surveyQuestions = sorted.map(normalizeQuestion).filter(q => q.question_text);
+        // De vragen-endpoint geeft de actuele aan/uit-stand mee; die is leidend.
+        const en = Array.isArray(data) ? undefined : (data.survey_enabled ?? (data.data && data.data.survey_enabled));
+        if (en !== undefined && en !== null) card.survey_enabled = en !== false && en !== 0 && en !== 'false';
         surveyAccess = 'yes'; surveyLoaded = true;
         applySurveyLockIcon(); showSurveySeg(true); renderSurvey();
       } catch (err) {
@@ -6005,7 +6023,23 @@
       }).join('');
 
       const intro = String(card.survey_intro_text || '');
+      const on = card.survey_enabled !== false;
       wrap.innerHTML = `<div class="block glass">
+          <h3>Klantonderzoek</h3>
+          <div class="switch-row">
+            <span class="switch-tx">
+              <strong>Klantonderzoek inschakelen</strong>
+              <small>Zet aan om de enquête aan klanten te tonen bij het aanmaken van hun kaart. Zet uit om te pauzeren zonder je vragen te verwijderen.</small>
+            </span>
+            <input type="checkbox" class="switch" id="svEnabled" aria-label="Klantonderzoek inschakelen" ${on ? 'checked' : ''} />
+          </div>
+          <div class="save-note" id="svToggleNote" style="margin-top:12px"></div>
+          <div class="sv-off-note" id="svOffNote" ${on ? 'hidden' : ''}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+            <span><b>Klantonderzoek staat uit.</b> Klanten zien de enquête nu niet. Zet aan om te activeren.</span>
+          </div>
+
+          <hr class="sv-intro-sep" />
           <h3>Introductietekst</h3>
           <p class="b-sub">Deze tekst zien klanten boven de vragen. Laat leeg voor de standaardtekst.</p>
           <div class="field">
@@ -6023,7 +6057,7 @@
         <div class="block glass" style="margin-top:20px">
           <div class="sv-top">
             <div>
-              <h3>Jouw enquête</h3>
+              <h3>Jouw enquête<span class="sv-state${on ? '' : ' off'}" id="svStatePill">${on ? 'Actief' : 'Gepauzeerd'}</span></h3>
               <div class="b-sub" style="margin-bottom:0">Stel vragen samen die je klanten beantwoorden bij het aanmaken van hun stempelkaart. Zo krijg je inzicht in wie je klanten zijn en waarom ze komen.</div>
             </div>
             <span class="sv-count${full ? ' full' : ''}"><b>${n}</b> van ${SURVEY_MAX} vragen gebruikt</span>
@@ -6046,6 +6080,18 @@
 
       updateIntroCount();
       applySatNote('svIntroNote');
+      applySatNote('svToggleNote');
+    }
+
+    // Alleen de statusdelen bijwerken, zodat een nog niet opgeslagen introductietekst blijft staan.
+    function applySurveyEnabledUI() {
+      const on = card.survey_enabled !== false;
+      const sw = document.getElementById('svEnabled');
+      if (sw) sw.checked = on;
+      const note = document.getElementById('svOffNote');
+      if (note) note.hidden = on;
+      const pill = document.getElementById('svStatePill');
+      if (pill) { pill.classList.toggle('off', !on); pill.textContent = on ? 'Actief' : 'Gepauzeerd'; }
     }
 
     // "120 / 300" — en een waarschuwingskleur zodra de ruimte opraakt.
@@ -6072,6 +6118,20 @@
 
     document.getElementById('surveyWrap').addEventListener('input', (e) => {
       if (e.target && e.target.id === 'svIntro') updateIntroCount();
+    });
+    // Hoofdschakelaar: alleen survey_enabled meesturen; de vragen blijven altijd bewaard.
+    document.getElementById('surveyWrap').addEventListener('change', async (e) => {
+      const el = e.target;
+      if (!el || el.id !== 'svEnabled') return;
+      const want = el.checked;
+      el.disabled = true;
+      const ok = await saveCardField('survey_enabled', want, 'svToggleNote',
+        { ok: want ? 'Klantonderzoek aangezet ✓' : 'Klantonderzoek uitgezet ✓' });
+      el.disabled = false;
+      // Mislukt: terugzetten, anders lijkt het aan/uit te staan terwijl de server er niets van weet.
+      if (!ok) { el.checked = !want; return; }
+      card.survey_enabled = want;
+      applySurveyEnabledUI();
     });
     document.getElementById('surveyWrap').addEventListener('click', (e) => {
       const introBtn = e.target.closest('#svIntroBtn');
@@ -7468,6 +7528,7 @@
           card.website_url = c.website_url ?? card.website_url ?? '';
           card.feedback_enabled = c.feedback_enabled === true;
           card.survey_intro_text = String(c.survey_intro_text ?? card.survey_intro_text ?? '');
+          card.survey_enabled = c.survey_enabled !== false;
           card.loyalty_enabled = c.loyalty_enabled === true;
 
           const s = data.stats || {};
