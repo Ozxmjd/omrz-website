@@ -721,6 +721,49 @@
     .sv-modal-foot { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 22px;
       padding-top: 18px; border-top: 1px solid var(--border); }
 
+    /* ---------- VIP & Loyaliteit ---------- */
+    .vip-list { display: grid; gap: 12px; }
+    .vip-card { display: flex; align-items: center; gap: 15px; padding: 16px 18px; border-radius: 14px;
+      border: 1px solid var(--border); background: rgba(var(--ink), .022); transition: border-color .2s var(--ease); }
+    .vip-card:hover { border-color: var(--border-strong); }
+    /* Het hoogste niveau krijgt een accentrand: dat is de status waar klanten naartoe sparen. */
+    .vip-card.top { border-color: rgba(139,92,246,.4); background: linear-gradient(180deg, var(--accent-soft), rgba(var(--ink), .02) 70%); }
+    .vip-ic { width: 38px; height: 38px; flex-shrink: 0; border-radius: 12px; display: grid; place-items: center;
+      background: rgba(var(--ink), .06); border: 1px solid var(--border); color: var(--muted); }
+    .vip-ic svg { width: 18px; height: 18px; }
+    .vip-card.top .vip-ic { background: var(--accent-grad); border-color: transparent; color: #fff; }
+    .vip-main { flex: 1; min-width: 0; }
+    .vip-name { font-size: 15px; font-weight: 600; letter-spacing: -.01em; color: var(--text-strong); }
+    .vip-meta { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+    .vip-meta b { color: var(--pearl); font-weight: 600; }
+    .vip-disc { flex-shrink: 0; font-size: 18px; font-weight: 600; letter-spacing: -.02em; color: var(--text-strong);
+      font-variant-numeric: tabular-nums; }
+    .vip-card.top .vip-disc { background: var(--accent-grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .vip-acts { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+
+    .vip-add { margin-top: 18px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .vip-add .vip-hint { font-size: 12.5px; color: var(--muted); }
+    .vip-sugg { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+    .vip-sugg-card { display: flex; flex-direction: column; gap: 8px; padding: 16px 17px; border-radius: 14px;
+      border: 1px dashed var(--border-strong); background: rgba(var(--ink), .015); }
+    .vip-sugg-n { font-size: 13.5px; font-weight: 600; color: var(--text-strong); }
+    .vip-sugg-d { font-size: 12.5px; color: var(--muted); line-height: 1.55; flex: 1; }
+    .vip-sugg-card .btn { align-self: flex-start; margin-top: 2px; }
+    .vip-sugg-card.used { opacity: .5; }
+
+    /* Hoe het aan de kassa werkt — er is geen kassakoppeling, dus dat moet duidelijk zijn. */
+    .vip-note { display: flex; align-items: flex-start; gap: 11px; margin-top: 22px; padding: 14px 16px;
+      border-radius: 12px; background: var(--accent-soft); border: 1px solid rgba(139,92,246,.2);
+      font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+    .vip-note svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 2px; color: var(--accent-2); }
+    .vip-note strong { color: var(--pearl); font-weight: 600; }
+    .vip-off { opacity: .5; pointer-events: none; }
+    .vip-modal-foot { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 22px;
+      padding-top: 18px; border-top: 1px solid var(--border); }
+    .vip-prev { margin-top: 4px; padding: 13px 15px; border-radius: 11px; border: 1px solid var(--border);
+      background: rgba(var(--ink), .03); font-size: 13px; color: var(--muted); line-height: 1.55; }
+    .vip-prev b { color: var(--text-strong); font-weight: 600; }
+
     /* Resultaten: samenvatting */
     .sv-seg { margin-bottom: 22px; }
     .sv-sum { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
@@ -1513,6 +1556,10 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2"/><rect x="9" y="2" width="6" height="4" rx="1"/><path d="m9 12 1.6 1.6L14 10"/><path d="M9 17h5"/></svg>
           Klantonderzoek
         </div>
+        <div class="side-link" data-tab="loyaliteit" id="navLoyaliteit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l4.5 3L12 4l4.5 6L21 7l-2 11H5z"/><path d="M5 21h14"/></svg>
+          VIP &amp; Loyaliteit
+        </div>
         <div class="side-link" data-tab="abonnement" id="navAbonnement">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M2 10h20"/></svg>
           Mijn Abonnement
@@ -2235,6 +2282,17 @@
           <div id="surveyFbWrap" hidden></div>
         </section>
 
+        <!-- ===== VIP & Loyaliteit ===== -->
+        <section class="panel" id="panel-loyaliteit">
+          <div class="panel-head">
+            <h2>VIP &amp; Loyaliteit</h2>
+            <p>Beloon je trouwste klanten automatisch met een status en korting.</p>
+          </div>
+          <div id="loyaltyWrap">
+            <div class="block glass"><div class="loader"><span class="spinner"></span> Niveaus laden…</div></div>
+          </div>
+        </section>
+
         <!-- ===== Mijn Abonnement ===== -->
         <section class="panel" id="panel-abonnement">
           <div class="panel-head">
@@ -2473,6 +2531,39 @@
     </div>
   </div>
 
+  <!-- ===== Niveau toevoegen / bewerken ===== -->
+  <div class="modal-overlay" id="vipModal" hidden>
+    <div class="modal glass" role="dialog" aria-modal="true" aria-labelledby="vipModalTitle">
+      <div class="modal-head">
+        <h3 id="vipModalTitle">Niveau toevoegen</h3>
+        <button class="modal-close" id="vipModalClose" aria-label="Sluiten">✕</button>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="vipName">Naam van het niveau</label>
+          <input type="text" id="vipName" maxlength="30" placeholder="Bijvoorbeeld: Gold" />
+        </div>
+        <div class="field">
+          <label for="vipThreshold">Vanaf hoeveel punten</label>
+          <input type="number" id="vipThreshold" min="1" max="100000" step="1" inputmode="numeric" placeholder="50" />
+          <p class="field-hint">Punten zijn de stempels die een klant in totaal heeft gespaard; die blijven staan na het inwisselen van een beloning.</p>
+        </div>
+        <div class="field">
+          <label for="vipDiscount">Kortingspercentage</label>
+          <input type="number" id="vipDiscount" min="1" max="100" step="1" inputmode="numeric" placeholder="20" />
+        </div>
+        <div class="vip-prev" id="vipPreview"></div>
+      </div>
+
+      <div class="vip-modal-foot">
+        <button type="button" class="btn btn-primary" id="vipSaveBtn"><span class="btn-label">Niveau opslaan</span></button>
+        <button type="button" class="btn btn-ghost" id="vipCancelBtn">Annuleren</button>
+        <span class="save-note" id="vipModalNote"></span>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== Groot abonnement-scherm (bij geen toegang / upgrade) ===== -->
   <div class="sub-modal-overlay" id="subModal" hidden>
     <div class="sub-modal glass" role="dialog" aria-modal="true" aria-labelledby="smTitle">
@@ -2625,7 +2716,7 @@
     const managerLocationId = localStorage.getItem('omrz_location_id') || null;
     const managerLocationName = localStorage.getItem('omrz_location_name') || '';
     // Tabs die alleen de eigenaar mag zien; een manager krijgt ze niet in het menu.
-    const OWNER_ONLY_TABS = new Set(['kaart', 'vestigingen', 'abonnement', 'facturen', 'bedrijfsgegevens', 'instellingen', 'enquete']);
+    const OWNER_ONLY_TABS = new Set(['kaart', 'vestigingen', 'abonnement', 'facturen', 'bedrijfsgegevens', 'instellingen', 'enquete', 'loyaliteit']);
 
     // ---- Multi-vestiging state ----
     let locations = [];               // alle vestigingen
@@ -2682,6 +2773,7 @@
       website_url: '',
       feedback_enabled: false,
       survey_intro_text: '',
+      loyalty_enabled: false,
       ask_occupation: true,
       ask_city: true,
     };
@@ -2735,6 +2827,7 @@
       if (tab === 'bedrijfsgegevens') loadBusinessProfile();
       if (tab === 'statistieken') { loadChartStats(currentRange); loadDemographics(); }
       if (tab === 'enquete') loadSurvey();
+      if (tab === 'loyaliteit') loadLoyalty();
       if (tab !== 'stempel') { stopScanner(); resetScanFlow(); } // camera vrijgeven + flow resetten bij verlaten van de scan-tab
     }
     links.forEach(l => l.addEventListener('click', () => activateTab(l.dataset.tab)));
@@ -5601,6 +5694,7 @@
       const locked = surveyAccess === 'no'
         || (surveyAccess === 'unknown' && !isPremiumPlusPlan() && subscription.access_status !== 'trial');
       el.classList.toggle('locked', locked);
+      applyLoyaltyLockIcon();
     }
 
     function setSurveyNote(msg, kind) {
@@ -6674,6 +6768,366 @@
       if (e.target.closest('[data-fb-more]')) { fbShown += FB_PAGE; renderFeedback(); }
     });
 
+    // ============================================================
+    //  VIP & Loyaliteit (Premium Plus)
+    // ============================================================
+    const LOYALTY_MAX = 5;             // backend-limiet: maximaal 5 niveaus
+    let loyaltyTiers = [];
+    let loyaltyEnabled = false;
+    let loyaltyAccess = 'unknown';     // unknown | yes | no
+    let loyaltyLoaded = false;
+    let vipEditing = null;
+    let vipBusy = false;
+
+    const VIP_CROWN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l4.5 3L12 4l4.5 6L21 7l-2 11H5z"/><path d="M5 21h14"/></svg>';
+    const VIP_STAR_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>';
+    const VIP_INFO_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>';
+
+    // Twee startniveaus waarmee een winkelier meteen iets werkends heeft staan.
+    const LOYALTY_SUGGESTIONS = [
+      { name: 'Gold', threshold: 50, discount_percent: 20 },
+      { name: 'VIP', threshold: 100, discount_percent: 40 },
+    ];
+
+    function normalizeTier(raw) {
+      const num = (v, d) => { const n = Number(v); return Number.isFinite(n) ? n : d; };
+      return {
+        id: raw.id ?? raw.tier_id ?? raw._id ?? null,
+        name: String(raw.name ?? raw.tier_name ?? raw.title ?? '').trim(),
+        threshold: Math.max(0, Math.round(num(raw.threshold ?? raw.points ?? raw.min_points ?? raw.points_required, 0))),
+        discount: Math.max(0, Math.round(num(raw.discount_percent ?? raw.discount ?? raw.percentage, 0))),
+      };
+    }
+    const sortTiers = list => [...list].sort((a, b) => a.threshold - b.threshold);
+
+    function applyLoyaltyLockIcon() {
+      const el = document.getElementById('navLoyaliteit');
+      if (!el) return;
+      const locked = loyaltyAccess === 'no'
+        || (loyaltyAccess === 'unknown' && !isPremiumPlusPlan() && subscription.access_status !== 'trial');
+      el.classList.toggle('locked', locked);
+    }
+
+    async function loadLoyalty(force) {
+      const wrap = document.getElementById('loyaltyWrap');
+      if (!wrap) return;
+      if (loyaltyLoaded && !force) return;
+      if (!cardId) { renderLoyaltyProblem('Geen stempelkaart gevonden. Log opnieuw in.'); loyaltyLoaded = true; return; }
+      wrap.innerHTML = '<div class="block glass"><div class="loader"><span class="spinner"></span> Niveaus laden…</div></div>';
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/loyalty/' + encodeURIComponent(cardId),
+          { headers: authHeaders() });
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 403) {
+          loyaltyAccess = 'no'; loyaltyLoaded = true;
+          applyLoyaltyLockIcon(); renderLoyaltyLock();
+          return;
+        }
+        if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+        const d = (data && (data.loyalty || data.data)) || data || {};
+        const list = Array.isArray(d) ? d : (d.tiers || d.loyalty_tiers || d.levels || []);
+        loyaltyTiers = sortTiers(list.map(normalizeTier).filter(t => t.name));
+        loyaltyEnabled = (d.loyalty_enabled ?? d.enabled ?? d.is_enabled ?? card.loyalty_enabled) === true;
+        card.loyalty_enabled = loyaltyEnabled;
+        loyaltyAccess = 'yes'; loyaltyLoaded = true;
+        applyLoyaltyLockIcon(); renderLoyalty();
+      } catch (err) {
+        renderLoyaltyProblem(isNetworkError(err) ? NET_MSG : (err.message || 'Probeer het later opnieuw.'), true);
+      }
+    }
+
+    // ---- Schermen ----
+    function renderLoyaltyLock() {
+      document.getElementById('loyaltyWrap').innerHTML = `<div class="block glass">
+          <div class="sv-lock">
+            <div class="sv-lock-ic">${VIP_CROWN_SVG}</div>
+            <h3>VIP &amp; Loyaliteit is een Premium Plus functie</h3>
+            <p>Beloon je trouwste klanten automatisch met een VIP status en korting. Upgrade naar Premium Plus.</p>
+            <button type="button" class="btn btn-primary" data-open-sub>Bekijk abonnementen</button>
+          </div>
+        </div>`;
+    }
+    function renderLoyaltyProblem(msg, retry) {
+      document.getElementById('loyaltyWrap').innerHTML = `<div class="block glass">
+          <div class="empty-state">
+            <span class="es-ic">${VIP_CROWN_SVG}</span>
+            <h4>Niveaus niet geladen</h4>
+            <p>${escapeHtml(msg)}</p>
+            ${retry ? '<button type="button" class="btn btn-ghost" data-vip-retry>Opnieuw proberen</button>' : ''}
+          </div>
+        </div>`;
+    }
+
+    const vipPoints = n => n + ' ' + (n === 1 ? 'punt' : 'punten');
+
+    function vipTierCard(t, i) {
+      const top = i === loyaltyTiers.length - 1 && loyaltyTiers.length > 1;
+      return `<div class="vip-card${top ? ' top' : ''}">
+          <span class="vip-ic">${top ? VIP_CROWN_SVG : VIP_STAR_SVG}</span>
+          <div class="vip-main">
+            <div class="vip-name">${escapeHtml(t.name)}</div>
+            <div class="vip-meta">Vanaf <b>${vipPoints(t.threshold)}</b></div>
+          </div>
+          <span class="vip-disc">${t.discount}%</span>
+          <div class="vip-acts">
+            <button type="button" class="sv-ico" data-vip-edit="${escapeHtml(String(t.id))}" title="Bewerken" aria-label="Niveau bewerken">${SV_EDIT_SVG}</button>
+            <button type="button" class="sv-ico danger" data-vip-del="${escapeHtml(String(t.id))}" title="Verwijderen" aria-label="Niveau verwijderen">${SV_DEL_SVG}</button>
+          </div>
+        </div>`;
+    }
+
+    function renderLoyalty() {
+      const wrap = document.getElementById('loyaltyWrap');
+      if (!wrap) return;
+      const n = loyaltyTiers.length;
+      const full = n >= LOYALTY_MAX;
+      const on = loyaltyEnabled;
+
+      const body = n
+        ? '<div class="vip-list">' + loyaltyTiers.map(vipTierCard).join('') + '</div>'
+        : `<div class="empty-state">
+            <span class="es-ic">${VIP_STAR_SVG}</span>
+            <h4>Nog geen niveaus</h4>
+            <p>Voeg je eerste niveau toe, of kies hieronder een voorbeeld om snel te starten.</p>
+          </div>`;
+
+      // Een voorbeeld dat al bestaat (zelfde naam) hoeft niet nog eens.
+      const used = new Set(loyaltyTiers.map(t => t.name.toLowerCase()));
+      const sugg = LOYALTY_SUGGESTIONS.map((sg, i) => {
+        const already = used.has(sg.name.toLowerCase());
+        const off = already || full;
+        return `<div class="vip-sugg-card${off ? ' used' : ''}">
+            <div class="vip-sugg-n">${escapeHtml(sg.name)}</div>
+            <div class="vip-sugg-d">Vanaf ${vipPoints(sg.threshold)} · ${sg.discount_percent}% korting</div>
+            <button type="button" class="btn btn-ghost" data-vip-sugg="${i}" ${off ? 'disabled' : ''}>${already ? 'Al toegevoegd' : 'Toevoegen'}</button>
+          </div>`;
+      }).join('');
+
+      wrap.innerHTML = `<div class="block glass">
+          <h3>Hoe het werkt</h3>
+          <p class="b-sub">Beloon klanten die veel sparen met een vaste status en korting. Klanten sparen levenslang punten (stempels). Zodra ze een drempel bereiken, krijgen ze automatisch de status en korting.</p>
+
+          <div class="switch-row">
+            <span class="switch-tx">
+              <strong>VIP &amp; Loyaliteit inschakelen</strong>
+              <small>Zet dit aan om klanten automatisch een status te geven zodra ze genoeg punten hebben.</small>
+            </span>
+            <input type="checkbox" class="switch" id="vipEnabled" ${on ? 'checked' : ''} />
+          </div>
+          <div class="save-note" id="vipToggleNote" style="margin-top:12px"></div>
+        </div>
+
+        <div class="block glass${on ? '' : ' vip-off'}" style="margin-top:20px" ${on ? '' : 'aria-hidden="true"'}>
+          <div class="sv-top">
+            <div>
+              <h3>Niveaus</h3>
+              <div class="b-sub" style="margin-bottom:0">Van laag naar hoog. Een klant krijgt het hoogste niveau waarvan hij de drempel haalt.</div>
+            </div>
+            <span class="sv-count${full ? ' full' : ''}"><b>${n}</b> van ${LOYALTY_MAX} niveaus</span>
+          </div>
+
+          <div style="margin-top:22px">${body}</div>
+
+          <div class="vip-add">
+            <button type="button" class="btn btn-primary" data-vip-add ${full ? 'disabled' : ''}>Niveau toevoegen</button>
+            ${full ? '<span class="vip-hint">Je hebt het maximum van ' + LOYALTY_MAX + ' niveaus bereikt. Verwijder er eerst een.</span>' : ''}
+            <span class="save-note" id="vipListNote"></span>
+          </div>
+
+          <div class="vip-note">${VIP_INFO_SVG}<span><strong>Aan de kassa:</strong> de korting wordt getoond bij het scannen van de klant. Je medewerker past de korting toe bij het afrekenen. Er is geen koppeling met je kassasysteem.</span></div>
+        </div>
+
+        ${on ? `<div class="block glass" style="margin-top:20px">
+          <h3>Voorbeelden</h3>
+          <p class="b-sub">Klaar om te gebruiken — je past ze daarna gewoon aan.</p>
+          <div class="vip-sugg">${sugg}</div>
+        </div>` : ''}`;
+
+      applySatNote('vipToggleNote');
+      applySatNote('vipListNote');
+    }
+
+    function vipNote(msg, kind) { satNote('vipListNote', msg, kind); }
+
+    // ---- Aan/uit ----
+    // Eerst het eigen endpoint; bestaat dat niet, dan valt het terug op het kaartveld.
+    async function saveLoyaltyEnabled(want) {
+      const body = JSON.stringify({ card_id: cardId, loyalty_enabled: want, enabled: want });
+      const res = await fetch(API_BASE + '/api/stamp/loyalty/toggle', {
+        method: 'PUT', headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()), body,
+      });
+      if (res.status === 404 || res.status === 405) {
+        return saveCardField('loyalty_enabled', want, 'vipToggleNote',
+          { ok: want ? 'VIP & Loyaliteit aangezet ✓' : 'VIP & Loyaliteit uitgezet ✓' });
+      }
+      if (res.status === 403) { loyaltyAccess = 'no'; applyLoyaltyLockIcon(); renderLoyaltyLock(); return false; }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || data.message || 'Opslaan mislukt');
+      satNote('vipToggleNote', want ? 'VIP & Loyaliteit aangezet ✓' : 'VIP & Loyaliteit uitgezet ✓', 'ok');
+      return true;
+    }
+
+    document.getElementById('loyaltyWrap').addEventListener('change', async (e) => {
+      const el = e.target;
+      if (el.id !== 'vipEnabled') return;
+      const want = el.checked;
+      el.disabled = true;
+      satNote('vipToggleNote', want ? 'Inschakelen…' : 'Uitschakelen…', '');
+      try {
+        const ok = await saveLoyaltyEnabled(want);
+        el.disabled = false;
+        if (ok === false) return;
+        loyaltyEnabled = want;
+        card.loyalty_enabled = want;
+        renderLoyalty();
+      } catch (err) {
+        // Mislukt: terugzetten, anders lijkt het aan te staan terwijl de server er niets van weet.
+        el.checked = !want; el.disabled = false;
+        satNote('vipToggleNote', isNetworkError(err) ? NET_MSG : ('Kon niet opslaan: ' + (err.message || 'onbekende fout')), 'error');
+      }
+    });
+
+    // ---- Niveau-editor ----
+    const vipModal = document.getElementById('vipModal');
+    function vipModalNote(msg, kind) {
+      const el = document.getElementById('vipModalNote');
+      if (!el) return;
+      el.textContent = msg || '';
+      el.className = 'save-note' + (msg ? ' ' + (kind || '') : '');
+    }
+    function vipPreview() {
+      const el = document.getElementById('vipPreview');
+      if (!el) return;
+      const name = document.getElementById('vipName').value.trim() || 'Dit niveau';
+      const th = parseInt(document.getElementById('vipThreshold').value, 10);
+      const disc = parseInt(document.getElementById('vipDiscount').value, 10);
+      if (!Number.isFinite(th) || !Number.isFinite(disc)) {
+        el.innerHTML = 'Vul een drempel en een percentage in om te zien wat de klant krijgt.';
+        return;
+      }
+      el.innerHTML = 'Een klant met <b>' + escapeHtml(vipPoints(th)) + '</b> of meer krijgt de status <b>'
+        + escapeHtml(name) + '</b> en <b>' + disc + '% korting</b>.';
+    }
+    function openVipModal(id) {
+      vipEditing = id ? loyaltyTiers.find(t => String(t.id) === String(id)) || null : null;
+      document.getElementById('vipModalTitle').textContent = vipEditing ? 'Niveau bewerken' : 'Niveau toevoegen';
+      document.getElementById('vipName').value = vipEditing ? vipEditing.name : '';
+      document.getElementById('vipThreshold').value = vipEditing ? vipEditing.threshold : '';
+      document.getElementById('vipDiscount').value = vipEditing ? vipEditing.discount : '';
+      vipModalNote('');
+      vipPreview();
+      vipModal.hidden = false;
+      const first = document.getElementById('vipName');
+      if (first && typeof first.focus === 'function') setTimeout(() => first.focus(), 40);
+    }
+    function closeVipModal() { vipModal.hidden = true; vipEditing = null; vipBusy = false; }
+
+    document.getElementById('vipModalClose').addEventListener('click', closeVipModal);
+    document.getElementById('vipCancelBtn').addEventListener('click', closeVipModal);
+    vipModal.addEventListener('click', (e) => { if (e.target === vipModal) closeVipModal(); });
+    ['vipName', 'vipThreshold', 'vipDiscount'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', vipPreview);
+    });
+
+    async function saveTier() {
+      if (vipBusy) return;
+      const name = document.getElementById('vipName').value.trim();
+      const th = parseInt(document.getElementById('vipThreshold').value, 10);
+      const disc = parseInt(document.getElementById('vipDiscount').value, 10);
+
+      if (!name) { vipModalNote('Geef het niveau een naam.', 'error'); document.getElementById('vipName').focus(); return; }
+      if (!Number.isFinite(th) || th < 1) { vipModalNote('Vul in vanaf hoeveel punten dit niveau geldt (minimaal 1).', 'error'); document.getElementById('vipThreshold').focus(); return; }
+      if (!Number.isFinite(disc) || disc < 1 || disc > 100) { vipModalNote('Vul een kortingspercentage in tussen 1 en 100.', 'error'); document.getElementById('vipDiscount').focus(); return; }
+      // Twee niveaus op dezelfde drempel is niet te bepalen voor de klant.
+      const clash = loyaltyTiers.find(t => t.threshold === th && (!vipEditing || String(t.id) !== String(vipEditing.id)));
+      if (clash) { vipModalNote('"' + clash.name + '" begint al bij ' + vipPoints(th) + '. Kies een andere drempel.', 'error'); document.getElementById('vipThreshold').focus(); return; }
+
+      const btn = document.getElementById('vipSaveBtn');
+      vipBusy = true; btn.disabled = true;
+      vipModalNote('Opslaan…', '');
+      try {
+        const payload = { card_id: cardId, name: name, threshold: th, discount_percent: disc };
+        const url = vipEditing
+          ? API_BASE + '/api/stamp/loyalty/tiers/' + encodeURIComponent(vipEditing.id)
+          : API_BASE + '/api/stamp/loyalty/tiers';
+        const res = await fetch(url, {
+          method: vipEditing ? 'PUT' : 'POST',
+          headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 403) { closeVipModal(); loyaltyAccess = 'no'; applyLoyaltyLockIcon(); renderLoyaltyLock(); return; }
+        if (!res.ok) throw new Error(data.error || data.message || 'Opslaan mislukt');
+        closeVipModal();
+        vipNote(vipEditing ? 'Niveau bijgewerkt ✓' : 'Niveau toegevoegd ✓', 'ok');
+        await loadLoyalty(true);
+      } catch (err) {
+        vipBusy = false; btn.disabled = false;
+        vipModalNote(isNetworkError(err) ? NET_MSG : (err.message || 'Opslaan mislukt'), 'error');
+      }
+    }
+    document.getElementById('vipSaveBtn').addEventListener('click', saveTier);
+
+    async function deleteTier(id) {
+      const tier = loyaltyTiers.find(t => String(t.id) === String(id));
+      if (!tier) return;
+      if (!window.confirm('"' + tier.name + '" verwijderen? Klanten met deze status verliezen hun korting.')) return;
+      vipNote('Verwijderen…', '');
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/loyalty/tiers/' + encodeURIComponent(id),
+          { method: 'DELETE', headers: authHeaders() });
+        if (res.status === 403) { loyaltyAccess = 'no'; applyLoyaltyLockIcon(); renderLoyaltyLock(); return; }
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || data.message || 'Verwijderen mislukt');
+        vipNote('Niveau verwijderd ✓', 'ok');
+        await loadLoyalty(true);
+      } catch (err) {
+        vipNote(isNetworkError(err) ? NET_MSG : (err.message || 'Verwijderen mislukt'), 'error');
+      }
+    }
+
+    // Voorbeeld met één klik toevoegen; botst de drempel, dan opent de editor zodat je hem kunt aanpassen.
+    async function addLoyaltySuggestion(i) {
+      const sg = LOYALTY_SUGGESTIONS[i];
+      if (!sg || loyaltyTiers.length >= LOYALTY_MAX) return;
+      if (loyaltyTiers.some(t => t.threshold === sg.threshold)) {
+        openVipModal(null);
+        document.getElementById('vipName').value = sg.name;
+        document.getElementById('vipDiscount').value = sg.discount_percent;
+        vipPreview();
+        vipModalNote('Er is al een niveau vanaf ' + vipPoints(sg.threshold) + '. Kies een andere drempel.', 'error');
+        return;
+      }
+      vipNote('Toevoegen…', '');
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/loyalty/tiers', {
+          method: 'POST',
+          headers: Object.assign({ 'Content-Type': 'application/json' }, authHeaders()),
+          body: JSON.stringify({ card_id: cardId, name: sg.name, threshold: sg.threshold, discount_percent: sg.discount_percent }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 403) { loyaltyAccess = 'no'; applyLoyaltyLockIcon(); renderLoyaltyLock(); return; }
+        if (!res.ok) throw new Error(data.error || data.message || 'Toevoegen mislukt');
+        vipNote(sg.name + ' toegevoegd ✓', 'ok');
+        await loadLoyalty(true);
+      } catch (err) {
+        vipNote(isNetworkError(err) ? NET_MSG : (err.message || 'Toevoegen mislukt'), 'error');
+      }
+    }
+
+    document.getElementById('loyaltyWrap').addEventListener('click', (e) => {
+      if (e.target.closest('[data-open-sub]')) { openSubModal(); return; }
+      if (e.target.closest('[data-vip-retry]')) { loadLoyalty(true); return; }
+      if (e.target.closest('[data-vip-add]')) { openVipModal(null); return; }
+      const sugg = e.target.closest('[data-vip-sugg]');
+      if (sugg) { addLoyaltySuggestion(Number(sugg.dataset.vipSugg)); return; }
+      const edit = e.target.closest('[data-vip-edit]');
+      if (edit) { openVipModal(edit.dataset.vipEdit); return; }
+      const del = e.target.closest('[data-vip-del]');
+      if (del) { deleteTier(del.dataset.vipDel); }
+    });
+
     // ---- Grafiek ----
     let currentRange = 'day';
     let chartData = { day: [], week: [] };
@@ -6821,6 +7275,7 @@
           card.website_url = c.website_url ?? card.website_url ?? '';
           card.feedback_enabled = c.feedback_enabled === true;
           card.survey_intro_text = String(c.survey_intro_text ?? card.survey_intro_text ?? '');
+          card.loyalty_enabled = c.loyalty_enabled === true;
 
           const s = data.stats || {};
           document.getElementById('statCustomers').textContent = s.total_customers ?? s.customers ?? 0;
