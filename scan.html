@@ -132,6 +132,17 @@
         .alert { margin: 0 0 18px; padding: 13px 16px; border-radius: 12px; font-size: 14px; line-height: 1.5;
             color: var(--red); background: rgba(255,80,80,.08); border: 1px solid rgba(255,80,80,.26); text-align: left; }
         .alert.hidden { display: none; }
+        .alert.info { color: var(--pearl); background: var(--accent-soft); border-color: rgba(139,92,246,.3); }
+
+        /* ===== Actief account ===== */
+        .acct { display: flex; align-items: center; gap: 12px; margin: 0 0 24px; padding: 13px 15px; border-radius: 14px;
+            background: rgba(var(--ink), .035); border: 1px solid var(--border); text-align: left; }
+        .acct-ic { width: 34px; height: 34px; flex-shrink: 0; border-radius: 10px; display: grid; place-items: center;
+            background: var(--accent-soft); color: var(--accent-2); font-weight: 600; font-size: 15px; }
+        .acct-tx { min-width: 0; }
+        .acct-lbl { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+        .acct-name { font-size: 15.5px; font-weight: 600; color: var(--text-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .acct-mail { font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         /* ===== Toegangscode ===== */
         .pin-dots { display: flex; justify-content: center; gap: 16px; margin: 6px 0 26px; }
@@ -167,6 +178,7 @@
         .brand-eyebrow { font-size: 10.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
         .biz { font-size: 17px; font-weight: 600; letter-spacing: -.02em; color: var(--text-strong);
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .biz-mail { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .topbar-actions { display: flex; align-items: center; gap: 9px; flex-shrink: 0; }
         .icon-btn {
             display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px;
@@ -396,6 +408,7 @@
             .scan-title { font-size: 22px; }
             .topbar { padding: 12px 16px; }
             .icon-btn span { display: none; }
+            .biz-mail { display: none; }
             .icon-btn { padding: 0 13px; }
             .result-card { padding: 30px 22px 26px; }
             .circle { width: 46px; height: 46px; }
@@ -413,7 +426,8 @@
         <div class="box glass">
             <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3 10h18M7 15h4"/></svg></div>
             <h1>Medewerker Login</h1>
-            <p class="sub">Log in om stempels te geven</p>
+            <p class="sub">Log in met het account van de winkel waar je stempels wilt geven</p>
+            <div class="alert info hidden" id="pairNote"></div>
             <div class="alert hidden" id="pairAlert"></div>
             <label>E-mailadres</label>
             <input type="email" id="pairEmail" placeholder="winkel@voorbeeld.nl" autocomplete="username" />
@@ -441,10 +455,19 @@
         <div class="box glass">
             <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
             <h1 id="pinBiz">Voer toegangscode in</h1>
-            <p class="sub" id="pinBizSub">Vergrendeld</p>
+            <p class="sub" style="margin-bottom:18px;">De scanner is vergrendeld</p>
+            <div class="acct">
+                <div class="acct-ic" id="pinAcctIc">?</div>
+                <div class="acct-tx">
+                    <div class="acct-lbl">Ingelogd als</div>
+                    <div class="acct-name" id="pinAcctName">Winkel</div>
+                    <div class="acct-mail" id="pinAcctMail"></div>
+                </div>
+            </div>
             <div class="pin-dots" id="pinDots"></div>
             <div class="alert hidden" id="pinAlert"></div>
             <div class="keypad" id="pinKeypad"></div>
+            <button class="link-btn" onclick="openSettings()">Niet de juiste winkel? Wissel account</button>
         </div>
     </div>
 
@@ -454,13 +477,14 @@
             <div class="brand-block">
                 <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3 10h18M7 15h4"/></svg></div>
                 <div class="brand-text">
-                    <div class="brand-eyebrow">Stempelkaart</div>
+                    <div class="brand-eyebrow">Ingelogd als</div>
                     <div class="biz" id="scanBiz">Winkel</div>
+                    <div class="biz-mail" id="scanMail"></div>
                 </div>
             </div>
             <div class="topbar-actions">
                 <button class="icon-btn" onclick="lockScreen()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Vergrendel</span></button>
-                <button class="icon-btn" onclick="openSettings()" aria-label="Instellingen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-2.82 1.17V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 8 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15H4.5a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 6 9.4l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 11 5.6V5.5a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 2.4 1.51l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 13z"/></svg></button>
+                <button class="icon-btn" onclick="openSettings()" aria-label="Wissel account"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg><span>Wissel account</span></button>
             </div>
         </div>
 
@@ -558,12 +582,10 @@
     <!-- Settings modal -->
     <div class="modal" id="settingsModal">
         <div class="modal-box glass">
-            <h2>Instellingen</h2>
-            <p>Uitloggen sluit deze sessie af. Je moet daarna opnieuw inloggen.</p>
-            <p style="margin-top:14px;">Bevestig met je wachtwoord:</p>
-            <div class="alert hidden" id="unpairAlert"></div>
-            <input type="password" id="unpairPassword" placeholder="Wachtwoord" style="margin-top:14px;" />
-            <button class="btn btn-danger" id="unpairBtn" onclick="doUnpair()">Uitloggen</button>
+            <h2>Wissel account</h2>
+            <p>Je bent ingelogd als <b id="logoutBiz" style="color:var(--text-strong)">Winkel</b>.</p>
+            <p style="margin-top:10px;">Uitloggen wist alles van dit account op dit apparaat (inlog, winkel en toegangscode). Daarna log je in met het juiste account.</p>
+            <button class="btn btn-danger" id="unpairBtn" style="margin-top:20px;" onclick="logout()">Uitloggen</button>
             <button class="btn btn-ghost" onclick="closeSettings()">Annuleren</button>
         </div>
     </div>
@@ -576,14 +598,17 @@
         };
 
         // ---- state ----
-        let store = {
-            card_id: localStorage.getItem(LS.card_id),
-            pin: localStorage.getItem(LS.pin),
-            email: localStorage.getItem(LS.email),
-            biz: localStorage.getItem(LS.biz) || 'Winkel',
-            required: parseInt(localStorage.getItem(LS.required) || '0', 10),
-            reward: localStorage.getItem(LS.reward) || '',
-        };
+        function readStore() {
+            return {
+                card_id: localStorage.getItem(LS.card_id),
+                pin: localStorage.getItem(LS.pin),
+                email: localStorage.getItem(LS.email),
+                biz: localStorage.getItem(LS.biz) || 'Winkel',
+                required: parseInt(localStorage.getItem(LS.required) || '0', 10),
+                reward: localStorage.getItem(LS.reward) || '',
+            };
+        }
+        let store = readStore();
         let current = null;   // { holder_id, customer_qr_code, stamps_collected, stamps_required, ... }
         let amount = 1;
         let setpinBuffer = '', setpinFirst = null;
@@ -615,11 +640,18 @@
             const token = authToken();
             const headers = Object.assign({}, opts.headers || {});
             if (token && !headers.Authorization) headers.Authorization = 'Bearer ' + token;
+            let res;
             try {
-                return await fetch(url, Object.assign({}, opts, { headers }));
+                res = await fetch(url, Object.assign({}, opts, { headers }));
             } catch (_) {
                 const e = new Error(NET_MSG); e.network = true; throw e;
             }
+            // Token verlopen of hoort bij een ander account: niet doorwerken met een halve sessie.
+            if (res.status === 401 && token && !/\/login$/.test(url)) {
+                logout('Je sessie is verlopen. Log opnieuw in.');
+                const e = new Error('Sessie verlopen'); e.handled = true; throw e;
+            }
+            return res;
         }
         // Dubbele-scan bescherming: dezelfde kaart kan 3s lang niet opnieuw verwerkt worden.
         let lastStampedQr = null, lastStampAt = 0;
@@ -628,17 +660,79 @@
         // Altijd de actuele card_id ophalen — localStorage is leidend, store.card_id als fallback.
         function activeCardId() { return localStorage.getItem(LS.card_id) || store.card_id || ''; }
 
+        // ---- sessie ----
+        // Alles van het vorige account wissen: onze vaste sleutels én eventuele oude stamp_*-restanten.
+        function clearSession() {
+            Object.values(LS).forEach(k => localStorage.removeItem(k));
+            Object.keys(localStorage).filter(k => k.indexOf('stamp_') === 0).forEach(k => localStorage.removeItem(k));
+            try { sessionStorage.clear(); } catch (_) {}
+            store = readStore();
+            current = null; amount = 1; pinBuffer = ''; setpinBuffer = ''; setpinFirst = null;
+            lastStampedQr = null; lastStampAt = 0;
+        }
+        // Toon overal welk account actief is (topbalk, vergrendelscherm, uitlog-venster).
+        function renderAccount() {
+            const biz = store.biz || 'Winkel';
+            $('scanBiz').textContent = biz;
+            $('scanMail').textContent = store.email || '';
+            $('pinAcctName').textContent = biz;
+            $('pinAcctMail').textContent = store.email || '';
+            $('pinAcctIc').textContent = (biz.trim()[0] || '?').toUpperCase();
+            $('logoutBiz').textContent = biz;
+        }
+        function showLogin(note) {
+            $('pairEmail').value = ''; $('pairPassword').value = '';
+            hideAlert('pairAlert');
+            if (note) showAlert('pairNote', note); else hideAlert('pairNote');
+            showScreen('pair');
+        }
+        // Uitloggen = alles wissen en schoon terug naar het inlogscherm.
+        function logout(note) {
+            stopCamera();
+            closeSettings();
+            clearSession();
+            resetToScan();
+            $('statStamps').textContent = '–'; $('statCustomers').textContent = '–';
+            renderAccount();
+            showLogin(note || 'Je bent uitgelogd. Log in met het account van de juiste winkel.');
+        }
+
+        // Kaartgegevens (winkelnaam, doel, beloning) van de server; true = sessie geldig.
+        async function refreshCardInfo() {
+            const cid = activeCardId();
+            if (!cid) return false;
+            const res = await apiCall(API_BASE + '/api/stamp/cards/' + encodeURIComponent(cid));
+            if (res.status === 404) return false;      // kaart bestaat niet (meer) voor dit account
+            const card = await res.json().catch(() => ({}));
+            if (!res.ok) return true;                  // 403 (bv. manager) of serverfout: sessie niet afkeuren
+            const c = card.card || card.data || card;
+            store.biz = c.business_name || store.biz || 'Winkel';
+            store.required = Number(c.stamps_required || store.required || 0) || 0;
+            store.reward = c.reward_description || store.reward || '';
+            localStorage.setItem(LS.biz, store.biz);
+            localStorage.setItem(LS.required, String(store.required));
+            localStorage.setItem(LS.reward, store.reward);
+            renderAccount();
+            return true;
+        }
+
         // ---- routing on load ----
         function boot() {
-            if (store.card_id && store.pin) {
-                $('pinBizSub').textContent = store.biz;
-                $('scanBiz').textContent = store.biz;
-                buildKeypad('pinKeypad', onPinKey);
-                renderDots('pinDots', 0);
-                showScreen('pin');
-            } else {
-                showScreen('pair');
+            const complete = localStorage.getItem(LS.token) && store.card_id && store.pin;
+            if (!complete) {
+                // Halve of oude sessie: helemaal wissen, zodat de nieuwe login schoon begint.
+                clearSession();
+                showLogin();
+                return;
             }
+            renderAccount();
+            buildKeypad('pinKeypad', onPinKey);
+            renderDots('pinDots', 0);
+            showScreen('pin');
+            // Op de achtergrond controleren of de sessie nog klopt en de winkelnaam verversen.
+            refreshCardInfo().then(ok => {
+                if (!ok) logout('Deze sessie is niet meer geldig. Log opnieuw in.');
+            }).catch(() => { /* offline of al afgehandeld: sessie laten staan */ });
         }
 
         // ================= STAP 1: LOGIN =================
@@ -665,34 +759,31 @@
                     showAlert('pairAlert', data.error || 'Inloggen mislukt. Controleer je gegevens.');
                     return;
                 }
+                // Schone lei: niets van een vorig account mag blijven hangen.
+                clearSession();
                 localStorage.setItem(LS.token, data.token);
                 localStorage.setItem(LS.card_id, data.card_id);
                 localStorage.setItem(LS.email, email);
                 store.card_id = data.card_id; store.email = email;
+                store.biz = data.business_name || email;   // tijdelijk, tot de kaart binnen is
+                localStorage.setItem(LS.biz, store.biz);
+                renderAccount();
+                hideAlert('pairNote');
+                $('pairPassword').value = '';
 
                 // Kaartgegevens ophalen (bedrijfsnaam, aantal stempels, beloning)
-                try {
-                    const cardRes = await apiCall(API_BASE + '/api/stamp/cards/' + data.card_id);
-                    const card = await cardRes.json();
-                    if (cardRes.ok) {
-                        store.biz = card.business_name || 'Winkel';
-                        store.required = card.stamps_required || 0;
-                        store.reward = card.reward_description || '';
-                        localStorage.setItem(LS.biz, store.biz);
-                        localStorage.setItem(LS.required, String(store.required));
-                        localStorage.setItem(LS.reward, store.reward);
-                    }
-                } catch (_) { /* niet kritiek */ }
+                try { await refreshCardInfo(); } catch (_) { /* niet kritiek */ }
 
                 // Door naar toegangscode instellen
                 setpinBuffer = ''; setpinFirst = null;
                 $('setpinTitle').innerHTML = 'Kies een snelle toegangscode';
-                $('setpinSub').textContent = 'Voor snel vergrendelen tijdens werk';
+                $('setpinSub').textContent = 'Voor ' + store.biz + ' · om snel te vergrendelen tijdens werk';
                 buildKeypad('setpinKeypad', onSetpinKey);
                 renderDots('setpinDots', 0);
                 hideAlert('setpinAlert');
                 showScreen('setpin');
             } catch (err) {
+                if (err.handled) return;
                 showAlert('pairAlert', err.network ? err.message : 'Er ging iets mis. Probeer het opnieuw.');
             } finally {
                 btn.disabled = false; btn.textContent = 'Inloggen';
@@ -776,7 +867,7 @@
 
         // ================= SCAN INTERFACE =================
         function enterScan() {
-            $('scanBiz').textContent = store.biz;
+            renderAccount();
             resetToScan();
             showScreen('scan');
             loadTodayStats();
@@ -964,6 +1055,16 @@
             rafId = requestAnimationFrame(tick);
         }
 
+        // Kaart/klant onbekend voor dit account: zeg welk account actief is, niet een vaag "niet bekend".
+        const WRONG_ACCOUNT_RX = /niet bekend|onbekend|niet gevonden|not found|unknown|andere (kaart|winkel)|hoort niet/i;
+        function wrongAccountMsg() {
+            return 'Deze klant hoort niet bij ' + (store.biz || 'deze winkel') +
+                '. Controleer of je met het juiste account bent ingelogd.';
+        }
+        function isWrongAccount(res, data) {
+            return res.status === 404 || WRONG_ACCOUNT_RX.test(String((data && (data.error || data.message)) || ''));
+        }
+
         async function onQrDetected(qr) {
             // Dubbele scan: dezelfde kaart binnen 3s na een stempel negeren.
             if (qr === lastStampedQr && (Date.now() - lastStampAt) < RESCAN_BLOCK_MS) {
@@ -985,7 +1086,8 @@
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok || !data.success) {
                     $('cameraOpenWrap').style.display = 'flex';
-                    showAlert('scanAlert', data.error || 'Klant niet gevonden. Probeer de QR-code opnieuw te scannen.');
+                    showAlert('scanAlert', isWrongAccount(res, data) ? wrongAccountMsg()
+                        : (data.error || 'Klant niet gevonden. Probeer de QR-code opnieuw te scannen.'));
                     return;
                 }
                 hideAlert('scanAlert');
@@ -999,6 +1101,7 @@
                 amount = 1;
                 showCustomer();
             } catch (err) {
+                if (err.handled) return;
                 $('cameraOpenWrap').style.display = 'flex';
                 showAlert('scanAlert', err.network ? err.message : 'Kon de klant niet ophalen. Probeer het opnieuw.');
             }
@@ -1266,7 +1369,8 @@
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok || !data.success) {
                     btn.disabled = false; btn.textContent = original;
-                    showAlert('scanAlert', data.error || 'Stempel niet opgeslagen — probeer opnieuw.');
+                    showAlert('scanAlert', isWrongAccount(res, data) ? wrongAccountMsg()
+                        : (data.error || 'Stempel niet opgeslagen — probeer opnieuw.'));
                     return;
                 }
                 // Onthoud voor dubbele-scan bescherming (3s dezelfde kaart blokkeren).
@@ -1419,30 +1523,10 @@
         }
 
         // ================= INSTELLINGEN / UITLOGGEN =================
-        function openSettings() { $('unpairPassword').value = ''; hideAlert('unpairAlert'); $('settingsModal').classList.add('on'); }
+        // Uitloggen vraagt geen wachtwoord: het geeft geen toegang, het neemt die juist weg.
+        // (Het oude wachtwoord-venster werkte bovendien niet voor manager-accounts.)
+        function openSettings() { renderAccount(); $('settingsModal').classList.add('on'); }
         function closeSettings() { $('settingsModal').classList.remove('on'); }
-        async function doUnpair() {
-            const password = $('unpairPassword').value;
-            const btn = $('unpairBtn');
-            hideAlert('unpairAlert');
-            if (!password) return showAlert('unpairAlert', 'Vul je wachtwoord in.');
-            if (!store.email) return showAlert('unpairAlert', 'Geen account bekend op dit apparaat.');
-            btn.disabled = true; btn.textContent = 'Controleren…';
-            try {
-                const res = await apiCall(API_BASE + '/api/stamp/login', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: store.email, password }),
-                });
-                const data = await res.json().catch(() => ({}));
-                if (!res.ok || !data.token) { showAlert('unpairAlert', 'Onjuist wachtwoord.'); return; }
-                Object.values(LS).forEach(k => localStorage.removeItem(k));
-                location.reload();
-            } catch (err) {
-                showAlert('unpairAlert', err.network ? err.message : 'Er ging iets mis. Probeer opnieuw.');
-            } finally {
-                btn.disabled = false; btn.textContent = 'Uitloggen';
-            }
-        }
 
         window.addEventListener('DOMContentLoaded', boot);
     </script>
