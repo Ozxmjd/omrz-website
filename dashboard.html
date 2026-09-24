@@ -439,6 +439,15 @@
     .save-note { font-size: 13px; color: var(--muted); }
     .save-note.ok { color: #8fe0b0; }
     .save-note.error { color: #f0a8a8; }
+    /* Scan-app blok (Vestigingen) */
+    .sa-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
+    .sa-head .b-sub { margin-bottom: 0; max-width: 520px; }
+    .sa-head .btn { flex-shrink: 0; text-decoration: none; }
+    .sa-head .btn svg { width: 16px; height: 16px; }
+    .spc-field { max-width: 280px; margin-bottom: 0; }
+    .spc-field input { letter-spacing: .2em; font-variant-numeric: tabular-nums; }
+    .spc-actions { margin-top: 16px; flex-wrap: wrap; }
+    #spcBody[hidden], #spcNoManage[hidden], #spcDelBtn[hidden] { display: none; }
 
     /* ---------- Bedrijfsgegevens ---------- */
     /* Compactere velden: veel gegevens op een scherm, zonder dat het formulier zwaar wordt. */
@@ -2236,6 +2245,36 @@
             <p>Beheer je adres, vestigingen, spaarmodus en managers.</p>
           </div>
 
+          <!-- Scan-app: openen + gedeelde toegangscode -->
+          <div class="block glass" id="scanAppBlock" style="margin-bottom:26px;">
+            <div class="sa-head">
+              <div>
+                <h3>Scan-app</h3>
+                <p class="b-sub">Open de scan-app op het apparaat in je winkel. Medewerkers loggen in en gebruiken de toegangscode.</p>
+              </div>
+              <a class="btn btn-primary" href="scan.html" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>
+                Scan-app openen
+              </a>
+            </div>
+
+            <hr class="sv-intro-sep" />
+            <h3>Scan-app toegangscode <span class="sv-state off" id="spcState">Laden…</span></h3>
+            <p class="b-sub">Stel een code in die je medewerkers gebruiken om de scan-app te openen. De code geldt voor al je apparaten.</p>
+            <div id="spcBody">
+              <div class="field spc-field">
+                <label for="spcInput" id="spcLabel">Code (4 tot 8 cijfers)</label>
+                <input type="text" id="spcInput" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" spellcheck="false" placeholder="Bijv. 2580" />
+              </div>
+              <div class="save-row spc-actions">
+                <button type="button" class="btn btn-primary" id="spcSaveBtn"><span class="btn-label">Code instellen</span></button>
+                <button type="button" class="btn btn-danger" id="spcDelBtn" hidden>Code verwijderen</button>
+                <span class="save-note" id="spcNote"></span>
+              </div>
+            </div>
+            <p class="b-sub" id="spcNoManage" style="margin-bottom:0" hidden>Alleen de eigenaar van het account kan de toegangscode instellen of wijzigen.</p>
+          </div>
+
           <!-- Kop + toevoegen -->
           <div class="loc-list-head">
             <h3>Adres &amp; vestigingen</h3>
@@ -2900,7 +2939,7 @@
       if (tab === 'qr') renderQR();
       if (tab === 'klanten') loadCustomers();
       if (tab === 'overzicht') refreshOverview();   // header, stats, kaart-preview en recente activiteit verversen
-      if (tab === 'vestigingen') renderLocationsPanel();
+      if (tab === 'vestigingen') { renderLocationsPanel(); loadScanPincode(); }
       if (tab === 'abonnement') renderSubscriptionPanel();
       if (tab === 'facturen') loadInvoices();
       if (tab === 'bedrijfsgegevens') loadBusinessProfile();
@@ -7746,6 +7785,91 @@
         const wanted = Math.max(subscribedLocations(), locQuota.current || locations.length || 0) + 1;
         openSubModal({ mode: 'change', locations: wanted });
       }
+    });
+
+    // ---- Scan-app toegangscode (gedeeld per account) ----
+    let spc = { set: false, manage: true, busy: false };
+    function spcNote(msg, kind) {
+      const el = document.getElementById('spcNote');
+      if (!el) return;
+      el.textContent = msg || '';
+      el.className = 'save-note' + (msg ? ' ' + (kind || '') : '');
+    }
+    function renderScanPincode() {
+      const pill = document.getElementById('spcState');
+      if (pill) { pill.textContent = spc.set ? 'Ingesteld' : 'Geen code'; pill.classList.toggle('off', !spc.set); }
+      document.getElementById('spcBody').hidden = !spc.manage;
+      document.getElementById('spcNoManage').hidden = spc.manage;
+      document.getElementById('spcDelBtn').hidden = !spc.set;
+      document.getElementById('spcLabel').textContent = spc.set ? 'Nieuwe code (4 tot 8 cijfers)' : 'Code (4 tot 8 cijfers)';
+      const lbl = document.querySelector('#spcSaveBtn .btn-label');
+      if (lbl) lbl.textContent = spc.set ? 'Code wijzigen' : 'Code instellen';
+    }
+    async function loadScanPincode() {
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/scan-pincode-status', { headers: authHeaders() });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || ('HTTP ' + res.status));
+        const d = data.data || data;
+        spc.set = d.pincode_set === true;
+        spc.manage = d.can_manage !== false;
+        renderScanPincode();
+      } catch (err) {
+        const pill = document.getElementById('spcState');
+        if (pill) { pill.textContent = 'Onbekend'; pill.classList.add('off'); }
+        spcNote(isNetworkError(err) ? NET_MSG : 'Kon de status van de toegangscode niet laden.', 'error');
+      }
+    }
+    async function saveScanPincode() {
+      if (spc.busy) return;
+      const input = document.getElementById('spcInput');
+      const code = input.value.trim();
+      if (!/^\d{4,8}$/.test(code)) { spcNote('Gebruik 4 tot 8 cijfers.', 'error'); input.focus(); return; }
+      spc.busy = true;
+      const btn = document.getElementById('spcSaveBtn'); btn.disabled = true;
+      spcNote('Opslaan…', '');
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/scan-pincode', {
+          method: 'POST', headers: authHeaders(), body: JSON.stringify({ code }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || data.message || 'Opslaan mislukt');
+        const wasSet = spc.set;
+        spc.set = true; input.value = '';
+        renderScanPincode();
+        spcNote(wasSet ? 'Code gewijzigd ✓ Deel de nieuwe code met je medewerkers.' : 'Code ingesteld ✓ Medewerkers hebben deze code nu nodig in de scan-app.', 'ok');
+      } catch (err) {
+        spcNote(isNetworkError(err) ? NET_MSG : ('Kon niet opslaan: ' + (err.message || 'onbekende fout')), 'error');
+      } finally {
+        spc.busy = false; btn.disabled = false;
+      }
+    }
+    async function deleteScanPincode() {
+      if (spc.busy) return;
+      if (!window.confirm('Toegangscode verwijderen? De scan-app vraagt daarna geen code meer.')) return;
+      spc.busy = true;
+      const btn = document.getElementById('spcDelBtn'); btn.disabled = true;
+      spcNote('Verwijderen…', '');
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/scan-pincode', { method: 'DELETE', headers: authHeaders() });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || data.message || 'Verwijderen mislukt');
+        spc.set = false;
+        renderScanPincode();
+        spcNote('Code verwijderd ✓ De scan-app opent nu zonder code.', 'ok');
+      } catch (err) {
+        spcNote(isNetworkError(err) ? NET_MSG : ('Kon niet verwijderen: ' + (err.message || 'onbekende fout')), 'error');
+      } finally {
+        spc.busy = false; btn.disabled = false;
+      }
+    }
+    document.getElementById('spcSaveBtn').addEventListener('click', saveScanPincode);
+    document.getElementById('spcDelBtn').addEventListener('click', deleteScanPincode);
+    document.getElementById('spcInput').addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 8);   // alleen cijfers
+    });
+    document.getElementById('spcInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); saveScanPincode(); }
     });
 
     function renderLocationsPanel() {
