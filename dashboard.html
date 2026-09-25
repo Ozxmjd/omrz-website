@@ -1190,6 +1190,10 @@
 
     /* ---------- Spaarmodus ---------- */
     .share-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 4px 0 20px; }
+    /* VIP telmethode: waarschuwing + bevestigen bij wisselen */
+    .vip-method-warn { margin-top: 0; flex-wrap: wrap; }
+    .vip-method-warn .vmw-tx { flex: 1; min-width: 200px; }
+    .vip-method-warn .vmw-acts { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
     .share-mode { display: flex; gap: 12px; text-align: left; padding: 15px 17px; border-radius: 12px; cursor: pointer; font-family: inherit; color: var(--text-strong); background: rgba(var(--ink), .022); border: 1px solid var(--border); transition: border-color .2s var(--ease), background .2s var(--ease); }
     .share-mode:hover { background: var(--card-hover); border-color: var(--border-strong); }
     .share-mode.active { border-color: rgba(var(--ink), .24); background: rgba(var(--ink), .055); }
@@ -5173,15 +5177,18 @@
       if (typeof v === 'string') return v.trim();
       return String(v.name ?? v.tier_name ?? v.title ?? '').trim();
     }
+    // De lookup levert de VIP-velden genest onder `loyalty`; oudere antwoorden plat. Beide lezen.
+    // Punten komen UITSLUITEND uit lifetime_points — nooit uit total_rewards_earned (aantal beloningen).
     function readLoyalty(raw) {
-      const d = raw || {};
+      const r = raw || {};
+      const d = Object.assign({}, r, (r.loyalty && typeof r.loyalty === 'object') ? r.loyalty : {});
       const num = v => { const n = Number(v); return Number.isFinite(n) ? n : null; };
       const cur = d.current_tier ?? d.tier ?? null;
       const objDisc = (cur && typeof cur === 'object') ? num(cur.discount_percent ?? cur.discount ?? cur.percentage) : null;
       return {
         name: loyaltyTierName(cur) || String(d.tier_name ?? '').trim(),
         discount: num(d.discount_percent ?? d.discount) ?? objDisc,
-        points: num(d.lifetime_points ?? d.total_points ?? d.points ?? d.loyalty_points),
+        points: num(d.lifetime_points),
         nextName: loyaltyTierName(d.next_tier ?? null),
         toNext: num(d.points_to_next ?? d.points_until_next ?? d.points_to_next_tier),
       };
@@ -5515,6 +5522,10 @@
         rawStamps: stamps,
         required,
         rewards: Number(raw.total_rewards_earned ?? raw.rewards_earned ?? raw.rewards ?? 0) || 0,
+        // VIP: alleen lifetime_points (null = programma uit). Los van het aantal beloningen hierboven.
+        vipPoints: (raw.lifetime_points === null || raw.lifetime_points === undefined) ? null : (Number(raw.lifetime_points) || 0),
+        vipTier: String(raw.tier_name || '').trim(),
+        vipDiscount: Number(raw.tier_discount_percent) || 0,
         lastVisitRaw,
         lastVisit: formatVisitDate(lastVisitRaw),
         createdRaw,
@@ -5605,6 +5616,10 @@
             ${detailRow('E-mailadres', mail, !c.email)}
             ${detailRow('Telefoonnummer', tel, !c.phone)}
             ${detailRow('Beloningen verdiend', String(c.rewards), false)}
+            ${c.vipPoints !== null ? detailRow('VIP-punten', escapeHtml(vipPoints(c.vipPoints)), false) : ''}
+            ${c.vipPoints !== null ? detailRow('VIP-status', c.vipTier
+              ? escapeHtml(c.vipTier) + (c.vipDiscount > 0 ? ' · ' + c.vipDiscount + '% korting' : '')
+              : 'Nog geen niveau', !c.vipTier) : ''}
             ${detailRow('Geregistreerd', escapeHtml(c.created || 'Onbekend'), !c.created)}
             ${detailRow('Laatste bezoek', escapeHtml(c.lastVisit || 'Nog geen bezoek'), !c.lastVisit)}
           </div>
@@ -7031,6 +7046,14 @@
     let loyaltyEnabled = false;
     let loyaltyAccess = 'unknown';     // unknown | yes | no
     let loyaltyLoaded = false;
+    // Telmethode voor VIP-punten: 'stamps' (per stempel) of 'rewards' (per volle kaart).
+    const COUNT_METHODS = {
+      stamps: { label: 'Per stempel', unit: 'stempels', hint: 'Elke stempel telt 1 punt. Een klant die 2x een kaart van 6 stempels vol maakt, heeft 12 punten.' },
+      rewards: { label: 'Per volle kaart', unit: 'volle kaarten', hint: 'Elke voltooide kaart (beloning) telt 1 punt. Een klant die 2x een kaart vol maakt, heeft 2 punten.' },
+    };
+    let loyaltyCountMethod = 'stamps';
+    let pendingCountMethod = null;     // gekozen maar nog niet bevestigd
+    let countMethodBusy = false;
     let vipEditing = null;
     let vipBusy = false;
 
@@ -7084,6 +7107,10 @@
         loyaltyTiers = sortTiers(list.map(normalizeTier).filter(t => t.name));
         loyaltyEnabled = (d.loyalty_enabled ?? d.enabled ?? d.is_enabled ?? card.loyalty_enabled) === true;
         card.loyalty_enabled = loyaltyEnabled;
+        const m = String(d.loyalty_count_method ?? data.loyalty_count_method ?? card.loyalty_count_method ?? 'stamps');
+        loyaltyCountMethod = COUNT_METHODS[m] ? m : 'stamps';
+        card.loyalty_count_method = loyaltyCountMethod;
+        pendingCountMethod = null;
         loyaltyAccess = 'yes'; loyaltyLoaded = true;
         applyLoyaltyLockIcon(); renderLoyalty();
       } catch (err) {
@@ -7160,7 +7187,7 @@
 
       wrap.innerHTML = `<div class="block glass">
           <h3>Hoe het werkt</h3>
-          <p class="b-sub">Beloon klanten die veel sparen met een vaste status en korting. Klanten sparen levenslang punten (stempels). Zodra ze een drempel bereiken, krijgen ze automatisch de status en korting.</p>
+          <p class="b-sub">Beloon klanten die veel sparen met een vaste status en korting. Klanten sparen levenslang punten (${COUNT_METHODS[loyaltyCountMethod].unit}). Zodra ze een drempel bereiken, krijgen ze automatisch de status en korting.</p>
 
           <div class="switch-row">
             <span class="switch-tx">
@@ -7170,6 +7197,30 @@
             <input type="checkbox" class="switch" id="vipEnabled" ${on ? 'checked' : ''} />
           </div>
           <div class="save-note" id="vipToggleNote" style="margin-top:12px"></div>
+
+          <hr class="sv-intro-sep" />
+          <h3>Hoe wil je punten tellen?</h3>
+          <p class="b-sub">Bepaalt hoe klanten punten sparen voor hun VIP-niveau.</p>
+          <div class="share-modes" role="radiogroup" aria-label="Telmethode">
+            ${Object.keys(COUNT_METHODS).map(k => {
+              const sel = (pendingCountMethod || loyaltyCountMethod) === k;
+              return `<button type="button" class="share-mode${sel ? ' active' : ''}" role="radio" aria-checked="${sel}" data-vip-method="${k}" ${countMethodBusy ? 'disabled' : ''}>
+                <span class="sm-radio"></span>
+                <span class="sm-tx"><strong>${COUNT_METHODS[k].label}</strong><small>${COUNT_METHODS[k].hint}</small></span>
+              </button>`;
+            }).join('')}
+          </div>
+          ${pendingCountMethod ? `<div class="sv-off-note vip-method-warn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/></svg>
+            <div class="vmw-tx">
+              <b>Let op:</b> als je de telmethode wijzigt, betekenen je huidige niveaus iets anders. Controleer je drempels na het wijzigen.
+              <div class="vmw-acts">
+                <button type="button" class="btn btn-primary" data-vip-method-confirm ${countMethodBusy ? 'disabled' : ''}>Wijzig naar ${COUNT_METHODS[pendingCountMethod].label.toLowerCase()}</button>
+                <button type="button" class="btn btn-ghost" data-vip-method-cancel ${countMethodBusy ? 'disabled' : ''}>Annuleren</button>
+              </div>
+            </div>
+          </div>` : ''}
+          <div class="save-note" id="vipMethodNote" style="margin-top:12px"></div>
         </div>
 
         <div class="block glass${on ? '' : ' vip-off'}" style="margin-top:20px" ${on ? '' : 'aria-hidden="true"'}>
@@ -7200,6 +7251,7 @@
 
       applySatNote('vipToggleNote');
       applySatNote('vipListNote');
+      applySatNote('vipMethodNote');
     }
 
     function vipNote(msg, kind) { satNote('vipListNote', msg, kind); }
@@ -7241,6 +7293,36 @@
         satNote('vipToggleNote', isNetworkError(err) ? NET_MSG : ('Kon niet opslaan: ' + (err.message || 'onbekende fout')), 'error');
       }
     });
+
+    // ---- Telmethode opslaan ----
+    // Eigen PUT (niet saveCardField): een 403 hoort hier het VIP-slot te tonen, niet dat van de enquête.
+    async function saveCountMethod() {
+      const want = pendingCountMethod;
+      if (!want || countMethodBusy) return;
+      countMethodBusy = true; renderLoyalty();
+      satNote('vipMethodNote', 'Opslaan…', '');
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/cards/' + encodeURIComponent(cardId), {
+          method: 'PUT', headers: authHeaders(), body: JSON.stringify({ loyalty_count_method: want }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 403) {
+          countMethodBusy = false; pendingCountMethod = null;
+          loyaltyAccess = 'no'; applyLoyaltyLockIcon(); renderLoyaltyLock();
+          return;
+        }
+        if (!res.ok) throw new Error(data.error || data.message || 'Opslaan mislukt');
+        loyaltyCountMethod = want;
+        card.loyalty_count_method = want;
+        pendingCountMethod = null;
+        satNote('vipMethodNote', 'Telmethode opgeslagen: ' + COUNT_METHODS[want].label.toLowerCase() + ' ✓ Controleer nu je drempels hieronder.', 'ok');
+      } catch (err) {
+        satNote('vipMethodNote', isNetworkError(err) ? NET_MSG : ('Kon niet opslaan: ' + (err.message || 'onbekende fout')), 'error');
+      } finally {
+        countMethodBusy = false;
+        if (loyaltyAccess !== 'no') renderLoyalty();
+      }
+    }
 
     // ---- Niveau-editor ----
     const vipModal = document.getElementById('vipModal');
@@ -7374,6 +7456,18 @@
     document.getElementById('loyaltyWrap').addEventListener('click', (e) => {
       if (e.target.closest('[data-open-sub]')) { openSubModal(); return; }
       if (e.target.closest('[data-vip-retry]')) { loadLoyalty(true); return; }
+      const meth = e.target.closest('[data-vip-method]');
+      if (meth) {
+        if (countMethodBusy) return;
+        const m = meth.dataset.vipMethod;
+        // Terug naar de huidige keuze = niets te wijzigen; een andere keuze eerst bevestigen.
+        pendingCountMethod = m === loyaltyCountMethod ? null : m;
+        satNote('vipMethodNote', '', '');
+        renderLoyalty();
+        return;
+      }
+      if (e.target.closest('[data-vip-method-cancel]')) { pendingCountMethod = null; renderLoyalty(); return; }
+      if (e.target.closest('[data-vip-method-confirm]')) { saveCountMethod(); return; }
       if (e.target.closest('[data-vip-add]')) { openVipModal(null); return; }
       const sugg = e.target.closest('[data-vip-sugg]');
       if (sugg) { addLoyaltySuggestion(Number(sugg.dataset.vipSugg)); return; }

@@ -1229,8 +1229,11 @@
             const n = Number(v.discount_percent ?? v.discount ?? v.percentage);
             return Number.isFinite(n) ? n : null;
         }
+        // De lookup levert de VIP-velden genest onder `loyalty`; oudere antwoorden plat. Beide lezen.
+        // Punten komen UITSLUITEND uit lifetime_points — nooit uit total_rewards_earned (aantal beloningen).
         function loyaltyOf(raw) {
-            const d = raw || {};
+            const r = raw || {};
+            const d = Object.assign({}, r, (r.loyalty && typeof r.loyalty === 'object') ? r.loyalty : {});
             const num = v => { const n = Number(v); return Number.isFinite(n) ? n : null; };
             const cur = d.current_tier ?? d.tier ?? null;
             const name = tierName(cur) || String(d.tier_name ?? '').trim();
@@ -1239,7 +1242,7 @@
             return {
                 name: name,
                 discount: disc === null ? null : Math.round(disc),
-                points: num(d.lifetime_points ?? d.total_points ?? d.points ?? d.loyalty_points),
+                points: num(d.lifetime_points),
                 nextName: tierName(next),
                 toNext: num(d.points_to_next ?? d.points_until_next ?? d.points_to_next_tier),
             };
