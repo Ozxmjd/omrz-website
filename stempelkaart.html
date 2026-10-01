@@ -324,12 +324,13 @@
     .journey-step p { color: #d4d4d8; font-size: 16px; }
 
     .price-wrap { max-width: 460px; margin: 0 auto; }
-    .price-card { padding: 44px 38px; text-align: center; position: relative; }
+    .price-card { padding: 44px 38px; text-align: center; position: relative; display: flex; flex-direction: column; }
     .price-tier { font-size: 15px; font-weight: 600; color: var(--accent); letter-spacing: .04em; }
     .price-amount { font-size: 60px; font-weight: 800; letter-spacing: -.03em; margin: 12px 0 4px; }
     .price-amount small { font-size: 18px; font-weight: 500; color: var(--muted); }
     .price-desc { color: var(--muted); font-size: 15.5px; margin-bottom: 28px; }
-    .price-features { list-style: none; display: grid; gap: 13px; margin-bottom: 32px; text-align: left; }
+    /* flex: 1 duwt de knop naar onderen, zodat de knoppen naast elkaar op één lijn staan */
+    .price-features { list-style: none; display: grid; gap: 13px; margin-bottom: 32px; text-align: left; flex: 1; align-content: start; }
     .price-features li { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; color: #d4d4d8; }
     .price-features svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--accent); margin-top: 1px; }
 
@@ -704,6 +705,7 @@
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Alles van Basic</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Locatie meldingen: klanten krijgen bericht als ze in de buurt zijn</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Klantinzichten: wie zijn je klanten</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>E-mail naar je klanten, rechtstreeks vanuit je dashboard (4x per maand)</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Prioriteit support</li>
           </ul>
           <a href="aanmelden.html?pakket=premium" class="btn btn-primary btn-block btn-lg">Kies Premium</a>
@@ -716,6 +718,7 @@
           <p class="price-desc">Alles van Premium, plus je eigen klantonderzoek.</p>
           <ul class="price-features">
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Alles van Premium</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>E-mail naar je klanten, rechtstreeks vanuit je dashboard (12x per maand)</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Klantonderzoek: stel je eigen enquête samen</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Klanten vullen hem in bij het aanmaken van hun kaart</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Uitgebreide statistieken en inzichten</li>
