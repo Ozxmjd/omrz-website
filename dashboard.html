@@ -1240,6 +1240,11 @@
     .loc-main { padding: 22px; border-color: var(--border-strong); margin-bottom: 12px; }
     .loc-ic-main { background: rgba(var(--ink), .07); }
     .loc-badge { display: inline-block; font-size: 9.5px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--pearl); background: rgba(var(--ink), .055); border: 1px solid var(--border-strong); padding: 3px 9px; border-radius: 999px; margin-bottom: 9px; }
+    .loc-badge.off { color: var(--muted); background: rgba(var(--ink), .03); border-style: dashed; }
+    /* Gedeactiveerd: zichtbaar maar duidelijk op een zijspoor. Niet verbergen — de
+       winkelier moet hem terug kunnen zetten. */
+    .loc-card.loc-off { opacity: .66; }
+    .loc-card.loc-off .loc-name { text-decoration: line-through; text-decoration-thickness: 1px; }
     .loc-main .loc-name { font-size: 17px; }
     .loc-addr.big { font-size: 14.5px; color: var(--pearl); margin-top: 5px; line-height: 1.45; }
     .loc-sub { font-size: 12.5px; color: var(--muted); margin-top: 5px; }
@@ -7677,6 +7682,10 @@
         stamps: Number(raw.stamp_count ?? raw.stamps ?? raw.total_stamps ?? 0) || 0,
         managers: Array.isArray(raw.managers) ? raw.managers : null,
         isMain: !!(raw.is_main ?? raw.is_primary ?? raw.main ?? raw.primary ?? raw.hoofdvestiging ?? false),
+        // Een gedeactiveerde vestiging blijft in de lijst staan (de backend verwijdert
+        // hem niet als er stempelhistorie is). Zonder dit veld zag zo'n rij er precies
+        // hetzelfde uit als een actieve, en leek deactiveren niets te doen.
+        active: raw.active !== false,
         lat: raw.latitude ?? raw.lat ?? null,
         lng: raw.longitude ?? raw.lng ?? raw.lon ?? null,
       };
@@ -7769,21 +7778,27 @@
     const PIN_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
 
     // Compacte actieknoppen per vestiging (data-act stuurt de afhandeling).
-    function locActionsHtml(isMain) {
+    function locActionsHtml(isMain, isActive) {
+      // Inactief? Dan is 'Verwijderen' zinloos (dat leidt alleen tot dezelfde
+      // deactivering) en wil de winkelier juist de weg terug.
+      const laatste = isActive === false
+        ? '<button class="btn btn-primary" data-act="reactivate">Heractiveren</button>'
+        : '<button class="btn btn-danger" data-act="delete">Verwijderen</button>';
       return `<div class="loc-actions">
             <button class="btn btn-ghost" data-act="edit">${isMain ? 'Adres bewerken' : 'Bewerken'}</button>
             <button class="btn btn-ghost" data-act="qr">QR-code</button>
             <button class="btn btn-ghost" data-act="managers">Managers</button>
-            <button class="btn btn-danger" data-act="delete">Verwijderen</button>
+            ${laatste}
           </div>`;
     }
+    const INACTIEF_BADGE = '<span class="loc-badge off">Inactief</span>';
     // Hoofdvestiging: prominent, met het volledige adres altijd zichtbaar.
     function mainCardHtml(l) {
-      return `<div class="loc-card loc-main glass" data-loc="${l.id}">
+      return `<div class="loc-card loc-main glass${l.active === false ? ' loc-off' : ''}" data-loc="${l.id}">
           <div class="loc-card-top">
             <div class="loc-ic loc-ic-main">${PIN_SVG}</div>
             <div class="loc-info">
-              <span class="loc-badge">Hoofdvestiging</span>
+              <span class="loc-badge">Hoofdvestiging</span>${l.active === false ? ' ' + INACTIEF_BADGE : ''}
               <div class="loc-name">${escapeHtml(l.name)}</div>
               <div class="loc-addr big">${escapeHtml(l.addressLine || 'Nog geen adres ingesteld — klik op “Adres bewerken”.')}</div>
               ${l.phone ? `<div class="loc-sub">${escapeHtml(l.phone)}</div>` : ''}
@@ -7793,15 +7808,16 @@
               </div>
             </div>
           </div>
-          ${locActionsHtml(true)}
+          ${locActionsHtml(true, l.active)}
         </div>`;
     }
     // Overige vestiging: compacte rij met adres + metrics.
     function rowCardHtml(l) {
-      return `<div class="loc-card loc-row glass" data-loc="${l.id}">
+      return `<div class="loc-card loc-row glass${l.active === false ? ' loc-off' : ''}" data-loc="${l.id}">
           <div class="loc-card-top">
             <div class="loc-ic">${BUILDING_SVG}</div>
             <div class="loc-info">
+              ${l.active === false ? INACTIEF_BADGE : ''}
               <div class="loc-name">${escapeHtml(l.name)}</div>
               <div class="loc-addr">${escapeHtml(l.addressLine || 'Geen adres opgegeven')}${l.phone ? ' · ' + escapeHtml(l.phone) : ''}</div>
             </div>
@@ -7810,7 +7826,7 @@
               <div class="loc-metric"><span class="lm-val">${l.stamps.toLocaleString('nl-NL')}</span><span class="lm-lbl">Stempels</span></div>
             </div>
           </div>
-          ${locActionsHtml(false)}
+          ${locActionsHtml(false, l.active)}
         </div>`;
     }
     function bindLocActions(wrap) {
@@ -7822,6 +7838,7 @@
           else if (btn.dataset.act === 'managers') openManagers(loc);
           else if (btn.dataset.act === 'edit') openLocForm(loc);
           else if (btn.dataset.act === 'delete') deleteLocation(loc);
+          else if (btn.dataset.act === 'reactivate') reactivateLocation(loc);
         }));
       });
     }
@@ -8122,14 +8139,40 @@
       }
     });
     async function deleteLocation(loc) {
-      if (!confirm(`Vestiging "${loc.name}" verwijderen? Dit kan niet ongedaan worden gemaakt.`)) return;
+      if (!confirm(`Vestiging "${loc.name}" verwijderen? Heeft de vestiging al stempels in de historie, dan wordt hij gedeactiveerd zodat de statistieken bewaard blijven.`)) return;
       try {
         const res = await fetch(API_BASE + '/api/stamp/locations/' + loc.id, { method: 'DELETE', headers: authHeaders() });
-        if (!res.ok) throw new Error();
+        const data = await res.json().catch(() => ({}));
+        // De echte melding van de server doorgeven. Hier stond 'throw new Error()' zonder
+        // boodschap, waardoor elke fout — ook een 403 of een database-constraint — als
+        // hetzelfde vage "probeer het opnieuw" bij de winkelier aankwam.
+        if (!res.ok) throw new Error(data.error || data.message || ('HTTP ' + res.status));
         if (currentLocationId === loc.id) currentLocationId = null;
         await loadLocations();
+        // Gedeactiveerd i.p.v. verwijderd, of medewerkers die hun toegang kwijt zijn:
+        // dat moet de winkelier weten, het is geen stille bijwerking.
+        const melding = data.message || data.notice;
+        if (melding) alert(melding);
       } catch (e) {
-        alert('Kon de vestiging niet verwijderen. Probeer het opnieuw.');
+        alert('Kon de vestiging niet verwijderen: ' + (e.message || 'onbekende fout'));
+      }
+    }
+
+    // Heractiveren gaat via de bestaande PUT-route, die de abonnementslimiet al bewaakt:
+    // een vestiging weer aanzetten is er in de praktijk één erbij. Bij een 402 toont de
+    // server zelf waarom het niet kan, en die tekst geven we onveranderd door.
+    async function reactivateLocation(loc) {
+      if (!confirm(`Vestiging "${loc.name}" weer activeren?`)) return;
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/locations/' + loc.id, {
+          method: 'PUT', headers: authHeaders(), body: JSON.stringify({ active: true }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || data.message || ('HTTP ' + res.status));
+        await loadLocations();
+        if (data.warning) alert(data.warning);
+      } catch (e) {
+        alert('Kon de vestiging niet heractiveren: ' + (e.message || 'onbekende fout'));
       }
     }
 
