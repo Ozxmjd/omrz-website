@@ -815,6 +815,76 @@
       background: rgba(var(--ink), .03); font-size: 13px; color: var(--muted); line-height: 1.55; }
     .vip-prev b { color: var(--text-strong); font-weight: 600; }
 
+    /* ---------- E-mail naar klanten ---------- */
+    .mail-block { margin-bottom: 26px; }
+    .mail-block[hidden] { display: none; }
+    .mail-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .mail-row .b-sub { margin-bottom: 0; }
+    .mail-usage { display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-radius: 12px;
+      border: 1px solid var(--border); background: rgba(var(--ink), .03); font-size: 13px; color: var(--muted); }
+    .mail-usage b { color: var(--text-strong); font-weight: 600; }
+    .mail-usage .mu-bar { flex: 1; min-width: 60px; height: 6px; border-radius: 999px; background: rgba(var(--ink), .07); overflow: hidden; }
+    .mail-usage .mu-bar > span { display: block; height: 100%; border-radius: 999px; background: var(--accent-grad); transition: width .4s var(--ease); }
+    .mail-usage.full { background: rgba(251,146,60,.07); border-color: rgba(251,146,60,.28); color: #eab68a; }
+    .mail-usage.full b { color: #eab68a; }
+    .mail-usage.full .mu-bar > span { background: rgba(251,146,60,.6); }
+    .mail-usage.full { flex-wrap: wrap; }
+    .mail-usage .mu-msg { flex-basis: 100%; }
+    .mail-block .mail-usage { margin-top: 18px; }
+
+    #mailModal .modal { max-width: 620px; }
+    .mail-sec + .mail-sec { margin-top: 22px; }
+    .mail-sec-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 9px; }
+    .mail-sec-head label, .mail-sec-title { font-size: 12.5px; font-weight: 500; color: var(--pearl); }
+    .mail-sec-head .ms-count { font-size: 12.5px; color: var(--muted); }
+    .mail-sel-acts { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+    .mail-sel-acts .btn, .mail-files .btn { font-size: 12.5px; padding: 7px 12px; border-radius: 9px; }
+    .mail-filter { width: 100%; padding: 9px 13px; border-radius: 10px; border: 1px solid var(--border-strong);
+      background: rgba(var(--ink), .03); color: var(--text); font: inherit; font-size: 13.5px; margin-bottom: 10px; }
+    .mail-filter:focus { outline: none; border-color: rgba(139,92,246,.5); box-shadow: 0 0 0 3px rgba(99,102,241,.14); }
+    .mail-list { max-height: 260px; overflow-y: auto; border: 1px solid var(--border); border-radius: 12px; }
+    .mail-cust { display: flex; align-items: center; gap: 12px; padding: 10px 14px; cursor: pointer; }
+    .mail-cust + .mail-cust { border-top: 1px solid var(--border); }
+    .mail-cust:hover { background: rgba(var(--ink), .03); }
+    .mail-cust input { width: 16px; height: 16px; flex: none; accent-color: var(--accent); cursor: pointer; }
+    .mail-cust .mc-tx { flex: 1; min-width: 0; }
+    .mail-cust .mc-name { display: block; font-size: 13.5px; color: var(--text-strong); }
+    .mail-cust .mc-mail { display: block; font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .mail-cust.off { cursor: default; opacity: .48; }
+    .mail-cust.off:hover { background: none; }
+    .mail-cust.off input { cursor: default; }
+    .mail-cust .mc-tag { flex: none; font-size: 10.5px; font-weight: 600; letter-spacing: .02em; padding: 3px 9px; border-radius: 999px;
+      background: rgba(var(--ink), .05); border: 1px solid var(--border-strong); color: var(--pearl); white-space: nowrap; }
+    .mail-list .modal-empty { padding: 24px 12px; }
+    .mail-files { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .mail-files .mf-hint { font-size: 12px; color: var(--muted); }
+    .mail-file-list { display: grid; gap: 6px; margin-top: 10px; }
+    .mail-file-list:empty { display: none; }
+    .mail-file { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 10px;
+      border: 1px solid var(--border); background: rgba(var(--ink), .025); font-size: 13px; color: var(--pearl); }
+    .mail-file .mf-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .mail-file .mf-size { font-size: 12px; color: var(--muted); flex: none; }
+    .mail-file button { background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 13px; padding: 2px 6px; border-radius: 6px; }
+    .mail-file button:hover { color: var(--text-strong); background: rgba(var(--ink), .06); }
+    .mail-confirm { text-align: center; padding: 10px 4px 2px; }
+    .mail-confirm h4 { font-size: 16px; font-weight: 600; color: var(--text-strong); letter-spacing: -.02em; margin-bottom: 8px; }
+    .mail-confirm p { font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+    .mail-confirm p b { color: var(--pearl); font-weight: 600; }
+    .mail-confirm .loader { justify-content: center; }
+    .mail-res-list { display: grid; gap: 1px; margin-top: 18px; max-height: 220px; overflow-y: auto; }
+    .mail-res-row { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; padding: 9px 0;
+      border-top: 1px solid var(--border); font-size: 13px; }
+    .mail-res-row .mr-name { color: var(--pearl); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .mail-res-row .mr-why { color: var(--muted); text-align: right; flex-shrink: 0; max-width: 60%; }
+    .mail-res-row.failed .mr-why { color: #f0a8a8; }
+    .sv-sum-val.ok { color: #8fe0b0; }
+    .sv-sum-val.warn { color: #eab68a; }
+    .sv-sum-val.bad { color: #f0a8a8; }
+    @media (max-width: 520px) {
+      .mail-usage { flex-wrap: wrap; }
+      .mail-usage .mu-bar { flex-basis: 100%; order: 2; }
+    }
+
     /* Resultaten: samenvatting */
     .sv-seg { margin-bottom: 22px; }
     .sv-sum { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
@@ -2237,6 +2307,9 @@
             </div>
           </div>
 
+          <!-- E-mail naar klanten (Premium, alleen de eigenaar) -->
+          <div class="block glass mail-block" id="mailBlock" hidden></div>
+
           <div class="cust-search">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
             <input type="text" id="custSearch" placeholder="Zoek op naam, e-mail of telefoon…" autocomplete="off" />
@@ -2675,6 +2748,75 @@
     </div>
   </div>
 
+  <!-- ===== E-mail naar klanten ===== -->
+  <div class="modal-overlay" id="mailModal" hidden>
+    <div class="modal glass" role="dialog" aria-modal="true" aria-labelledby="mailModalTitle">
+      <div class="modal-head">
+        <h3 id="mailModalTitle">Mail versturen</h3>
+        <button class="modal-close" id="mailModalClose" aria-label="Sluiten">✕</button>
+      </div>
+
+      <div class="mail-usage" id="mailUsage"></div>
+
+      <!-- Stap 1: opstellen -->
+      <div id="mailCompose" style="margin-top:22px;">
+        <div class="mail-sec">
+          <div class="mail-sec-head">
+            <span class="mail-sec-title">Ontvangers</span>
+            <span class="ms-count" id="mailSelCount">0 geselecteerd</span>
+          </div>
+          <input type="text" class="mail-filter" id="mailFilter" placeholder="Zoek op naam of e-mail…" autocomplete="off" />
+          <div class="mail-sel-acts">
+            <button type="button" class="btn btn-ghost" id="mailSelAll">Alles selecteren</button>
+            <button type="button" class="btn btn-ghost" id="mailSelNone">Niemand selecteren</button>
+          </div>
+          <div class="mail-list" id="mailList"></div>
+        </div>
+
+        <div class="mail-sec field">
+          <label for="mailSubject">Onderwerp</label>
+          <input type="text" id="mailSubject" maxlength="200" placeholder="Bijvoorbeeld: Deze week dubbele stempels" />
+        </div>
+
+        <div class="mail-sec field">
+          <label for="mailBody">Bericht</label>
+          <textarea id="mailBody" rows="8" maxlength="50000" placeholder="Schrijf hier je bericht. Een lege regel begint een nieuwe alinea."></textarea>
+        </div>
+
+        <div class="mail-sec">
+          <div class="mail-sec-head"><span class="mail-sec-title">Bijlagen</span></div>
+          <div class="mail-files">
+            <button type="button" class="btn btn-ghost" id="mailFileBtn">Bestand toevoegen</button>
+            <span class="mf-hint">Maximaal 3 bestanden, elk tot 5 MB.</span>
+            <input type="file" id="mailFileInput" multiple hidden />
+          </div>
+          <div class="mail-file-list" id="mailFileList"></div>
+        </div>
+
+        <div class="mail-sec vip-prev" id="mailSender"></div>
+
+        <div class="vip-modal-foot">
+          <button type="button" class="btn btn-primary" id="mailNextBtn"><span class="btn-label">Versturen</span></button>
+          <button type="button" class="btn btn-ghost" id="mailCancelBtn">Annuleren</button>
+          <span class="save-note" id="mailNote"></span>
+        </div>
+      </div>
+
+      <!-- Stap 2: bevestigen / bezig -->
+      <div id="mailConfirm" style="margin-top:22px;" hidden>
+        <div class="mail-confirm" id="mailConfirmBody"></div>
+        <div class="vip-modal-foot" id="mailConfirmFoot">
+          <button type="button" class="btn btn-primary" id="mailSendBtn"><span class="btn-label">Ja, versturen</span></button>
+          <button type="button" class="btn btn-ghost" id="mailBackBtn">Terug</button>
+          <span class="save-note" id="mailSendNote"></span>
+        </div>
+      </div>
+
+      <!-- Stap 3: resultaat -->
+      <div id="mailResult" style="margin-top:22px;" hidden></div>
+    </div>
+  </div>
+
   <!-- ===== Groot abonnement-scherm (bij geen toegang / upgrade) ===== -->
   <div class="sub-modal-overlay" id="subModal" hidden>
     <div class="sub-modal glass" role="dialog" aria-modal="true" aria-labelledby="smTitle">
@@ -2946,7 +3088,7 @@
       // Basic: tab opent met alleen de upgrade-melding; niets laden.
       if (basicTabLocked(tab)) { stopScanner(); resetScanFlow(); return; }
       if (tab === 'qr') renderQR();
-      if (tab === 'klanten') loadCustomers();
+      if (tab === 'klanten') { loadCustomers(); loadMailUsage(); }
       if (tab === 'overzicht') refreshOverview();   // header, stats, kaart-preview en recente activiteit verversen
       if (tab === 'vestigingen') { renderLocationsPanel(); loadScanPincode(); }
       if (tab === 'abonnement') renderSubscriptionPanel();
@@ -2997,6 +3139,7 @@
       applySurveyLockIcon();
       applyLockIcons();
       applyPlanGating();
+      renderMailBlock();
       // Zonder toegang: toon direct het grote abonnement-scherm.
       if (!subscription.has_access) openSubModal();
     }
@@ -5692,6 +5835,372 @@
     }
 
     custSearch.addEventListener('input', renderCustomers);
+
+    // ---- E-mail naar klanten (Premium, alleen de eigenaar) ----
+    // Een actie = één keer versturen naar een selectie; de backend telt per maand.
+    const MAIL_MAX_FILES = 3;
+    const MAIL_MAX_FILE_BYTES = 5 * 1024 * 1024;
+    const MAIL_MAX_RECIPIENTS = 500;
+    let mailUsage = null;              // antwoord van /email-campaign/usage
+    let mailUsageError = '';
+    let mailCustomers = [];            // alle klanten van de kaart, los van het vestigingsfilter
+    let mailCustomersLoaded = false;
+    let mailSelected = new Set();
+    let mailFiles = [];
+    let mailBusy = false;
+    const mailModal = document.getElementById('mailModal');
+
+    // Zelfde controle als de backend (isPlausibleEmail), zodat de lijst niets aanbiedt wat daar sneuvelt.
+    function mailAddressOk(v) {
+      const s = String(v == null ? '' : v).trim();
+      return /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/.test(s) && s.length <= 254;
+    }
+    function mailBusinessName() {
+      const cached = (typeof readBizCache === 'function' && readBizCache()) || {};
+      return (businessProfile && businessProfile.business_name) || cached.business_name || card.business_name || 'Jouw zaak';
+    }
+    function mailLimitReached() { return !!mailUsage && mailUsage.limit > 0 && mailUsage.used >= mailUsage.limit; }
+    function mailFmtSize(b) {
+      return b >= 1024 * 1024 ? (b / (1024 * 1024)).toFixed(1).replace('.', ',') + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB';
+    }
+
+    function mailUsageHtml() {
+      if (!mailUsage) {
+        return mailUsageError
+          ? `<span>${escapeHtml(mailUsageError)}</span>`
+          : '<span class="spinner"></span><span>Verbruik laden…</span>';
+      }
+      const { used, limit } = mailUsage;
+      const pct = limit ? Math.min(100, Math.round((used / limit) * 100)) : 0;
+      const txt = `<span><b>${used}</b> van <b>${limit}</b> e-mailacties deze maand gebruikt</span>`;
+      return txt + `<div class="mu-bar"><span style="width:${pct}%"></span></div>`
+        + (mailLimitReached() ? '<span class="mu-msg">Limiet bereikt — volgende maand kun je weer versturen.</span>' : '');
+    }
+    function paintMailUsage() {
+      const full = mailLimitReached();
+      document.querySelectorAll('[data-mail-usage]').forEach(el => {
+        el.innerHTML = mailUsageHtml();
+        el.classList.toggle('full', full);
+      });
+      const el = document.getElementById('mailUsage');
+      el.innerHTML = mailUsageHtml();
+      el.classList.toggle('full', full);
+      paintMailSendState();
+    }
+
+    // Het blok in de Klanten-tab: knop voor Premium, upgrade-uitnodiging voor Basic.
+    // Managers krijgen niets: de backend laat alleen de eigenaar versturen.
+    function renderMailBlock() {
+      const block = document.getElementById('mailBlock');
+      if (!block) return;
+      if (isManager || !cardId) { block.hidden = true; return; }
+      block.hidden = false;
+      // De backend is leidend zodra die heeft geantwoord; tot dan het pakket uit /subscription.
+      const premium = mailUsage ? !!mailUsage.is_premium : isPremiumNow();
+      if (!premium) {
+        block.innerHTML = `<div class="sv-lock">
+            <div class="sv-lock-ic">${MAIL_SVG}</div>
+            <h3>E-mail naar klanten is een Premium-functie</h3>
+            <p>Stuur je klanten zelf een bericht met je acties en nieuws, met antwoorden rechtstreeks in je eigen inbox. Premium bevat 4 e-mailacties per maand, Premium Plus 12.</p>
+            <button type="button" class="btn btn-primary" data-plan-upgrade>Bekijk abonnementen</button>
+          </div>`;
+        return;
+      }
+      block.innerHTML = `<div class="mail-row">
+          <div>
+            <h3>E-mail naar klanten</h3>
+            <p class="b-sub">Stuur je klanten een bericht. Antwoorden komen rechtstreeks bij jou binnen.</p>
+          </div>
+          <button type="button" class="btn btn-primary" id="mailOpenBtn">Mail versturen</button>
+        </div>
+        <div class="mail-usage" data-mail-usage></div>`;
+      document.getElementById('mailOpenBtn').addEventListener('click', openMailModal);
+      paintMailUsage();
+    }
+
+    async function loadMailUsage() {
+      if (isManager || !cardId) { renderMailBlock(); return; }
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/email-campaign/usage/' + encodeURIComponent(cardId), { headers: authHeaders() });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Verbruik ophalen mislukt');
+        mailUsage = {
+          is_premium: !!data.is_premium,
+          limit: Number(data.limit) || 0,
+          used: Number(data.used) || 0,
+          max_recipients: Number(data.max_recipients) || MAIL_MAX_RECIPIENTS,
+        };
+        mailUsageError = '';
+      } catch (err) {
+        mailUsage = null;
+        mailUsageError = isNetworkError(err) ? NET_MSG : 'Kon het verbruik niet ophalen: ' + (err.message || 'onbekende fout');
+      }
+      renderMailBlock();
+      paintMailUsage();
+    }
+
+    // Klanten die geen mail kunnen krijgen staan er wél in, maar uitgegrijsd met de reden.
+    function mailBlockReason(c) {
+      if (c.unsubscribed) return 'Afgemeld';
+      if (!mailAddressOk(c.email)) return 'Geen e-mailadres';
+      return '';
+    }
+    async function loadMailCustomers(force) {
+      const list = document.getElementById('mailList');
+      if (mailCustomersLoaded && !force) { renderMailList(); return; }
+      list.innerHTML = '<div class="loader" style="padding:20px 14px;"><span class="spinner"></span> Klanten laden…</div>';
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/customers/' + encodeURIComponent(cardId), { headers: authHeaders() });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Klanten laden mislukt');
+        const raw = Array.isArray(data) ? data : (data.customers || []);
+        mailCustomers = raw.map(r => {
+          const c = normalizeCustomer(r);
+          return { id: c.id, name: c.name, email: String(c.email || '').trim(), unsubscribed: !!r.unsubscribed_at };
+        }).filter(c => c.id).sort((a, b) => a.name.localeCompare(b.name, 'nl'));
+        mailCustomersLoaded = true;
+        // Selectie opschonen: wie niet (meer) mailbaar is, eruit.
+        const ok = new Set(mailCustomers.filter(c => !mailBlockReason(c)).map(c => String(c.id)));
+        mailSelected = new Set([...mailSelected].filter(id => ok.has(id)));
+        renderMailList();
+      } catch (err) {
+        list.innerHTML = `<div class="modal-empty">${escapeHtml(isNetworkError(err) ? NET_MSG : 'Kon klanten niet laden. Probeer het later opnieuw.')}</div>`;
+      }
+    }
+    function mailVisibleCustomers() {
+      const q = document.getElementById('mailFilter').value.trim().toLowerCase();
+      if (!q) return mailCustomers;
+      return mailCustomers.filter(c => c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q));
+    }
+    function renderMailList() {
+      const list = document.getElementById('mailList');
+      const rows = mailVisibleCustomers();
+      if (!mailCustomers.length) {
+        list.innerHTML = '<div class="modal-empty">Nog geen klanten op deze kaart.</div>';
+      } else if (!rows.length) {
+        list.innerHTML = '<div class="modal-empty">Geen klanten gevonden.</div>';
+      } else {
+        list.innerHTML = rows.map(c => {
+          const why = mailBlockReason(c);
+          const id = String(c.id);
+          return `<label class="mail-cust${why ? ' off' : ''}">
+              <input type="checkbox" data-mail-id="${escapeHtml(id)}"${why ? ' disabled' : ''}${!why && mailSelected.has(id) ? ' checked' : ''} />
+              <span class="mc-tx">
+                <span class="mc-name">${escapeHtml(c.name)}</span>
+                <span class="mc-mail">${escapeHtml(c.email || 'Geen e-mailadres opgegeven')}</span>
+              </span>
+              ${why ? `<span class="mc-tag">${escapeHtml(why)}</span>` : ''}
+            </label>`;
+        }).join('');
+      }
+      paintMailSendState();
+    }
+    document.getElementById('mailList').addEventListener('change', (e) => {
+      const box = e.target.closest('[data-mail-id]');
+      if (!box) return;
+      if (box.checked) mailSelected.add(box.dataset.mailId); else mailSelected.delete(box.dataset.mailId);
+      paintMailSendState();
+    });
+    // Alles/niemand werkt op wat zichtbaar is: zonder zoekterm is dat iedereen.
+    document.getElementById('mailSelAll').addEventListener('click', () => {
+      mailVisibleCustomers().forEach(c => { if (!mailBlockReason(c)) mailSelected.add(String(c.id)); });
+      renderMailList();
+    });
+    document.getElementById('mailSelNone').addEventListener('click', () => {
+      mailVisibleCustomers().forEach(c => mailSelected.delete(String(c.id)));
+      renderMailList();
+    });
+    document.getElementById('mailFilter').addEventListener('input', renderMailList);
+    ['mailSubject', 'mailBody'].forEach(id => document.getElementById(id).addEventListener('input', () => mailNote('')));
+
+    function paintMailSendState() {
+      const n = mailSelected.size;
+      const cnt = document.getElementById('mailSelCount');
+      if (cnt) {
+        const mailable = mailCustomers.filter(c => !mailBlockReason(c)).length;
+        cnt.textContent = `${n} van ${mailable} geselecteerd`;
+      }
+      const btn = document.getElementById('mailNextBtn');
+      if (btn) btn.disabled = mailBusy || mailLimitReached() || !mailUsage || n === 0;
+    }
+
+    // ---- Bijlagen ----
+    function renderMailFiles() {
+      document.getElementById('mailFileList').innerHTML = mailFiles.map((f, i) =>
+        `<div class="mail-file">
+            <span class="mf-name" title="${escapeHtml(f.name)}">${escapeHtml(f.name)}</span>
+            <span class="mf-size">${mailFmtSize(f.size)}</span>
+            <button type="button" data-mail-rm="${i}" aria-label="Bijlage verwijderen">✕</button>
+          </div>`).join('');
+      document.getElementById('mailFileBtn').disabled = mailFiles.length >= MAIL_MAX_FILES;
+    }
+    document.getElementById('mailFileBtn').addEventListener('click', () => document.getElementById('mailFileInput').click());
+    document.getElementById('mailFileInput').addEventListener('change', (e) => {
+      const problems = [];
+      [...e.target.files].forEach(f => {
+        if (mailFiles.length >= MAIL_MAX_FILES) { problems.push(`Maximaal ${MAIL_MAX_FILES} bijlagen; "${f.name}" is niet toegevoegd.`); return; }
+        if (f.size > MAIL_MAX_FILE_BYTES) { problems.push(`"${f.name}" is ${mailFmtSize(f.size)}; maximaal 5 MB per bijlage.`); return; }
+        if (!f.size) { problems.push(`"${f.name}" is leeg.`); return; }
+        mailFiles.push(f);
+      });
+      e.target.value = '';
+      renderMailFiles();
+      mailNote(problems.join(' '), problems.length ? 'error' : '');
+    });
+    document.getElementById('mailFileList').addEventListener('click', (e) => {
+      const rm = e.target.closest('[data-mail-rm]');
+      if (!rm) return;
+      mailFiles.splice(Number(rm.dataset.mailRm), 1);
+      renderMailFiles();
+    });
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(String(r.result).replace(/^data:[^,]*,/, ''));
+        r.onerror = () => reject(new Error(`Kon "${file.name}" niet lezen`));
+        r.readAsDataURL(file);
+      });
+    }
+
+    function mailNote(msg, kind) {
+      const el = document.getElementById('mailNote');
+      el.textContent = msg || '';
+      el.className = 'save-note' + (msg && kind ? ' ' + kind : '');
+    }
+    function showMailStep(step) {
+      document.getElementById('mailCompose').hidden = step !== 'compose';
+      document.getElementById('mailConfirm').hidden = step !== 'confirm';
+      document.getElementById('mailResult').hidden = step !== 'result';
+    }
+
+    function openMailModal() {
+      showMailStep('compose');
+      mailNote('');
+      document.getElementById('mailSender').innerHTML =
+        `Verzonden als: <b>${escapeHtml(mailBusinessName())}</b> via OMRZ Digital — klanten kunnen rechtstreeks naar u antwoorden.`;
+      renderMailFiles();
+      paintMailUsage();
+      mailModal.hidden = false;
+      loadMailCustomers(true);
+      loadMailUsage();
+    }
+    function closeMailModal() {
+      if (mailBusy) return;   // tijdens het versturen niet wegklikken: dan ziet de winkelier het resultaat niet
+      mailModal.hidden = true;
+    }
+    function resetMailForm() {
+      mailSelected = new Set();
+      mailFiles = [];
+      document.getElementById('mailSubject').value = '';
+      document.getElementById('mailBody').value = '';
+      document.getElementById('mailFilter').value = '';
+    }
+    document.getElementById('mailModalClose').addEventListener('click', closeMailModal);
+    document.getElementById('mailCancelBtn').addEventListener('click', closeMailModal);
+    mailModal.addEventListener('click', (e) => { if (e.target === mailModal) closeMailModal(); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !mailModal.hidden) closeMailModal(); });
+
+    // Stap 1 → 2: controleren en om bevestiging vragen.
+    document.getElementById('mailNextBtn').addEventListener('click', () => {
+      const subject = document.getElementById('mailSubject').value.trim();
+      const body = document.getElementById('mailBody').value.trim();
+      const n = mailSelected.size;
+      const max = (mailUsage && mailUsage.max_recipients) || MAIL_MAX_RECIPIENTS;
+      if (mailLimitReached()) { mailNote('Je hebt je e-mailacties voor deze maand gebruikt.', 'error'); return; }
+      if (!n) { mailNote('Selecteer minstens één klant.', 'error'); return; }
+      if (n > max) { mailNote(`Maximaal ${max} klanten per verzending. Splits de selectie.`, 'error'); return; }
+      if (!subject) { mailNote('Vul een onderwerp in.', 'error'); document.getElementById('mailSubject').focus(); return; }
+      if (!body) { mailNote('Schrijf een bericht.', 'error'); document.getElementById('mailBody').focus(); return; }
+      mailNote('');
+      const left = mailUsage ? mailUsage.limit - mailUsage.used : 0;
+      document.getElementById('mailConfirmBody').innerHTML = `<h4>Mail versturen?</h4>
+          <p>Weet u zeker dat u deze mail naar <b>${n} ${n === 1 ? 'klant' : 'klanten'}</b> wilt versturen?</p>
+          <p style="margin-top:8px;">Onderwerp: <b>${escapeHtml(subject)}</b>${mailFiles.length ? ` · ${mailFiles.length} ${mailFiles.length === 1 ? 'bijlage' : 'bijlagen'}` : ''}</p>
+          <p style="margin-top:8px;">Dit gebruikt 1 van je ${left} resterende e-mailacties deze maand. Versturen kan niet ongedaan worden gemaakt.</p>`;
+      document.getElementById('mailConfirmFoot').hidden = false;
+      document.getElementById('mailSendNote').textContent = '';
+      showMailStep('confirm');
+    });
+    document.getElementById('mailBackBtn').addEventListener('click', () => showMailStep('compose'));
+
+    // Stap 2 → 3: versturen.
+    document.getElementById('mailSendBtn').addEventListener('click', async () => {
+      if (mailBusy) return;
+      const btn = document.getElementById('mailSendBtn');
+      const note = document.getElementById('mailSendNote');
+      const n = mailSelected.size;
+      mailBusy = true; btn.disabled = true; btn.classList.add('loading');
+      note.className = 'save-note'; note.textContent = '';
+      try {
+        const attachments = [];
+        for (const f of mailFiles) attachments.push({ filename: f.name, content: await fileToBase64(f) });
+        document.getElementById('mailConfirmFoot').hidden = true;
+        document.getElementById('mailConfirmBody').innerHTML = `<div class="loader"><span class="spinner"></span> Bezig met versturen naar ${n} ${n === 1 ? 'klant' : 'klanten'}…</div>
+          <p>Dit kan even duren; sluit dit venster niet.</p>`;
+        const res = await fetch(API_BASE + '/api/stamp/email-campaign', {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({
+            card_id: cardId,
+            subject: document.getElementById('mailSubject').value.trim(),
+            body_text: document.getElementById('mailBody').value,
+            recipient_holder_ids: [...mailSelected],
+            attachments,
+          }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          if (data.limit_reached && mailUsage) mailUsage.used = Number(data.used) || mailUsage.limit;
+          if (res.status === 413) throw new Error('De bijlagen zijn samen te groot. Verklein ze of stuur er minder mee.');
+          throw new Error(data.error || 'Versturen mislukt');
+        }
+        if (mailUsage) { mailUsage.used = Number(data.used) || mailUsage.used + 1; mailUsage.limit = Number(data.limit) || mailUsage.limit; }
+        renderMailResult(data);
+        resetMailForm();
+        showMailStep('result');
+      } catch (err) {
+        document.getElementById('mailConfirmFoot').hidden = false;
+        document.getElementById('mailConfirmBody').innerHTML = `<h4>Niet verstuurd</h4>
+          <p>${escapeHtml(isNetworkError(err) ? NET_MSG : (err.message || 'Probeer het later opnieuw.'))}</p>`;
+        note.textContent = '';
+      } finally {
+        mailBusy = false; btn.disabled = false; btn.classList.remove('loading');
+        paintMailUsage();
+      }
+    });
+
+    function renderMailResult(d) {
+      const sent = Number(d.sent_count) || 0;
+      const skipped = Number(d.skipped_unsubscribed) || 0;
+      const failed = Number(d.failed_count) || 0;
+      const total = Number(d.recipient_count) || (sent + skipped + failed);
+      const pct = total ? Math.round((sent / total) * 100) : 0;
+      const issues = (Array.isArray(d.results) ? d.results : []).filter(r => r.status !== 'sent');
+      const names = new Map(mailCustomers.map(c => [String(c.id), c.name]));
+      const rows = issues.map(r => `<div class="mail-res-row ${r.status === 'failed' ? 'failed' : ''}">
+          <span class="mr-name">${escapeHtml(r.customer_name || names.get(String(r.holder_id)) || 'Onbekende klant')}</span>
+          <span class="mr-why">${r.status === 'skipped' ? 'Overgeslagen: ' : 'Mislukt: '}${escapeHtml(r.reason || 'onbekende reden')}</span>
+        </div>`).join('');
+      const head = failed === 0
+        ? (sent ? 'Je mail is verstuurd.' : 'Er is niets verstuurd.')
+        : (sent ? 'Je mail is deels verstuurd.' : 'Versturen is mislukt.');
+      document.getElementById('mailResult').innerHTML = `
+        <div class="mail-confirm" style="margin-bottom:20px;"><h4>${head}</h4>
+          <p>Onderwerp: <b>${escapeHtml(d.subject || '')}</b>${d.attachments_sent ? ` · ${d.attachments_sent} ${d.attachments_sent === 1 ? 'bijlage' : 'bijlagen'}` : ''}</p></div>
+        <div class="sv-sum">
+          <div class="sv-sum-cell"><div class="sv-sum-val ok">${sent}</div><div class="sv-sum-lbl">Verstuurd</div></div>
+          <div class="sv-sum-cell"><div class="sv-sum-val${skipped ? ' warn' : ''}">${skipped}</div><div class="sv-sum-lbl">Overgeslagen (afgemeld)</div></div>
+          <div class="sv-sum-cell"><div class="sv-sum-val${failed ? ' bad' : ''}">${failed}</div><div class="sv-sum-lbl">Mislukt</div></div>
+        </div>
+        <div class="sv-sum-bar"><span style="width:${pct}%"></span></div>
+        <p class="sv-sum-line"><strong>${sent}</strong> van ${total} ${total === 1 ? 'klant' : 'klanten'} ontvangen je mail.
+          Je hebt nu <strong>${Number(d.used) || 0} van ${Number(d.limit) || 0}</strong> e-mailacties deze maand gebruikt.</p>
+        ${rows ? `<div class="mail-res-list">${rows}</div>` : ''}
+        <div class="vip-modal-foot">
+          <button type="button" class="btn btn-primary" id="mailDoneBtn">Sluiten</button>
+        </div>`;
+      document.getElementById('mailDoneBtn').addEventListener('click', closeMailModal);
+    }
 
     // ---- Klantdemografie (premium) ----
     let demographicsLoaded = false;
