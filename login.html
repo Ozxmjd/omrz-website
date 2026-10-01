@@ -287,6 +287,14 @@
         const cardIdVal = data.card_id || data.cardId || (data.card && data.card.id)
           || (data.data && data.data.card_id);
         if (cardIdVal) localStorage.setItem('omrz_card_id', cardIdVal);
+        // Voorzorg: gecachete bedrijfsprofielen van andere (of geen) kaarten opruimen, zodat
+        // het dashboard nooit de KvK/BTW/naam van een vorig account toont.
+        try {
+          const eigen = cardIdVal ? 'omrz_business_profile:' + cardIdVal : null;
+          Object.keys(localStorage)
+            .filter(k => k.indexOf('omrz_business_profile') === 0 && k !== eigen)
+            .forEach(k => localStorage.removeItem(k));
+        } catch (e) { /* geen storage */ }
         localStorage.setItem('omrz_email', email);
 
         // Rol vastleggen: het dashboard beperkt de weergave voor een manager tot zijn vestiging.

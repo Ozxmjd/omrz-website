@@ -4051,6 +4051,9 @@
       localStorage.removeItem('omrz_role');
       localStorage.removeItem('omrz_location_id');
       localStorage.removeItem('omrz_location_name');
+      // Alle gecachete bedrijfsprofielen weg, niet alleen dat van dit account.
+      Object.keys(localStorage).filter(k => k.indexOf('omrz_business_profile') === 0)
+        .forEach(k => localStorage.removeItem(k));
       window.location.href = 'login.html';
     });
 
@@ -4818,7 +4821,12 @@
 
     // ---- Bedrijfsgegevens (bedrijfsinfo, contactpersoon, adres) ----
     // De backend levert deze velden onder wisselende namen; lees tolerant, schrijf canoniek.
-    const BIZ_CACHE_KEY = 'omrz_business_profile';
+    // Per kaart: één gedeelde sleutel liet de gegevens (KvK, BTW, naam) van het vorige
+    // account staan na een accountwissel. Uitloggen en inloggen wissen alle varianten.
+    const BIZ_CACHE_PREFIX = 'omrz_business_profile';
+    const BIZ_CACHE_KEY = cardId ? BIZ_CACHE_PREFIX + ':' + cardId : null;
+    // De oude gedeelde sleutel wordt nergens meer gelezen; opruimen.
+    try { localStorage.removeItem(BIZ_CACHE_PREFIX); } catch (e) { /* geen storage */ }
     let businessProfile = null;
     let businessLoaded = false;
 
@@ -4847,9 +4855,11 @@
     }
     // Lokale kopie: KvK/BTW en adres blijven zichtbaar, ook als de API even niet bereikbaar is.
     function readBizCache() {
+      if (!BIZ_CACHE_KEY) return null;
       try { return JSON.parse(localStorage.getItem(BIZ_CACHE_KEY) || 'null'); } catch (e) { return null; }
     }
     function writeBizCache(p) {
+      if (!BIZ_CACHE_KEY) return;
       try { localStorage.setItem(BIZ_CACHE_KEY, JSON.stringify(p)); } catch (e) { /* private mode / vol */ }
     }
     function fillBizForm(p) {
@@ -5855,9 +5865,24 @@
       const s = String(v == null ? '' : v).trim();
       return /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/.test(s) && s.length <= 254;
     }
-    function mailBusinessName() {
-      const cached = (typeof readBizCache === 'function' && readBizCache()) || {};
-      return (businessProfile && businessProfile.business_name) || cached.business_name || card.business_name || 'Jouw zaak';
+    // Afzender-preview: uitsluitend wat de server bij verzending gebruikt (campaignSender in
+    // de backend, via /usage). Geen cache of kaartnaam als terugval: die kan van een ander
+    // account zijn en zou dan liegen over wie de mail verstuurt.
+    function paintMailSender() {
+      const el = document.getElementById('mailSender');
+      if (!el) return;
+      if (!mailUsage) {
+        el.innerHTML = mailUsageError
+          ? 'Verzonden als: <i>kon niet worden opgehaald</i>'
+          : 'Verzonden als: <span class="spinner" style="display:inline-block;width:12px;height:12px;vertical-align:-1px;"></span> Laden…';
+        return;
+      }
+      if (!mailUsage.from) {
+        el.innerHTML = 'Verzonden als: <i>onbekend — versturen is uitgeschakeld tot de afzender bekend is</i>';
+        return;
+      }
+      el.innerHTML = `Verzonden als: <b>${escapeHtml(mailUsage.from)}</b> — klanten kunnen rechtstreeks naar u antwoorden`
+        + (mailUsage.reply_to ? ` (${escapeHtml(mailUsage.reply_to)}).` : '.');
     }
     function mailLimitReached() { return !!mailUsage && mailUsage.limit > 0 && mailUsage.used >= mailUsage.limit; }
     function mailFmtSize(b) {
@@ -5885,6 +5910,7 @@
       const el = document.getElementById('mailUsage');
       el.innerHTML = mailUsageHtml();
       el.classList.toggle('full', full);
+      paintMailSender();
       paintMailSendState();
     }
 
@@ -5929,6 +5955,8 @@
           limit: Number(data.limit) || 0,
           used: Number(data.used) || 0,
           max_recipients: Number(data.max_recipients) || MAIL_MAX_RECIPIENTS,
+          from: typeof data.from === 'string' ? data.from.trim() : '',
+          reply_to: typeof data.reply_to === 'string' ? data.reply_to.trim() : '',
         };
         mailUsageError = '';
       } catch (err) {
@@ -6021,7 +6049,7 @@
         cnt.textContent = `${n} van ${mailable} geselecteerd`;
       }
       const btn = document.getElementById('mailNextBtn');
-      if (btn) btn.disabled = mailBusy || mailLimitReached() || !mailUsage || n === 0;
+      if (btn) btn.disabled = mailBusy || mailLimitReached() || !mailUsage || !mailUsage.from || n === 0;
     }
 
     // ---- Bijlagen ----
@@ -6076,8 +6104,8 @@
     function openMailModal() {
       showMailStep('compose');
       mailNote('');
-      document.getElementById('mailSender').innerHTML =
-        `Verzonden als: <b>${escapeHtml(mailBusinessName())}</b> via OMRZ Digital — klanten kunnen rechtstreeks naar u antwoorden.`;
+      // Elke keer vers ophalen: teller én afzender tonen "Laden…" tot de server antwoordt.
+      mailUsage = null; mailUsageError = '';
       renderMailFiles();
       paintMailUsage();
       mailModal.hidden = false;
@@ -6107,6 +6135,7 @@
       const n = mailSelected.size;
       const max = (mailUsage && mailUsage.max_recipients) || MAIL_MAX_RECIPIENTS;
       if (mailLimitReached()) { mailNote('Je hebt je e-mailacties voor deze maand gebruikt.', 'error'); return; }
+      if (!mailUsage || !mailUsage.from) { mailNote('De afzender is nog niet bekend. Probeer het zo opnieuw.', 'error'); return; }
       if (!n) { mailNote('Selecteer minstens één klant.', 'error'); return; }
       if (n > max) { mailNote(`Maximaal ${max} klanten per verzending. Splits de selectie.`, 'error'); return; }
       if (!subject) { mailNote('Vul een onderwerp in.', 'error'); document.getElementById('mailSubject').focus(); return; }
@@ -6115,6 +6144,7 @@
       const left = mailUsage ? mailUsage.limit - mailUsage.used : 0;
       document.getElementById('mailConfirmBody').innerHTML = `<h4>Mail versturen?</h4>
           <p>Weet u zeker dat u deze mail naar <b>${n} ${n === 1 ? 'klant' : 'klanten'}</b> wilt versturen?</p>
+          <p style="margin-top:8px;">Afzender: <b>${escapeHtml(mailUsage.from)}</b></p>
           <p style="margin-top:8px;">Onderwerp: <b>${escapeHtml(subject)}</b>${mailFiles.length ? ` · ${mailFiles.length} ${mailFiles.length === 1 ? 'bijlage' : 'bijlagen'}` : ''}</p>
           <p style="margin-top:8px;">Dit gebruikt 1 van je ${left} resterende e-mailacties deze maand. Versturen kan niet ongedaan worden gemaakt.</p>`;
       document.getElementById('mailConfirmFoot').hidden = false;
