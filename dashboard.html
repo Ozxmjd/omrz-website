@@ -866,6 +866,9 @@
     .mail-file .mf-size { font-size: 12px; color: var(--muted); flex: none; }
     .mail-file button { background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 13px; padding: 2px 6px; border-radius: 6px; }
     .mail-file button:hover { color: var(--text-strong); background: rgba(var(--ink), .06); }
+    .mail-sender-row { display: flex; align-items: center; gap: 14px; }
+    .mail-sender-logo { width: 48px; height: 48px; flex: none; object-fit: contain; border-radius: 10px;
+      background: #fff; border: 1px solid var(--border); padding: 4px; }
     .mail-confirm { text-align: center; padding: 10px 4px 2px; }
     .mail-confirm h4 { font-size: 16px; font-weight: 600; color: var(--text-strong); letter-spacing: -.02em; margin-bottom: 8px; }
     .mail-confirm p { font-size: 13.5px; color: var(--muted); line-height: 1.6; }
@@ -5881,8 +5884,16 @@
         el.innerHTML = 'Verzonden als: <i>onbekend — versturen is uitgeschakeld tot de afzender bekend is</i>';
         return;
       }
-      el.innerHTML = `Verzonden als: <b>${escapeHtml(mailUsage.from)}</b> — klanten kunnen rechtstreeks naar u antwoorden`
+      const tekst = `Verzonden als: <b>${escapeHtml(mailUsage.from)}</b> — klanten kunnen rechtstreeks naar u antwoorden`
         + (mailUsage.reply_to ? ` (${escapeHtml(mailUsage.reply_to)}).` : '.');
+      // Het logo dat bovenaan de mail komt. Geen logo → alleen de tekst; laadt het niet,
+      // dan verdwijnt het in plaats van een kapotte afbeelding te tonen.
+      if (!mailUsage.logo_url) { el.innerHTML = tekst; return; }
+      el.innerHTML = `<div class="mail-sender-row">
+          <img class="mail-sender-logo" src="${escapeHtml(mailUsage.logo_url)}" alt="Logo in je mail" />
+          <span>${tekst}</span>
+        </div>`;
+      el.querySelector('img').addEventListener('error', function () { this.remove(); });
     }
     function mailLimitReached() { return !!mailUsage && mailUsage.limit > 0 && mailUsage.used >= mailUsage.limit; }
     function mailFmtSize(b) {
@@ -5947,7 +5958,8 @@
     async function loadMailUsage() {
       if (isManager || !cardId) { renderMailBlock(); return; }
       try {
-        const res = await fetch(API_BASE + '/api/stamp/email-campaign/usage/' + encodeURIComponent(cardId), { headers: authHeaders() });
+        const res = await fetch(API_BASE + '/api/stamp/email-campaign/usage/' + encodeURIComponent(cardId),
+          { headers: authHeaders(), cache: 'no-store' });   // afzender nooit uit de HTTP-cache
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.error || 'Verbruik ophalen mislukt');
         mailUsage = {
@@ -5957,6 +5969,8 @@
           max_recipients: Number(data.max_recipients) || MAIL_MAX_RECIPIENTS,
           from: typeof data.from === 'string' ? data.from.trim() : '',
           reply_to: typeof data.reply_to === 'string' ? data.reply_to.trim() : '',
+          // Alleen http(s); de backend filtert al, dit is een tweede slot voor de src.
+          logo_url: /^https?:\/\//i.test(String(data.logo_url || '').trim()) ? String(data.logo_url).trim() : '',
         };
         mailUsageError = '';
       } catch (err) {
