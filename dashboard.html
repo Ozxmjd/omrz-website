@@ -592,6 +592,8 @@
     .result-check .st { width: 100%; height: 100%; position: relative; display: block; }
     .result-check .st > svg, .result-check .st-outline { width: 100%; height: 100%; display: block; }
     .result-check .st-img { position: absolute; inset: 0; background-size: cover; background-position: center; }
+    .result-check .st-img-bare { background-size: contain; background-repeat: no-repeat; transform: scale(1.22); }
+    .result-check .st-img-leeg { opacity: .3; }
     .result-check .st-outline { position: absolute; inset: 0; }
     @keyframes checkPop { from { transform: scale(0) rotate(-30deg); } to { transform: scale(1) rotate(0); } }
     .result-title { font-size: 20px; font-weight: 600; letter-spacing: -.02em; margin-bottom: 6px; }
@@ -1190,6 +1192,8 @@
     /* Logo-stempel (afbeelding in vorm-masker) */
 
     .sc-stamps .st-img { position: absolute; inset: 0; background-size: cover; background-position: center; }
+    .sc-stamps .st-img-bare { background-size: contain; background-repeat: no-repeat; transform: scale(1.22); }
+    .sc-stamps .st-img-leeg { opacity: .3; }
 
     .sc-stamps .st-outline { position: absolute; inset: 0; width: 100%; height: 100%; }
 
@@ -4223,7 +4227,12 @@
 
     // ---- Stempel-rendering ----
     // Bron-afbeelding voor logo-stempels: aparte stempel-upload heeft voorrang, anders het bedrijfslogo.
-    const stampImageSrc = () => card.stamp_type === 'logo' ? absoluteUrl(card.stamp_logo_url || card.logo_url || '') : '';
+    // 'logo' = afbeelding geknipt in de gekozen vorm. 'image' = de afbeelding zelf is de
+    // stempel: geen masker en niet bijgesneden, zodat een transparante PNG zijn eigen
+    // silhouet houdt.
+    const isBareImageStamp = () => card.stamp_type === 'image';
+    const stampImageSrc = () => (card.stamp_type === 'logo' || isBareImageStamp())
+      ? absoluteUrl(card.stamp_logo_url || card.logo_url || '') : '';
     // De gekozen vorm als SVG-masker (data-URI): het logo vult exact die vorm.
     function shapeMaskUrl(shape) {
       const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='#000'>${SHAPE_PATH[shape] || SHAPE_PATH.circle}</svg>`;
@@ -4242,6 +4251,17 @@
       // Instelbare lijndikte. Bij een logo-stempel iets dunner, zodat het logo goed zichtbaar blijft.
       const ow = Number(card.outline_width) || 2.5;
       const owLogo = Math.max(1, ow * 0.65);
+
+      // Kale afbeelding als stempel: geen masker, geen omtrek, niets bijgesneden.
+      // Nog niet gegeven → hetzelfde silhouet, vervaagd (zoals een vorm zijn lege
+      // outline toont) in plaats van een neutrale ring die niets met de winkel te maken heeft.
+      if (isBareImageStamp() && img) {
+        const imgEl = document.createElement('span');
+        imgEl.className = 'st-img st-img-bare' + (active ? '' : ' st-img-leeg');
+        imgEl.style.backgroundImage = `url("${img}")`;
+        st.appendChild(imgEl);
+        return st;
+      }
 
       // Logo-als-stempel: de vorm is de outline, het logo vult de binnenkant.
       if (card.stamp_type === 'logo' && img) {
