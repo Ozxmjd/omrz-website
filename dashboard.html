@@ -4105,8 +4105,10 @@
       bolt:    '<path d="M13.5 2L4 13.2h6.2L9.4 22l9.6-11.6h-6.3z"/>',
       crown:   '<path d="M3 8.5l3.6 2.4L12 4l5.4 6.9L21 8.5l-1.8 10.5H4.8z"/>',
       coffee:  '<path d="M4 7.5h13v4.5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM17 8.5h2.2a2.4 2.4 0 0 1 0 4.8H17zM5 20.5h11"/>',
+      // IJsbeker: één buitenomtrek (beker + ijsblokjes + rietje), zodat hij ook als logo-masker werkt.
+      cup:     '<path d="M5.83 9Q5.8 8.6 6 8.3L6.09 8.17Q6.2 8 6.21 7.8L6.28 6.4Q6.3 5.9 6.78 5.76L8.92 5.14Q9.4 5 9.67 5.42L10.47 6.69Q10.6 6.9 10.54 6.66L10.12 4.84Q10 4.3 10.49 4.06L12.46 3.09Q12.95 2.85 13.19 3.35L14.18 5.44Q14.35 5.8 14.31 6.2L14.23 6.95Q14.2 7.2 14.32 6.98L14.81 6.05Q15 5.7 15.38 5.75L15.75 5.8L16.74 1.29Q16.85 0.8 17.34 0.88L17.56 0.92Q18.05 1 17.94 1.49L16.95 5.95L17.43 6.13Q17.9 6.3 17.96 6.8L18.15 8.2Q18.2 8.6 18.17 9L17.21 21.2Q17.1 22.6 15.7 22.6L8.3 22.6Q6.9 22.6 6.79 21.2Z"/>',
     };
-    const SHAPE_GLYPH = { circle:'●', square:'■', star:'★', heart:'♥', diamond:'◆', hexagon:'⬢', flower:'✿', bolt:'⚡', crown:'👑', coffee:'☕' };
+    const SHAPE_GLYPH = { circle:'●', square:'■', star:'★', heart:'♥', diamond:'◆', hexagon:'⬢', flower:'✿', bolt:'⚡', crown:'👑', coffee:'☕', cup:'🥤' };
     const SHAPES = [
       { key:'circle',  label:'Cirkel' },
       { key:'star',    label:'Ster' },
@@ -4118,6 +4120,7 @@
       { key:'bolt',    label:'Bliksem' },
       { key:'crown',   label:'Kroon' },
       { key:'coffee',  label:'Koffie' },
+      { key:'cup',     label:'IJsbeker' },
     ];
 
     // ---- Lettertypen (Google Fonts) ----
