@@ -4454,8 +4454,15 @@
       [...fontGrid.children].forEach(ch => ch.classList.toggle('active', ch.dataset.font === name));
       paintEditor();
     }
+    // De toggle in de editor kent twee standen: 'shape' en 'logo'. Daarnaast bestaat
+    // 'image' (de afbeelding zelf als stempel), die buiten deze toggle om wordt gezet.
+    // Die moet hier bewaard blijven: deze functie wordt ook aangeroepen bij het vullen
+    // van het formulier, en alles wat niet 'logo' was terugzetten naar 'shape' maakte
+    // van een opgeslagen 'image'-kaart stilletjes weer een vormstempel — in de preview
+    // én, zodra de winkelier op opslaan drukte, ook in de database.
+    const STAMP_TYPES = ['shape', 'logo', 'image'];
     function setStampType(type) {
-      card.stamp_type = (type === 'logo') ? 'logo' : 'shape';
+      card.stamp_type = STAMP_TYPES.includes(type) ? type : 'shape';
       updateStampControls();
       paintEditor();
     }
@@ -4471,6 +4478,9 @@
       if (!outline && card.stamp_type === 'logo') card.stamp_type = 'shape';
       // Geen logo beschikbaar → val terug op kleur.
       if (!hasLogo && card.stamp_type === 'logo') card.stamp_type = 'shape';
+      // 'image' blijft hier bewust buiten schot: die stand hangt niet aan de
+      // outline-keuze en heeft zijn eigen afbeelding, dus hij hoort niet te vervallen.
+      if (card.stamp_type === 'image' && !hasLogo) card.stamp_type = 'shape';
 
       fillingGroup.hidden = !outline;                 // vulling-groep alleen bij Outline
       outlineWidthField.hidden = !outline;            // lijndikte-slider alleen bij Outline
