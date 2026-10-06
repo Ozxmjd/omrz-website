@@ -863,6 +863,10 @@
     .sg-banner .sgb-note { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
     [data-theme="light"] .sg-banner { border-color: rgba(217,119,6,.4); background: linear-gradient(135deg, rgba(251,191,36,.22), rgba(251,191,36,.06)); }
     [data-theme="light"] .sg-banner .sgb-title { color: #b45309; }
+    /* Bij een Special Guest alleen het kroonbericht en de naam: geen korting, geen kaart met
+       voortgang en spaardoel, en geen knoppen om te stempelen of in te wisselen. */
+    .customer-view.sg-only #custVip, .customer-view.sg-only #custVipNext, .customer-view.sg-only #custCard,
+    .customer-view.sg-only #giveControls, .customer-view.sg-only #fullControls { display: none !important; }
 
     /* ---------- E-mail naar klanten ---------- */
     .mail-block { margin-bottom: 26px; }
@@ -5385,17 +5389,14 @@
       holderName = h.customer_name || h.name || h.customer || 'Klant';
       holderId = h.holder_id ?? h.holderId ?? h.id ?? h._id ?? h.holder ?? h.customer_id ?? null;
       currentStamps = Number(h.current_stamps ?? h.stamps ?? h.stamp_count ?? h.stamps_collected ?? 0) || 0;
-      // Special Guest: de backend zet reward_available dan altijd aan. currentStamps blijft
-      // de echte stand (stamps_collected), en daarmee wordt gewoon gestempeld.
+      // Special Guest: dan toont het scherm alleen het kroonbericht; stempelen en inwisselen
+      // kan niet. (De backend zet reward_available voor hem altijd aan.)
       holderSpecial = h.is_vip_forever === true
         ? { label: h.vip_label || 'Special Guest', reward: h.reward_description || card.reward_description || '' }
         : null;
-      // Volle kaart? Uit reward_available (of afgeleid uit de stand). Voor een Special Guest
-      // alleen de echte stand: reward_available zegt bij hem niets over zijn kaart.
-      rewardAvailable = holderSpecial
-        ? currentStamps >= stampsRequired
-        : (h.reward_available ?? h.rewardAvailable ?? h.reward_ready ?? h.is_full ?? false) === true
-          || currentStamps >= stampsRequired;
+      // Volle kaart? Uit reward_available (of afgeleid uit de stand).
+      rewardAvailable = (h.reward_available ?? h.rewardAvailable ?? h.reward_ready ?? h.is_full ?? false) === true
+        || currentStamps >= stampsRequired;
       // VIP-status: de backend stuurt dit alleen mee als loyaliteit aanstaat.
       holderLoyalty = readLoyalty(h);
 
@@ -5501,7 +5502,7 @@
       el.innerHTML = '<span class="sgb-ic">' + VIP_CROWN_MINI + '</span>'
         + '<span class="sgb-title">' + escapeHtml(holderSpecial.label) + '</span>'
         + '<span class="sgb-sub">Heeft recht op ' + escapeHtml(specialGuestReward()) + '</span>'
-        + '<span class="sgb-note">Geen actie nodig: niet inwisselen, de kaart blijft altijd vol.</span>';
+        + '<span class="sgb-note">Geen actie nodig: niet stempelen en niet inwisselen.</span>';
       el.hidden = false;
     }
 
@@ -5521,25 +5522,19 @@
       custReward.textContent =
         `Spaar ${stampsRequired} stempels → ${card.reward_description || 'gratis product'}`;
 
-      renderHolderVip();
       renderHolderSpecial();
+      customerView.classList.toggle('sg-only', !!holderSpecial);
+      if (holderSpecial) {
+        // Alleen het kroonbericht (sg-only verbergt de rest); niets om te doen.
+        selectedAmount = 0;
+        giveControls.hidden = true;
+        fullControls.hidden = true;
+        return;
+      }
+      renderHolderVip();
 
       custRedeemError.hidden = true;
       const full = rewardAvailable === true || currentStamps >= stampsRequired;
-      if (holderSpecial) {
-        // Nooit "Beloning uitreiken"; stempelen gaat door op de echte stand tot die vol is.
-        custReward.textContent = `${holderSpecial.label} · altijd ${specialGuestReward()}`;
-        fullControls.hidden = true;
-        giveControls.hidden = full;
-        if (full) {
-          selectedAmount = 0;
-          custProgress.textContent = `Echte stand: ${currentStamps} / ${stampsRequired} stempels`;
-          renderCustomerStamps();
-        } else {
-          updateCustomerUI();
-        }
-        return;
-      }
       // VOL → verberg de +/- teller en toon "Beloning uitreiken"; NIET VOL → normale stempel-flow.
       giveControls.hidden = full;
       fullControls.hidden = !full;
@@ -5578,9 +5573,9 @@
       minusBtn.disabled = selectedAmount <= 1;
       plusBtn.disabled = selectedAmount >= maxAdd;
       addPreview.textContent = `Na toevoegen: ${projected}/${stampsRequired} stempels`;
-      rewardHint.hidden = projected < stampsRequired || !!holderSpecial;
+      rewardHint.hidden = projected < stampsRequired;
       confirmLabel.textContent = `Bevestig ${selectedAmount} stempel${selectedAmount > 1 ? 's' : ''}`;
-      custProgress.textContent = `${holderSpecial ? 'Echte stand: ' : ''}${currentStamps} / ${stampsRequired} stempels`;
+      custProgress.textContent = `${currentStamps} / ${stampsRequired} stempels`;
       renderCustomerStamps();
     }
 
@@ -5595,6 +5590,7 @@
     // Bevestigen → POST /api/stamp/give met de gekozen hoeveelheid.
     async function confirmGive() {
       if (confirmBtn.disabled) return;   // voorkom dubbel klikken tijdens laden
+      if (holderSpecial) return;         // vangnet: een Special Guest wordt niet gestempeld
       const cid = activeCardId();
 
       // Validatie: toon precies welk verplicht veld ontbreekt.
@@ -5645,12 +5641,6 @@
       resultTitle.textContent = `Stempel gegeven aan ${holderName}!`;
       resultSub.textContent = `Nu heeft die ${newCount}/${stampsRequired} stempels`;
 
-      // Special Guest: gewoon gestempeld, inwisselen hoeft nooit.
-      if (holderSpecial) {
-        resultSub.textContent = `Echte stand: ${newCount}/${stampsRequired} stempels · ${holderSpecial.label}, altijd ${specialGuestReward()}`;
-        rewardBlock.hidden = true;
-        return;
-      }
       // Reward-check op basis van stamps_required uit de kaart.
       if (newCount >= stampsRequired) {
         const rewardText = card.reward_description || 'de beloning';

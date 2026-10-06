@@ -418,6 +418,12 @@
         .sg-banner .sg-sub { font-size: 16.5px; font-weight: 500; color: var(--text-strong); line-height: 1.45; }
         .sg-banner .sg-note { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
         .manual-result .mr-sg { color: #fde68a; font-weight: 600; }
+        /* Bij een Special Guest alleen het kroonbericht en de naam: geen korting, geen voortgang
+           en geen knoppen om te stempelen of in te wisselen. */
+        .result-card.sg-only #custMeta, .result-card.sg-only #custVip, .result-card.sg-only #custVipNext,
+        .result-card.sg-only .prog, .result-card.sg-only #circles,
+        .result-card.sg-only #giveControls, .result-card.sg-only #rewardControls { display: none !important; }
+        .result-card.sg-only .cust-name { margin-bottom: 26px; }
 
         /* ===== iPad & telefoon ===== */
         @media (max-width: 720px) {
@@ -1187,15 +1193,13 @@
             if (req <= 0) return NO_TARGET_MAX;      // doel onbekend → vangnet
             return Math.max(0, req - currentCollected());
         }
-        // Special Guest: altijd recht op de beloning, maar nooit inwisselen (dat zou zijn echte
-        // stand resetten). stamps_collected blijft zijn echte stand; daar wordt mee gestempeld.
+        // Special Guest: altijd recht op de beloning. Het scherm toont dan alleen het kroonbericht;
+        // stempelen en inwisselen kan niet (inwisselen zou zijn echte stand resetten).
         function isSpecialGuest() { return !!(current && current.is_vip_forever === true); }
 
         function isCardFull() {
             if (!current) return false;
-            // De backend zet reward_available altijd aan voor een Special Guest; dat zegt dus
-            // niets over zijn echte kaart.
-            if (current.reward_available === true && !isSpecialGuest()) return true;
+            if (current.reward_available === true) return true;
             const req = currentRequired();
             return req > 0 && currentCollected() >= req;
         }
@@ -1207,6 +1211,7 @@
             // slide-up opnieuw triggeren
             const rc = $('resultStage').querySelector('.result-card');
             rc.classList.remove('slide-up'); void rc.offsetWidth; rc.classList.add('slide-up');
+            rc.classList.toggle('sg-only', isSpecialGuest());
 
             const name = current.customer_name || 'Klant zonder naam';
             $('custName').textContent = name;
@@ -1223,26 +1228,14 @@
                 : '';
 
             // Volle kaart (reward_available OF stand ≥ vereist) → uitreiken tonen i.p.v. stempel geven.
-            renderVip();
             renderSpecialGuest();
-
             if (isSpecialGuest()) {
-                // Nooit "Beloning uitreiken". Stempelen gaat gewoon door op de echte stand, tot
-                // die vol is; meer hoeft dan niet.
+                // Alleen het kroonbericht (sg-only verbergt de rest); niets om te doen.
+                $('giveControls').style.display = 'none';
                 $('rewardControls').style.display = 'none';
-                const full = isCardFull();
-                $('custMeta').textContent = 'Echte stand: ' + col + (req > 0 ? ' van ' + req : '') + ' stempels' + rewards;
-                if (full) {
-                    renderCircles(col, req, 0);
-                    renderProgress(col, req, 0);
-                    $('giveControls').style.display = 'none';
-                    return;
-                }
-                $('giveControls').style.display = 'block';
-                amount = 1;
-                updateGiveButton();
                 return;
             }
+            renderVip();
 
             if (isCardFull()) {
                 $('custMeta').textContent = 'Kaart is vol — ' + col + ' van ' + (req || col) + ' stempels' + rewards;
@@ -1276,7 +1269,7 @@
             el.innerHTML = '<span class="sg-ic">' + VIP_CROWN + '</span>' +
                 '<span class="sg-title">' + esc(current.vip_label || 'Special Guest') + '</span>' +
                 '<span class="sg-sub">Heeft recht op ' + esc(specialGuestReward()) + '</span>' +
-                '<span class="sg-note">Geen actie nodig: niet inwisselen, de kaart blijft altijd vol.</span>';
+                '<span class="sg-note">Geen actie nodig: niet stempelen en niet inwisselen.</span>';
             el.classList.add('on');
         }
 
@@ -1414,8 +1407,7 @@
             if (plus) plus.disabled = amount >= max;
 
             const total = col + amount;
-            // Special Guest: zijn kaart staat voor hem al vol; geen "beloning beschikbaar" tonen.
-            const willBeFull = req > 0 && total >= req && !isSpecialGuest();
+            const willBeFull = req > 0 && total >= req;
 
             const room = $('amountRoom');
             if (room) {
@@ -1440,6 +1432,7 @@
         async function giveStamps() {
             const btn = $('giveBtn');
             if (btn.disabled) return;               // voorkom dubbel klikken
+            if (isSpecialGuest()) return;           // vangnet: een Special Guest wordt niet gestempeld
             const cid = activeCardId();
 
             // Validatie: toon precies welk verplicht veld ontbreekt.
@@ -1447,9 +1440,8 @@
             // gaat er nooit meer naar de server dan er nog op de kaart past.
             const roomNow = roomLeft();
             if (roomNow <= 0) {
-                $('giveControls').style.display = 'none';
-                if (isSpecialGuest()) return;        // Special Guest: niets in te wisselen
                 showAlert('scanAlert', 'Deze kaart is al vol — reik eerst de beloning uit.');
+                $('giveControls').style.display = 'none';
                 $('rewardControls').style.display = 'block';
                 return;
             }
@@ -1495,12 +1487,7 @@
                 current.stamps_required = req || current.stamps_required;
                 current.reward_available = full;
                 loadTodayStats();
-                if (isSpecialGuest()) {
-                    // Gewoon gestempeld; inwisselen hoeft nooit.
-                    showSuccess('stamp', 'Gelukt!',
-                        (current.customer_name ? current.customer_name + ' — ' : '') + given + (given === 1 ? ' stempel' : ' stempels') +
-                        ' gegeven · ' + (current.vip_label || 'Special Guest') + ', altijd ' + specialGuestReward());
-                } else if (full) {
+                if (full) {
                     showSuccess('reward', 'Kaart is vol!',
                         (current.customer_name ? current.customer_name + ' — ' : '') + now + ' van ' + req + ' stempels · beloning beschikbaar');
                     showRewardOnSuccess(true);       // direct uitreiken vanaf dit scherm
