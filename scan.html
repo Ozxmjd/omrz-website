@@ -403,6 +403,22 @@
 
         .hidden { display: none !important; }
 
+        /* ===== Special Guest =====
+           Groot en warm van kleur, los van de indigo VIP-niveaus: deze klant krijgt
+           altijd gratis en er hoeft niets ingewisseld te worden. */
+        .sg-banner { display: none; flex-direction: column; align-items: center; gap: 9px; max-width: 480px;
+            margin: 0 auto 26px; padding: 22px 20px 20px; border-radius: 20px;
+            border: 1px solid rgba(245,196,81,.5); background: linear-gradient(135deg, rgba(245,196,81,.2), rgba(234,179,8,.07));
+            box-shadow: 0 14px 40px rgba(245,196,81,.14); }
+        .sg-banner.on { display: flex; }
+        .sg-banner .sg-ic { width: 62px; height: 62px; border-radius: 19px; display: grid; place-items: center;
+            background: linear-gradient(135deg, #fde68a, #f59e0b); color: #3b2a05; box-shadow: 0 8px 24px rgba(245,158,11,.35); }
+        .sg-banner .sg-ic svg { width: 34px; height: 34px; }
+        .sg-banner .sg-title { font-size: 25px; font-weight: 700; letter-spacing: -.03em; color: #fde68a; line-height: 1.15; }
+        .sg-banner .sg-sub { font-size: 16.5px; font-weight: 500; color: var(--text-strong); line-height: 1.45; }
+        .sg-banner .sg-note { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+        .manual-result .mr-sg { color: #fde68a; font-weight: 600; }
+
         /* ===== iPad & telefoon ===== */
         @media (max-width: 720px) {
             .box { padding: 32px 24px 28px; }
@@ -418,6 +434,9 @@
             .result-card { padding: 30px 22px 26px; }
             .circle { width: 46px; height: 46px; }
             .cust-name { font-size: 23px; }
+            .sg-banner { padding: 18px 16px 16px; }
+            .sg-banner .sg-title { font-size: 22px; }
+            .sg-banner .sg-sub { font-size: 15.5px; }
         }
     </style>
 </head>
@@ -529,6 +548,7 @@
                 <!-- Customer result -->
                 <div class="result" id="resultStage">
                     <div class="result-card glass slide-up">
+                        <div class="sg-banner" id="custSg" role="status"></div>
                         <div class="cust-avatar" id="custAvatar">?</div>
                         <div class="cust-name" id="custName">Klant</div>
                         <div class="cust-meta" id="custMeta"></div>
@@ -1040,7 +1060,8 @@
                     const name = esc(c.customer_name || c.name || 'Klant');
                     const col = c.stamps_collected ?? c.stamps ?? c.current_stamps ?? 0;
                     const req = c.stamps_required ?? store.required ?? 0;
-                    return `<button type="button" class="manual-result" data-idx="${i}"><span class="mr-name">${name}</span><span class="mr-meta">${col}/${req} stempels</span></button>`;
+                    const sg = c.is_vip_forever === true ? '<span class="mr-sg">Special Guest</span> · ' : '';
+                    return `<button type="button" class="manual-result" data-idx="${i}"><span class="mr-name">${name}</span><span class="mr-meta">${sg}${col}/${req} stempels</span></button>`;
                 }).join('');
                 $('manualResults').querySelectorAll('.manual-result').forEach(b =>
                     b.addEventListener('click', () => selectManualCustomer(matches[b.dataset.idx | 0])));
@@ -1067,6 +1088,8 @@
                 reward_available: (!!c.reward_available) || (mreq > 0 && mcol >= mreq),
                 reward_description: c.reward_description || store.reward,
                 total_rewards_earned: c.total_rewards_earned || 0,
+                is_vip_forever: c.is_vip_forever === true,
+                vip_forever_since: c.vip_forever_since || null,
             };
             amount = 1;
             hideManualSearch();
@@ -1164,9 +1187,15 @@
             if (req <= 0) return NO_TARGET_MAX;      // doel onbekend → vangnet
             return Math.max(0, req - currentCollected());
         }
+        // Special Guest: altijd recht op de beloning, maar nooit inwisselen (dat zou zijn echte
+        // stand resetten). stamps_collected blijft zijn echte stand; daar wordt mee gestempeld.
+        function isSpecialGuest() { return !!(current && current.is_vip_forever === true); }
+
         function isCardFull() {
             if (!current) return false;
-            if (current.reward_available === true) return true;
+            // De backend zet reward_available altijd aan voor een Special Guest; dat zegt dus
+            // niets over zijn echte kaart.
+            if (current.reward_available === true && !isSpecialGuest()) return true;
             const req = currentRequired();
             return req > 0 && currentCollected() >= req;
         }
@@ -1195,6 +1224,25 @@
 
             // Volle kaart (reward_available OF stand ≥ vereist) → uitreiken tonen i.p.v. stempel geven.
             renderVip();
+            renderSpecialGuest();
+
+            if (isSpecialGuest()) {
+                // Nooit "Beloning uitreiken". Stempelen gaat gewoon door op de echte stand, tot
+                // die vol is; meer hoeft dan niet.
+                $('rewardControls').style.display = 'none';
+                const full = isCardFull();
+                $('custMeta').textContent = 'Echte stand: ' + col + (req > 0 ? ' van ' + req : '') + ' stempels' + rewards;
+                if (full) {
+                    renderCircles(col, req, 0);
+                    renderProgress(col, req, 0);
+                    $('giveControls').style.display = 'none';
+                    return;
+                }
+                $('giveControls').style.display = 'block';
+                amount = 1;
+                updateGiveButton();
+                return;
+            }
 
             if (isCardFull()) {
                 $('custMeta').textContent = 'Kaart is vol — ' + col + ' van ' + (req || col) + ' stempels' + rewards;
@@ -1212,6 +1260,24 @@
             $('rewardControls').style.display = 'none';
             amount = 1;                              // elke klant start op 1
             updateGiveButton();                      // vult teller, bolletjes, balk en knopteksten
+        }
+
+        // ===== Special Guest =====
+        function specialGuestReward() {
+            const r = String(current.reward_description || store.reward || '').trim();
+            if (!r) return 'gratis beloning';
+            // "gratis koffie" niet tot "gratis gratis koffie" maken.
+            return /^gratis\b/i.test(r) ? r : 'gratis ' + r;
+        }
+        function renderSpecialGuest() {
+            const el = $('custSg');
+            if (!el) return;
+            if (!isSpecialGuest()) { el.classList.remove('on'); el.innerHTML = ''; return; }
+            el.innerHTML = '<span class="sg-ic">' + VIP_CROWN + '</span>' +
+                '<span class="sg-title">' + esc(current.vip_label || 'Special Guest') + '</span>' +
+                '<span class="sg-sub">Heeft recht op ' + esc(specialGuestReward()) + '</span>' +
+                '<span class="sg-note">Geen actie nodig: niet inwisselen, de kaart blijft altijd vol.</span>';
+            el.classList.add('on');
         }
 
         // ===== VIP-status =====
@@ -1348,7 +1414,8 @@
             if (plus) plus.disabled = amount >= max;
 
             const total = col + amount;
-            const willBeFull = req > 0 && total >= req;
+            // Special Guest: zijn kaart staat voor hem al vol; geen "beloning beschikbaar" tonen.
+            const willBeFull = req > 0 && total >= req && !isSpecialGuest();
 
             const room = $('amountRoom');
             if (room) {
@@ -1380,8 +1447,9 @@
             // gaat er nooit meer naar de server dan er nog op de kaart past.
             const roomNow = roomLeft();
             if (roomNow <= 0) {
-                showAlert('scanAlert', 'Deze kaart is al vol — reik eerst de beloning uit.');
                 $('giveControls').style.display = 'none';
+                if (isSpecialGuest()) return;        // Special Guest: niets in te wisselen
+                showAlert('scanAlert', 'Deze kaart is al vol — reik eerst de beloning uit.');
                 $('rewardControls').style.display = 'block';
                 return;
             }
@@ -1427,7 +1495,12 @@
                 current.stamps_required = req || current.stamps_required;
                 current.reward_available = full;
                 loadTodayStats();
-                if (full) {
+                if (isSpecialGuest()) {
+                    // Gewoon gestempeld; inwisselen hoeft nooit.
+                    showSuccess('stamp', 'Gelukt!',
+                        (current.customer_name ? current.customer_name + ' — ' : '') + given + (given === 1 ? ' stempel' : ' stempels') +
+                        ' gegeven · ' + (current.vip_label || 'Special Guest') + ', altijd ' + specialGuestReward());
+                } else if (full) {
                     showSuccess('reward', 'Kaart is vol!',
                         (current.customer_name ? current.customer_name + ' — ' : '') + now + ' van ' + req + ' stempels · beloning beschikbaar');
                     showRewardOnSuccess(true);       // direct uitreiken vanaf dit scherm
@@ -1445,6 +1518,8 @@
 
         async function redeemReward(ev) {
             const btn = ev && ev.currentTarget ? ev.currentTarget : null;
+            // Vangnet: een Special Guest nooit inwisselen, dat zou zijn echte stand resetten.
+            if (isSpecialGuest()) return;
             // Bevestiging vragen vóór het uitreiken (de kaart wordt hierna gereset).
             if (!window.confirm('Beloning uitreiken aan ' + (current.customer_name || 'de klant') + '? De stempelkaart wordt teruggezet naar 0.')) return;
             if (btn) { if (btn.disabled) return; btn.disabled = true; var orig = btn.textContent; btn.textContent = 'Bezig…'; }

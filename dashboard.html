@@ -817,6 +817,53 @@
       background: rgba(var(--ink), .03); font-size: 13px; color: var(--muted); line-height: 1.55; }
     .vip-prev b { color: var(--text-strong); font-weight: 600; }
 
+    /* ---------- Special Guests ---------- */
+    /* Warm goud, los van de indigo VIP-niveaus: dit is geen niveau maar een uitzondering. */
+    .sg-head-ic { display: inline-grid; place-items: center; width: 26px; height: 26px; margin-right: 8px; vertical-align: -6px;
+      border-radius: 8px; background: linear-gradient(135deg, #fde68a, #f59e0b); color: #3b2a05; }
+    .sg-head-ic svg { width: 15px; height: 15px; }
+    .sg-block .cust-search { margin: 20px 0 14px; }
+    .sg-list { display: grid; gap: 8px; }
+    .sg-row { display: flex; align-items: center; gap: 14px; padding: 13px 16px; border-radius: 13px;
+      border: 1px solid var(--border); background: rgba(var(--ink), .02); transition: border-color .2s var(--ease), background .2s var(--ease); }
+    .sg-row.on { border-color: rgba(245,196,81,.42); background: linear-gradient(135deg, rgba(245,196,81,.1), rgba(var(--ink), .02) 70%); }
+    .sg-main { flex: 1; min-width: 0; }
+    .sg-name { display: flex; align-items: center; gap: 7px; font-size: 14.5px; font-weight: 500; color: var(--text-strong); }
+    .sg-name > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .sg-crown { flex: none; display: inline-grid; place-items: center; color: #f5c451; }
+    .sg-crown svg { width: 16px; height: 16px; }
+    .sg-meta { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+    .sg-meta b { color: #f5c451; font-weight: 600; }
+    .sg-msg { font-size: 12.5px; margin-top: 5px; }
+    .sg-msg:empty { display: none; }
+    .sg-msg.ok { color: #8fe0b0; }
+    .sg-msg.error { color: #ffb4b4; }
+    .sg-toggle { flex: none; display: flex; align-items: center; gap: 11px; cursor: pointer; }
+    .sg-toggle-tx { font-size: 12.5px; font-weight: 500; color: var(--pearl); white-space: nowrap; }
+    .sg-more { margin-top: 12px; font-size: 12.5px; color: var(--muted); text-align: center; }
+    [data-theme="light"] .sg-crown, [data-theme="light"] .sg-meta b { color: #b45309; }
+    [data-theme="light"] .sg-row.on { border-color: rgba(217,119,6,.35); background: linear-gradient(135deg, rgba(251,191,36,.14), rgba(var(--ink), .02) 70%); }
+    [data-theme="light"] .sg-msg.ok { color: #15803d; }
+    [data-theme="light"] .sg-msg.error { color: #b91c1c; }
+    @media (max-width: 560px) {
+      .sg-row { flex-wrap: wrap; }
+      .sg-toggle { width: 100%; justify-content: space-between; padding-top: 10px; border-top: 1px solid var(--border); }
+    }
+
+    /* Special Guest op het scanscherm: groot en meteen zichtbaar. */
+    .sg-banner { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 0 0 18px; padding: 20px 18px 18px;
+      border-radius: 18px; text-align: center; border: 1px solid rgba(245,196,81,.5);
+      background: linear-gradient(135deg, rgba(245,196,81,.2), rgba(234,179,8,.07)); box-shadow: 0 14px 40px rgba(245,196,81,.14); }
+    .sg-banner[hidden] { display: none; }
+    .sg-banner .sgb-ic { width: 58px; height: 58px; border-radius: 18px; display: grid; place-items: center;
+      background: linear-gradient(135deg, #fde68a, #f59e0b); color: #3b2a05; box-shadow: 0 8px 24px rgba(245,158,11,.35); }
+    .sg-banner .sgb-ic svg { width: 32px; height: 32px; }
+    .sg-banner .sgb-title { font-size: 23px; font-weight: 700; letter-spacing: -.03em; color: #fde68a; line-height: 1.15; }
+    .sg-banner .sgb-sub { font-size: 16px; font-weight: 500; color: var(--text-strong); line-height: 1.45; }
+    .sg-banner .sgb-note { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+    [data-theme="light"] .sg-banner { border-color: rgba(217,119,6,.4); background: linear-gradient(135deg, rgba(251,191,36,.22), rgba(251,191,36,.06)); }
+    [data-theme="light"] .sg-banner .sgb-title { color: #b45309; }
+
     /* ---------- E-mail naar klanten ---------- */
     .mail-block { margin-bottom: 26px; }
     .mail-block[hidden] { display: none; }
@@ -2198,6 +2245,7 @@
 
             <!-- STAP 2 · Klantkaart + teller -->
             <div class="customer-view" id="customerView" hidden>
+              <div class="sg-banner" id="custSg" role="status" hidden></div>
               <p class="cust-name" id="custName">Klant</p>
 
               <div class="vip-box" id="custVip" hidden></div>
@@ -2482,6 +2530,7 @@
           <div id="loyaltyWrap">
             <div class="block glass"><div class="loader"><span class="spinner"></span> Niveaus laden…</div></div>
           </div>
+          <div id="sgWrap"></div>
         </section>
 
         <!-- ===== Mijn Abonnement ===== -->
@@ -3105,7 +3154,7 @@
       if (tab === 'bedrijfsgegevens') loadBusinessProfile();
       if (tab === 'statistieken') { loadChartStats(currentRange); loadDemographics(); }
       if (tab === 'enquete') loadSurvey();
-      if (tab === 'loyaliteit') loadLoyalty();
+      if (tab === 'loyaliteit') { loadLoyalty(); loadSpecialGuests(true); }
       if (tab !== 'stempel') { stopScanner(); resetScanFlow(); } // camera vrijgeven + flow resetten bij verlaten van de scan-tab
     }
     links.forEach(l => l.addEventListener('click', () => activateTab(l.dataset.tab)));
@@ -3149,6 +3198,9 @@
       applyLockIcons();
       applyPlanGating();
       renderMailBlock();
+      // Special Guests volgt de abonnementsregel van de Klanten-lijst; staat de tab al open,
+      // dan meteen het juiste blok tonen (slot of lijst).
+      if (document.getElementById('panel-loyaliteit').classList.contains('active')) loadSpecialGuests();
       // Zonder toegang: toon direct het grote abonnement-scherm.
       if (!subscription.has_access) openSubModal();
     }
@@ -5195,6 +5247,7 @@
     let newCount = 0;              // stand na toevoegen (uit API-respons)
     let rewardAvailable = false;   // kaart is vol → beloning kan uitgereikt worden (uit lookup)
     let holderLoyalty = null;      // VIP-status van deze klant (alleen als loyaliteit aanstaat)
+    let holderSpecial = null;      // Special Guest: { label, reward } of null. Nooit inwisselen.
 
     const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -5332,9 +5385,17 @@
       holderName = h.customer_name || h.name || h.customer || 'Klant';
       holderId = h.holder_id ?? h.holderId ?? h.id ?? h._id ?? h.holder ?? h.customer_id ?? null;
       currentStamps = Number(h.current_stamps ?? h.stamps ?? h.stamp_count ?? h.stamps_collected ?? 0) || 0;
-      // Volle kaart? Uit reward_available (of afgeleid uit de stand).
-      rewardAvailable = (h.reward_available ?? h.rewardAvailable ?? h.reward_ready ?? h.is_full ?? false) === true
-        || currentStamps >= stampsRequired;
+      // Special Guest: de backend zet reward_available dan altijd aan. currentStamps blijft
+      // de echte stand (stamps_collected), en daarmee wordt gewoon gestempeld.
+      holderSpecial = h.is_vip_forever === true
+        ? { label: h.vip_label || 'Special Guest', reward: h.reward_description || card.reward_description || '' }
+        : null;
+      // Volle kaart? Uit reward_available (of afgeleid uit de stand). Voor een Special Guest
+      // alleen de echte stand: reward_available zegt bij hem niets over zijn kaart.
+      rewardAvailable = holderSpecial
+        ? currentStamps >= stampsRequired
+        : (h.reward_available ?? h.rewardAvailable ?? h.reward_ready ?? h.is_full ?? false) === true
+          || currentStamps >= stampsRequired;
       // VIP-status: de backend stuurt dit alleen mee als loyaliteit aanstaat.
       holderLoyalty = readLoyalty(h);
 
@@ -5427,6 +5488,23 @@
       next.hidden = true; next.innerHTML = '';
     }
 
+    // ===== Special Guest =====
+    function specialGuestReward() {
+      const r = String((holderSpecial && holderSpecial.reward) || '').trim();
+      if (!r) return 'gratis beloning';
+      return /^gratis\b/i.test(r) ? r : 'gratis ' + r;   // geen "gratis gratis koffie"
+    }
+    function renderHolderSpecial() {
+      const el = document.getElementById('custSg');
+      if (!el) return;
+      if (!holderSpecial) { el.hidden = true; el.innerHTML = ''; return; }
+      el.innerHTML = '<span class="sgb-ic">' + VIP_CROWN_MINI + '</span>'
+        + '<span class="sgb-title">' + escapeHtml(holderSpecial.label) + '</span>'
+        + '<span class="sgb-sub">Heeft recht op ' + escapeHtml(specialGuestReward()) + '</span>'
+        + '<span class="sgb-note">Geen actie nodig: niet inwisselen, de kaart blijft altijd vol.</span>';
+      el.hidden = false;
+    }
+
     // ===== STAP 2 · Klantkaart + teller =====
     function showCustomerView() {
       scanView.hidden = true;
@@ -5444,9 +5522,24 @@
         `Spaar ${stampsRequired} stempels → ${card.reward_description || 'gratis product'}`;
 
       renderHolderVip();
+      renderHolderSpecial();
 
       custRedeemError.hidden = true;
       const full = rewardAvailable === true || currentStamps >= stampsRequired;
+      if (holderSpecial) {
+        // Nooit "Beloning uitreiken"; stempelen gaat door op de echte stand tot die vol is.
+        custReward.textContent = `${holderSpecial.label} · altijd ${specialGuestReward()}`;
+        fullControls.hidden = true;
+        giveControls.hidden = full;
+        if (full) {
+          selectedAmount = 0;
+          custProgress.textContent = `Echte stand: ${currentStamps} / ${stampsRequired} stempels`;
+          renderCustomerStamps();
+        } else {
+          updateCustomerUI();
+        }
+        return;
+      }
       // VOL → verberg de +/- teller en toon "Beloning uitreiken"; NIET VOL → normale stempel-flow.
       giveControls.hidden = full;
       fullControls.hidden = !full;
@@ -5485,9 +5578,9 @@
       minusBtn.disabled = selectedAmount <= 1;
       plusBtn.disabled = selectedAmount >= maxAdd;
       addPreview.textContent = `Na toevoegen: ${projected}/${stampsRequired} stempels`;
-      rewardHint.hidden = projected < stampsRequired;
+      rewardHint.hidden = projected < stampsRequired || !!holderSpecial;
       confirmLabel.textContent = `Bevestig ${selectedAmount} stempel${selectedAmount > 1 ? 's' : ''}`;
-      custProgress.textContent = `${currentStamps} / ${stampsRequired} stempels`;
+      custProgress.textContent = `${holderSpecial ? 'Echte stand: ' : ''}${currentStamps} / ${stampsRequired} stempels`;
       renderCustomerStamps();
     }
 
@@ -5552,6 +5645,12 @@
       resultTitle.textContent = `Stempel gegeven aan ${holderName}!`;
       resultSub.textContent = `Nu heeft die ${newCount}/${stampsRequired} stempels`;
 
+      // Special Guest: gewoon gestempeld, inwisselen hoeft nooit.
+      if (holderSpecial) {
+        resultSub.textContent = `Echte stand: ${newCount}/${stampsRequired} stempels · ${holderSpecial.label}, altijd ${specialGuestReward()}`;
+        rewardBlock.hidden = true;
+        return;
+      }
       // Reward-check op basis van stamps_required uit de kaart.
       if (newCount >= stampsRequired) {
         const rewardText = card.reward_description || 'de beloning';
@@ -5568,6 +5667,7 @@
     // Beloning uitreiken → reset stempels naar 0 via POST /api/stamp/redeem.
     async function redeemReward() {
       if (redeemBtn.disabled) return;   // voorkom dubbel klikken tijdens laden
+      if (holderSpecial) return;        // vangnet: een Special Guest nooit inwisselen (reset zijn echte stand)
       const cid = activeCardId();
       const missing = [];
       if (!cid) missing.push('card_id (winkelier-kaart)');
@@ -5621,6 +5721,7 @@
     // Volle kaart → beloning uitreiken (met bevestiging) via POST /api/stamp/redeem.
     async function redeemFromFull() {
       if (custRedeemBtn.disabled) return;
+      if (holderSpecial) return;        // vangnet: een Special Guest nooit inwisselen
       const cid = activeCardId();
       const missing = [];
       if (!cid) missing.push('card_id (winkelier-kaart)');
@@ -5660,6 +5761,8 @@
     function resetScanFlow() {
       holderLoyalty = null;
       renderHolderVip();               // geen VIP-blok van de vorige klant laten staan
+      holderSpecial = null;
+      renderHolderSpecial();
       customerView.hidden = true;
       stampResult.hidden = true;
       rewardBlock.hidden = true;
@@ -5722,6 +5825,9 @@
         vipPoints: (raw.lifetime_points === null || raw.lifetime_points === undefined) ? null : (Number(raw.lifetime_points) || 0),
         vipTier: String(raw.tier_name || '').trim(),
         vipDiscount: Number(raw.tier_discount_percent) || 0,
+        // Special Guest: altijd gratis. Puur weergave; 'stamps' hierboven blijft de echte stand.
+        isSpecialGuest: raw.is_vip_forever === true,
+        specialGuestSince: raw.vip_forever_since || null,
         lastVisitRaw,
         lastVisit: formatVisitDate(lastVisitRaw),
         createdRaw,
@@ -7629,6 +7735,179 @@
       if (e.target.closest('[data-fb-retry]')) { loadFeedback(true); return; }
       if (e.target.closest('[data-fb-settings]')) { setSvView('satisfaction'); return; }
       if (e.target.closest('[data-fb-more]')) { fbShown += FB_PAGE; renderFeedback(); }
+    });
+
+    // ============================================================
+    //  Special Guests (op de VIP & Loyaliteit-pagina)
+    // ============================================================
+    // Een vaste klant die altijd gratis krijgt. Puur een weergave-vlag: zijn kaart staat
+    // overal vol, maar zijn echte stempelstand loopt gewoon door. Dit blok toont de klanten-
+    // lijst, dus het volgt dezelfde abonnementsregel als de Klanten-tab.
+    const SG_LIMIT = 60;               // zonder zoekterm niet honderden schakelaars tegelijk
+    let sgCustomers = [];
+    let sgLoaded = false;
+    let sgLoading = false;
+    const sgMsgs = {};                 // id → { msg, kind } per klantregel
+
+    function sgLocked() { return isBasicPlan() || !subscription.has_access; }
+
+    function sgErrorText(status, data) {
+      if (status === 403) return 'Geen rechten: alleen de eigenaar van de kaart kan een Special Guest aanwijzen, een vestigingsmanager niet.';
+      if (status === 404) return 'Deze klant is niet gevonden. Ververs de pagina en probeer het opnieuw.';
+      if (status === 503) return 'Deze functie is nog niet actief, neem contact op met support.';
+      return (data && (data.error || data.message)) || 'Opslaan mislukt. Probeer het opnieuw.';
+    }
+
+    async function loadSpecialGuests(force) {
+      const wrap = document.getElementById('sgWrap');
+      if (!wrap || sgLoading) return;
+      if (sgLocked()) {
+        wrap.innerHTML = `<div class="block glass" style="margin-top:20px">
+            <div class="sv-lock">
+              <div class="sv-lock-ic">${VIP_CROWN_SVG}</div>
+              <h3>Special Guests is een Premium functie</h3>
+              <p>Wijs vaste klanten aan die altijd gratis krijgen. Beschikbaar vanaf Premium.</p>
+              <button type="button" class="btn btn-primary" data-plan-upgrade>Bekijk abonnementen</button>
+            </div>
+          </div>`;
+        return;
+      }
+      if (sgLoaded && !force) { renderSpecialGuests(); return; }
+      if (!cardId) { sgProblem('Geen stempelkaart gevonden. Log opnieuw in.'); return; }
+      sgLoading = true;
+      wrap.innerHTML = '<div class="block glass" style="margin-top:20px"><div class="loader"><span class="spinner"></span> Klanten laden…</div></div>';
+      try {
+        // Zonder vestigingsfilter: de eigenaar wijst Special Guests aan voor de hele kaart.
+        const res = await fetch(API_BASE + '/api/stamp/customers/' + encodeURIComponent(cardId), { headers: authHeaders() });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) { sgProblem(sgErrorText(res.status, data), res.status !== 403); return; }
+        const list = Array.isArray(data) ? data : (data.customers || data.holders || []);
+        sgCustomers = list.map(normalizeCustomer).filter(c => c.id !== null);
+        sgLoaded = true;
+        renderSpecialGuests();
+      } catch (err) {
+        sgProblem(isNetworkError(err) ? NET_MSG : 'Kon klanten niet laden. Probeer het later opnieuw.', true);
+      } finally {
+        sgLoading = false;
+      }
+    }
+
+    function sgProblem(msg, retry) {
+      document.getElementById('sgWrap').innerHTML = `<div class="block glass" style="margin-top:20px">
+          <div class="empty-state">
+            <span class="es-ic">${VIP_CROWN_SVG}</span>
+            <h4>Special Guests niet geladen</h4>
+            <p>${escapeHtml(msg)}</p>
+            ${retry ? '<button type="button" class="btn btn-ghost" data-sg-retry>Opnieuw proberen</button>' : ''}
+          </div>
+        </div>`;
+    }
+
+    function sgRowHTML(c) {
+      const on = c.isSpecialGuest;
+      const since = on ? formatVisitDate(c.specialGuestSince) : null;
+      const status = on ? '<b>Special Guest</b>' + (since ? ' sinds ' + escapeHtml(since) : '') + ' · ' : '';
+      const m = sgMsgs[c.id];
+      return `<div class="sg-row${on ? ' on' : ''}" data-sg-row="${escapeHtml(String(c.id))}">
+          <div class="cust-avatar">${escapeHtml(customerInitials(c.name))}</div>
+          <div class="sg-main">
+            <div class="sg-name"><span>${escapeHtml(c.name)}</span>${on ? `<span class="sg-crown" title="Special Guest">${VIP_CROWN_SVG}</span>` : ''}</div>
+            <div class="sg-meta">${status}Echte stand: ${c.rawStamps}/${c.required} stempels</div>
+            <div class="sg-msg${m && m.kind ? ' ' + m.kind : ''}">${m ? escapeHtml(m.msg) : ''}</div>
+          </div>
+          <label class="sg-toggle">
+            <span class="sg-toggle-tx">Special Guest – altijd gratis</span>
+            <input type="checkbox" class="switch" data-sg-toggle="${escapeHtml(String(c.id))}" ${on ? 'checked' : ''}
+              aria-label="Special Guest – altijd gratis voor ${escapeHtml(c.name)}" />
+          </label>
+        </div>`;
+    }
+
+    function renderSpecialGuests() {
+      const wrap = document.getElementById('sgWrap');
+      if (!wrap || !sgLoaded) return;
+      const input = document.getElementById('sgSearch');
+      const q = input ? input.value : '';
+      const count = sgCustomers.filter(c => c.isSpecialGuest).length;
+
+      // Bouw het blok één keer; daarna alleen de lijst, zodat de zoekbalk zijn focus houdt.
+      if (!input) {
+        wrap.innerHTML = `<div class="block glass sg-block" style="margin-top:20px">
+            <div class="sv-top">
+              <div>
+                <h3><span class="sg-head-ic">${VIP_CROWN_SVG}</span>Special Guests</h3>
+                <div class="b-sub" style="margin-bottom:0">Vaste klanten die altijd gratis krijgen. Hun kaart staat altijd vol en er wordt nooit iets ingewisseld. Hun echte stempelstand loopt gewoon door: zet je het uit, dan zien ze weer hun eigen stand.</div>
+              </div>
+              <span class="sv-count" id="sgCount"></span>
+            </div>
+            <div class="cust-search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" id="sgSearch" placeholder="Zoek op naam, e-mail of telefoon…" autocomplete="off" />
+            </div>
+            <div id="sgList"></div>
+          </div>`;
+        document.getElementById('sgSearch').addEventListener('input', renderSpecialGuests);
+      }
+      document.getElementById('sgCount').innerHTML = `<b>${count}</b> Special Guest${count === 1 ? '' : 's'}`;
+
+      const term = q.trim().toLowerCase();
+      // Special Guests bovenaan, daarna het recentste bezoek.
+      const sorted = [...sgCustomers].sort((a, b) =>
+        (b.isSpecialGuest - a.isSpecialGuest) || (b.sortKey - a.sortKey));
+      const filtered = term
+        ? sorted.filter(c => (c.name + ' ' + c.email + ' ' + c.phone).toLowerCase().includes(term))
+        : sorted;
+      const list = document.getElementById('sgList');
+      if (!sgCustomers.length) {
+        list.innerHTML = '<div class="cust-empty"><p>Nog geen klanten. Zodra iemand spaart, kun je hem hier Special Guest maken.</p></div>';
+        return;
+      }
+      if (!filtered.length) {
+        list.innerHTML = `<div class="cust-empty"><p>Geen klanten gevonden voor "${escapeHtml(q.trim())}".</p></div>`;
+        return;
+      }
+      const shown = filtered.slice(0, SG_LIMIT);
+      list.innerHTML = '<div class="sg-list">' + shown.map(sgRowHTML).join('') + '</div>'
+        + (filtered.length > shown.length
+          ? `<p class="sg-more">${shown.length} van ${filtered.length} klanten getoond. Zoek op naam om iemand anders te vinden.</p>` : '');
+    }
+
+    function sgSetMsg(id, msg, kind) {
+      sgMsgs[id] = msg ? { msg, kind: kind || '' } : null;
+      const row = document.querySelector(`[data-sg-row="${CSS.escape(id)}"] .sg-msg`);
+      if (row) { row.textContent = msg || ''; row.className = 'sg-msg' + (kind ? ' ' + kind : ''); }
+    }
+
+    async function toggleSpecialGuest(el) {
+      const id = el.dataset.sgToggle;
+      const c = sgCustomers.find(x => String(x.id) === id);
+      if (!c) return;
+      const want = el.checked;
+      el.disabled = true;
+      sgSetMsg(id, 'Opslaan…', '');
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/customers/' + encodeURIComponent(id) + '/vip-forever', {
+          method: 'POST', headers: authHeaders(), body: JSON.stringify({ enabled: want }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw Object.assign(new Error(sgErrorText(res.status, data)), { handled: true });
+        c.isSpecialGuest = data.is_vip_forever === true;
+        c.specialGuestSince = data.vip_forever_since || null;
+        sgMsgs[id] = { msg: c.isSpecialGuest ? 'Special Guest aangezet ✓' : 'Special Guest uitgezet ✓', kind: 'ok' };
+        renderSpecialGuests();
+        setTimeout(() => { if (sgMsgs[id] && sgMsgs[id].kind === 'ok') sgSetMsg(id, ''); }, 4000);
+      } catch (err) {
+        // Mislukt: terugzetten, anders lijkt het aan te staan terwijl de server er niets van weet.
+        el.checked = !want; el.disabled = false;
+        sgSetMsg(id, err.handled ? err.message : (isNetworkError(err) ? NET_MSG : 'Opslaan mislukt. Probeer het opnieuw.'), 'error');
+      }
+    }
+
+    document.getElementById('sgWrap').addEventListener('change', (e) => {
+      if (e.target.matches('[data-sg-toggle]')) toggleSpecialGuest(e.target);
+    });
+    document.getElementById('sgWrap').addEventListener('click', (e) => {
+      if (e.target.closest('[data-sg-retry]')) loadSpecialGuests(true);
     });
 
     // ============================================================
