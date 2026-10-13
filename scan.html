@@ -1620,7 +1620,6 @@
                 });
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok || !data.success) {
-                    btn.disabled = false; btn.textContent = original;
                     showAlert('scanAlert', isWrongAccount(res, data) ? wrongAccountMsg()
                         : (data.error || 'Stempel niet opgeslagen — probeer opnieuw.'));
                     return;
@@ -1650,8 +1649,11 @@
                         ' gegeven · ' + now + ' van ' + req + ' stempels');
                 }
             } catch (err) {
-                btn.disabled = false; btn.textContent = original;
                 showAlert('scanAlert', err.network ? err.message : 'Stempel niet opgeslagen — probeer opnieuw.');
+            } finally {
+                // Altijd terugzetten, ook na een geslaagde stempel: dit is dezelfde knop voor de
+                // volgende klant. Bleef hij uit staan, dan deed elke volgende klik niets meer.
+                btn.disabled = false; btn.textContent = original;
             }
         }
 
@@ -1670,7 +1672,6 @@
                 });
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok || !data.success) {
-                    if (btn) { btn.disabled = false; btn.textContent = orig; }
                     showAlert('scanAlert', data.error || 'Beloning niet ingewisseld — probeer opnieuw.');
                     return;
                 }
@@ -1680,8 +1681,10 @@
                 showSuccess('reward', 'Beloning uitgereikt!', (current.reward_description || store.reward || 'Beloning') + ' voor ' + (current.customer_name || 'de klant'));
                 fireConfetti();
             } catch (err) {
-                if (btn) { btn.disabled = false; btn.textContent = orig; }
                 showAlert('scanAlert', err.network ? err.message : 'Beloning niet ingewisseld — probeer opnieuw.');
+            } finally {
+                // Ook na een geslaagde inwisseling: de knop wordt bij de volgende volle kaart hergebruikt.
+                if (btn) { btn.disabled = false; btn.textContent = orig; }
             }
         }
 
