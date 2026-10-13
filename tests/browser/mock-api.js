@@ -15,7 +15,7 @@ const tokens = {
 const locs = { pp: [{ id: 'L1', name: 'Centrum' }, { id: 'L2', name: 'Noord' }], basic: [], trial: [], ptrial: [], pptrial: [] };
 let S;
 function reset() {
-  S = { gifts: [], txs: [], ref: 400, idem: {}, cfg: { notLive: false, rateLimited: false, redeemDelay: 0, failLookup: false }, log: { redeem: [], create: [], lookup: [], give: [], redeemStamp: [] }, holders: { 'vip-0000-9a4d-4e6f-b7c2-1d0e5a9f8b34': { name: 'Vaste Gast', stamps: 2, vip: true } } };
+  S = { gifts: [], txs: [], ref: 400, idem: {}, cfg: { notLive: false, rateLimited: false, redeemDelay: 0, failLookup: false, settingsFail: null }, settings: {}, log: { redeem: [], create: [], lookup: [], give: [], redeemStamp: [], settingsPut: [], settingsGet: 0 }, holders: { 'vip-0000-9a4d-4e6f-b7c2-1d0e5a9f8b34': { name: 'Vaste Gast', stamps: 2, vip: true } } };
   const now = Date.now();
   mk('pp', 5000, { recipient_name: 'Sanne de Vries', message: 'Gefeliciteerd!' }, now - 5 * 864e5, 'ABCD-EFGH-JK', 'longcodeSanne123');
   mk('pp', 2500, { recipient_name: 'Daan' }, now - 3 * 864e5, 'BLKD-0000-01', 'longcodeBlocked1').status = 'blocked';
@@ -55,6 +55,7 @@ function api(req, res, url, body) {
   if (p === '/__reset') { reset(); return send(res, 200, {}); }
   if (p === '/__cfg') { Object.assign(S.cfg, body); return send(res, 200, S.cfg); }
   if (p === '/__state') return send(res, 200, S);
+  if (p === '/__settings') { S.settings[body.card] = body.on === true; return send(res, 200, S.settings); }
   if (p === '/api/stamp/subscription') { if (!tok) return send(res, 401, { error: 'Niet ingelogd' }); return send(res, 200, { success: true, plan: tok.plan, access_status: tok.access_status || 'active', has_access: true }); }
   if (p === '/api/stamp/locations') return send(res, 200, { success: true, locations: tok ? locs[tok.card] : [] });
   if ((m = p.match(/^\/api\/stamp\/cards\/(\w+)$/))) return send(res, 200, { success: true, card: { id: m[1], business_name: (Object.values(tokens).find(t => t.card === m[1]) || {}).biz, card_title: 'Spaarkaart', stamps_required: 8, reward_description: 'gratis product' } });
@@ -86,6 +87,22 @@ function api(req, res, url, body) {
     if (tok.plan !== 'premium_plus') return fail(res, 403, 'premium_plus_required', 'Cadeaubonnen horen bij Premium Plus.', { upgrade_required: true });
     if (S.cfg.rateLimited) return fail(res, 429, 'rate_limited', 'Te veel verzoeken');
     const card = tok.card;
+    // Instelling: cadeaubon-scanner voor medewerkers (standaard uit). Lezen mag iedereen van de zaak,
+    // wijzigen alleen de eigenaar.
+    if (p === '/api/stamp/gift-cards/settings') {
+      const f = S.cfg.settingsFail;
+      if (f === 404) { res.writeHead(404, { 'Content-Type': 'text/html' }); return res.end('Cannot ' + req.method); }
+      if (f === 'migration') return fail(res, 503, 'migration_missing', 'Draai migratie');
+      if (f === 500) return fail(res, 500, null, 'Interne fout');
+      if (req.method === 'GET') { S.log.settingsGet++; return send(res, 200, { success: true, scanner_enabled: S.settings[card] === true }); }
+      if (req.method === 'PUT') {
+        if (!tok.owner) return fail(res, 403, 'owner_only', 'Alleen eigenaar');
+        if (f === 'putFail') return fail(res, 500, null, 'Opslaan mislukt op de server');
+        if (typeof body.scanner_enabled !== 'boolean') return fail(res, 400, 'invalid_request', 'scanner_enabled ontbreekt');
+        S.settings[card] = body.scanner_enabled; S.log.settingsPut.push(body);
+        return send(res, 200, { success: true, scanner_enabled: S.settings[card] });
+      }
+    }
     if (p === '/api/stamp/gift-cards' && req.method === 'POST') {
       if (!Number.isInteger(body.amount_cents) || body.amount_cents <= 0) return fail(res, 400, 'invalid_amount', 'Ongeldig bedrag');
       const g = mk(card, body.amount_cents, { recipient_name: body.recipient_name || null, message: body.message || null, recipient_email: body.recipient_email || null, expires_at: body.expires_at || null });

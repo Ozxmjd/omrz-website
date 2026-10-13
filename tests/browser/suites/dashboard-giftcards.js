@@ -10,7 +10,9 @@ async function open(b, tok, card, vp, extra = {}) {
   const p = await ctx.newPage();
   p.on('pageerror', e => pageErrors.push(tok + ': ' + e.message));
   p.on('console', m => { if (m.type() === 'error' && !extra.expectErrors) consoleErrors.push(tok + ': ' + m.text()); });
-  p.on('dialog', d => d.accept());
+  // Bevestigingsvensters onthouden; p.dismissNext = true weigert het volgende.
+  p.dialogs = [];
+  p.on('dialog', d => { p.dialogs.push(d.message()); if (p.dismissNext) { p.dismissNext = false; d.dismiss(); } else d.accept(); });
   if (extra.log) p.on('request', r => { if (/gift-cards/.test(r.url())) extra.log.push(r.url()); });
   await p.goto(B + '/dashboard.html'); await p.waitForTimeout(900);
   await p.evaluate(() => activateTab('cadeaubonnen'));
@@ -214,6 +216,57 @@ module.exports = async function run(env) {
   check('7. rate_limited → "Te veel pogingen"', /Te veel pogingen/.test(await txt(p, '#gcWrap')), (await txt(p, '#gcWrap')).slice(0, 80));
   await post('/__cfg', { rateLimited: false });
   await ctx.close();
+
+  // ===== 9. Schakelaar "Cadeaubon-scanner voor uw medewerkers" =====
+  await post('/__reset');
+  ({ ctx, p } = await open(b, 'tok-pp', 'pp'));
+  await p.waitForSelector('.gc-row'); await p.waitForFunction(() => !document.getElementById('gcScannerSwitch').disabled);
+  check('9. Schakelaar bovenaan de pagina, standaard uit', await vis(p, '#gcScannerSwitch') && !(await p.isChecked('#gcScannerSwitch'))
+    && await p.evaluate(() => document.querySelector('.gc-setting').getBoundingClientRect().top < document.querySelector('.gc-top').getBoundingClientRect().top)
+    && /Cadeaubon-scanner voor uw medewerkers/.test(await txt(p, '.gc-setting')));
+  await p.click('#gcScannerSwitch');
+  await p.waitForFunction(() => /Aan\./.test(document.getElementById('gcScannerNote').textContent));
+  let st9 = await state();
+  check('9. Aanzetten → PUT scanner_enabled true + bevestiging over het blok "Cadeaubon scannen"', JSON.stringify(st9.log.settingsPut.slice(-1)[0]) === JSON.stringify({ card_id: 'pp', scanner_enabled: true })
+    && /Cadeaubon scannen/.test(await txt(p, '#gcScannerNote')) && await p.isChecked('#gcScannerSwitch') && p.dialogs.length === 0);
+  const open9 = (await state()).gifts.filter(g => g.card_id === 'pp' && g.status === 'active').reduce((n, g) => n + g.balance_cents, 0);
+  const euro = '€' + NB + (open9 / 100).toFixed(2).replace('.', ',');
+  const want9 = `Er staat nog ${euro} aan tegoed open. Uitzetten verbergt de scanner voor uw medewerkers. Bestaande bonnen blijven geldig en kunnen weer worden ingewisseld zodra u de scanner aanzet.`;
+  p.dismissNext = true;
+  await p.click('#gcScannerSwitch'); await p.waitForTimeout(400);
+  check('9. Uitzetten met open tegoed → exacte waarschuwing; Annuleren laat hem aan, geen PUT', p.dialogs.slice(-1)[0] === want9 && await p.isChecked('#gcScannerSwitch') && (await state()).log.settingsPut.length === 1, p.dialogs.slice(-1)[0]);
+  await p.click('#gcScannerSwitch');
+  await p.waitForFunction(() => /Uit\./.test(document.getElementById('gcScannerNote').textContent));
+  check('9. Bevestigen → PUT scanner_enabled false, schakelaar uit', JSON.stringify((await state()).log.settingsPut.slice(-1)[0]) === JSON.stringify({ card_id: 'pp', scanner_enabled: false }) && !(await p.isChecked('#gcScannerSwitch')));
+  // Mislukt opslaan → terugzetten + melding
+  await post('/__cfg', { settingsFail: 'putFail' });
+  await p.click('#gcScannerSwitch'); await p.waitForFunction(() => /Niet opgeslagen/.test(document.getElementById('gcScannerNote').textContent));
+  check('9. Opslaan mislukt → schakelaar terug (uit) + melding', !(await p.isChecked('#gcScannerSwitch')) && /Opslaan mislukt op de server/.test(await txt(p, '#gcScannerNote')) && !(await p.isDisabled('#gcScannerSwitch')));
+  await post('/__cfg', { settingsFail: null });
+  // Na herladen: de server is leidend
+  await post('/__settings', { card: 'pp', on: true });
+  await p.reload(); await p.waitForTimeout(800); await p.evaluate(() => activateTab('cadeaubonnen'));
+  await p.waitForFunction(() => !document.getElementById('gcScannerSwitch').disabled);
+  check('9. Stand komt van de server (aan na herladen)', await p.isChecked('#gcScannerSwitch'));
+  await ctx.close();
+  // Geen open tegoed → geen waarschuwing
+  ({ ctx, p } = await open(b, 'tok-pp', 'pp'));
+  await p.route('**/api/stamp/gift-cards?*', async r => { const res = await r.fetch(); const j = await res.json(); j.totals = { outstanding_cents: 0, active_count: 0 }; r.fulfill({ response: res, json: j }); });
+  await p.evaluate(() => loadGiftList(true)); await p.waitForTimeout(400);
+  await p.waitForFunction(() => !document.getElementById('gcScannerSwitch').disabled);
+  await p.click('#gcScannerSwitch');
+  await p.waitForFunction(() => /Uit\./.test(document.getElementById('gcScannerNote').textContent));
+  check('9. Uitzetten zonder open tegoed → geen waarschuwing, direct uit', p.dialogs.length === 0 && !(await p.isChecked('#gcScannerSwitch')));
+  await ctx.close();
+  // Ophalen mislukt → uit en niet te bedienen, met melding
+  for (const [f, re, label] of [[500, /Instelling niet geladen/, 'serverfout'], [404, /nog niet beschikbaar/, '404'], ['migration', /nog niet beschikbaar/, 'migration_missing']]) {
+    await post('/__cfg', { settingsFail: f });
+    ({ ctx, p } = await open(b, 'tok-pp', 'pp', null, { expectErrors: true }));
+    await p.waitForSelector('.gc-row'); await p.waitForTimeout(300);
+    check(`9. Ophalen ${label} → schakelaar uit en vergrendeld, melding`, !(await p.isChecked('#gcScannerSwitch')) && await p.isDisabled('#gcScannerSwitch') && re.test(await txt(p, '#gcScannerNote')), await txt(p, '#gcScannerNote'));
+    await ctx.close();
+  }
+  await post('/__cfg', { settingsFail: null });
 
   // ===== 8. Schermformaten =====
   for (const vp of [{ width: 1440, height: 1000 }, { width: 820, height: 1180 }, { width: 390, height: 844 }]) {

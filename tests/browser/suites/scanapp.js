@@ -9,6 +9,8 @@ let b;
 async function open(tok, vp, extra = {}) {
   const ctx = await b.newContext({ viewport: vp || { width: 820, height: 1180 }, permissions: ['clipboard-read', 'clipboard-write', 'camera'] });
   await ctx.addInitScript(([t, loc]) => { if (!/scan/.test(location.pathname)) return; localStorage.setItem('stamp_token', t); localStorage.setItem('stamp_card_id', t.replace('tok-', '') === 'mgr' ? 'pp' : t.replace('tok-', '')); if (loc) localStorage.setItem('stamp_location_id', loc); }, [tok, extra.loc || null]);
+  const card = tok.replace('tok-', '') === 'mgr' ? 'pp' : tok.replace('tok-', '');
+  await post('/__settings', { card, on: extra.scanner !== false });
   const p = await ctx.newPage();
   p.on('pageerror', e => pageErrors.push(tok + ': ' + e.message));
   p.on('console', m => { if (m.type() === 'error' && !extra.expectErrors) consoleErrors.push(tok + ': ' + m.text()); });
@@ -20,6 +22,8 @@ const vis = (p, s) => p.evaluate(s => { const e = document.querySelector(s); if 
 const noH = p => p.evaluate(() => document.documentElement.scrollWidth <= innerWidth);
 const scan = (p, t) => p.evaluate(t => routeScan(t), t);
 const keys = async (p, str) => { for (const k of str) await p.click(`#gPad [data-k="${k === '<' ? 'del' : k}"]`); };
+// In de cadeaubonflow komen via het blok "Cadeaubon scannen" (vervangt de vroegere bovenste knoppen).
+const giftMode = p => p.evaluate(() => { if (scanMode !== 'gift') document.getElementById('giftBlockBtn').click(); });
 const sanne = () => state().then(s => s.gifts.find(g => g.short_code === 'ABCD-EFGH-JK'));
 
 module.exports = async function run(env) {
@@ -29,19 +33,18 @@ module.exports = async function run(env) {
 
   // ===== A. Ander plan: niets verandert =====
   let { ctx, p } = await open('tok-basic');
-  check('A. Basic: geen Stempel/Cadeaubon-keuze', !(await vis(p, '#modeSwitch')));
-  await scan(p, 'https://omrzdigital.nl/cadeaubon/longcodeBasic001');
-  await p.waitForSelector('#resultStage.on');
-  check('A. Basic: elke QR gaat naar de stempelflow (geen cadeaubon-lookup)', !(await vis(p, '#giftStage')) && (await state()).log.lookup.length === 0);
+  check('A. Basic: geen blok Cadeaubon scannen (ook al staat de instelling aan)', !(await vis(p, '#giftBlock')));
+  await scan(p, 'https://omrzdigital.nl/cadeaubon/longcodeBasic001'); await p.waitForTimeout(200);
+  check('A. Basic: cadeaubon-link → "Cadeaubonnen staan uit voor deze zaak", geen lookup', /Cadeaubonnen staan uit voor deze zaak/.test(await txt(p, '#scanAlert')) && !(await vis(p, '#giftStage')) && !(await vis(p, '#resultStage')) && (await state()).log.lookup.length === 0);
   await ctx.close();
 
   // ===== A2. Proefperiodes: alleen het pakket telt =====
   for (const [tok, show, label] of [['tok-trial', false, 'Proef op Basic'], ['tok-ptrial', false, 'Proef op Premium'], ['tok-pptrial', true, 'Proef op Premium Plus']]) {
     ({ ctx, p } = await open(tok));
-    check(`A2. ${label}: ${show ? 'keuze Stempel/Cadeaubon zichtbaar' : 'alleen stempelscanner'}`, (await vis(p, '#modeSwitch')) === show);
+    check(`A2. ${label} (instelling aan): ${show ? 'blok Cadeaubon scannen zichtbaar' : 'geen blok, alleen stempelscanner'}`, (await vis(p, '#giftBlock')) === show);
     if (!show) {
-      await scan(p, 'https://omrzdigital.nl/cadeaubon/longcodeProef001'); await p.waitForSelector('#resultStage.on');
-      check(`A2. ${label}: cadeaubon-link gaat naar de stempelflow`, !(await vis(p, '#giftStage')));
+      await scan(p, 'https://omrzdigital.nl/cadeaubon/longcodeProef001'); await p.waitForTimeout(200);
+      check(`A2. ${label}: cadeaubon-link → "staan uit", geen cadeaubonflow`, /staan uit/.test(await txt(p, '#scanAlert')) && !(await vis(p, '#giftStage')));
     }
     await ctx.close();
   }
@@ -49,12 +52,14 @@ module.exports = async function run(env) {
   ({ ctx, p } = await open('tok-pp'));
   await p.route('**/gift-cards/lookup**', r => r.fulfill({ status: 403, contentType: 'application/json', body: JSON.stringify({ success: false, code: 'premium_plus_required', error: 'x' }) }));
   await scan(p, 'ABCD-EFGH-JK'); await p.waitForTimeout(300);
-  check('A2. premium_plus_required bij lookup → melding en alleen nog stempelscanner', /Premium Plus/.test(await txt(p, '#scanAlert')) && !(await vis(p, '#modeSwitch')));
+  check('A2. premium_plus_required bij lookup → melding en blok weg', /Premium Plus/.test(await txt(p, '#scanAlert')) && !(await vis(p, '#giftBlock')));
   await ctx.close();
 
   // ===== B. Premium Plus eigenaar =====
   ({ ctx, p } = await open('tok-pp'));
-  check('B1. Premium Plus: keuze zichtbaar, standaard Stempel', await vis(p, '#modeSwitch') && /active/.test(await p.getAttribute('[data-mode="stamp"]', 'class')));
+  check('B1. Premium Plus + instelling aan: stempelscanner bovenaan, blok Cadeaubon scannen eronder', await vis(p, '#giftBlock') && await vis(p, '#cameraBtn')
+    && await p.evaluate(() => document.getElementById('giftBlock').getBoundingClientRect().top > document.getElementById('cameraOpenWrap').getBoundingClientRect().bottom)
+    && /Klaar om te scannen/.test(await txt(p, '#scanStage .scan-title')));
   await p.screenshot({ path: OUT + '/' + 'gcs-start-820.png' });
   await scan(p, UUID); await p.waitForSelector('#resultStage.on');
   check('B1. Stempelkaart-QR in Stempel-modus → bestaande stempelflow', await vis(p, '#giveBtn') && /Stempel Klant/.test(await txt(p, '#custName')));
@@ -96,7 +101,7 @@ module.exports = async function run(env) {
   await p.click('#gdNext');
 
   // B5: geblokkeerd / verlopen / leeg (korte code intypen)
-  await p.click('[data-mode="gift"]');
+  await giftMode(p);
   check('B5. Cadeaubon-modus: titel en "Code intypen"', /Cadeaubon scannen/.test(await txt(p, '#scanStage .scan-title')) && await vis(p, '#giftCodeToggle') && !(await vis(p, '#manualToggle')));
   await p.click('#giftCodeToggle'); await p.fill('#giftCodeInput', 'blkd0'); await p.type('#giftCodeInput', '00001');
   check('B5. Code wordt automatisch opgemaakt', (await p.inputValue('#giftCodeInput')) === 'BLKD-0000-01', await p.inputValue('#giftCodeInput'));
@@ -107,7 +112,7 @@ module.exports = async function run(env) {
   const scanColors = { blocked: await p.evaluate(() => getComputedStyle(document.getElementById('gBadge')).color) };
   await p.click('#gCancel');
   for (const [code, word, cls] of [['EXPI-0000-03', 'Verlopen', 'expired'], ['PAST-0000-05', 'Verlopen', 'expired'], ['EMPT-0000-02', 'Leeg', 'empty'], ['ABCD-EFGH-JK', 'Leeg', 'empty']]) {
-    await p.click('[data-mode="gift"]').catch(() => {}); await scan(p, code); await p.waitForSelector('#giftStage.on');
+    await giftMode(p); await scan(p, code); await p.waitForSelector('#giftStage.on');
     check(`B5. ${code}: label "${word}" (${cls}), rode stopmelding, geen invoer`, (await txt(p, '#gBadge')) === word && new RegExp(cls).test(await p.getAttribute('#gBadge', 'class')) && new RegExp(word).test(await txt(p, '#gStop')) && !(await vis(p, '#gForm')));
     scanColors[cls] = await p.evaluate(() => getComputedStyle(document.getElementById('gBadge')).color);
     await p.click('#gCancel');
@@ -120,11 +125,11 @@ module.exports = async function run(env) {
   check('B5. Onbekende code → "bestaat niet of hoort niet bij deze zaak"', /bestaat niet/.test(await txt(p, '#scanAlert')));
 
   // B6: stempelkaart-QR in Cadeaubon-modus
-  await p.click('[data-mode="gift"]').catch(() => {});
+  await giftMode(p);
   await scan(p, UUID); await p.waitForTimeout(200);
   check('B6. Stempelkaart in Cadeaubon-modus → melding + "Naar stempelen"', /stempelkaart, geen cadeaubon/.test(await txt(p, '#wrongQr')) && await vis(p, '#wrongQrBtn'));
   await p.click('#wrongQrBtn'); await p.waitForSelector('#resultStage.on');
-  check('B6. "Naar stempelen" → stempelflow met die klant, modus Stempel', /Stempel Klant/.test(await txt(p, '#custName')) && /active/.test(await p.getAttribute('[data-mode="stamp"]', 'class')));
+  check('B6. "Naar stempelen" → stempelflow met die klant, modus Stempel', /Stempel Klant/.test(await txt(p, '#custName')) && (await p.evaluate(() => scanMode)) === 'stamp');
   await p.click('#resultStage .btn-ghost');
   await ctx.close();
 
@@ -201,14 +206,58 @@ module.exports = async function run(env) {
   check('F. Camera staat uit na de scan', await p.evaluate(() => !scanning));
   await ctx.close();
 
+  // ===== K. Instelling "Cadeaubon-scanner voor medewerkers" =====
+  await post('/__reset');
+  ({ ctx, p } = await open('tok-pp', null, { scanner: false }));
+  check('K1. Standaard uit: geen blok, stempelscanner zoals altijd', !(await vis(p, '#giftBlock')) && await vis(p, '#cameraBtn'));
+  let lk = (await state()).log.lookup.length;
+  await scan(p, 'https://omrzdigital.nl/cadeaubon/longcodeSanne123'); await p.waitForTimeout(200);
+  check('K1. Uit + cadeaubon-link: "Cadeaubonnen staan uit voor deze zaak", verder niets', (await txt(p, '#scanAlert')) === 'Cadeaubonnen staan uit voor deze zaak.' && (await state()).log.lookup.length === lk && !(await vis(p, '#giftStage')) && !(await vis(p, '#resultStage')) && await p.evaluate(() => !scanning));
+  await scan(p, UUID); await p.waitForSelector('#resultStage.on');
+  check('K1. Uit: stempelkaart-QR gewoon naar de stempelflow', await vis(p, '#giveBtn'));
+  await p.click('#resultStage .btn-ghost');
+  await p.evaluate(() => { window.__zelfdePagina = true; });
+  await post('/__settings', { card: 'pp', on: true });
+  await p.evaluate(() => { Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => 'visible' }); document.dispatchEvent(new Event('visibilitychange')); });
+  await p.waitForTimeout(500);
+  check('K4. Aangezet door eigenaar → blok verschijnt bij terugkeer (visibilitychange), zonder reload', await vis(p, '#giftBlock') && await p.evaluate(() => window.__zelfdePagina === true));
+  await post('/__settings', { card: 'pp', on: false });
+  await p.waitForTimeout(1600);
+  await p.evaluate(() => window.dispatchEvent(new Event('focus')));
+  await p.waitForTimeout(500);
+  check('K4. Uitgezet door eigenaar → blok weg bij terugkeer (focus), zonder reload', !(await vis(p, '#giftBlock')) && await p.evaluate(() => window.__zelfdePagina === true));
+  await ctx.close();
+  ({ ctx, p } = await open('tok-pp'));
+  await p.click('#giftBlockBtn'); await p.waitForTimeout(300);
+  check('K2. Blok → cadeaubon-scanmodus (titel, code intypen), blok verborgen', /Cadeaubon scannen/.test(await txt(p, '#scanStage .scan-title')) && await vis(p, '#giftCodeToggle') && !(await vis(p, '#giftBlock')) && !(await vis(p, '#manualToggle')));
+  await scan(p, 'ABCD-EFGH-JK'); await p.waitForSelector('#giftStage.on');
+  check('K2. Cadeaubon gescand → bestaande cadeaubonflow (saldo)', /50,00/.test(await txt(p, '#gBal')));
+  await p.click('#gCancel'); await p.click('#giftBack');
+  check('K2. "Terug naar stempelen" → stempelscanner met blok eronder', /Klaar om te scannen/.test(await txt(p, '#scanStage .scan-title')) && await vis(p, '#giftBlock'));
+  await ctx.close();
+  for (const [f, label] of [[500, 'serverfout'], [404, '404 (endpoint bestaat nog niet)'], ['migration', 'migration_missing']]) {
+    await post('/__cfg', { settingsFail: f });
+    ({ ctx, p } = await open('tok-pp', null, { expectErrors: true }));
+    check(`K3. Instelling aan maar ophalen geeft ${label} → geen blok`, !(await vis(p, '#giftBlock')) && await vis(p, '#cameraBtn'));
+    await ctx.close();
+  }
+  await post('/__cfg', { settingsFail: null });
+  for (const on of [true, false]) {
+    ({ ctx, p } = await open('tok-mgr', null, { loc: 'L1', scanner: on }));
+    check(`K5. Medewerker, instelling ${on ? 'aan' : 'uit'} → ${on ? 'blok zichtbaar' : 'geen blok'}`, (await vis(p, '#giftBlock')) === on);
+    await ctx.close();
+  }
+
   // ===== S. Stempelreeks zonder reload (regressie: tweede stempel deed niets) =====
   await require('./stamp-sequence.js').stampSequence(b, check, pageErrors, B);
+  // Dezelfde reeks met de cadeaubon-scanner aan: het blok mag de stempelflow niet raken.
+  await require('./stamp-sequence.js').stampSequence(b, check, pageErrors, B, { scannerOn: true });
 
   // ===== G. Schermformaten =====
   await post('/__reset');
   for (const vp of [{ width: 1440, height: 1000 }, { width: 820, height: 1180 }, { width: 390, height: 844 }]) {
     ({ ctx, p } = await open('tok-pp', vp));
-    await p.click('[data-mode="gift"]');
+    await giftMode(p);
     check(`G. ${vp.width}px scanscherm: geen horizontale scroll`, await noH(p));
     await p.screenshot({ path: OUT + '/' + `gcs-start-${vp.width}.png` });
     await scan(p, 'ABCD-EFGH-JK'); await p.waitForSelector('#giftStage.on');

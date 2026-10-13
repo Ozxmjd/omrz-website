@@ -829,6 +829,7 @@
     .vip-prev b { color: var(--text-strong); font-weight: 600; }
 
     /* ---------- Cadeaubonnen ---------- */
+    .gc-setting { margin-bottom: 20px; }
     .gc-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 22px; }
     .gc-stats { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 22px; }
     .gc-filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
@@ -7983,6 +7984,7 @@
     let gcSearchTimer = null;
     let gcReportSeq = 0;
     let gcReport = { from: null, to: null, location: '' };
+    let gcLastTotals = null;           // laatst opgehaalde totals (openstaand tegoed) van de lijst
 
     // Premium Plus volgens het pakket zelf, met dezelfde hulpfunctie als de andere Premium
     // Plus-functies. Een proef telt alleen als die proef op Premium Plus staat. Zolang het
@@ -8075,6 +8077,17 @@
             ${locations.map(l => `<option value="${escapeHtml(l.id)}">${escapeHtml(l.name)}</option>`).join('')}
           </select></div>` : '';
       document.getElementById('gcWrap').innerHTML = `
+        <div class="block glass gc-setting">
+          <div class="switch-row">
+            <span class="switch-tx">
+              <strong>Cadeaubon-scanner voor uw medewerkers</strong>
+              <small>Staat dit aan, dan zien uw medewerkers in de scanapp onder de stempelscanner een blok “Cadeaubon scannen” om bonnen op te zoeken en af te schrijven.</small>
+            </span>
+            <input type="checkbox" class="switch" id="gcScannerSwitch" disabled aria-label="Cadeaubon-scanner voor uw medewerkers" />
+          </div>
+          <div class="save-note" id="gcScannerNote" style="margin-top:10px"></div>
+        </div>
+
         <div class="gc-top">
           <div class="seg" role="tablist" aria-label="Cadeaubonnen">
             <button type="button" role="tab" data-gc-view="list">Bonnen</button>
@@ -8122,6 +8135,8 @@
         </div>`;
       const sel = document.getElementById('gcRepLoc');
       if (sel) sel.value = gcReport.location;
+      document.getElementById('gcScannerSwitch').addEventListener('change', (e) => toggleGiftScanner(e.target));
+      loadGiftScannerSetting();
       document.getElementById('gcSearch').addEventListener('input', () => {
         clearTimeout(gcSearchTimer);
         gcSearchTimer = setTimeout(() => loadGiftList(true), 250);
@@ -8149,6 +8164,69 @@
       if (gcView === 'list') loadGiftList(true); else loadGiftReport();
     }
 
+    // ---- Cadeaubon-scanner voor medewerkers (alleen de eigenaar ziet deze pagina) ----
+    function gcScannerNote(msg, kind) {
+      const el = document.getElementById('gcScannerNote');
+      if (el) { el.textContent = msg || ''; el.className = 'save-note' + (kind ? ' ' + kind : ''); }
+    }
+    async function loadGiftScannerSetting() {
+      const sw = document.getElementById('gcScannerSwitch');
+      if (!sw) return;
+      sw.checked = false; sw.disabled = true;           // standaard uit tot de server iets anders zegt
+      try {
+        const data = await gcFetch('/api/stamp/gift-cards/settings?card_id=' + encodeURIComponent(cardId));
+        sw.checked = data.scanner_enabled === true;
+        sw.disabled = false;
+        gcScannerNote('');
+      } catch (err) {
+        if (err && GIFT.isPlanLock(err.code)) { renderGiftLock(); return; }
+        sw.checked = false; sw.disabled = true;
+        gcScannerNote(err && (err.code === 'not_live' || err.code === 'migration_missing')
+          ? 'Deze instelling is nog niet beschikbaar. De scanner blijft voor medewerkers verborgen.'
+          : 'Instelling niet geladen: ' + gcErrText(err), 'error');
+      }
+    }
+    // Openstaand tegoed voor de waarschuwing; uit de lijst als die er is, anders kort ophalen.
+    async function gcOutstandingCents() {
+      if (gcLastTotals && Number.isInteger(gcLastTotals.outstanding_cents)) return gcLastTotals.outstanding_cents;
+      try {
+        const data = await gcFetch('/api/stamp/gift-cards?card_id=' + encodeURIComponent(cardId) + '&limit=1&offset=0');
+        const t = data.totals || {};
+        gcLastTotals = t;
+        return Number.isInteger(t.outstanding_cents) ? t.outstanding_cents : null;
+      } catch (_) { return null; }
+    }
+    async function toggleGiftScanner(sw) {
+      const want = sw.checked;
+      sw.disabled = true;
+      if (!want) {
+        const open = await gcOutstandingCents();
+        if (open !== null && open > 0 && !window.confirm(
+          `Er staat nog ${GIFT.formatCents(open)} aan tegoed open. Uitzetten verbergt de scanner voor uw medewerkers. `
+          + 'Bestaande bonnen blijven geldig en kunnen weer worden ingewisseld zodra u de scanner aanzet.')) {
+          sw.checked = true; sw.disabled = false;
+          return;
+        }
+      }
+      gcScannerNote('Opslaan…');
+      try {
+        const data = await gcFetch('/api/stamp/gift-cards/settings', {
+          method: 'PUT', body: JSON.stringify({ card_id: cardId, scanner_enabled: want }),
+        });
+        const on = data.scanner_enabled === true;
+        sw.checked = on;
+        gcScannerNote(on
+          ? 'Aan. Uw medewerkers zien vanaf nu een blok “Cadeaubon scannen” onder de stempelscanner.'
+          : 'Uit. De cadeaubon-scanner is verborgen voor uw medewerkers.', 'ok');
+      } catch (err) {
+        sw.checked = !want;                               // terug naar wat de server nog heeft
+        if (err && GIFT.isPlanLock(err.code)) { renderGiftLock(); return; }
+        gcScannerNote('Niet opgeslagen: ' + gcErrText(err), 'error');
+      } finally {
+        sw.disabled = false;
+      }
+    }
+
     // ---- Lijst ----
     async function loadGiftList(reset) {
       const box = document.getElementById('gcListBox');
@@ -8168,6 +8246,7 @@
         gcItems = reset ? list : gcItems.concat(list);
         gcTotal = Number.isInteger(data.total) ? data.total : gcItems.length;
         const t = data.totals || {};
+        gcLastTotals = t;
         const out = document.getElementById('gcOutstanding'), act = document.getElementById('gcActive');
         if (out) { out.textContent = GIFT.formatCents(t.outstanding_cents); out.classList.remove('is-loading'); }
         if (act) { act.textContent = Number.isInteger(t.active_count) ? t.active_count.toLocaleString('nl-NL') : '—'; act.classList.remove('is-loading'); }
