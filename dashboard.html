@@ -830,6 +830,55 @@
 
     /* ---------- Cadeaubonnen ---------- */
     .gc-setting { margin-bottom: 20px; }
+    .gc-design { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+    @media (max-width: 1000px) { .gc-design { grid-template-columns: 1fr; } }
+    .gc-design h3 { margin-bottom: 6px; }
+    .gc-drow { padding: 14px 0; border-top: 1px solid var(--border); }
+    .gc-drow:first-of-type { border-top: 0; }
+    .gc-dhead { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+    .gc-dhead b { font-size: 13.5px; font-weight: 600; color: var(--text-strong); }
+    .gc-dchip { font-size: 11.5px; font-weight: 500; padding: 3px 9px; border-radius: 999px; color: var(--muted); background: rgba(var(--ink), .05); border: 1px solid var(--border); }
+    .gc-dchip.own { color: var(--accent-2); background: var(--accent-soft); border-color: rgba(139,92,246,.3); }
+    .gc-dchip.pending { color: #eab68a; background: rgba(251,146,60,.09); border-color: rgba(251,146,60,.28); }
+    [data-theme="light"] .gc-dchip.pending { color: #b45309; }
+    .gc-dctl { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .gc-dctl input[type=color] { width: 44px; height: 40px; padding: 2px; border-radius: 10px; border: 1px solid var(--border-strong); background: transparent; cursor: pointer; flex: none; }
+    .gc-dctl .gc-hex { width: 130px; font-family: ui-monospace, Menlo, Consolas, monospace; }
+    .gc-dctl .gc-dtext { flex: 1; width: 100%; }
+    .gc-check { display: inline-flex; align-items: center; gap: 9px; font-size: 13.5px; color: var(--pearl); cursor: pointer; }
+    .gc-dwarn { margin-top: 8px; padding: 10px 12px; border-radius: 10px; font-size: 12.5px; line-height: 1.5; color: #eab68a; background: rgba(251,146,60,.08); border: 1px solid rgba(251,146,60,.26); }
+    [data-theme="light"] .gc-dwarn { color: #92400e; }
+    .gc-dinherit { margin-top: 8px; padding: 6px 11px; font-size: 12.5px; }
+    .gc-dsave { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
+    .gc-dpreview iframe { width: 100%; height: 560px; border: 1px solid var(--border); border-radius: 14px; background: #fff; display: block; }
+    @media (max-width: 560px) { .gc-dpreview iframe { height: 460px; } }
+    .gc-fs { border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px 4px; margin: 0 0 14px; min-width: 0; }
+    .gc-fs legend { font-size: 13px; font-weight: 600; color: var(--text-strong); padding: 0 6px; }
+    .gc-fs legend small { font-weight: 400; color: var(--muted); }
+    .gc-req { font-size: 11px; font-weight: 600; color: #eab68a; background: rgba(251,191,36,.16); border-radius: 999px; padding: 2px 8px; margin-left: 6px; }
+    .gc-radios { display: grid; gap: 8px; margin-bottom: 12px; }
+    .gc-radios-inline { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+    .gc-radio { display: flex; align-items: flex-start; gap: 10px; padding: 11px 13px; border-radius: 11px; border: 1px solid var(--border-strong); cursor: pointer; }
+    .gc-radio:has(input:checked) { border-color: rgba(139,92,246,.55); background: var(--accent-soft); }
+    .gc-radio input { margin-top: 3px; accent-color: #8b5cf6; }
+    .gc-radio b { display: block; font-size: 13.5px; font-weight: 600; color: var(--text-strong); }
+    .gc-radio small { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; line-height: 1.45; }
+    .gc-mails { text-align: left; margin-bottom: 14px; display: grid; gap: 8px; }
+    .gc-mail { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 12px 14px; border-radius: 12px; font-size: 13.5px; }
+    .gc-mail svg { width: 16px; height: 16px; flex: none; }
+    .gc-mail.ok { color: #8fe0b0; background: rgba(74,222,128,.1); border: 1px solid rgba(74,222,128,.3); }
+    .gc-mail.failed { color: var(--text-strong); background: rgba(251,146,60,.1); border: 1px solid rgba(251,146,60,.4); }
+    .gc-mail.failed > div:first-child { flex: 1 1 220px; }
+    .gc-mail.failed b { display: block; }
+    .gc-mail.failed small { display: block; color: var(--muted); margin-top: 2px; }
+    .gc-mail .save-note { flex-basis: 100%; }
+    .gc-mail .btn { padding: 8px 12px; font-size: 12.5px; }
+    .gc-mail-ok { color: #8fe0b0; }
+    .gc-mail-bad { color: #eab68a; }
+    [data-theme="light"] .gc-mail.ok, [data-theme="light"] .gc-mail-ok { color: #15803d; }
+    [data-theme="light"] .gc-mail-bad { color: #b45309; }
+    [data-theme="light"] .gc-req { color: #b45309; }
+    .gc-passnote { font-size: 12.5px; color: var(--muted); margin: 12px 0 0; padding: 10px 12px; border-radius: 10px; background: rgba(var(--ink), .03); }
     .gc-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 22px; }
     .gc-stats { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 22px; }
     .gc-filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
@@ -8092,6 +8141,7 @@
           <div class="seg" role="tablist" aria-label="Cadeaubonnen">
             <button type="button" role="tab" data-gc-view="list">Bonnen</button>
             <button type="button" role="tab" data-gc-view="report">Rapport</button>
+            <button type="button" role="tab" data-gc-view="design">Ontwerp</button>
           </div>
           <button type="button" class="btn btn-primary" data-gc-new>Nieuwe cadeaubon</button>
         </div>
@@ -8132,6 +8182,10 @@
             <button type="button" class="btn btn-ghost" data-gc-csv>Download CSV</button>
           </div>
           <div id="gcReportBox"></div>
+        </div>
+
+        <div id="gcDesignView" hidden>
+          <div id="gcDesignBox"></div>
         </div>`;
       const sel = document.getElementById('gcRepLoc');
       if (sel) sel.value = gcReport.location;
@@ -8154,14 +8208,17 @@
     }
 
     function setGiftView(view) {
-      gcView = view === 'report' ? 'report' : 'list';
+      gcView = view === 'report' || view === 'design' ? view : 'list';
       document.querySelectorAll('[data-gc-view]').forEach(b => {
         const on = b.dataset.gcView === gcView;
         b.classList.toggle('active', on); b.setAttribute('aria-selected', on ? 'true' : 'false');
       });
       document.getElementById('gcListView').hidden = gcView !== 'list';
       document.getElementById('gcReportView').hidden = gcView !== 'report';
-      if (gcView === 'list') loadGiftList(true); else loadGiftReport();
+      document.getElementById('gcDesignView').hidden = gcView !== 'design';
+      if (gcView === 'list') loadGiftList(true);
+      else if (gcView === 'report') loadGiftReport();
+      else { gcDesign = null; loadGiftDesign(); }
     }
 
     // ---- Cadeaubon-scanner voor medewerkers (alleen de eigenaar ziet deze pagina) ----
@@ -8285,8 +8342,19 @@
     }
 
     // ---- Nieuwe cadeaubon ----
+    // ---- Nieuwe cadeaubon: koper, ontvanger en verzending ----
+    const GC_DELIVERY = {
+      none: { label: 'Geen e-mail', sub: 'U geeft de link of QR-code zelf aan de klant.' },
+      recipient: { label: 'Direct naar de ontvanger', sub: 'We mailen de cadeaubon naar de ontvanger. E-mail ontvanger is dan verplicht.' },
+      buyer: { label: 'Ik stuur hem zelf door', sub: 'We mailen de link naar de koper. E-mail koper is dan verplicht.' },
+    };
+    let gcCreateAttempt = null;        // { key, sig }: zelfde poging = zelfde sleutel, tot de server duidelijk antwoordt
+
     function openNewGiftCard() {
       const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+      gcCreateAttempt = null;
+      const opt = k => `<label class="gc-radio"><input type="radio" name="gcDelivery" value="${k}" ${k === 'none' ? 'checked' : ''} />
+          <span><b>${GC_DELIVERY[k].label}</b><small>${GC_DELIVERY[k].sub}</small></span></label>`;
       openModal('Nieuwe cadeaubon', `
         <form class="gc-new" id="gcNewForm" novalidate>
           <div class="field">
@@ -8297,9 +8365,21 @@
             </div>
             <input type="text" id="gcAmount" inputmode="decimal" placeholder="Bijv. 30,00" autocomplete="off" />
           </div>
-          <div class="field"><label for="gcRecName">Naam ontvanger <small style="color:var(--muted)">(optioneel)</small></label><input type="text" id="gcRecName" maxlength="80" /></div>
-          <div class="field"><label for="gcMessage">Boodschap <small style="color:var(--muted)">(optioneel)</small></label><textarea id="gcMessage" maxlength="500" placeholder="Bijv. Gefeliciteerd!"></textarea></div>
-          <div class="field"><label for="gcRecEmail">E-mail ontvanger <small style="color:var(--muted)">(optioneel)</small></label><input type="email" id="gcRecEmail" maxlength="160" /></div>
+          <fieldset class="gc-fs">
+            <legend>Koper <small>(optioneel)</small></legend>
+            <div class="field"><label for="gcBuyerName">Naam koper</label><input type="text" id="gcBuyerName" maxlength="80" autocomplete="off" /></div>
+            <div class="field"><label for="gcBuyerEmail">E-mail koper <span class="gc-req" id="gcBuyerReq" hidden>verplicht bij deze keuze</span></label><input type="email" id="gcBuyerEmail" maxlength="160" autocomplete="off" /></div>
+          </fieldset>
+          <fieldset class="gc-fs">
+            <legend>Ontvanger <small>(optioneel)</small></legend>
+            <div class="field"><label for="gcRecName">Naam ontvanger</label><input type="text" id="gcRecName" maxlength="80" autocomplete="off" /></div>
+            <div class="field"><label for="gcRecEmail">E-mail ontvanger <span class="gc-req" id="gcRecReq" hidden>verplicht bij deze keuze</span></label><input type="email" id="gcRecEmail" maxlength="160" autocomplete="off" /></div>
+            <div class="field"><label for="gcMessage">Persoonlijk bericht</label><textarea id="gcMessage" maxlength="500" placeholder="Bijv. Gefeliciteerd!"></textarea></div>
+          </fieldset>
+          <fieldset class="gc-fs">
+            <legend>Verzending</legend>
+            <div class="gc-radios">${['none', 'recipient', 'buyer'].map(opt).join('')}</div>
+          </fieldset>
           <div class="field"><label for="gcExpires">Vervaldatum <small style="color:var(--muted)">(optioneel)</small></label><input type="date" id="gcExpires" min="${gcDateKey(tomorrow)}" />
             <div class="gc-hint">Leeg laten = geen vervaldatum.</div></div>
           <div class="save-note" id="gcNewNote" style="margin-bottom:12px"></div>
@@ -8318,59 +8398,105 @@
         syncChips();
       }));
       amount.addEventListener('input', syncChips);
+      // Vooraf laten zien welk e-mailadres bij de gekozen verzending verplicht is.
+      const syncRequired = () => {
+        const mode = gcDeliveryMode();
+        document.getElementById('gcRecReq').hidden = mode !== 'recipient';
+        document.getElementById('gcBuyerReq').hidden = mode !== 'buyer';
+        document.getElementById('gcRecEmail').setAttribute('aria-required', mode === 'recipient' ? 'true' : 'false');
+        document.getElementById('gcBuyerEmail').setAttribute('aria-required', mode === 'buyer' ? 'true' : 'false');
+      };
+      document.querySelectorAll('input[name="gcDelivery"]').forEach(r => r.addEventListener('change', syncRequired));
+      syncRequired();
       document.getElementById('gcNewForm').addEventListener('submit', (e) => { e.preventDefault(); createGiftCard(); });
+    }
+    function gcDeliveryMode() {
+      const r = document.querySelector('input[name="gcDelivery"]:checked');
+      return r ? r.value : 'none';
     }
 
     async function createGiftCard() {
       const note = document.getElementById('gcNewNote');
       const btn = document.getElementById('gcNewBtn');
       const say = (m, k) => { note.textContent = m || ''; note.className = 'save-note' + (k ? ' ' + k : ''); };
+      const val = id => document.getElementById(id).value.trim();
       const cents = GIFT.parseEuroToCents(document.getElementById('gcAmount').value);
       if (!cents) { say('Kies of vul een geldig bedrag in, bijvoorbeeld 25 of 30,50.', 'error'); return; }
-      const body = { card_id: cardId, amount_cents: cents };
-      const name = document.getElementById('gcRecName').value.trim();
-      const msg = document.getElementById('gcMessage').value.trim();
-      const email = document.getElementById('gcRecEmail').value.trim();
+      const form = {
+        card_id: cardId, amount_cents: cents, delivery_mode: gcDeliveryMode(),
+        buyer_name: val('gcBuyerName'), buyer_email: val('gcBuyerEmail'),
+        recipient_name: val('gcRecName'), recipient_email: val('gcRecEmail'), message: val('gcMessage'),
+      };
+      const bad = GIFT.validateGiftDelivery(form);
+      if (bad) {
+        say(GIFT.MESSAGES[bad], 'error');
+        const focus = { buyer_email_required: 'gcBuyerEmail', invalid_buyer_email: 'gcBuyerEmail', recipient_email_required: 'gcRecEmail', invalid_recipient_email: 'gcRecEmail' }[bad];
+        if (focus) document.getElementById(focus).focus();
+        return;
+      }
       const exp = document.getElementById('gcExpires').value;
-      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { say('Dit e-mailadres klopt niet.', 'error'); return; }
       if (exp) {
         // Tot en met die dag, 23:59:59 Nederlandse tijd, ook op een apparaat in een andere tijdzone.
         const end = GIFT.endOfDayAmsterdamISO(exp);
         if (!end || new Date(end) <= new Date()) { say('Kies een vervaldatum in de toekomst.', 'error'); return; }
-        body.expires_at = end;
+        form.expires_at = end;
       }
-      if (name) body.recipient_name = name;
-      if (msg) body.message = msg;
-      if (email) body.recipient_email = email;
+      // Zelfde formulier opnieuw versturen (na een netwerk- of serverfout) = zelfde sleutel.
+      const sig = JSON.stringify(GIFT.giftCreateBody(form));
+      if (!gcCreateAttempt || gcCreateAttempt.sig !== sig) gcCreateAttempt = { key: GIFT.newIdempotencyKey(), sig };
+      form.idempotency_key = gcCreateAttempt.key;
       if (btn.disabled) return;
       btn.disabled = true; btn.textContent = 'Aanmaken…'; say('');
       try {
-        const data = await gcFetch('/api/stamp/gift-cards', { method: 'POST', body: JSON.stringify(body) });
-        renderGiftCreated(data.gift_card || {}, GIFT.referenceFrom(data));
+        const data = await gcFetch('/api/stamp/gift-cards', { method: 'POST', body: JSON.stringify(GIFT.giftCreateBody(form)) });
+        gcCreateAttempt = null;
+        renderGiftCreated(data.gift_card || {}, GIFT.referenceFrom(data), data.mail, form);
         loadGiftList(true);
       } catch (err) {
         btn.disabled = false; btn.textContent = 'Cadeaubon aanmaken';
+        if (err && err.status >= 400 && err.status < 500) gcCreateAttempt = null;   // duidelijk antwoord: poging klaar
         if (err && GIFT.isPlanLock(err.code)) { closeModal(); renderGiftLock(); return; }
         say(gcErrText(err), 'error');
       }
     }
 
-    function renderGiftCreated(g, ref) {
+    // Eén regel verzendstatus na het aanmaken (verstuurd of mislukt, met knop Opnieuw versturen).
+    function gcMailRowHTML(id, r, fallbackTo) {
+      const who = r.target === 'buyer' ? 'koper' : 'ontvanger';
+      const to = r.to || fallbackTo || '';
+      if (r.status === 'sent') {
+        return `<div class="gc-mail ok" data-gc-mailrow="${r.target}">${GC_CHECK_SVG}<span>Mail verstuurd naar de ${who}${to ? ' (' + escapeHtml(to) + ')' : ''}.</span></div>`;
+      }
+      return `<div class="gc-mail failed" data-gc-mailrow="${r.target}">
+          <div><b>Bon is aangemaakt, mail is niet verstuurd</b>
+            <small>Mail naar de ${who}${to ? ' (' + escapeHtml(to) + ')' : ''}${r.error ? ': ' + escapeHtml(r.error) : ''}. De bon zelf is geldig.</small></div>
+          <button type="button" class="btn btn-ghost" data-gc-resend-now="${r.target}" data-gc-id="${escapeHtml(String(id))}">Opnieuw versturen</button>
+          <div class="save-note" data-gc-resend-note></div>
+        </div>`;
+    }
+
+    function renderGiftCreated(g, ref, mail, form) {
       const amount = GIFT.formatCents(g.initial_amount_cents);
       const url = g.share_url || '';
       const shop = card.business_name || 'ons';
       const wa = `Je hebt een cadeaubon van ${amount} gekregen bij ${shop}!`
         + (g.recipient_name ? ` Voor ${g.recipient_name}.` : '') + ` Bekijk hem hier: ${url}`;
+      const outcome = GIFT.mailOutcome(mail);
+      const fb = { recipient: g.recipient_email || (form && form.recipient_email), buyer: g.buyer_email || (form && form.buyer_email) };
+      const mailHTML = outcome.rows.length
+        ? outcome.rows.map(r => gcMailRowHTML(g.id, r, fb[r.target])).join('')
+        : ((form && form.delivery_mode) === 'none' ? '<p class="gc-hint" style="margin-bottom:14px">Er is geen e-mail verstuurd. Deel de link of QR-code hieronder zelf.</p>' : '');
       modalTitle.textContent = 'Cadeaubon aangemaakt';
       modalBody.innerHTML = `<div class="gc-success">
           <div class="gc-ok">${GC_CHECK_SVG}</div>
           <h4>Cadeaubon van ${escapeHtml(amount)} aangemaakt</h4>
           <div class="gc-cash"><b>Boek op de kassa als verkoop cadeaubon:</b> ${escapeHtml(amount)}</div>
+          <div class="gc-mails">${mailHTML}</div>
           <div class="gc-facts">
             <div class="gc-fact"><small>Korte code</small><b class="gc-code">${escapeHtml(g.short_code || '—')}</b></div>
             <div class="gc-fact"><small>Referentienummer</small><b>${escapeHtml(ref || '—')}</b></div>
           </div>
-          ${url ? `<div class="gc-link"><input type="text" readonly value="${escapeHtml(url)}" aria-label="Deelbare link" /><button type="button" class="btn btn-ghost" data-gc-copy><span class="btn-label">Kopieer</span></button></div>
+          ${url ? `<div class="gc-link"><input type="text" readonly value="${escapeHtml(url)}" aria-label="Deelbare link" /><button type="button" class="btn btn-ghost" data-gc-copy><span class="btn-label">Link kopiëren</span></button></div>
           <div class="gc-share"><a class="btn btn-ghost" href="https://wa.me/?text=${encodeURIComponent(wa)}" target="_blank" rel="noopener">Deel via WhatsApp</a></div>
           <div class="gc-qr" id="gcQr" aria-label="QR-code van de link"></div>` : '<p class="gc-hint">De server stuurde geen deelbare link mee.</p>'}
           <button type="button" class="btn btn-primary" data-gc-close style="width:100%">Klaar</button>
@@ -8380,6 +8506,23 @@
       const qr = document.getElementById('gcQr');
       if (qr && url && typeof QRCode === 'function') {
         new QRCode(qr, { text: url, width: 180, height: 180, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+      }
+    }
+
+    // ---- Opnieuw versturen (vanuit het resultaat of het detail) ----
+    // Geeft { ok, neutral, msg }. resend_too_soon is geen fout maar een wachttijd.
+    async function resendGift(id, target, email) {
+      try {
+        const data = await gcFetch('/api/stamp/gift-cards/' + encodeURIComponent(id) + '/resend',
+          { method: 'POST', body: JSON.stringify(GIFT.resendBody(target, email)) });
+        const m = (data && data.mail) || data || {};
+        if (m.status === 'failed') return { ok: false, msg: 'Niet verstuurd' + (m.error ? ': ' + m.error : '.') };
+        const who = target === 'buyer' ? 'koper' : 'ontvanger';
+        const to = m.to || email || '';
+        return { ok: true, msg: `Opnieuw verstuurd naar de ${who}${to ? ' (' + to + ')' : ''} ✓` };
+      } catch (err) {
+        if (err && err.code === 'resend_too_soon') return { ok: false, neutral: true, msg: GIFT.errorMessage(err.code, err.data) };
+        return { ok: false, msg: gcErrText(err) };
       }
     }
 
@@ -8423,6 +8566,13 @@
           </tr>`;
       }).join('');
       const blocked = GIFT.giftStatus(g) === 'blocked';
+      // De pas blijft in de Wallet van de klant staan; hij toont alleen dat hij niet meer bruikbaar is.
+      const passNote = {
+        blocked: 'De pas blijft in de Wallet van de klant staan en toont dat de bon geblokkeerd is.',
+        empty: 'De pas blijft in de Wallet van de klant staan en toont dat het saldo op is.',
+        expired: 'De pas blijft in de Wallet van de klant staan en toont dat de bon verlopen is.',
+      }[GIFT.giftStatus(g)] || '';
+      gcDetailGift = g;
       modalBody.innerHTML = `<div class="gc-detail">
           <div class="gc-hero">
             <small>Saldo</small>
@@ -8433,11 +8583,34 @@
             ${row('Korte code', `<span class="gc-code">${escapeHtml(g.short_code || '—')}</span>`, !g.short_code)}
             ${row('Ontvanger', escapeHtml(g.recipient_name || 'Niet opgegeven'), !g.recipient_name)}
             ${row('E-mail ontvanger', escapeHtml(g.recipient_email || 'Niet opgegeven'), !g.recipient_email)}
-            ${g.message ? row('Boodschap', escapeHtml(g.message), false) : ''}
+            ${g.message ? row('Persoonlijk bericht', escapeHtml(g.message), false) : ''}
+            ${row('Koper', escapeHtml(g.buyer_name || 'Niet opgegeven'), !g.buyer_name)}
+            ${row('E-mail koper', escapeHtml(g.buyer_email || 'Niet opgegeven'), !g.buyer_email)}
             ${row('Vervaldatum', escapeHtml(g.expires_at ? gcDate(g.expires_at) : 'Geen'), !g.expires_at)}
             ${row('Aangemaakt', escapeHtml(gcDate(g.created_at, true)), !g.created_at)}
           </div>
-          ${g.share_url ? `<div class="gc-link" style="margin-top:14px"><input type="text" readonly value="${escapeHtml(g.share_url)}" aria-label="Deelbare link" /><button type="button" class="btn btn-ghost" data-gc-copy><span class="btn-label">Kopieer link</span></button></div>` : ''}
+          ${passNote ? `<p class="gc-passnote">${escapeHtml(passNote)}</p>` : ''}
+          ${g.share_url ? `<div class="gc-link" style="margin-top:14px"><input type="text" readonly value="${escapeHtml(g.share_url)}" aria-label="Deelbare link" /><button type="button" class="btn btn-ghost" data-gc-copy><span class="btn-label">Link kopiëren</span></button></div>` : ''}
+          <h4>Verzending</h4>
+          <div class="cd-rows gc-mailstat">
+            ${row('Mail ontvanger', gcMailStateHTML(g, 'recipient'), GIFT.mailStateOf(g, 'recipient').state === 'none')}
+            ${row('Mail koper', gcMailStateHTML(g, 'buyer'), GIFT.mailStateOf(g, 'buyer').state === 'none')}
+          </div>
+          ${owner ? `<div class="gc-actions"><button type="button" class="btn btn-ghost" data-gc-resend-open>Opnieuw versturen</button></div>
+            <form class="gc-adjust" id="gcResend" hidden novalidate>
+              <div class="field"><label>Versturen naar</label>
+                <div class="gc-radios gc-radios-inline">
+                  <label class="gc-radio"><input type="radio" name="gcResendTarget" value="recipient" ${g.recipient_email || !g.buyer_email ? 'checked' : ''} /><span><b>Ontvanger</b></span></label>
+                  <label class="gc-radio"><input type="radio" name="gcResendTarget" value="buyer" ${!g.recipient_email && g.buyer_email ? 'checked' : ''} /><span><b>Koper</b></span></label>
+                </div></div>
+              <div class="field"><label for="gcResendEmail">E-mailadres</label><input type="email" id="gcResendEmail" maxlength="160" autocomplete="off" />
+                <div class="gc-hint">Klopt het adres niet? Pas het hier aan voordat u verstuurt.</div></div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button type="submit" class="btn btn-primary" id="gcResendBtn">Versturen</button>
+                <button type="button" class="btn btn-ghost" data-gc-resend-cancel>Annuleren</button>
+              </div>
+              <div class="save-note" id="gcResendNote" style="margin-top:10px"></div>
+            </form>` : ''}
           ${owner ? `<div class="gc-actions">
               <button type="button" class="btn btn-ghost" data-gc-adjust-open>Saldo corrigeren</button>
               <button type="button" class="btn ${blocked ? 'btn-ghost' : 'btn-danger'}" data-gc-block="${blocked ? 'unblock' : 'block'}">${blocked ? 'Deblokkeren' : 'Blokkeren'}</button>
@@ -8465,6 +8638,40 @@
       if (copy) copy.addEventListener('click', () => copyToClipboard(g.share_url, copy, 'Gekopieerd ✓'));
       const adj = document.getElementById('gcAdjust');
       if (adj) adj.addEventListener('submit', (e) => { e.preventDefault(); adjustGiftCard(g.id); });
+      const rs = document.getElementById('gcResend');
+      if (rs) {
+        const fill = () => {
+          const t = (document.querySelector('input[name="gcResendTarget"]:checked') || {}).value;
+          document.getElementById('gcResendEmail').value = (t === 'buyer' ? g.buyer_email : g.recipient_email) || '';
+        };
+        document.querySelectorAll('input[name="gcResendTarget"]').forEach(r => r.addEventListener('change', fill));
+        fill();
+        rs.addEventListener('submit', (e) => { e.preventDefault(); resendFromDetail(g); });
+      }
+    }
+    // Verzendstatus van één doel: tijdstip, fout of nog niet verstuurd.
+    function gcMailStateHTML(g, target) {
+      const st = GIFT.mailStateOf(g, target);
+      if (st.state === 'sent') return `<span class="gc-mail-ok">Verstuurd op ${escapeHtml(gcDate(st.at, true))}</span>`;
+      if (st.state === 'failed') return `<span class="gc-mail-bad">Mislukt${st.at ? ' (' + escapeHtml(gcDate(st.at, true)) + ')' : ''}: ${escapeHtml(st.error)}</span>`;
+      return 'Nog niet verstuurd';
+    }
+    let gcDetailGift = null;
+    async function resendFromDetail(g) {
+      const btn = document.getElementById('gcResendBtn');
+      const note = document.getElementById('gcResendNote');
+      const say = (m, k) => { note.textContent = m || ''; note.className = 'save-note' + (k ? ' ' + k : ''); };
+      const target = (document.querySelector('input[name="gcResendTarget"]:checked') || {}).value || 'recipient';
+      const email = document.getElementById('gcResendEmail').value.trim();
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { say(GIFT.MESSAGES[target === 'buyer' ? 'invalid_buyer_email' : 'invalid_recipient_email'], 'error'); return; }
+      if (btn.disabled) return;
+      btn.disabled = true; say('Versturen…');
+      // Alleen een adres meesturen als het afwijkt van wat er al op de bon staat.
+      const current = (target === 'buyer' ? g.buyer_email : g.recipient_email) || '';
+      const r = await resendGift(g.id, target, email && email !== current ? email : '');
+      btn.disabled = false;
+      if (r.ok) { gcAfterAction(g.id, r.msg); return; }
+      say(r.msg, r.neutral ? '' : 'error');
     }
     function satDetail(msg, kind) {
       const el = document.getElementById('gcDetailNote');
@@ -8497,7 +8704,7 @@
     }
 
     async function toggleGiftBlock(id, action, btn) {
-      if (action === 'block' && !window.confirm('Deze cadeaubon blokkeren? Hij kan dan niet meer worden afgeschreven tot je hem deblokkeert.')) return;
+      if (action === 'block' && !window.confirm('Deze cadeaubon blokkeren? Hij kan dan niet meer worden afgeschreven tot je hem deblokkeert. De pas blijft in de Wallet van de klant staan en toont dat de bon geblokkeerd is.')) return;
       if (btn.disabled) return;
       btn.disabled = true; satDetail(action === 'block' ? 'Blokkeren…' : 'Deblokkeren…');
       try {
@@ -8517,6 +8724,140 @@
           { method: 'POST', body: JSON.stringify({ note }) });
         gcAfterAction(gcDetailId, `Afschrijving van ${bedrag} teruggedraaid ✓`);
       } catch (err) { btn.disabled = false; satDetail(gcErrText(err), 'error'); }
+    }
+
+    // ---- Ontwerp van de cadeaubon (Premium Plus, alleen de eigenaar ziet deze pagina) ----
+    // GET geeft per veld { value, inherited }; PUT met null = weer overnemen van de stempelkaart.
+    // Het voorbeeld is altijd de iframe op preview_url van de server, nooit zelf getekend.
+    const GC_DESIGN_META = {
+      pass_color: { label: 'Kleur van de pas', type: 'color' },
+      text_color: { label: 'Tekstkleur', type: 'color' },
+      logo_url: { label: 'Logo', type: 'url', hint: 'Link naar een afbeelding (https://…). Leeg laten = logo van de stempelkaart.' },
+      background_url: { label: 'Achtergrondafbeelding', type: 'url', hint: 'Link naar een afbeelding (https://…). Leeg laten = achtergrond van de stempelkaart.',
+        warn: 'Let op: op de Apple Wallet-pas wordt een achtergrondafbeelding alleen als smalle strip getoond, of helemaal niet. Op de publieke cadeaubonpagina en in Google Wallet ziet de klant hem wel volledig.' },
+      business_name: { label: 'Naam op de cadeaubon', type: 'text' },
+      show_name: { label: 'Naam van de zaak tonen', type: 'bool' },
+    };
+    let gcDesign = null;               // { original, current, preview_url }
+    let gcDesignSeq = 0;
+
+    function gcNormalizeDesign(data) {
+      const out = {};
+      GIFT.DESIGN_FIELDS.forEach(k => {
+        const f = data && data[k];
+        out[k] = (f && typeof f === 'object' && 'value' in f)
+          ? { value: f.value === undefined ? null : f.value, inherited: f.inherited === true }
+          : { value: f === undefined ? null : f, inherited: true };
+      });
+      return out;
+    }
+    async function loadGiftDesign(note) {
+      const box = document.getElementById('gcDesignBox');
+      if (!box) return;
+      const seq = ++gcDesignSeq;
+      if (!gcDesign) box.innerHTML = '<div class="block glass"><div class="loader"><span class="spinner"></span> Ontwerp laden…</div></div>';
+      try {
+        const data = await gcFetch('/api/stamp/gift-cards/design?card_id=' + encodeURIComponent(cardId));
+        if (seq !== gcDesignSeq) return;
+        const original = gcNormalizeDesign(data);
+        gcDesign = { original, current: JSON.parse(JSON.stringify(original)), preview_url: data.preview_url || null };
+        renderGiftDesign(note);
+      } catch (err) {
+        if (seq !== gcDesignSeq || gcPageError(err)) return;
+        box.innerHTML = `<div class="gc-banner error">${escapeHtml(err && err.code === 'migration_missing' ? 'Het ontwerp van cadeaubonnen is nog niet beschikbaar.' : gcErrText(err))}<button type="button" class="btn btn-ghost" data-gc-retry>Opnieuw proberen</button></div>`;
+      }
+    }
+    function gcDesignRowHTML(k) {
+      const m = GC_DESIGN_META[k], c = gcDesign.current[k], o = gcDesign.original[k];
+      const v = c.value;
+      let ctl;
+      if (m.type === 'color') {
+        const hex = GIFT.isHexColor(v) ? v : '#000000';
+        ctl = `<input type="color" value="${escapeHtml(hex)}" data-gc-dcolor="${k}" aria-label="${escapeHtml(m.label)}" />
+          <input type="text" class="gc-input gc-hex" value="${escapeHtml(v || '')}" maxlength="7" placeholder="#1F4D2B" data-gc-dinput="${k}" aria-label="${escapeHtml(m.label)} (kleurcode)" />`;
+      } else if (m.type === 'bool') {
+        ctl = `<label class="gc-check"><input type="checkbox" ${v ? 'checked' : ''} data-gc-dinput="${k}" /> Naam tonen op de cadeaubon</label>`;
+      } else {
+        ctl = `<input type="${m.type === 'url' ? 'url' : 'text'}" class="gc-input gc-dtext" value="${escapeHtml(v || '')}" ${m.type === 'url' ? 'placeholder="https://…"' : 'maxlength="60"'} data-gc-dinput="${k}" aria-label="${escapeHtml(m.label)}" />`;
+      }
+      const chip = c.inherited
+        ? (o.inherited ? '<span class="gc-dchip">Van stempelkaart</span>' : '<span class="gc-dchip pending">Wordt overgenomen van de stempelkaart na opslaan</span>')
+        : '<span class="gc-dchip own">Eigen instelling</span>';
+      return `<div class="gc-drow" data-gc-drow="${k}">
+          <div class="gc-dhead"><b>${escapeHtml(m.label)}</b>${chip}</div>
+          <div class="gc-dctl">${ctl}</div>
+          ${m.hint ? `<div class="gc-hint">${escapeHtml(m.hint)}</div>` : ''}
+          ${m.warn ? `<div class="gc-dwarn">${escapeHtml(m.warn)}</div>` : ''}
+          ${c.inherited ? '' : `<button type="button" class="btn btn-ghost gc-dinherit" data-gc-inherit="${k}">Overnemen van stempelkaart</button>`}
+        </div>`;
+    }
+    function renderGiftDesign(note) {
+      const box = document.getElementById('gcDesignBox');
+      if (!box || !gcDesign) return;
+      const frame = document.getElementById('gcDesignFrame');
+      const keepFrame = frame && gcDesign.preview_url && frame.getAttribute('src') === gcDesign.preview_url;
+      const preview = gcDesign.preview_url
+        ? `<iframe id="gcDesignFrame" src="${escapeHtml(gcDesign.preview_url)}" title="Voorbeeld van de cadeaubon" loading="lazy" referrerpolicy="no-referrer"></iframe>`
+        : '<div class="empty-state"><span class="es-ic">' + GC_GIFT_SVG + '</span><h4>Geen voorbeeld</h4><p>De server gaf geen voorbeeld mee.</p></div>';
+      box.innerHTML = `<div class="gc-design">
+          <div class="block glass">
+            <h3>Ontwerp van de cadeaubon</h3>
+            <p class="b-sub">Standaard neemt de cadeaubon het ontwerp van uw stempelkaart over. Pas hier aan wat anders moet; met "Overnemen van stempelkaart" zet u een veld weer terug.</p>
+            ${GIFT.DESIGN_FIELDS.map(gcDesignRowHTML).join('')}
+            <div class="gc-dsave">
+              <button type="button" class="btn btn-primary" id="gcDesignSave">Ontwerp opslaan</button>
+              <span class="save-note" id="gcDesignNote"></span>
+            </div>
+          </div>
+          <div class="block glass gc-dpreview">
+            <h3>Voorbeeld</h3>
+            <div id="gcDesignFrameWrap">${preview}</div>
+            <p class="gc-hint">Zo ziet de klant de cadeaubon. Het voorbeeld komt van de server en ververst na opslaan.</p>
+          </div>
+        </div>`;
+      if (keepFrame) document.getElementById('gcDesignFrameWrap').replaceChildren(frame);   // niet onnodig herladen
+      if (note) gcDesignNote(note.msg, note.kind);
+    }
+    function gcDesignNote(msg, kind) {
+      const el = document.getElementById('gcDesignNote');
+      if (el) { el.textContent = msg || ''; el.className = 'save-note' + (kind ? ' ' + kind : ''); }
+    }
+    // Een veld wijzigen maakt het een eigen instelling; een lege link betekent: van de stempelkaart.
+    function gcDesignInput(k, value) {
+      const m = GC_DESIGN_META[k];
+      if (m.type === 'url' && String(value).trim() === '') gcDesign.current[k] = { value: gcDesign.original[k].inherited ? gcDesign.original[k].value : null, inherited: true };
+      else gcDesign.current[k] = { value: m.type === 'url' || m.type === 'text' ? String(value).trim() : value, inherited: false };
+      const row = document.querySelector(`[data-gc-drow="${k}"]`);
+      if (row) {
+        const fresh = document.createElement('div'); fresh.innerHTML = gcDesignRowHTML(k);
+        // Alleen het label en de knop bijwerken, zodat het invoerveld zijn focus houdt.
+        row.querySelector('.gc-dhead').replaceWith(fresh.querySelector('.gc-dhead'));
+        const oldBtn = row.querySelector('.gc-dinherit'), newBtn = fresh.querySelector('.gc-dinherit');
+        if (oldBtn && !newBtn) oldBtn.remove();
+        if (!oldBtn && newBtn) row.appendChild(newBtn);
+      }
+      gcDesignNote('');
+    }
+    async function saveGiftDesign(btn) {
+      for (const k of GIFT.DESIGN_FIELDS) {
+        const c = gcDesign.current[k];
+        if (c.inherited) continue;
+        const bad = GIFT.validateDesignValue(k, c.value);
+        if (bad) { gcDesignNote(GC_DESIGN_META[k].label + ': ' + GIFT.MESSAGES[bad], 'error'); return; }
+      }
+      const body = GIFT.designBody(cardId, gcDesign.current, gcDesign.original);
+      if (Object.keys(body).length === 1) { gcDesignNote('Er is niets gewijzigd.'); return; }
+      if (btn.disabled) return;
+      btn.disabled = true; gcDesignNote('Opslaan…');
+      try {
+        await gcFetch('/api/stamp/gift-cards/design', { method: 'PUT', body: JSON.stringify(body) });
+        gcDesign = null;                               // vers ophalen: nieuwe waarden én nieuw voorbeeld
+        await loadGiftDesign({ msg: 'Ontwerp opgeslagen ✓', kind: 'ok' });
+      } catch (err) {
+        btn.disabled = false;
+        if (err && GIFT.isPlanLock(err.code)) { renderGiftLock(); return; }
+        gcDesignNote('Niet opgeslagen: ' + gcErrText(err), 'error');
+      }
     }
 
     // ---- Rapport ----
@@ -8595,11 +8936,40 @@
       if (e.target.closest('[data-gc-csv]')) { downloadGiftCsv(e.target.closest('[data-gc-csv]')); return; }
       if (e.target.closest('[data-gc-retry]')) {
         if (!document.getElementById('gcListView')) { loadGiftCards(); return; }
-        if (gcView === 'list') loadGiftList(true); else loadGiftReport();
+        if (gcView === 'list') loadGiftList(true); else if (gcView === 'report') loadGiftReport(); else loadGiftDesign();
         return;
       }
+      const inh = e.target.closest('[data-gc-inherit]');
+      if (inh && gcDesign) {
+        const k = inh.dataset.gcInherit, o = gcDesign.original[k];
+        gcDesign.current[k] = { value: o.inherited ? o.value : gcDesign.current[k].value, inherited: true };
+        const row = document.querySelector(`[data-gc-drow="${k}"]`);
+        if (row) { const t = document.createElement('div'); t.innerHTML = gcDesignRowHTML(k); row.replaceWith(t.firstElementChild); }
+        gcDesignNote('');
+        return;
+      }
+      if (e.target.closest('#gcDesignSave')) { saveGiftDesign(e.target.closest('#gcDesignSave')); return; }
       const row = e.target.closest('[data-gc-id]');
       if (row) openGiftDetail(row.dataset.gcId);
+    });
+    document.getElementById('gcWrap').addEventListener('input', (e) => {
+      if (!gcDesign) return;
+      const t = e.target;
+      if (t.dataset.gcDcolor) {                          // kleurkiezer → ook de kleurcode bijwerken
+        const k = t.dataset.gcDcolor; const hex = document.querySelector(`[data-gc-dinput="${k}"]`);
+        if (hex) hex.value = t.value;
+        gcDesignInput(k, t.value); return;
+      }
+      if (t.dataset.gcDinput) {
+        const k = t.dataset.gcDinput;
+        if (GC_DESIGN_META[k].type === 'bool') return;    // via change
+        if (GC_DESIGN_META[k].type === 'color' && GIFT.isHexColor(t.value)) { const col = document.querySelector(`[data-gc-dcolor="${k}"]`); if (col) col.value = t.value; }
+        gcDesignInput(k, t.value);
+      }
+    });
+    document.getElementById('gcWrap').addEventListener('change', (e) => {
+      const t = e.target;
+      if (gcDesign && t.dataset.gcDinput && GC_DESIGN_META[t.dataset.gcDinput].type === 'bool') gcDesignInput(t.dataset.gcDinput, t.checked);
     });
     // getElementById i.p.v. de const modalBody: die wordt pas verderop in het script gedeclareerd.
     document.getElementById('modalBody').addEventListener('click', (e) => {
@@ -8607,6 +8977,23 @@
       if (e.target.closest('[data-gc-close]')) { closeModal(); return; }
       if (e.target.closest('[data-gc-adjust-open]')) { const f = document.getElementById('gcAdjust'); if (f) { f.hidden = false; document.getElementById('gcAdjAmt').focus(); } return; }
       if (e.target.closest('[data-gc-adjust-cancel]')) { const f = document.getElementById('gcAdjust'); if (f) f.hidden = true; satDetail(''); return; }
+      if (e.target.closest('[data-gc-resend-open]')) { const f = document.getElementById('gcResend'); if (f) { f.hidden = false; document.getElementById('gcResendEmail').focus(); } return; }
+      if (e.target.closest('[data-gc-resend-cancel]')) { const f = document.getElementById('gcResend'); if (f) f.hidden = true; return; }
+      const now = e.target.closest('[data-gc-resend-now]');
+      if (now) {
+        // Opnieuw versturen vanuit het resultaat na aanmaken.
+        if (now.disabled) return;
+        now.disabled = true;
+        const rowEl = now.closest('[data-gc-mailrow]');
+        const noteEl = rowEl.querySelector('[data-gc-resend-note]');
+        noteEl.textContent = 'Versturen…'; noteEl.className = 'save-note';
+        resendGift(now.dataset.gcId, now.dataset.gcResendNow).then(r => {
+          now.disabled = false;
+          if (r.ok) { rowEl.className = 'gc-mail ok'; rowEl.innerHTML = GC_CHECK_SVG + '<span>' + escapeHtml(r.msg) + '</span>'; return; }
+          noteEl.textContent = r.msg; noteEl.className = 'save-note' + (r.neutral ? '' : ' error');
+        });
+        return;
+      }
       const b = e.target.closest('[data-gc-block]');
       if (b) { toggleGiftBlock(gcDetailId, b.dataset.gcBlock, b); return; }
       const r = e.target.closest('[data-gc-reverse]');

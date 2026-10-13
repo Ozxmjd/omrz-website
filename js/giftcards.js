@@ -146,6 +146,83 @@
     const d = data || {};
     return (d.transaction && d.transaction.reference_number) || d.reference_number || null;
   }
+  // ---- Nieuwe cadeaubon: koper, ontvanger en verzending ----
+  const DELIVERY_MODES = ['recipient', 'buyer', 'none'];
+  const EMAIL_RX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const isEmail = v => EMAIL_RX.test(String(v || '').trim());
+  // Zelfde regels als de backend, zodat het formulier vooraf de juiste melding geeft.
+  // f = { delivery_mode, buyer_email, recipient_email }. Geeft een foutcode of null.
+  function validateGiftDelivery(f) {
+    const mode = f && f.delivery_mode;
+    if (DELIVERY_MODES.indexOf(mode) === -1) return 'invalid_delivery_mode';
+    const be = String(f.buyer_email || '').trim(), re = String(f.recipient_email || '').trim();
+    if (be && !isEmail(be)) return 'invalid_buyer_email';
+    if (re && !isEmail(re)) return 'invalid_recipient_email';
+    if (mode === 'recipient' && !re) return 'recipient_email_required';
+    if (mode === 'buyer' && !be) return 'buyer_email_required';
+    return null;
+  }
+  // Body voor POST /gift-cards: lege optionele velden laten we weg.
+  function giftCreateBody(f) {
+    const body = { card_id: f.card_id, amount_cents: f.amount_cents, delivery_mode: f.delivery_mode };
+    ['buyer_name', 'buyer_email', 'recipient_name', 'recipient_email', 'message'].forEach(k => {
+      const v = String(f[k] == null ? '' : f[k]).trim();
+      if (v) body[k] = v;
+    });
+    if (f.expires_at) body.expires_at = f.expires_at;
+    if (f.idempotency_key) body.idempotency_key = f.idempotency_key;
+    return body;
+  }
+  // Body voor POST /gift-cards/:id/resend: { target } en alleen een e-mail als die is ingevuld.
+  function resendBody(target, email) {
+    const body = { target: target === 'buyer' ? 'buyer' : 'recipient' };
+    const e = String(email == null ? '' : email).trim();
+    if (e) body.email = e;
+    return body;
+  }
+  // Verzendstatus van een bon (velden op de bon) per doel: { state: sent|failed|none, at, error }.
+  function mailStateOf(g, target) {
+    const pre = target === 'buyer' ? 'buyer_mail_' : 'pass_mail_';
+    const at = g && g[pre + 'sent_at'], err = g && g[pre + 'error'];
+    if (err) return { state: 'failed', at: at || null, error: String(err) };
+    if (at) return { state: 'sent', at, error: null };
+    return { state: 'none', at: null, error: null };
+  }
+  // Mailresultaat na het aanmaken: { pass: {to,status,error}, buyer: {status,error} }.
+  // Geeft de regels die het tonen waard zijn (sent/failed) en of er iets misging.
+  function mailOutcome(mail) {
+    const m = mail || {};
+    const rows = [];
+    [['recipient', m.pass], ['buyer', m.buyer]].forEach(([target, x]) => {
+      if (!x || (x.status !== 'sent' && x.status !== 'failed')) return;   // skipped of onbekend: niets te melden
+      rows.push({ target, status: x.status, to: x.to || null, error: x.error || null });
+    });
+    return { rows, failed: rows.some(r => r.status === 'failed') };
+  }
+
+  // ---- Ontwerp van de cadeaubon ----
+  const DESIGN_FIELDS = ['pass_color', 'text_color', 'logo_url', 'background_url', 'business_name', 'show_name'];
+  const isHexColor = v => /^#[0-9a-fA-F]{6}$/.test(String(v || ''));
+  const isHttpsUrl = v => { try { const u = new URL(String(v)); return u.protocol === 'https:'; } catch (_) { return false; } };
+  // Alleen gewijzigde velden; null = weer overnemen van de stempelkaart.
+  // current/original: { veld: { value, inherited } }.
+  function designBody(cardId, current, original) {
+    const body = { card_id: cardId };
+    DESIGN_FIELDS.forEach(k => {
+      const c = current[k] || {}, o = original[k] || {};
+      if (c.inherited) { if (!o.inherited) body[k] = null; return; }
+      if (o.inherited || c.value !== o.value) body[k] = c.value;
+    });
+    return body;
+  }
+  // Fout van een ontwerpveld vooraf: invalid_color, invalid_url of null.
+  function validateDesignValue(field, value) {
+    if (value === null) return null;
+    if (field === 'pass_color' || field === 'text_color') return isHexColor(value) ? null : 'invalid_color';
+    if (field === 'logo_url' || field === 'background_url') return value === '' || isHttpsUrl(value) ? null : 'invalid_url';
+    return null;
+  }
+
   const PLAN_LOCK_CODES = ['premium_plus_required', 'plan_required'];
   const isPlanLock = code => PLAN_LOCK_CODES.indexOf(code) !== -1;
 
@@ -163,6 +240,15 @@
     owner_only: 'Alleen de eigenaar van de zaak kan dit doen.',
     already_reversed: 'Deze afschrijving is al teruggedraaid.',
     rate_limited: 'Te veel pogingen achter elkaar. Wacht even en probeer het opnieuw.',
+    buyer_email_required: 'Vul het e-mailadres van de koper in: bij "Ik stuur hem zelf door" mailen we de link naar de koper.',
+    invalid_buyer_email: 'Het e-mailadres van de koper klopt niet.',
+    recipient_email_required: 'Vul het e-mailadres van de ontvanger in: bij "Direct naar de ontvanger" mailen we de bon naar de ontvanger.',
+    invalid_recipient_email: 'Het e-mailadres van de ontvanger klopt niet.',
+    invalid_delivery_mode: 'Kies hoe de cadeaubon verstuurd wordt.',
+    resend_too_soon: 'Net al verstuurd. Probeer het over een minuut opnieuw.',
+    no_email_for_target: 'Er is geen e-mailadres bekend om naartoe te sturen. Vul een adres in.',
+    invalid_color: 'Deze kleur klopt niet. Gebruik een kleurcode zoals #1F4D2B.',
+    invalid_url: 'Deze link klopt niet. Gebruik een volledige link die begint met https://.',
   };
   const NOT_LIVE_MESSAGE = 'Cadeaubonnen zijn nog niet beschikbaar. Probeer het later opnieuw.';
 
@@ -176,12 +262,18 @@
     if (code === 'insufficient_balance' && data && Number.isInteger(data.balance_cents)) {
       return 'Onvoldoende saldo. Er staat nog ' + formatCents(data.balance_cents) + ' op deze cadeaubon.';
     }
+    if (code === 'resend_too_soon' && data && Number.isFinite(Number(data.retry_after_seconds))) {
+      const sec = Math.max(1, Math.ceil(Number(data.retry_after_seconds)));
+      return 'Net al verstuurd, probeer over ' + sec + (sec === 1 ? ' seconde.' : ' seconden.');
+    }
     if (MESSAGES[code]) return MESSAGES[code];
     return (data && typeof data.error === 'string' && data.error) || 'Er ging iets mis. Probeer het opnieuw.';
   }
 
   const api = { formatCents, parseEuroToCents, normalizeShortCode, classifyScan, newIdempotencyKey, endOfDayAmsterdamISO,
-    giftStatus, STATUS_LABELS, isPlanLock, scannerEnabledFrom, referenceFrom, scannerSettingsBody, errorMessage, isNotLive, MESSAGES, NOT_LIVE_MESSAGE };
+    giftStatus, STATUS_LABELS, isPlanLock, scannerEnabledFrom, referenceFrom, scannerSettingsBody, errorMessage, isNotLive, MESSAGES, NOT_LIVE_MESSAGE,
+    DELIVERY_MODES, validateGiftDelivery, giftCreateBody, resendBody, mailStateOf, mailOutcome,
+    DESIGN_FIELDS, designBody, validateDesignValue, isHexColor, isHttpsUrl };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.OMRZGift = api;
 })(typeof window !== 'undefined' ? window : globalThis);

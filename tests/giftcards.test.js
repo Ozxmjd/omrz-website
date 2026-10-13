@@ -141,3 +141,62 @@ test('referenceFrom: transaction.reference_number, met reference_number als teru
   assert.equal(G.referenceFrom({}), null);
   assert.equal(G.referenceFrom(null), null);
 });
+
+test('validateGiftDelivery: regels van de backend vooraf', () => {
+  const v = f => G.validateGiftDelivery(f);
+  assert.equal(v({ delivery_mode: 'none' }), null);                                           // ontvangerblok leeg mag
+  assert.equal(v({ delivery_mode: 'recipient', recipient_email: 'a@b.nl' }), null);
+  assert.equal(v({ delivery_mode: 'recipient' }), 'recipient_email_required');
+  assert.equal(v({ delivery_mode: 'buyer', buyer_email: 'k@b.nl' }), null);
+  assert.equal(v({ delivery_mode: 'buyer', recipient_email: 'a@b.nl' }), 'buyer_email_required');
+  assert.equal(v({ delivery_mode: 'none', buyer_email: 'geen-mail' }), 'invalid_buyer_email');
+  assert.equal(v({ delivery_mode: 'none', recipient_email: 'x@' }), 'invalid_recipient_email');
+  assert.equal(v({ delivery_mode: 'post' }), 'invalid_delivery_mode');
+  assert.equal(v({}), 'invalid_delivery_mode');
+});
+
+test('giftCreateBody: alleen ingevulde velden, met delivery_mode en sleutel', () => {
+  assert.deepEqual(G.giftCreateBody({ card_id: 'c', amount_cents: 2500, delivery_mode: 'none', buyer_name: '  ', recipient_name: 'Mila ', message: '' }),
+    { card_id: 'c', amount_cents: 2500, delivery_mode: 'none', recipient_name: 'Mila' });
+  assert.deepEqual(G.giftCreateBody({ card_id: 'c', amount_cents: 1000, delivery_mode: 'buyer', buyer_name: 'Kees', buyer_email: 'k@b.nl', expires_at: '2027-01-15T22:59:59.000Z', idempotency_key: 'k1' }),
+    { card_id: 'c', amount_cents: 1000, delivery_mode: 'buyer', buyer_name: 'Kees', buyer_email: 'k@b.nl', expires_at: '2027-01-15T22:59:59.000Z', idempotency_key: 'k1' });
+});
+
+test('resendBody: target en alleen een ingevuld adres', () => {
+  assert.deepEqual(G.resendBody('recipient'), { target: 'recipient' });
+  assert.deepEqual(G.resendBody('buyer', ' k@b.nl '), { target: 'buyer', email: 'k@b.nl' });
+  assert.deepEqual(G.resendBody('iets', ''), { target: 'recipient' });
+});
+
+test('mailStateOf en mailOutcome: verzendstatus', () => {
+  assert.deepEqual(G.mailStateOf({ pass_mail_sent_at: 't1' }, 'recipient'), { state: 'sent', at: 't1', error: null });
+  assert.deepEqual(G.mailStateOf({ buyer_mail_error: 'bounce' }, 'buyer'), { state: 'failed', at: null, error: 'bounce' });
+  assert.deepEqual(G.mailStateOf({}, 'buyer'), { state: 'none', at: null, error: null });
+  const o = G.mailOutcome({ pass: { to: 'a@b.nl', status: 'failed', error: 'SMTP' }, buyer: { status: 'skipped' } });
+  assert.equal(o.failed, true); assert.equal(o.rows.length, 1); assert.equal(o.rows[0].target, 'recipient');
+  assert.deepEqual(G.mailOutcome(undefined), { rows: [], failed: false });
+  assert.equal(G.mailOutcome({ pass: { to: 'a@b.nl', status: 'sent' }, buyer: { status: 'sent' } }).failed, false);
+});
+
+test('designBody: alleen wijzigingen, null = weer overnemen van de stempelkaart', () => {
+  const o = { pass_color: { value: '#111111', inherited: true }, text_color: { value: '#ffffff', inherited: false }, logo_url: { value: 'https://x/l.png', inherited: false },
+    background_url: { value: null, inherited: true }, business_name: { value: 'Zaak', inherited: true }, show_name: { value: true, inherited: true } };
+  const c = JSON.parse(JSON.stringify(o));
+  assert.deepEqual(G.designBody('c', c, o), { card_id: 'c' });
+  c.pass_color = { value: '#1f4d2b', inherited: false };      // eigen kleur
+  c.logo_url = { value: 'https://x/l.png', inherited: true }; // terug naar stempelkaart
+  c.show_name = { value: false, inherited: false };
+  assert.deepEqual(G.designBody('c', c, o), { card_id: 'c', pass_color: '#1f4d2b', logo_url: null, show_name: false });
+});
+
+test('validateDesignValue en nieuwe foutmeldingen', () => {
+  assert.equal(G.validateDesignValue('pass_color', '#1F4D2B'), null);
+  assert.equal(G.validateDesignValue('text_color', 'rood'), 'invalid_color');
+  assert.equal(G.validateDesignValue('logo_url', 'http://x.nl/a.png'), 'invalid_url');
+  assert.equal(G.validateDesignValue('background_url', 'https://x.nl/a.jpg'), null);
+  assert.equal(G.validateDesignValue('logo_url', null), null);
+  assert.equal(G.errorMessage('resend_too_soon', { retry_after_seconds: 42 }), 'Net al verstuurd, probeer over 42 seconden.');
+  assert.equal(G.errorMessage('resend_too_soon', { retry_after_seconds: 1 }), 'Net al verstuurd, probeer over 1 seconde.');
+  for (const c of ['buyer_email_required', 'invalid_buyer_email', 'invalid_recipient_email', 'recipient_email_required', 'invalid_delivery_mode',
+    'no_email_for_target', 'invalid_color', 'invalid_url', 'resend_too_soon']) assert.ok(G.MESSAGES[c], c);
+});

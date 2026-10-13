@@ -4,7 +4,7 @@ const post = (p, b) => fetch(B + p, { method: 'POST', headers: { 'Content-Type':
 const state = () => fetch(B + '/__state').then(r => r.json());
 const NB = ' ';
 async function open(b, tok, card, vp, extra = {}) {
-  const ctx = await b.newContext({ viewport: vp || { width: 1440, height: 1000 }, acceptDownloads: true, ...(extra.tz ? { timezoneId: extra.tz } : {}) });
+  const ctx = await b.newContext({ viewport: vp || { width: 1440, height: 1000 }, acceptDownloads: true, permissions: ['clipboard-read', 'clipboard-write'], ...(extra.tz ? { timezoneId: extra.tz } : {}) });
   await ctx.addInitScript(([t, c, role]) => { if (!/dashboard/.test(location.pathname)) return; localStorage.setItem('omrz_token', t); localStorage.setItem('omrz_card_id', c); localStorage.setItem('omrz_role', role);
     if (role === 'manager') { localStorage.setItem('omrz_location_id', 'L1'); localStorage.setItem('omrz_location_name', 'Centrum'); } }, [tok, card, extra.role || 'owner']);
   const p = await ctx.newPage();
@@ -277,6 +277,205 @@ module.exports = async function run(env) {
     await ctx.close();
   }
   await post('/__cfg', { settingsFail: null });
+
+  // ===== 10. Nieuwe cadeaubon: koper, ontvanger, verzending =====
+  await post('/__reset');
+  ({ ctx, p } = await open(b, 'tok-pp', 'pp'));
+  await p.waitForSelector('.gc-row');
+  const newForm = async () => { await p.click('[data-gc-new]'); await p.waitForSelector('#gcNewForm'); };
+  const note = () => txt(p, '#gcNewNote');
+  const creates = async () => (await state()).log.create.length;
+  await newForm();
+  const legends = await p.$$eval('#gcNewForm legend', l => l.map(x => x.textContent.replace(/\s+/g, ' ').trim()));
+  check('10. Formulier: blokken Koper (optioneel), Ontvanger (optioneel), Verzending; standaard "Geen e-mail"',
+    JSON.stringify(legends) === JSON.stringify(['Koper (optioneel)', 'Ontvanger (optioneel)', 'Verzending']) && await p.isChecked('input[name="gcDelivery"][value="none"]')
+    && !(await vis(p, '#gcRecReq')) && !(await vis(p, '#gcBuyerReq')), JSON.stringify(legends));
+  await p.click('[data-gc-quick="2500"]');
+  await p.check('input[name="gcDelivery"][value="recipient"]');
+  check('10. "Direct naar de ontvanger" → vooraf: e-mail ontvanger verplicht', await vis(p, '#gcRecReq') && !(await vis(p, '#gcBuyerReq')));
+  let c0 = await creates();
+  await p.click('#gcNewBtn');
+  check('10. Zonder e-mail ontvanger: nette melding, niets verstuurd, focus op het veld', /e-mailadres van de ontvanger in/.test(await note()) && await creates() === c0 && await p.evaluate(() => document.activeElement.id) === 'gcRecEmail');
+  await p.check('input[name="gcDelivery"][value="buyer"]');
+  check('10. "Ik stuur hem zelf door" → vooraf: e-mail koper verplicht', await vis(p, '#gcBuyerReq') && !(await vis(p, '#gcRecReq')));
+  await p.click('#gcNewBtn');
+  check('10. Zonder e-mail koper: nette melding', /e-mailadres van de koper in/.test(await note()) && await creates() === c0);
+  await p.check('input[name="gcDelivery"][value="none"]'); await p.fill('#gcBuyerEmail', 'geen-mail'); await p.click('#gcNewBtn');
+  check('10. Ongeldig e-mailadres koper', /e-mailadres van de koper klopt niet/.test(await note()));
+  await p.fill('#gcBuyerEmail', ''); await p.fill('#gcRecEmail', 'x@'); await p.click('#gcNewBtn');
+  check('10. Ongeldig e-mailadres ontvanger', /e-mailadres van de ontvanger klopt niet/.test(await note()));
+  await p.fill('#gcRecEmail', '');
+  // Foutcodes van de server vertaald
+  for (const [code, re] of [['invalid_delivery_mode', /Kies hoe de cadeaubon verstuurd wordt/], ['buyer_email_required', /e-mailadres van de koper in/], ['recipient_email_required', /e-mailadres van de ontvanger in/],
+    ['invalid_buyer_email', /koper klopt niet/], ['invalid_recipient_email', /ontvanger klopt niet/]]) {
+    await p.route('**/api/stamp/gift-cards', r => r.request().method() === 'POST' ? r.fulfill({ status: 400, contentType: 'application/json', body: JSON.stringify({ success: false, code, error: 'x' }) }) : r.continue());
+    await p.click('#gcNewBtn'); await p.waitForTimeout(250);
+    check(`10. Server ${code} → Nederlandse melding`, re.test(await note()), await note());
+    await p.unroute('**/api/stamp/gift-cards');
+  }
+  // Ontvangerblok leeg, geen e-mail
+  await p.click('#gcNewBtn'); await p.waitForSelector('.gc-success');
+  let body = (await state()).log.create.slice(-1)[0];
+  check('10. Leeg ontvangerblok + geen e-mail: body zonder koper/ontvanger, delivery_mode none, met sleutel',
+    JSON.stringify(Object.keys(body).sort()) === JSON.stringify(['amount_cents', 'card_id', 'delivery_mode', 'idempotency_key']) && body.delivery_mode === 'none' && /^[0-9a-f-]{36}$/.test(body.idempotency_key), JSON.stringify(body));
+  check('10. Resultaat: "geen e-mail verstuurd", link en kassa-instructie blijven', /geen e-mail verstuurd/.test(await txt(p, '.gc-success')) && /Boek op de kassa/.test(await txt(p, '.gc-success')));
+  await p.click('[data-gc-close]');
+  // Direct naar de ontvanger, mail lukt
+  await newForm(); await p.click('[data-gc-quick="5000"]');
+  await p.fill('#gcBuyerName', 'Kees'); await p.fill('#gcBuyerEmail', 'kees@example.nl');
+  await p.fill('#gcRecName', 'Mila'); await p.fill('#gcRecEmail', 'mila@example.nl'); await p.fill('#gcMessage', 'Fijne dag!');
+  await p.check('input[name="gcDelivery"][value="recipient"]');
+  await p.click('#gcNewBtn'); await p.waitForSelector('.gc-success');
+  body = (await state()).log.create.slice(-1)[0];
+  check('10. Body met koper, ontvanger, bericht en delivery_mode recipient', body.buyer_name === 'Kees' && body.buyer_email === 'kees@example.nl' && body.recipient_name === 'Mila'
+    && body.recipient_email === 'mila@example.nl' && body.message === 'Fijne dag!' && body.delivery_mode === 'recipient' && body.amount_cents === 5000, JSON.stringify(body));
+  check('10. Mail gelukt → "Mail verstuurd naar de ontvanger (mila@example.nl)"', /Mail verstuurd naar de ontvanger \(mila@example\.nl\)/.test(await txt(p, '.gc-mails')));
+  await p.click('[data-gc-close]');
+  // Mail mislukt: bon bestaat wel, Opnieuw versturen
+  await post('/__cfg', { mailFail: 'recipient' });
+  await newForm(); await p.click('[data-gc-quick="1000"]'); await p.fill('#gcRecEmail', 'stuk@example.nl'); await p.check('input[name="gcDelivery"][value="recipient"]');
+  c0 = (await state()).gifts.length;
+  await p.click('#gcNewBtn'); await p.waitForSelector('.gc-success');
+  check('10. Mail mislukt → "Bon is aangemaakt, mail is niet verstuurd" + knop Opnieuw versturen; bon bestaat', /Bon is aangemaakt, mail is niet verstuurd/.test(await txt(p, '.gc-mails'))
+    && await vis(p, '[data-gc-resend-now="recipient"]') && (await state()).gifts.length === c0 + 1 && /Korte code/.test(await txt(p, '.gc-success')));
+  await p.screenshot({ path: OUT + '/gcd-mailfail-1440.png' });
+  await post('/__cfg', { mailFail: null });
+  await p.click('[data-gc-resend-now="recipient"]'); await p.waitForTimeout(400);
+  const waitNote = await p.$eval('[data-gc-mailrow="recipient"] [data-gc-resend-note]', e => ({ t: e.textContent, c: e.className }));
+  check('10. Direct opnieuw → 429: "Net al verstuurd, probeer over X seconden", geen rode fout', /^Net al verstuurd, probeer over \d+ seconden\.$/.test(waitNote.t) && !/error/.test(waitNote.c), JSON.stringify(waitNote));
+  await post('/__cfg', { resendWait: 0 });
+  await p.click('[data-gc-resend-now="recipient"]'); await p.waitForTimeout(400);
+  check('10. Later opnieuw → verstuurd', /Opnieuw verstuurd naar de ontvanger/.test(await txt(p, '.gc-mails')) && JSON.stringify((await state()).log.resend.slice(-1)[0]) === '{"target":"recipient"}');
+  await p.click('[data-gc-close]');
+  await post('/__cfg', { resendWait: 60 });
+  // Koper-mail mislukt
+  await post('/__cfg', { mailFail: 'buyer' });
+  await newForm(); await p.click('[data-gc-quick="1000"]'); await p.fill('#gcBuyerEmail', 'koper@example.nl'); await p.check('input[name="gcDelivery"][value="buyer"]');
+  await p.click('#gcNewBtn'); await p.waitForSelector('.gc-success');
+  check('10. "Ik stuur hem zelf door", mail koper mislukt → melding met knop voor de koper', /niet verstuurd/.test(await txt(p, '.gc-mails')) && /koper/.test(await txt(p, '.gc-mails')) && await vis(p, '[data-gc-resend-now="buyer"]'));
+  await p.click('[data-gc-close]'); await post('/__cfg', { mailFail: null });
+  // Netwerkfout bij aanmaken: opnieuw = zelfde sleutel, één bon
+  await newForm(); await p.click('[data-gc-quick="2500"]');
+  let firstTry = true;
+  await p.route('**/api/stamp/gift-cards', async r => {
+    if (r.request().method() !== 'POST') return r.continue();
+    if (firstTry) { firstTry = false; const res = await r.fetch(); await res.text(); return r.abort('failed'); }
+    return r.continue();
+  });
+  c0 = (await state()).gifts.length;
+  await p.click('#gcNewBtn'); await p.waitForTimeout(500);
+  await p.click('#gcNewBtn'); await p.waitForSelector('.gc-success');
+  const two = (await state()).log.create.slice(-2);
+  check('10. Netwerkfout bij aanmaken: opnieuw versturen gebruikt dezelfde sleutel, er is maar één bon', two[0].idempotency_key === two[1].idempotency_key && (await state()).gifts.length === c0 + 1);
+  await p.unroute('**/api/stamp/gift-cards'); await p.click('[data-gc-close]');
+  await ctx.close();
+
+  // ===== 11. Detail: verzendstatus, link kopiëren, opnieuw versturen =====
+  await post('/__reset');
+  ({ ctx, p } = await open(b, 'tok-pp', 'pp'));
+  await p.waitForSelector('.gc-row');
+  // Een bon met geslaagde ontvanger-mail en mislukte koper-mail
+  await post('/__cfg', { mailFail: 'buyer' });
+  await p.click('[data-gc-new]'); await p.click('[data-gc-quick="2500"]');
+  await p.fill('#gcRecName', 'Rosa'); await p.fill('#gcRecEmail', 'rosa@example.nl'); await p.fill('#gcBuyerEmail', 'oud@example.nl');
+  await p.check('input[name="gcDelivery"][value="buyer"]'); await p.click('#gcNewBtn'); await p.waitForSelector('.gc-success'); await p.click('[data-gc-close]');
+  await post('/__cfg', { mailFail: null });
+  const rosa = (await state()).gifts.find(g => g.recipient_name === 'Rosa');
+  await p.evaluate(id => openGiftDetail(id), rosa.id); await p.waitForSelector('.gc-detail');
+  const ms = await txt(p, '.gc-mailstat');
+  check('11. Verzendstatus: ontvanger "Nog niet verstuurd", koper "Mislukt …: fout"', /Mail ontvanger\s*Nog niet verstuurd/.test(ms) && /Mail koper\s*Mislukt.*Mailserver weigerde/.test(ms), ms.replace(/\s+/g, ' '));
+  check('11. Koper en e-mail koper in de gegevens', /E-mail koper\s*oud@example\.nl/.test(await txt(p, '.gc-detail .cd-rows')));
+  await p.click('.gc-detail [data-gc-copy]'); await p.waitForTimeout(150);
+  check('11. "Link kopiëren" kopieert de deelbare link', (await p.evaluate(() => navigator.clipboard.readText())) === rosa.share_url && /Gekopieerd/.test(await txt(p, '.gc-detail [data-gc-copy]')));
+  await p.click('[data-gc-resend-open]');
+  check('11. Opnieuw versturen: ontvanger voorgeselecteerd met haar adres', await p.isChecked('input[name="gcResendTarget"][value="recipient"]') && (await p.inputValue('#gcResendEmail')) === 'rosa@example.nl');
+  await p.check('input[name="gcResendTarget"][value="buyer"]');
+  check('11. Koper kiezen vult het koper-adres', (await p.inputValue('#gcResendEmail')) === 'oud@example.nl');
+  await p.fill('#gcResendEmail', 'nieuw@example.nl'); await post('/__cfg', { resendWait: 0 });
+  await p.click('#gcResendBtn');
+  await p.waitForFunction(() => /Opnieuw verstuurd/.test(document.getElementById('gcDetailNote').textContent));
+  check('11. Gecorrigeerd adres → body {target:"buyer", email:"nieuw@example.nl"}, status bijgewerkt', JSON.stringify((await state()).log.resend.slice(-1)[0]) === '{"target":"buyer","email":"nieuw@example.nl"}'
+    && /Mail koper\s*Verstuurd op/.test(await txt(p, '.gc-mailstat')) && /nieuw@example\.nl/.test(await txt(p, '.gc-detail .cd-rows')));
+  await p.click('[data-gc-resend-open]');
+  await p.click('#gcResendBtn');
+  await p.waitForFunction(() => /Opnieuw verstuurd/.test(document.getElementById('gcDetailNote').textContent));
+  check('11. Ongewijzigd adres → alleen {target}', JSON.stringify((await state()).log.resend.slice(-1)[0]) === '{"target":"recipient"}');
+  await post('/__cfg', { resendWait: 60 });
+  await p.click('[data-gc-resend-open]'); await p.click('#gcResendBtn'); await p.waitForTimeout(400);
+  const rn = await p.$eval('#gcResendNote', e => ({ t: e.textContent, c: e.className }));
+  check('11. 429 resend_too_soon → "Net al verstuurd, probeer over X seconden", geen rode fout', /^Net al verstuurd, probeer over \d+ seconden\.$/.test(rn.t) && !/error/.test(rn.c), JSON.stringify(rn));
+  await p.click('#modalClose');
+  // Bon zonder e-mailadressen: no_email_for_target
+  const sanne = (await state()).gifts.find(g => g.short_code === 'ABCD-EFGH-JK');
+  await p.evaluate(id => openGiftDetail(id), sanne.id); await p.waitForSelector('.gc-detail');
+  await p.click('[data-gc-resend-open]'); await p.click('#gcResendBtn'); await p.waitForTimeout(400);
+  check('11. Geen adres bekend → "geen e-mailadres bekend"', /geen e-mailadres bekend/.test(await txt(p, '#gcResendNote')) && /error/.test(await p.getAttribute('#gcResendNote', 'class')));
+  await p.click('#modalClose');
+  // Geblokkeerde bon
+  const daan = (await state()).gifts.find(g => g.short_code === 'BLKD-0000-01');
+  await p.evaluate(id => openGiftDetail(id), daan.id); await p.waitForSelector('.gc-detail');
+  check('11. Geblokkeerd: uitleg dat de pas in de Wallet blijft staan en dat toont', /De pas blijft in de Wallet van de klant staan en toont dat de bon geblokkeerd is/.test(await txt(p, '.gc-passnote')));
+  await p.click('[data-gc-resend-open]'); await p.fill('#gcResendEmail', 'daan@example.nl'); await p.click('#gcResendBtn'); await p.waitForTimeout(400);
+  check('11. 409 gift_card_blocked → nette melding', /geblokkeerd/.test(await txt(p, '#gcResendNote')));
+  await p.click('#modalClose');
+  // Blokkeren: bevestiging noemt de Wallet, nergens "verdwijnt"
+  await p.evaluate(id => openGiftDetail(id), sanne.id); await p.waitForSelector('.gc-detail');
+  await p.click('[data-gc-block="block"]'); await p.waitForFunction(() => /geblokkeerd ✓/.test(document.getElementById('gcDetailNote').textContent));
+  check('11. Blokkeer-bevestiging: pas blijft in de Wallet; nergens "verdwijnt"', /pas blijft in de Wallet van de klant staan/.test(p.dialogs.slice(-1)[0])
+    && !/verdwijn|van de telefoon/i.test(p.dialogs.join(' ') + await txt(p, '#gcWrap') + await txt(p, '.gc-detail')));
+  await p.screenshot({ path: OUT + '/gcd-detail-mail-1440.png' });
+  await ctx.close();
+
+  // ===== 12. Ontwerp =====
+  await post('/__reset');
+  ({ ctx, p } = await open(b, 'tok-pp', 'pp'));
+  await p.waitForSelector('.gc-row');
+  await p.click('[data-gc-view="design"]'); await p.waitForSelector('#gcDesignFrame');
+  const chips = await p.$$eval('.gc-drow .gc-dchip', c => c.map(x => x.textContent));
+  check('12. Zes velden, allemaal "Van stempelkaart"', chips.length === 6 && chips.every(t => t === 'Van stempelkaart'), chips.join('|'));
+  check('12. Voorbeeld = iframe op preview_url van de server', (await p.getAttribute('#gcDesignFrame', 'src')) === B + '/__preview?card=pp&v=1');
+  check('12. Waarschuwing bij achtergrond: Apple-pas alleen strip of niets, publieke pagina en Google Wallet volledig',
+    /Apple Wallet-pas.*alleen als smalle strip.*of helemaal niet.*publieke cadeaubonpagina en in Google Wallet.*volledig/.test(await txt(p, '[data-gc-drow="background_url"] .gc-dwarn')));
+  await p.click('#gcDesignSave'); await p.waitForTimeout(200);
+  check('12. Niets gewijzigd → geen PUT', /niets gewijzigd/.test(await txt(p, '#gcDesignNote')) && (await state()).log.designPut.length === 0);
+  await p.fill('[data-gc-dinput="pass_color"]', '#123456');
+  check('12. Kleur wijzigen → "Eigen instelling" + knop "Overnemen van stempelkaart"', /Eigen instelling/.test(await txt(p, '[data-gc-drow="pass_color"]')) && await vis(p, '[data-gc-inherit="pass_color"]'));
+  await p.uncheck('[data-gc-dinput="show_name"]');
+  await p.click('#gcDesignSave'); await p.waitForFunction(() => /opgeslagen/.test((document.getElementById('gcDesignNote') || {}).textContent || ''));
+  check('12. Opslaan → PUT met alleen de wijzigingen', JSON.stringify((await state()).log.designPut.slice(-1)[0]) === '{"card_id":"pp","pass_color":"#123456","show_name":false}', JSON.stringify((await state()).log.designPut.slice(-1)[0]));
+  check('12. Voorbeeld ververst (nieuwe preview_url) en toont de nieuwe kleur', (await p.getAttribute('#gcDesignFrame', 'src')) === B + '/__preview?card=pp&v=2'
+    && await p.frameLocator('#gcDesignFrame').locator('body').evaluate(b => getComputedStyle(b).backgroundColor) === 'rgb(18, 52, 86)');
+  await p.click('[data-gc-inherit="pass_color"]');
+  check('12. "Overnemen van stempelkaart" → wordt overgenomen na opslaan', /overgenomen van de stempelkaart na opslaan/.test(await txt(p, '[data-gc-drow="pass_color"]')));
+  await p.click('#gcDesignSave'); await p.waitForFunction(() => /opgeslagen/.test((document.getElementById('gcDesignNote') || {}).textContent || ''));
+  check('12. PUT met null = weer overnemen; daarna "Van stempelkaart"', JSON.stringify((await state()).log.designPut.slice(-1)[0]) === '{"card_id":"pp","pass_color":null}'
+    && /Van stempelkaart/.test(await txt(p, '[data-gc-drow="pass_color"]')));
+  const puts = (await state()).log.designPut.length;
+  await p.fill('[data-gc-dinput="text_color"]', 'rood'); await p.click('#gcDesignSave'); await p.waitForTimeout(200);
+  check('12. Ongeldige kleur → melding vooraf, geen PUT', /Tekstkleur: Deze kleur klopt niet/.test(await txt(p, '#gcDesignNote')) && (await state()).log.designPut.length === puts);
+  await p.fill('[data-gc-dinput="text_color"]', '#ffffff');
+  await p.fill('[data-gc-dinput="logo_url"]', 'http://onveilig.nl/logo.png'); await p.click('#gcDesignSave'); await p.waitForTimeout(200);
+  check('12. Link zonder https → melding vooraf', /Logo: Deze link klopt niet/.test(await txt(p, '#gcDesignNote')));
+  await p.fill('[data-gc-dinput="logo_url"]', 'https://cdn.example.nl/logo.png');
+  for (const code of ['invalid_url', 'invalid_color']) {
+    await p.route('**/api/stamp/gift-cards/design', r => r.request().method() === 'PUT' ? r.fulfill({ status: 400, contentType: 'application/json', body: JSON.stringify({ success: false, code, error: 'x' }) }) : r.continue());
+    await p.click('#gcDesignSave'); await p.waitForTimeout(250);
+    check(`12. Server ${code} → nette melding`, new RegExp('Niet opgeslagen: Deze ' + (code === 'invalid_url' ? 'link' : 'kleur') + ' klopt niet').test(await txt(p, '#gcDesignNote')), await txt(p, '#gcDesignNote'));
+    await p.unroute('**/api/stamp/gift-cards/design');
+  }
+  await p.screenshot({ path: OUT + '/gcd-design-1440.png', fullPage: true });
+  await ctx.close();
+  for (const vp of [{ width: 820, height: 1180 }, { width: 390, height: 844 }]) {
+    ({ ctx, p } = await open(b, 'tok-pp', 'pp', vp));
+    await p.waitForSelector('.gc-row');
+    await p.click('[data-gc-view="design"]'); await p.waitForSelector('#gcDesignFrame');
+    check(`12. ${vp.width}px ontwerp: geen horizontale scroll`, await noH(p));
+    await p.screenshot({ path: OUT + `/gcd-design-${vp.width}.png`, fullPage: true });
+    await p.click('[data-gc-view="list"]'); await p.click('[data-gc-new]'); await p.waitForSelector('#gcNewForm');
+    check(`12. ${vp.width}px nieuw formulier: geen horizontale scroll`, await noH(p));
+    await p.screenshot({ path: OUT + `/gcd-newform-${vp.width}.png`, fullPage: true });
+    await ctx.close();
+  }
 
   // ===== 8. Schermformaten =====
   for (const vp of [{ width: 1440, height: 1000 }, { width: 820, height: 1180 }, { width: 390, height: 844 }]) {

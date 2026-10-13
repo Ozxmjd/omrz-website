@@ -15,7 +15,7 @@ const tokens = {
 const locs = { pp: [{ id: 'L1', name: 'Centrum' }, { id: 'L2', name: 'Noord' }], basic: [], trial: [], ptrial: [], pptrial: [] };
 let S;
 function reset() {
-  S = { gifts: [], txs: [], ref: 400, idem: {}, cfg: { notLive: false, rateLimited: false, redeemDelay: 0, failLookup: false, settingsFail: null }, settings: {}, log: { redeem: [], create: [], lookup: [], give: [], redeemStamp: [], settingsPut: [], settingsGet: 0 }, holders: { 'vip-0000-9a4d-4e6f-b7c2-1d0e5a9f8b34': { name: 'Vaste Gast', stamps: 2, vip: true } } };
+  S = { gifts: [], txs: [], ref: 400, idem: {}, cfg: { notLive: false, rateLimited: false, redeemDelay: 0, failLookup: false, settingsFail: null, mailFail: null, resendWait: 60 }, settings: {}, design: {}, designVersion: 1, createIdem: {}, log: { redeem: [], create: [], lookup: [], give: [], redeemStamp: [], settingsPut: [], settingsGet: 0, resend: [], designPut: [] }, holders: { 'vip-0000-9a4d-4e6f-b7c2-1d0e5a9f8b34': { name: 'Vaste Gast', stamps: 2, vip: true } } };
   const now = Date.now();
   mk('pp', 5000, { recipient_name: 'Sanne de Vries', message: 'Gefeliciteerd!' }, now - 5 * 864e5, 'ABCD-EFGH-JK', 'longcodeSanne123');
   mk('pp', 2500, { recipient_name: 'Daan' }, now - 3 * 864e5, 'BLKD-0000-01', 'longcodeBlocked1').status = 'blocked';
@@ -29,7 +29,8 @@ function reset() {
 const ref = () => 'CB-' + String(++S.ref).padStart(4, '0');
 function mk(card, cents, extra, t, short, code) {
   const g = { id: crypto.randomUUID(), card_id: card, code: code || crypto.randomBytes(9).toString('base64url'), short_code: short || [4, 4, 2].map(n => crypto.randomBytes(8).toString('hex').toUpperCase().slice(0, n)).join('-'),
-    initial_amount_cents: cents, balance_cents: cents, status: 'active', recipient_name: null, recipient_email: null, message: null, expires_at: null, created_at: new Date(t || Date.now()).toISOString(), ...extra };
+    initial_amount_cents: cents, balance_cents: cents, status: 'active', recipient_name: null, recipient_email: null, message: null, expires_at: null, created_at: new Date(t || Date.now()).toISOString(),
+    buyer_name: null, buyer_email: null, delivery_mode: 'none', pass_mail_sent_at: null, pass_mail_error: null, buyer_mail_sent_at: null, buyer_mail_error: null, ...extra };
   g.share_url = 'https://omrzdigital.nl/cadeaubon/' + g.code;
   S.gifts.push(g);
   S.txs.push({ id: crypto.randomUUID(), gift_card_id: g.id, card_id: card, type: 'issue', amount_cents: cents, balance_after_cents: cents, reference_number: ref(), location_id: null, actor: 'owner', note: null, created_at: g.created_at });
@@ -40,8 +41,25 @@ function redeemRaw(g, cents, loc) {
   const tx = { id: crypto.randomUUID(), gift_card_id: g.id, card_id: g.card_id, type: 'redeem', amount_cents: -cents, balance_after_cents: g.balance_cents, reference_number: ref(), location_id: loc || null, actor: 'staff', note: null, created_at: new Date().toISOString() };
   S.txs.push(tx); return tx;
 }
+// Stempelkaart-waarden waar het ontwerp van de cadeaubon op terugvalt.
+const CARD_DESIGN = { pass_color: '#1f4d2b', text_color: '#ffffff', logo_url: 'https://omrzdigital.nl/images/logo.png', background_url: null, business_name: 'Loris Parfum', show_name: true };
+function designOf(card) {
+  const own = S.design[card] || {};
+  const out = {};
+  Object.keys(CARD_DESIGN).forEach(k => { out[k] = k in own ? { value: own[k], inherited: false } : { value: CARD_DESIGN[k], inherited: true }; });
+  return out;
+}
+// Mail versturen (nep): mislukt als cfg.mailFail dat doel noemt.
+function sendMail(g, target) {
+  const pre = target === 'buyer' ? 'buyer_mail_' : 'pass_mail_';
+  const to = target === 'buyer' ? g.buyer_email : g.recipient_email;
+  const now = new Date().toISOString();
+  if (S.cfg.mailFail === target || S.cfg.mailFail === 'all') { g[pre + 'error'] = 'Mailserver weigerde het adres'; g[pre + 'sent_at'] = null; g[pre + 'tried_ms'] = Date.now(); return { to, status: 'failed', error: g[pre + 'error'] }; }
+  g[pre + 'sent_at'] = now; g[pre + 'error'] = null; g[pre + 'tried_ms'] = Date.now();
+  return { to, status: 'sent', error: null };
+}
 reset();
-const pub = g => { const { card_id, ...r } = g; return r; };
+const pub = g => { const { card_id, pass_mail_tried_ms, buyer_mail_tried_ms, ...r } = g; return r; };
 const send = (res, st, obj) => { res.writeHead(st, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' }); res.end(JSON.stringify(obj)); };
 const fail = (res, st, code, error, extra) => send(res, st, { success: false, code, error, ...(extra || {}) });
 const findCode = (card, code) => {
@@ -55,6 +73,12 @@ function api(req, res, url, body, rawBody) {
   if (p === '/__reset') { reset(); return send(res, 200, {}); }
   if (p === '/__cfg') { Object.assign(S.cfg, body); return send(res, 200, S.cfg); }
   if (p === '/__state') return send(res, 200, S);
+  if (p === '/__preview') {
+    const d = designOf(q.get('card') || 'pp');
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    return res.end(`<!doctype html><meta charset="utf-8"><body style="margin:0;font-family:sans-serif;background:${d.pass_color.value};color:${d.text_color.value}">
+      <div id="pv" data-version="${q.get('v')}" style="padding:24px"><h2>${d.show_name.value ? d.business_name.value : ''}</h2><p>Cadeaubon € 25,00</p></div></body>`);
+  }
   if (p === '/__settings') { S.settings[body.card] = body.on === true; return send(res, 200, S.settings); }
   if (p === '/api/stamp/subscription') { if (!tok) return send(res, 401, { error: 'Niet ingelogd' }); return send(res, 200, { success: true, plan: tok.plan, access_status: tok.access_status || 'active', has_access: true }); }
   if (p === '/api/stamp/locations') return send(res, 200, { success: true, locations: tok ? locs[tok.card] : [] });
@@ -108,12 +132,64 @@ function api(req, res, url, body, rawBody) {
       }
     }
     if (p === '/api/stamp/gift-cards' && req.method === 'POST') {
-      if (!Number.isInteger(body.amount_cents) || body.amount_cents <= 0) return fail(res, 400, 'invalid_amount', 'Ongeldig bedrag');
-      const g = mk(card, body.amount_cents, { recipient_name: body.recipient_name || null, message: body.message || null, recipient_email: body.recipient_email || null, expires_at: body.expires_at || null });
       S.log.create.push(body);
+      if (body.idempotency_key && S.createIdem[body.idempotency_key]) return send(res, 201, S.createIdem[body.idempotency_key]);
+      if (!Number.isInteger(body.amount_cents) || body.amount_cents <= 0) return fail(res, 400, 'invalid_amount', 'Ongeldig bedrag');
+      const mode = body.delivery_mode === undefined ? 'none' : body.delivery_mode;
+      const okMail = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+      if (!['recipient', 'buyer', 'none'].includes(mode)) return fail(res, 400, 'invalid_delivery_mode', 'Ongeldige verzending');
+      if (body.buyer_email && !okMail(body.buyer_email)) return fail(res, 400, 'invalid_buyer_email', 'Ongeldig e-mailadres koper');
+      if (body.recipient_email && !okMail(body.recipient_email)) return fail(res, 400, 'invalid_recipient_email', 'Ongeldig e-mailadres ontvanger');
+      if (mode === 'recipient' && !body.recipient_email) return fail(res, 400, 'recipient_email_required', 'E-mail ontvanger vereist');
+      if (mode === 'buyer' && !body.buyer_email) return fail(res, 400, 'buyer_email_required', 'E-mail koper vereist');
+      const g = mk(card, body.amount_cents, { recipient_name: body.recipient_name || null, message: body.message || null, recipient_email: body.recipient_email || null,
+        buyer_name: body.buyer_name || null, buyer_email: body.buyer_email || null, delivery_mode: mode, expires_at: body.expires_at || null });
+      const mail = { pass: { to: g.recipient_email, status: 'skipped', error: null }, buyer: { status: 'skipped', error: null } };
+      if (mode === 'recipient') mail.pass = sendMail(g, 'recipient');
+      if (mode === 'buyer') { const r = sendMail(g, 'buyer'); mail.buyer = { status: r.status, error: r.error }; }
       // Zelfde vorm als de backend: het referentienummer zit in transaction.
       const tx = S.txs[S.txs.length - 1];
-      return send(res, 201, { success: true, gift_card: pub(g), transaction: { id: tx.id, reference_number: tx.reference_number } });
+      const out = { success: true, gift_card: pub(g), transaction: { id: tx.id, reference_number: tx.reference_number }, mail };
+      if (body.idempotency_key) S.createIdem[body.idempotency_key] = out;
+      return send(res, 201, out);
+    }
+    if ((m = p.match(/^\/api\/stamp\/gift-cards\/([\w-]+)\/resend$/)) && req.method === 'POST') {
+      if (!tok.owner) return fail(res, 403, 'owner_only', 'Alleen eigenaar');
+      const g = S.gifts.find(x => x.id === m[1] && x.card_id === card);
+      if (!g) return fail(res, 404, 'gift_card_not_found', 'Niet gevonden');
+      S.log.resend.push(body);
+      if (g.status === 'blocked') return fail(res, 409, 'gift_card_blocked', 'Geblokkeerd');
+      const target = body.target === 'buyer' ? 'buyer' : 'recipient';
+      const key = target === 'buyer' ? 'buyer_email' : 'recipient_email';
+      if (body.email) g[key] = body.email;
+      if (!g[key]) return fail(res, 400, 'no_email_for_target', 'Geen e-mailadres');
+      const last = g[(target === 'buyer' ? 'buyer_mail_' : 'pass_mail_') + 'tried_ms'];
+      if (last && Date.now() - last < S.cfg.resendWait * 1000) {
+        return fail(res, 429, 'resend_too_soon', 'Te snel', { retry_after_seconds: Math.ceil((S.cfg.resendWait * 1000 - (Date.now() - last)) / 1000) });
+      }
+      const r = sendMail(g, target);
+      return send(res, 200, { success: true, mail: r, gift_card: pub(g) });
+    }
+    if (p === '/api/stamp/gift-cards/design') {
+      if (req.method === 'GET') {
+        const d = designOf(card);
+        return send(res, 200, { success: true, card_id: card, ...d, preview_url: BASE + '/__preview?card=' + card + '&v=' + S.designVersion });
+      }
+      if (req.method === 'PUT') {
+        if (!tok.owner) return fail(res, 403, 'owner_only', 'Alleen eigenaar');
+        S.log.designPut.push(body);
+        const own = Object.assign({}, S.design[card] || {});
+        for (const k of Object.keys(CARD_DESIGN)) {
+          if (!(k in body)) continue;
+          const v = body[k];
+          if (v === null) { delete own[k]; continue; }
+          if ((k === 'pass_color' || k === 'text_color') && !/^#[0-9a-fA-F]{6}$/.test(v)) return fail(res, 400, 'invalid_color', 'Ongeldige kleur');
+          if ((k === 'logo_url' || k === 'background_url') && !/^https:\/\//.test(v)) return fail(res, 400, 'invalid_url', 'Ongeldige link');
+          own[k] = v;
+        }
+        S.design[card] = own; S.designVersion++;
+        return send(res, 200, { success: true, card_id: card, ...designOf(card), preview_url: BASE + '/__preview?card=' + card + '&v=' + S.designVersion });
+      }
     }
     if (p === '/api/stamp/gift-cards' && req.method === 'GET') {
       let list = S.gifts.filter(g => g.card_id === card).sort((a, b) => b.created_at.localeCompare(a.created_at));
