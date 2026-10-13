@@ -93,6 +93,28 @@
     return h.slice(0, 8) + '-' + h.slice(8, 12) + '-' + h.slice(12, 16) + '-' + h.slice(16, 20) + '-' + h.slice(20);
   }
 
+  // "2027-03-31" → het einde van die dag in Europe/Amsterdam (23:59:59 lokale tijd) als
+  // ISO-tijd in UTC, ongeacht de tijdzone van het apparaat. Ongeldige datum → null.
+  const AMS = 'Europe/Amsterdam';
+  function amsOffsetMs(utcMs) {
+    const parts = new Intl.DateTimeFormat('en-US', { timeZone: AMS, hourCycle: 'h23', year: 'numeric', month: '2-digit',
+      day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }).formatToParts(new Date(utcMs));
+    const v = {}; parts.forEach(p => { v[p.type] = Number(p.value); });
+    return Date.UTC(v.year, v.month - 1, v.day, v.hour, v.minute, v.second) - Math.floor(utcMs / 1000) * 1000;
+  }
+  function endOfDayAmsterdamISO(dateStr) {
+    const m = String(dateStr || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m) return null;
+    const y = Number(m[1]), mo = Number(m[2]), d = Number(m[3]);
+    const wall = Date.UTC(y, mo - 1, d, 23, 59, 59);
+    const check = new Date(wall);
+    if (check.getUTCFullYear() !== y || check.getUTCMonth() !== mo - 1 || check.getUTCDate() !== d) return null;
+    // Wandkloktijd min de Amsterdamse afwijking; nogmaals met de afwijking op dat tijdstip (zomertijd-wissel).
+    let utc = wall - amsOffsetMs(wall);
+    utc = wall - amsOffsetMs(utc);
+    return new Date(utc).toISOString();
+  }
+
   // Duidelijke Nederlandse melding per foutcode uit het contract.
   const MESSAGES = {
     plan_required: 'Cadeaubonnen zijn onderdeel van Premium Plus.',
@@ -122,7 +144,7 @@
     return (data && typeof data.error === 'string' && data.error) || 'Er ging iets mis. Probeer het opnieuw.';
   }
 
-  const api = { formatCents, parseEuroToCents, normalizeShortCode, classifyScan, newIdempotencyKey, errorMessage, isNotLive, MESSAGES, NOT_LIVE_MESSAGE };
+  const api = { formatCents, parseEuroToCents, normalizeShortCode, classifyScan, newIdempotencyKey, endOfDayAmsterdamISO, errorMessage, isNotLive, MESSAGES, NOT_LIVE_MESSAGE };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.OMRZGift = api;
 })(typeof window !== 'undefined' ? window : globalThis);

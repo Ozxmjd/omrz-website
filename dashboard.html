@@ -915,6 +915,8 @@
     [data-theme="light"] .gc-table td.neg { color: #b91c1c; }
     [data-theme="light"] .gc-table td.pos { color: #15803d; }
     .gc-table .btn { padding: 5px 10px; font-size: 12px; border-radius: 8px; }
+    .gc-reversed { font-size: 12px; font-weight: 500; color: var(--muted); }
+    .gc-table td.gc-when { white-space: normal; min-width: 96px; }
     .gc-report-filters { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
     .gc-report-filters label { display: block; font-size: 12px; font-weight: 500; color: var(--pearl); margin-bottom: 6px; }
     .gc-report-filters .btn { margin-left: auto; }
@@ -3177,7 +3179,7 @@
     const managerLocationId = localStorage.getItem('omrz_location_id') || null;
     const managerLocationName = localStorage.getItem('omrz_location_name') || '';
     // Tabs die alleen de eigenaar mag zien; een manager krijgt ze niet in het menu.
-    const OWNER_ONLY_TABS = new Set(['kaart', 'vestigingen', 'abonnement', 'facturen', 'bedrijfsgegevens', 'instellingen', 'enquete', 'loyaliteit']);
+    const OWNER_ONLY_TABS = new Set(['kaart', 'vestigingen', 'abonnement', 'facturen', 'bedrijfsgegevens', 'instellingen', 'enquete', 'loyaliteit', 'cadeaubonnen']);
 
     // ---- Multi-vestiging state ----
     let locations = [];               // alle vestigingen
@@ -8058,6 +8060,8 @@
 
     // ---- Openen ----
     function loadGiftCards() {
+      // Alleen de eigenaar; een manager werkt met cadeaubonnen uitsluitend in de scanapp.
+      if (isManager) { document.getElementById('gcWrap').innerHTML = ''; return; }
       applyGiftLockIcon();
       if (giftPlanBlocked || !giftPlanAllowed()) { renderGiftLock(); return; }
       if (!cardId) {
@@ -8071,7 +8075,7 @@
     function renderGiftShell() {
       const today = new Date();
       if (!gcReport.from) { gcReport.from = gcDateKey(new Date(today.getFullYear(), today.getMonth(), 1)); gcReport.to = gcDateKey(today); }
-      const locOpts = (!isManager && locations.length > 1)
+      const locOpts = locations.length > 1
         ? `<div><label for="gcRepLoc">Vestiging</label><select class="gc-select" id="gcRepLoc">
             <option value="">Alle vestigingen</option>
             ${locations.map(l => `<option value="${escapeHtml(l.id)}">${escapeHtml(l.name)}</option>`).join('')}
@@ -8257,10 +8261,10 @@
       const exp = document.getElementById('gcExpires').value;
       if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { say('Dit e-mailadres klopt niet.', 'error'); return; }
       if (exp) {
-        const [y, m, d] = exp.split('-').map(Number);
-        const end = new Date(y, m - 1, d, 23, 59, 59);      // tot en met die dag
-        if (isNaN(end.getTime()) || end <= new Date()) { say('Kies een vervaldatum in de toekomst.', 'error'); return; }
-        body.expires_at = end.toISOString();
+        // Tot en met die dag, 23:59:59 Nederlandse tijd, ook op een apparaat in een andere tijdzone.
+        const end = GIFT.endOfDayAmsterdamISO(exp);
+        if (!end || new Date(end) <= new Date()) { say('Kies een vervaldatum in de toekomst.', 'error'); return; }
+        body.expires_at = end;
       }
       if (name) body.recipient_name = name;
       if (msg) body.message = msg;
@@ -8325,19 +8329,24 @@
 
     function renderGiftDetail(g, txs, note) {
       const owner = !isManager;
+      // Afschrijvingen die al zijn teruggedraaid: een reverse-transactie wijst ernaar.
+      const reversed = new Set(txs.filter(t => (t.type === 'reverse' || t.type === 'reversal') && t.reverses_transaction_id)
+        .map(t => String(t.reverses_transaction_id)));
       modalTitle.textContent = 'Cadeaubon ' + (g.short_code || '');
       const row = (lbl, val, empty) => detailRow(lbl, val, empty);
       const txRows = txs.map(t => {
         const amt = Number(t.amount_cents);
         const cls = amt < 0 ? 'neg' : amt > 0 ? 'pos' : '';
-        const canReverse = owner && gcIsRedeemTx(t.type);
+        const isReversed = gcIsRedeemTx(t.type) && reversed.has(String(t.id));
+        const canReverse = owner && gcIsRedeemTx(t.type) && !isReversed;
         return `<tr>
             <td>${escapeHtml(GC_TX_TYPES[t.type] || t.type || '—')}</td>
             <td class="num ${cls}">${GIFT.formatCents(amt)}</td>
             <td class="num">${GIFT.formatCents(t.balance_after_cents)}</td>
             <td class="gc-code">${escapeHtml(t.reference_number || '—')}</td>
-            <td>${escapeHtml(gcDate(t.created_at, true))}</td>
-            ${owner ? `<td>${canReverse ? `<button type="button" class="btn btn-danger" data-gc-reverse="${escapeHtml(String(t.id))}" data-gc-amt="${amt}">Terugdraaien</button>` : ''}</td>` : ''}
+            <td class="gc-when">${escapeHtml(gcDate(t.created_at, true))}</td>
+            ${owner ? `<td>${canReverse ? `<button type="button" class="btn btn-danger" data-gc-reverse="${escapeHtml(String(t.id))}" data-gc-amt="${amt}">Terugdraaien</button>`
+              : isReversed ? '<span class="gc-reversed">Teruggedraaid</span>' : ''}</td>` : ''}
           </tr>`;
       }).join('');
       const blocked = g.status === 'blocked';

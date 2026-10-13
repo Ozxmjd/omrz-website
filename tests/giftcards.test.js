@@ -68,6 +68,15 @@ test('newIdempotencyKey: uuid v4, uniek', () => {
   assert.notEqual(a, b);
 });
 
+test('endOfDayAmsterdamISO: 23:59:59 Amsterdamse tijd, ook rond de zomertijd', () => {
+  assert.equal(G.endOfDayAmsterdamISO('2027-03-31'), '2027-03-31T21:59:59.000Z');   // zomertijd (+02:00)
+  assert.equal(G.endOfDayAmsterdamISO('2027-01-15'), '2027-01-15T22:59:59.000Z');   // wintertijd (+01:00)
+  assert.equal(G.endOfDayAmsterdamISO('2026-03-29'), '2026-03-29T21:59:59.000Z');   // dag van de wissel naar zomertijd
+  assert.equal(G.endOfDayAmsterdamISO('2026-10-25'), '2026-10-25T22:59:59.000Z');   // dag van de wissel naar wintertijd
+  assert.equal(G.endOfDayAmsterdamISO('2028-02-29'), '2028-02-29T22:59:59.000Z');   // schrikkeldag
+  for (const v of ['', '2027-02-30', '31-03-2027', '2027-3-1', null]) assert.equal(G.endOfDayAmsterdamISO(v), null, String(v));
+});
+
 test('errorMessage: elke contractcode heeft een Nederlandse melding', () => {
   const codes = ['plan_required', 'gift_card_not_found', 'gift_card_blocked', 'gift_card_expired', 'gift_card_empty',
     'insufficient_balance', 'invalid_amount', 'owner_only', 'already_reversed', 'rate_limited'];
