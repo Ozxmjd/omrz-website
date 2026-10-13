@@ -54,12 +54,19 @@ function sendMail(g, target) {
   const pre = target === 'buyer' ? 'buyer_mail_' : 'pass_mail_';
   const to = target === 'buyer' ? g.buyer_email : g.recipient_email;
   const now = new Date().toISOString();
+  g.last_mail_attempt_at = now;
   if (S.cfg.mailFail === target || S.cfg.mailFail === 'all') { g[pre + 'error'] = 'Mailserver weigerde het adres'; g[pre + 'sent_at'] = null; g[pre + 'tried_ms'] = Date.now(); return { to, status: 'failed', error: g[pre + 'error'] }; }
   g[pre + 'sent_at'] = now; g[pre + 'error'] = null; g[pre + 'tried_ms'] = Date.now();
   return { to, status: 'sent', error: null };
 }
 reset();
-const pub = g => { const { card_id, pass_mail_tried_ms, buyer_mail_tried_ms, ...r } = g; return r; };
+// Publieke vorm van de bon, zoals de backend: verzendstatus genest onder mail.
+const pub = g => {
+  const { card_id, pass_mail_tried_ms, buyer_mail_tried_ms, pass_mail_sent_at, pass_mail_error, buyer_mail_sent_at, buyer_mail_error, last_mail_attempt_at, ...r } = g;
+  r.mail = { pass: { sent_at: pass_mail_sent_at || null, error: pass_mail_error || null },
+    buyer: { sent_at: buyer_mail_sent_at || null, error: buyer_mail_error || null }, last_attempt_at: last_mail_attempt_at || null };
+  return r;
+};
 const send = (res, st, obj) => { res.writeHead(st, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' }); res.end(JSON.stringify(obj)); };
 const fail = (res, st, code, error, extra) => send(res, st, { success: false, code, error, ...(extra || {}) });
 const findCode = (card, code) => {
@@ -135,6 +142,7 @@ function api(req, res, url, body, rawBody) {
       S.log.create.push(body);
       if (body.idempotency_key && S.createIdem[body.idempotency_key]) return send(res, 201, S.createIdem[body.idempotency_key]);
       if (!Number.isInteger(body.amount_cents) || body.amount_cents <= 0) return fail(res, 400, 'invalid_amount', 'Ongeldig bedrag');
+      if (body.expires_at && !(Date.parse(body.expires_at) > Date.now())) return fail(res, 400, 'invalid_expires_at', 'De vervaldatum ligt in het verleden.');
       const mode = body.delivery_mode === undefined ? 'none' : body.delivery_mode;
       const okMail = v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
       if (!['recipient', 'buyer', 'none'].includes(mode)) return fail(res, 400, 'invalid_delivery_mode', 'Ongeldige verzending');
@@ -159,7 +167,8 @@ function api(req, res, url, body, rawBody) {
       if (!g) return fail(res, 404, 'gift_card_not_found', 'Niet gevonden');
       S.log.resend.push(body);
       if (g.status === 'blocked') return fail(res, 409, 'gift_card_blocked', 'Geblokkeerd');
-      const target = body.target === 'buyer' ? 'buyer' : 'recipient';
+      const target = body.target === 'buyer' ? 'buyer' : body.target === 'recipient' ? 'recipient' : null;
+      if (!target) return fail(res, 400, 'invalid_target', 'target moet "recipient" of "buyer" zijn');
       const key = target === 'buyer' ? 'buyer_email' : 'recipient_email';
       if (body.email) g[key] = body.email;
       if (!g[key]) return fail(res, 400, 'no_email_for_target', 'Geen e-mailadres');
@@ -168,7 +177,8 @@ function api(req, res, url, body, rawBody) {
         return fail(res, 429, 'resend_too_soon', 'Te snel', { retry_after_seconds: Math.ceil((S.cfg.resendWait * 1000 - (Date.now() - last)) / 1000) });
       }
       const r = sendMail(g, target);
-      return send(res, 200, { success: true, mail: r, gift_card: pub(g) });
+      // Zoals de backend: mail.to is het doel, mail.email het adres.
+      return send(res, 200, { success: true, mail: { status: r.status, to: target, email: r.to, error: r.error }, gift_card: pub(g) });
     }
     if (p === '/api/stamp/gift-cards/design') {
       if (req.method === 'GET') {

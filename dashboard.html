@@ -8515,10 +8515,12 @@
       try {
         const data = await gcFetch('/api/stamp/gift-cards/' + encodeURIComponent(id) + '/resend',
           { method: 'POST', body: JSON.stringify(GIFT.resendBody(target, email)) });
-        const m = (data && data.mail) || data || {};
+        const m = (data && data.mail) || {};
         if (m.status === 'failed') return { ok: false, msg: 'Niet verstuurd' + (m.error ? ': ' + m.error : '.') };
         const who = target === 'buyer' ? 'koper' : 'ontvanger';
-        const to = m.to || email || '';
+        // mail.email is het adres; mail.to is bij de backend het doel en tonen we nooit als adres.
+        const g = (data && data.gift_card) || {};
+        const to = GIFT.mailAddress(m) || email || (target === 'buyer' ? g.buyer_email : g.recipient_email) || '';
         return { ok: true, msg: `Opnieuw verstuurd naar de ${who}${to ? ' (' + to + ')' : ''} ✓` };
       } catch (err) {
         if (err && err.code === 'resend_too_soon') return { ok: false, neutral: true, msg: GIFT.errorMessage(err.code, err.data) };

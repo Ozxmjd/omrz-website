@@ -180,13 +180,24 @@
     if (e) body.email = e;
     return body;
   }
-  // Verzendstatus van een bon (velden op de bon) per doel: { state: sent|failed|none, at, error }.
+  // Verzendstatus van een bon per doel: { state: sent|failed|none, at, error }.
+  // De backend geeft dit genest: gift_card.mail.pass|buyer = { sent_at, error } en
+  // gift_card.mail.last_attempt_at (tijdstip van de laatste poging, ook als die mislukte).
   function mailStateOf(g, target) {
-    const pre = target === 'buyer' ? 'buyer_mail_' : 'pass_mail_';
-    const at = g && g[pre + 'sent_at'], err = g && g[pre + 'error'];
-    if (err) return { state: 'failed', at: at || null, error: String(err) };
+    const m = (g && g.mail) || {};
+    const x = (target === 'buyer' ? m.buyer : m.pass) || {};
+    const at = x.sent_at || null, err = x.error || null;
+    if (err) return { state: 'failed', at: at || m.last_attempt_at || null, error: String(err) };
     if (at) return { state: 'sent', at, error: null };
     return { state: 'none', at: null, error: null };
+  }
+  // Het e-mailadres uit een mailresultaat. mail.email is het adres; mail.to kan bij opnieuw
+  // versturen het doel zijn ("recipient"/"buyer") en telt alleen als het echt een adres is.
+  function mailAddress(x) {
+    if (!x) return null;
+    if (isEmail(x.email)) return String(x.email).trim();
+    if (isEmail(x.to)) return String(x.to).trim();
+    return null;
   }
   // Mailresultaat na het aanmaken: { pass: {to,status,error}, buyer: {status,error} }.
   // Geeft de regels die het tonen waard zijn (sent/failed) en of er iets misging.
@@ -195,7 +206,7 @@
     const rows = [];
     [['recipient', m.pass], ['buyer', m.buyer]].forEach(([target, x]) => {
       if (!x || (x.status !== 'sent' && x.status !== 'failed')) return;   // skipped of onbekend: niets te melden
-      rows.push({ target, status: x.status, to: x.to || null, error: x.error || null });
+      rows.push({ target, status: x.status, to: mailAddress(x), error: x.error || null });
     });
     return { rows, failed: rows.some(r => r.status === 'failed') };
   }
@@ -247,6 +258,8 @@
     invalid_delivery_mode: 'Kies hoe de cadeaubon verstuurd wordt.',
     resend_too_soon: 'Net al verstuurd. Probeer het over een minuut opnieuw.',
     no_email_for_target: 'Er is geen e-mailadres bekend om naartoe te sturen. Vul een adres in.',
+    invalid_target: 'Kies of de mail naar de ontvanger of naar de koper moet.',
+    invalid_expires_at: 'De vervaldatum klopt niet of ligt in het verleden. Kies een datum in de toekomst.',
     invalid_color: 'Deze kleur klopt niet. Gebruik een kleurcode zoals #1F4D2B.',
     invalid_url: 'Deze link klopt niet. Gebruik een volledige link die begint met https://.',
   };
@@ -272,7 +285,7 @@
 
   const api = { formatCents, parseEuroToCents, normalizeShortCode, classifyScan, newIdempotencyKey, endOfDayAmsterdamISO,
     giftStatus, STATUS_LABELS, isPlanLock, scannerEnabledFrom, referenceFrom, scannerSettingsBody, errorMessage, isNotLive, MESSAGES, NOT_LIVE_MESSAGE,
-    DELIVERY_MODES, validateGiftDelivery, giftCreateBody, resendBody, mailStateOf, mailOutcome,
+    DELIVERY_MODES, validateGiftDelivery, giftCreateBody, resendBody, mailStateOf, mailOutcome, mailAddress,
     DESIGN_FIELDS, designBody, validateDesignValue, isHexColor, isHttpsUrl };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.OMRZGift = api;

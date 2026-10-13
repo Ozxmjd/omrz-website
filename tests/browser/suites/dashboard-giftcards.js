@@ -313,6 +313,11 @@ module.exports = async function run(env) {
     check(`10. Server ${code} → Nederlandse melding`, re.test(await note()), await note());
     await p.unroute('**/api/stamp/gift-cards');
   }
+  // Server invalid_expires_at (bijv. als de klok van het apparaat afwijkt)
+  await p.route('**/api/stamp/gift-cards', r => r.request().method() === 'POST' ? r.fulfill({ status: 400, contentType: 'application/json', body: JSON.stringify({ success: false, code: 'invalid_expires_at', error: 'x' }) }) : r.continue());
+  await p.click('#gcNewBtn'); await p.waitForTimeout(250);
+  check('10. Server invalid_expires_at → nette melding', /vervaldatum klopt niet of ligt in het verleden/.test(await note()), await note());
+  await p.unroute('**/api/stamp/gift-cards');
   // Ontvangerblok leeg, geen e-mail
   await p.click('#gcNewBtn'); await p.waitForSelector('.gc-success');
   let body = (await state()).log.create.slice(-1)[0];
@@ -383,7 +388,8 @@ module.exports = async function run(env) {
   const rosa = (await state()).gifts.find(g => g.recipient_name === 'Rosa');
   await p.evaluate(id => openGiftDetail(id), rosa.id); await p.waitForSelector('.gc-detail');
   const ms = await txt(p, '.gc-mailstat');
-  check('11. Verzendstatus: ontvanger "Nog niet verstuurd", koper "Mislukt …: fout"', /Mail ontvanger\s*Nog niet verstuurd/.test(ms) && /Mail koper\s*Mislukt.*Mailserver weigerde/.test(ms), ms.replace(/\s+/g, ' '));
+  check('11. Verzendstatus (geneste gift_card.mail): ontvanger "Nog niet verstuurd", koper "Mislukt (tijdstip laatste poging): fout"',
+    /Mail ontvanger\s*Nog niet verstuurd/.test(ms) && /Mail koper\s*Mislukt \(\d+ \w+\.? 20\d\d, \d\d:\d\d\): .*Mailserver weigerde/.test(ms), ms.replace(/\s+/g, ' '));
   check('11. Koper en e-mail koper in de gegevens', /E-mail koper\s*oud@example\.nl/.test(await txt(p, '.gc-detail .cd-rows')));
   await p.click('.gc-detail [data-gc-copy]'); await p.waitForTimeout(150);
   check('11. "Link kopiëren" kopieert de deelbare link', (await p.evaluate(() => navigator.clipboard.readText())) === rosa.share_url && /Gekopieerd/.test(await txt(p, '.gc-detail [data-gc-copy]')));
@@ -394,17 +400,28 @@ module.exports = async function run(env) {
   await p.fill('#gcResendEmail', 'nieuw@example.nl'); await post('/__cfg', { resendWait: 0 });
   await p.click('#gcResendBtn');
   await p.waitForFunction(() => /Opnieuw verstuurd/.test(document.getElementById('gcDetailNote').textContent));
+  check('11. "Opnieuw verstuurd naar de koper (nieuw@example.nl)": adres uit mail.email, nooit het doel', /Opnieuw verstuurd naar de koper \(nieuw@example\.nl\)/.test(await txt(p, '#gcDetailNote'))
+    && !/\((recipient|buyer)\)/.test(await txt(p, '#gcDetailNote')), await txt(p, '#gcDetailNote'));
   check('11. Gecorrigeerd adres → body {target:"buyer", email:"nieuw@example.nl"}, status bijgewerkt', JSON.stringify((await state()).log.resend.slice(-1)[0]) === '{"target":"buyer","email":"nieuw@example.nl"}'
     && /Mail koper\s*Verstuurd op/.test(await txt(p, '.gc-mailstat')) && /nieuw@example\.nl/.test(await txt(p, '.gc-detail .cd-rows')));
   await p.click('[data-gc-resend-open]');
+  // De melding van de vorige keer staat er nog: wacht op het nieuwe verzoek én de nieuwe weergave.
+  const nResend = (await state()).log.resend.length;
+  await p.evaluate(() => { document.getElementById('gcDetailNote').textContent = ''; });
   await p.click('#gcResendBtn');
-  await p.waitForFunction(() => /Opnieuw verstuurd/.test(document.getElementById('gcDetailNote').textContent));
-  check('11. Ongewijzigd adres → alleen {target}', JSON.stringify((await state()).log.resend.slice(-1)[0]) === '{"target":"recipient"}');
+  await p.waitForFunction(() => /Opnieuw verstuurd/.test((document.getElementById('gcDetailNote') || {}).textContent || ''));
+  check('11. Ongewijzigd adres → alleen {target}', (await state()).log.resend.length === nResend + 1 && JSON.stringify((await state()).log.resend.slice(-1)[0]) === '{"target":"recipient"}');
   await post('/__cfg', { resendWait: 60 });
   await p.click('[data-gc-resend-open]'); await p.click('#gcResendBtn'); await p.waitForTimeout(400);
   const rn = await p.$eval('#gcResendNote', e => ({ t: e.textContent, c: e.className }));
   check('11. 429 resend_too_soon → "Net al verstuurd, probeer over X seconden", geen rode fout', /^Net al verstuurd, probeer over \d+ seconden\.$/.test(rn.t) && !/error/.test(rn.c), JSON.stringify(rn));
   await p.click('#modalClose');
+  // Server-code invalid_target bij opnieuw versturen
+  await p.evaluate(id => openGiftDetail(id), rosa.id); await p.waitForSelector('.gc-detail');
+  await p.route('**/resend', r => r.fulfill({ status: 400, contentType: 'application/json', body: JSON.stringify({ success: false, code: 'invalid_target', error: 'x' }) }));
+  await p.click('[data-gc-resend-open]'); await p.click('#gcResendBtn'); await p.waitForTimeout(300);
+  check('11. Server invalid_target → nette melding', /naar de ontvanger of naar de koper/.test(await txt(p, '#gcResendNote')), await txt(p, '#gcResendNote'));
+  await p.unroute('**/resend'); await p.click('#modalClose');
   // Bon zonder e-mailadressen: no_email_for_target
   const sanne = (await state()).gifts.find(g => g.short_code === 'ABCD-EFGH-JK');
   await p.evaluate(id => openGiftDetail(id), sanne.id); await p.waitForSelector('.gc-detail');

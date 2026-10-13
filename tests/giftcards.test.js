@@ -169,8 +169,11 @@ test('resendBody: target en alleen een ingevuld adres', () => {
 });
 
 test('mailStateOf en mailOutcome: verzendstatus', () => {
-  assert.deepEqual(G.mailStateOf({ pass_mail_sent_at: 't1' }, 'recipient'), { state: 'sent', at: 't1', error: null });
-  assert.deepEqual(G.mailStateOf({ buyer_mail_error: 'bounce' }, 'buyer'), { state: 'failed', at: null, error: 'bounce' });
+  // Geneste vorm van de backend: gift_card.mail.pass|buyer + mail.last_attempt_at
+  assert.deepEqual(G.mailStateOf({ mail: { pass: { sent_at: 't1', error: null } } }, 'recipient'), { state: 'sent', at: 't1', error: null });
+  assert.deepEqual(G.mailStateOf({ mail: { buyer: { sent_at: null, error: 'bounce' }, last_attempt_at: 't2' } }, 'buyer'), { state: 'failed', at: 't2', error: 'bounce' });
+  assert.deepEqual(G.mailStateOf({ mail: { pass: { sent_at: 't1' } } }, 'buyer'), { state: 'none', at: null, error: null });
+  assert.deepEqual(G.mailStateOf({ pass_mail_sent_at: 't1' }, 'recipient'), { state: 'none', at: null, error: null });   // platte velden bestaan niet
   assert.deepEqual(G.mailStateOf({}, 'buyer'), { state: 'none', at: null, error: null });
   const o = G.mailOutcome({ pass: { to: 'a@b.nl', status: 'failed', error: 'SMTP' }, buyer: { status: 'skipped' } });
   assert.equal(o.failed, true); assert.equal(o.rows.length, 1); assert.equal(o.rows[0].target, 'recipient');
@@ -199,4 +202,12 @@ test('validateDesignValue en nieuwe foutmeldingen', () => {
   assert.equal(G.errorMessage('resend_too_soon', { retry_after_seconds: 1 }), 'Net al verstuurd, probeer over 1 seconde.');
   for (const c of ['buyer_email_required', 'invalid_buyer_email', 'invalid_recipient_email', 'recipient_email_required', 'invalid_delivery_mode',
     'no_email_for_target', 'invalid_color', 'invalid_url', 'resend_too_soon']) assert.ok(G.MESSAGES[c], c);
+});
+
+test('mailAddress: mail.email is het adres, mail.to alleen als het een adres is', () => {
+  assert.equal(G.mailAddress({ status: 'sent', to: 'recipient', email: 'a@b.nl' }), 'a@b.nl');
+  assert.equal(G.mailAddress({ status: 'sent', to: 'buyer' }), null);
+  assert.equal(G.mailAddress({ to: 'a@b.nl', status: 'failed' }), 'a@b.nl');
+  assert.equal(G.mailAddress(null), null);
+  for (const c of ['invalid_target', 'invalid_expires_at']) assert.ok(G.MESSAGES[c], c);
 });
