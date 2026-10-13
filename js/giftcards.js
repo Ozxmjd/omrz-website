@@ -129,6 +129,17 @@
     if (g.status === 'active') return 'active';
     return 'unknown';
   }
+  // Staat de cadeaubon-scanner aan volgens /gift-cards/settings? De backend antwoordt met
+  // gift_cards_scanner_enabled (en available); scanner_enabled uit het oorspronkelijke contract
+  // lezen we ook. Alleen een echte true telt.
+  function scannerEnabledFrom(data) {
+    if (!data || data.success === false) return false;
+    return data.gift_cards_scanner_enabled === true || data.scanner_enabled === true;
+  }
+  // De body voor PUT /gift-cards/settings: precies { card_id, enabled } met een echte boolean.
+  function scannerSettingsBody(cardId, enabled) {
+    return JSON.stringify({ card_id: cardId, enabled: enabled === true });
+  }
   const PLAN_LOCK_CODES = ['premium_plus_required', 'plan_required'];
   const isPlanLock = code => PLAN_LOCK_CODES.indexOf(code) !== -1;
 
@@ -164,7 +175,7 @@
   }
 
   const api = { formatCents, parseEuroToCents, normalizeShortCode, classifyScan, newIdempotencyKey, endOfDayAmsterdamISO,
-    giftStatus, STATUS_LABELS, isPlanLock, errorMessage, isNotLive, MESSAGES, NOT_LIVE_MESSAGE };
+    giftStatus, STATUS_LABELS, isPlanLock, scannerEnabledFrom, scannerSettingsBody, errorMessage, isNotLive, MESSAGES, NOT_LIVE_MESSAGE };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.OMRZGift = api;
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -118,3 +118,18 @@ test('isNotLive: 404 zonder code = backend niet live, met code = onbekende bon',
   assert.equal(G.isNotLive(404, { code: 'gift_card_not_found' }), false);
   assert.equal(G.isNotLive(500, {}), false);
 });
+
+test('scannerSettingsBody: precies { card_id, enabled } met een echte boolean', () => {
+  assert.equal(G.scannerSettingsBody('c1', true), '{"card_id":"c1","enabled":true}');
+  assert.equal(G.scannerSettingsBody('c1', false), '{"card_id":"c1","enabled":false}');
+  for (const v of ['true', 1, null, undefined]) assert.equal(JSON.parse(G.scannerSettingsBody('c1', v)).enabled, false, String(v));
+});
+
+test('scannerEnabledFrom: velden van de backend, alleen een echte true telt', () => {
+  assert.equal(G.scannerEnabledFrom({ success: true, gift_cards_scanner_enabled: true, available: true }), true);
+  assert.equal(G.scannerEnabledFrom({ success: true, gift_cards_scanner_enabled: false, available: false }), false);
+  assert.equal(G.scannerEnabledFrom({ success: true, scanner_enabled: true }), true);       // oud contract
+  assert.equal(G.scannerEnabledFrom({ success: true, gift_cards_scanner_enabled: 'true' }), false);
+  assert.equal(G.scannerEnabledFrom({ success: false, gift_cards_scanner_enabled: true }), false);
+  assert.equal(G.scannerEnabledFrom(null), false);
+});

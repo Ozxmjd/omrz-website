@@ -227,7 +227,10 @@ module.exports = async function run(env) {
   await p.click('#gcScannerSwitch');
   await p.waitForFunction(() => /Aan\./.test(document.getElementById('gcScannerNote').textContent));
   let st9 = await state();
-  check('9. Aanzetten → PUT scanner_enabled true + bevestiging over het blok "Cadeaubon scannen"', JSON.stringify(st9.log.settingsPut.slice(-1)[0]) === JSON.stringify({ card_id: 'pp', scanner_enabled: true })
+  const put1 = st9.log.settingsPut.slice(-1)[0];
+  check('9. Aanzetten → PUT body exact {"card_id":"pp","enabled":true} (echte boolean), Content-Type application/json',
+    put1.raw === '{"card_id":"pp","enabled":true}' && put1.body.enabled === true && typeof put1.body.enabled === 'boolean' && /^application\/json/.test(put1.contentType || ''), JSON.stringify(put1));
+  check('9. Aanzetten → schakelaar aan + bevestiging over het blok "Cadeaubon scannen"', true
     && /Cadeaubon scannen/.test(await txt(p, '#gcScannerNote')) && await p.isChecked('#gcScannerSwitch') && p.dialogs.length === 0);
   const open9 = (await state()).gifts.filter(g => g.card_id === 'pp' && g.status === 'active').reduce((n, g) => n + g.balance_cents, 0);
   const euro = '€' + NB + (open9 / 100).toFixed(2).replace('.', ',');
@@ -237,7 +240,8 @@ module.exports = async function run(env) {
   check('9. Uitzetten met open tegoed → exacte waarschuwing; Annuleren laat hem aan, geen PUT', p.dialogs.slice(-1)[0] === want9 && await p.isChecked('#gcScannerSwitch') && (await state()).log.settingsPut.length === 1, p.dialogs.slice(-1)[0]);
   await p.click('#gcScannerSwitch');
   await p.waitForFunction(() => /Uit\./.test(document.getElementById('gcScannerNote').textContent));
-  check('9. Bevestigen → PUT scanner_enabled false, schakelaar uit', JSON.stringify((await state()).log.settingsPut.slice(-1)[0]) === JSON.stringify({ card_id: 'pp', scanner_enabled: false }) && !(await p.isChecked('#gcScannerSwitch')));
+  const put2 = (await state()).log.settingsPut.slice(-1)[0];
+  check('9. Bevestigen → PUT body exact {"card_id":"pp","enabled":false}, schakelaar uit', put2.raw === '{"card_id":"pp","enabled":false}' && typeof put2.body.enabled === 'boolean' && !(await p.isChecked('#gcScannerSwitch')), put2.raw);
   // Mislukt opslaan → terugzetten + melding
   await post('/__cfg', { settingsFail: 'putFail' });
   await p.click('#gcScannerSwitch'); await p.waitForFunction(() => /Niet opgeslagen/.test(document.getElementById('gcScannerNote').textContent));

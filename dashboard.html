@@ -8175,7 +8175,7 @@
       sw.checked = false; sw.disabled = true;           // standaard uit tot de server iets anders zegt
       try {
         const data = await gcFetch('/api/stamp/gift-cards/settings?card_id=' + encodeURIComponent(cardId));
-        sw.checked = data.scanner_enabled === true;
+        sw.checked = GIFT.scannerEnabledFrom(data);
         sw.disabled = false;
         gcScannerNote('');
       } catch (err) {
@@ -8211,9 +8211,9 @@
       gcScannerNote('Opslaan…');
       try {
         const data = await gcFetch('/api/stamp/gift-cards/settings', {
-          method: 'PUT', body: JSON.stringify({ card_id: cardId, scanner_enabled: want }),
+          method: 'PUT', body: GIFT.scannerSettingsBody(cardId, want),   // { card_id, enabled: true|false }
         });
-        const on = data.scanner_enabled === true;
+        const on = GIFT.scannerEnabledFrom(data);
         sw.checked = on;
         gcScannerNote(on
           ? 'Aan. Uw medewerkers zien vanaf nu een blok “Cadeaubon scannen” onder de stempelscanner.'

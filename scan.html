@@ -1731,7 +1731,7 @@
         // code) en stuurt al het andere ongewijzigd naar de stempelflow (onQrDetected).
         const GIFT = window.OMRZGift;
         const GIFT_LOC_KEY = 'stamp_location_id';   // valt onder stamp_*, dus clearSession wist hem mee
-        let giftEnabled = false;                    // Premium Plus-pakket én scanner_enabled van de eigenaar
+        let giftEnabled = false;                    // Premium Plus-pakket én de scanner aangezet door de eigenaar
         let scanMode = 'stamp';                     // stamp | gift
         let giftAccessSeq = 0;
         let gift = null;                            // { code, card } na een lookup
@@ -1753,7 +1753,7 @@
                 if (res.ok && window.OMRZPlan.isPremiumPlus(d.plan)) {
                     const r2 = await apiCall(API_BASE + '/api/stamp/gift-cards/settings?card_id=' + encodeURIComponent(activeCardId()));
                     const s2 = await r2.json().catch(() => ({}));
-                    on = r2.ok && s2.success !== false && s2.scanner_enabled === true;
+                    on = r2.ok && GIFT.scannerEnabledFrom(s2);
                 }
             } catch (_) { on = false; }
             if (seq === giftAccessSeq) setGiftEnabled(on);

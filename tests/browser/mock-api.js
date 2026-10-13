@@ -49,7 +49,7 @@ const findCode = (card, code) => {
   return S.gifts.find(g => g.card_id === card && (g.code === c || g.short_code === c.toUpperCase()));
 };
 
-function api(req, res, url, body) {
+function api(req, res, url, body, rawBody) {
   const p = url.pathname, q = url.searchParams; let m;
   const tok = tokens[(req.headers.authorization || '').replace('Bearer ', '')];
   if (p === '/__reset') { reset(); return send(res, 200, {}); }
@@ -94,13 +94,17 @@ function api(req, res, url, body) {
       if (f === 404) { res.writeHead(404, { 'Content-Type': 'text/html' }); return res.end('Cannot ' + req.method); }
       if (f === 'migration') return fail(res, 503, 'migration_missing', 'Draai migratie');
       if (f === 500) return fail(res, 500, null, 'Interne fout');
-      if (req.method === 'GET') { S.log.settingsGet++; return send(res, 200, { success: true, scanner_enabled: S.settings[card] === true }); }
+      // Zelfde velden als de echte backend (ai-review-bot 9abe6c0).
+      const out = on => ({ success: true, card_id: card, gift_cards_scanner_enabled: on, is_premium_plus: true, available: on });
+      if (req.method === 'GET') { S.log.settingsGet++; return send(res, 200, out(S.settings[card] === true)); }
       if (req.method === 'PUT') {
         if (!tok.owner) return fail(res, 403, 'owner_only', 'Alleen eigenaar');
         if (f === 'putFail') return fail(res, 500, null, 'Opslaan mislukt op de server');
-        if (typeof body.scanner_enabled !== 'boolean') return fail(res, 400, 'invalid_request', 'scanner_enabled ontbreekt');
-        S.settings[card] = body.scanner_enabled; S.log.settingsPut.push(body);
-        return send(res, 200, { success: true, scanner_enabled: S.settings[card] });
+        S.log.settingsPut.push({ body, raw: rawBody, contentType: req.headers['content-type'] || null });
+        if (!body.card_id) return fail(res, 400, 'card_id_required', 'card_id is verplicht');
+        if (typeof body.enabled !== 'boolean') return fail(res, 400, 'invalid_enabled', 'enabled moet true of false zijn');
+        S.settings[card] = body.enabled;
+        return send(res, 200, out(S.settings[card]));
       }
     }
     if (p === '/api/stamp/gift-cards' && req.method === 'POST') {
@@ -190,7 +194,7 @@ http.createServer((req, res) => {
   const url = new URL(req.url, BASE);
   if (req.method === 'OPTIONS') { res.writeHead(204, { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*', 'Access-Control-Allow-Methods': '*' }); return res.end(); }
   if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/__')) {
-    let b = ''; req.on('data', c => b += c); req.on('end', () => { let body = {}; try { body = JSON.parse(b || '{}'); } catch (_) {} api(req, res, url, body); }); return;
+    let b = ''; req.on('data', c => b += c); req.on('end', () => { let body = {}; try { body = JSON.parse(b || '{}'); } catch (_) {} api(req, res, url, body, b); }); return;
   }
   const f = path.join(SITE, url.pathname === '/' ? 'index.html' : url.pathname);
   if (!f.startsWith(SITE) || !fs.existsSync(f)) { res.writeHead(404); return res.end(); }
