@@ -111,7 +111,9 @@ function api(req, res, url, body, rawBody) {
       if (!Number.isInteger(body.amount_cents) || body.amount_cents <= 0) return fail(res, 400, 'invalid_amount', 'Ongeldig bedrag');
       const g = mk(card, body.amount_cents, { recipient_name: body.recipient_name || null, message: body.message || null, recipient_email: body.recipient_email || null, expires_at: body.expires_at || null });
       S.log.create.push(body);
-      return send(res, 200, { success: true, gift_card: pub(g), reference_number: S.txs[S.txs.length - 1].reference_number });
+      // Zelfde vorm als de backend: het referentienummer zit in transaction.
+      const tx = S.txs[S.txs.length - 1];
+      return send(res, 201, { success: true, gift_card: pub(g), transaction: { id: tx.id, reference_number: tx.reference_number } });
     }
     if (p === '/api/stamp/gift-cards' && req.method === 'GET') {
       let list = S.gifts.filter(g => g.card_id === card).sort((a, b) => b.created_at.localeCompare(a.created_at));

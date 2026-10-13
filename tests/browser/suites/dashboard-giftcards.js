@@ -70,6 +70,12 @@ module.exports = async function run(env) {
   const st1 = await state(); const sent = st1.log.create[st1.log.create.length - 1];
   check('2. Verstuurd: amount_cents 2500 + optionele velden', sent.amount_cents === 2500 && sent.recipient_name === 'Mila' && sent.recipient_email === 'mila@example.nl' && sent.message === 'Fijne verjaardag!' && !('expires_at' in sent) && sent.card_id === 'pp', JSON.stringify(sent));
   const succ = await txt(p, '.gc-success');
+  {
+    // Backend stuurt het nummer als transaction.reference_number: precies dat moet in beeld staan.
+    const st = await state(); const issue = st.txs.filter(t => t.type === 'issue').slice(-1)[0];
+    const shown = await p.$$eval('.gc-success .gc-fact', fs => (fs.find(f => /Referentienummer/.test(f.innerText)) || {}).innerText || '');
+    check('2. Referentienummer uit transaction.reference_number in beeld (niet "—")', shown.includes(issue.reference_number) && !/—/.test(shown), shown.replace(/\s+/g, ' '));
+  }
   check('2. Succes: kassa-instructie, korte code, referentie', /Boek op de kassa als verkoop cadeaubon:\s*€\s25,00/.test(succ) && /CB-\d{4}/.test(succ) && /[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{2}/.test(succ));
   const link = await p.inputValue('.gc-success .gc-link input');
   check('2. Deelbare link getoond', /^https:\/\/omrzdigital\.nl\/cadeaubon\//.test(link), link);

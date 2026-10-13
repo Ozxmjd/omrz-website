@@ -133,3 +133,11 @@ test('scannerEnabledFrom: velden van de backend, alleen een echte true telt', ()
   assert.equal(G.scannerEnabledFrom({ success: false, gift_cards_scanner_enabled: true }), false);
   assert.equal(G.scannerEnabledFrom(null), false);
 });
+
+test('referenceFrom: transaction.reference_number, met reference_number als terugval', () => {
+  assert.equal(G.referenceFrom({ transaction: { id: 't', reference_number: 'CB-0412' } }), 'CB-0412');
+  assert.equal(G.referenceFrom({ reference_number: 'CB-0001' }), 'CB-0001');
+  assert.equal(G.referenceFrom({ transaction: { reference_number: 'CB-0412' }, reference_number: 'CB-0001' }), 'CB-0412');
+  assert.equal(G.referenceFrom({}), null);
+  assert.equal(G.referenceFrom(null), null);
+});

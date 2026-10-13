@@ -8346,7 +8346,7 @@
       btn.disabled = true; btn.textContent = 'Aanmaken…'; say('');
       try {
         const data = await gcFetch('/api/stamp/gift-cards', { method: 'POST', body: JSON.stringify(body) });
-        renderGiftCreated(data.gift_card || {}, data.reference_number);
+        renderGiftCreated(data.gift_card || {}, GIFT.referenceFrom(data));
         loadGiftList(true);
       } catch (err) {
         btn.disabled = false; btn.textContent = 'Cadeaubon aanmaken';

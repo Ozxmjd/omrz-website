@@ -140,6 +140,12 @@
   function scannerSettingsBody(cardId, enabled) {
     return JSON.stringify({ card_id: cardId, enabled: enabled === true });
   }
+  // Referentienummer uit het antwoord van POST /gift-cards. De backend stuurt het als
+  // transaction.reference_number; reference_number bovenaan is de terugval (oud contract).
+  function referenceFrom(data) {
+    const d = data || {};
+    return (d.transaction && d.transaction.reference_number) || d.reference_number || null;
+  }
   const PLAN_LOCK_CODES = ['premium_plus_required', 'plan_required'];
   const isPlanLock = code => PLAN_LOCK_CODES.indexOf(code) !== -1;
 
@@ -175,7 +181,7 @@
   }
 
   const api = { formatCents, parseEuroToCents, normalizeShortCode, classifyScan, newIdempotencyKey, endOfDayAmsterdamISO,
-    giftStatus, STATUS_LABELS, isPlanLock, scannerEnabledFrom, scannerSettingsBody, errorMessage, isNotLive, MESSAGES, NOT_LIVE_MESSAGE };
+    giftStatus, STATUS_LABELS, isPlanLock, scannerEnabledFrom, referenceFrom, scannerSettingsBody, errorMessage, isNotLive, MESSAGES, NOT_LIVE_MESSAGE };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.OMRZGift = api;
 })(typeof window !== 'undefined' ? window : globalThis);
