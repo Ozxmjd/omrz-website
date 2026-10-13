@@ -115,9 +115,28 @@
     return new Date(utc).toISOString();
   }
 
+  // Weergavestatus van een bon, met vaste voorrang: blocked, expired, empty, active.
+  // Een verlopen vervaldatum telt als verlopen, een saldo van 0 als leeg, ook als de
+  // server (nog) iets anders zegt.
+  const STATUS_LABELS = { active: 'Actief', empty: 'Leeg', blocked: 'Geblokkeerd', expired: 'Verlopen' };
+  function giftStatus(g, nowMs) {
+    if (!g) return 'unknown';
+    const now = typeof nowMs === 'number' ? nowMs : Date.now();
+    if (g.status === 'blocked') return 'blocked';
+    const exp = g.expires_at ? Date.parse(g.expires_at) : NaN;
+    if (g.status === 'expired' || (!isNaN(exp) && exp <= now)) return 'expired';
+    if (g.status === 'empty' || (Number.isInteger(g.balance_cents) && g.balance_cents <= 0)) return 'empty';
+    if (g.status === 'active') return 'active';
+    return 'unknown';
+  }
+  const PLAN_LOCK_CODES = ['premium_plus_required', 'plan_required'];
+  const isPlanLock = code => PLAN_LOCK_CODES.indexOf(code) !== -1;
+
   // Duidelijke Nederlandse melding per foutcode uit het contract.
   const MESSAGES = {
+    premium_plus_required: 'Cadeaubonnen zijn onderdeel van Premium Plus.',
     plan_required: 'Cadeaubonnen zijn onderdeel van Premium Plus.',
+    migration_missing: 'Cadeaubonnen zijn nog niet ingericht. Neem contact op met support.',
     gift_card_not_found: 'Deze cadeaubon bestaat niet of hoort niet bij deze zaak.',
     gift_card_blocked: 'Deze cadeaubon is geblokkeerd en kan niet worden gebruikt.',
     gift_card_expired: 'Deze cadeaubon is verlopen.',
@@ -144,7 +163,8 @@
     return (data && typeof data.error === 'string' && data.error) || 'Er ging iets mis. Probeer het opnieuw.';
   }
 
-  const api = { formatCents, parseEuroToCents, normalizeShortCode, classifyScan, newIdempotencyKey, endOfDayAmsterdamISO, errorMessage, isNotLive, MESSAGES, NOT_LIVE_MESSAGE };
+  const api = { formatCents, parseEuroToCents, normalizeShortCode, classifyScan, newIdempotencyKey, endOfDayAmsterdamISO,
+    giftStatus, STATUS_LABELS, isPlanLock, errorMessage, isNotLive, MESSAGES, NOT_LIVE_MESSAGE };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.OMRZGift = api;
 })(typeof window !== 'undefined' ? window : globalThis);

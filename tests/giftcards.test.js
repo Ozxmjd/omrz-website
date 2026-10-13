@@ -77,8 +77,31 @@ test('endOfDayAmsterdamISO: 23:59:59 Amsterdamse tijd, ook rond de zomertijd', (
   for (const v of ['', '2027-02-30', '31-03-2027', '2027-3-1', null]) assert.equal(G.endOfDayAmsterdamISO(v), null, String(v));
 });
 
+test('giftStatus: voorrang blocked, expired, empty, active', () => {
+  const now = Date.parse('2026-10-13T12:00:00Z');
+  const past = '2026-10-01T21:59:59.000Z', future = '2027-03-31T21:59:59.000Z';
+  const st = g => G.giftStatus(g, now);
+  assert.equal(st({ status: 'active', balance_cents: 500 }), 'active');
+  assert.equal(st({ status: 'active', balance_cents: 500, expires_at: future }), 'active');
+  assert.equal(st({ status: 'blocked', balance_cents: 0, expires_at: past }), 'blocked');   // blocked wint van alles
+  assert.equal(st({ status: 'expired', balance_cents: 0 }), 'expired');                    // expired wint van empty
+  assert.equal(st({ status: 'active', balance_cents: 500, expires_at: past }), 'expired'); // vervaldatum voorbij
+  assert.equal(st({ status: 'empty', balance_cents: 0, expires_at: past }), 'expired');
+  assert.equal(st({ status: 'empty', balance_cents: 0 }), 'empty');
+  assert.equal(st({ status: 'active', balance_cents: 0 }), 'empty');                       // saldo 0 = leeg
+  assert.equal(st({ status: 'iets_anders', balance_cents: 500 }), 'unknown');
+  assert.equal(st(null), 'unknown');
+  assert.deepEqual(G.STATUS_LABELS, { active: 'Actief', empty: 'Leeg', blocked: 'Geblokkeerd', expired: 'Verlopen' });
+});
+
+test('isPlanLock: premium_plus_required (backend) en plan_required (contract)', () => {
+  assert.equal(G.isPlanLock('premium_plus_required'), true);
+  assert.equal(G.isPlanLock('plan_required'), true);
+  assert.equal(G.isPlanLock('owner_only'), false);
+});
+
 test('errorMessage: elke contractcode heeft een Nederlandse melding', () => {
-  const codes = ['plan_required', 'gift_card_not_found', 'gift_card_blocked', 'gift_card_expired', 'gift_card_empty',
+  const codes = ['premium_plus_required', 'plan_required', 'migration_missing', 'gift_card_not_found', 'gift_card_blocked', 'gift_card_expired', 'gift_card_empty',
     'insufficient_balance', 'invalid_amount', 'owner_only', 'already_reversed', 'rate_limited'];
   for (const c of codes) {
     const m = G.errorMessage(c, {});

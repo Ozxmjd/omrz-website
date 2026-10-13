@@ -856,6 +856,7 @@
     .gc-badge.empty { color: var(--muted); background: rgba(var(--ink), .05); border-color: var(--border); }
     .gc-badge.blocked { color: #f0a8a8; background: rgba(255,80,80,.08); border-color: rgba(255,80,80,.26); }
     .gc-badge.expired { color: #eab68a; background: rgba(251,146,60,.09); border-color: rgba(251,146,60,.28); }
+    .gc-badge.unknown { color: var(--muted); background: transparent; border-color: var(--border); }
     [data-theme="light"] .gc-badge.active { color: #15803d; }
     [data-theme="light"] .gc-badge.blocked { color: #b91c1c; }
     [data-theme="light"] .gc-badge.expired { color: #b45309; }
@@ -1825,6 +1826,7 @@
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="js/plan.js"></script>
   <script src="js/giftcards.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 </head>
@@ -3446,13 +3448,9 @@
     };
     // Eén plek voor de weergavenaam van een pakket.
     const PLAN_LABELS = { basic: 'Basic', premium: 'Premium', premium_plus: 'Premium Plus' };
-    // De backend kan 'premium_plus', 'premium-plus' of 'premiumplus' sturen.
-    function normalizePlan(v) {
-      const p = String(v == null ? '' : v).toLowerCase().replace(/[^a-z+]/g, '');
-      if (p === 'premiumplus' || p === 'premium+' || p === 'plus') return 'premium_plus';
-      if (p === 'premium' || p === 'pro') return 'premium';
-      return 'basic';
-    }
+    // De backend kan 'premium_plus', 'premium-plus' of 'premiumplus' sturen (js/plan.js,
+    // gedeeld met de scanapp).
+    function normalizePlan(v) { return window.OMRZPlan.normalizePlan(v); }
     function planName(v) { return PLAN_LABELS[normalizePlan(v)] || 'Basic'; }
     // Eenmalige begeleiding; het bedrag staat ook in de backend (ONBOARDING_PRICE_LABEL).
     const ONBOARDING_PRICE = 149;
@@ -6834,7 +6832,7 @@
     }
     // Premium Plus volgens het pakket. De backend blijft leidend; dit is alleen
     // om het slotje in het menu meteen goed te zetten.
-    function isPremiumPlusPlan() { return normalizePlan(subscription.plan) === 'premium_plus'; }
+    function isPremiumPlusPlan() { return window.OMRZPlan.isPremiumPlus(subscription.plan); }
     function applySurveyLockIcon() {
       const el = document.getElementById('navEnquete');
       if (!el) return;
@@ -7968,12 +7966,7 @@
     const GC_PAGE = 50;
     const GC_GIFT_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>';
     const GC_CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
-    const GC_STATUS = {
-      active: { label: 'Actief', cls: 'active' },
-      empty: { label: 'Leeg', cls: 'empty' },
-      blocked: { label: 'Geblokkeerd', cls: 'blocked' },
-      expired: { label: 'Verlopen', cls: 'expired' },
-    };
+    // Labels en voorrang (blocked, expired, empty, active) uit js/giftcards.js, gelijk aan de scanapp.
     const GC_TX_TYPES = {
       issue: 'Uitgifte', issued: 'Uitgifte', create: 'Uitgifte',
       redeem: 'Afschrijving', redemption: 'Afschrijving',
@@ -7991,11 +7984,12 @@
     let gcReportSeq = 0;
     let gcReport = { from: null, to: null, location: '' };
 
-    // Premium Plus volgens het pakket (proefperiode telt mee). De backend blijft leidend:
-    // een plan_required zet het slot alsnog.
+    // Premium Plus volgens het pakket zelf, met dezelfde hulpfunctie als de andere Premium
+    // Plus-functies. Een proef telt alleen als die proef op Premium Plus staat. Zolang het
+    // pakket onbekend is, beslist de backend (premium_plus_required zet het slot alsnog).
     function giftPlanAllowed() {
       if (!subscription.plan_known) return true;
-      return effectivePlan() === 'premium_plus' || subscription.access_status === 'trial';
+      return isPremiumPlusPlan();
     }
     let giftPlanBlocked = false;      // backend zei plan_required
     function applyGiftLockIcon() {
@@ -8011,7 +8005,7 @@
       if (res.ok && data && data.success !== false) return data;
       const notLive = GIFT.isNotLive(res.status, data);
       const code = notLive ? 'not_live' : (data && data.code) || null;
-      if (code === 'plan_required') { giftPlanBlocked = true; applyGiftLockIcon(); }
+      if (GIFT.isPlanLock(code)) { giftPlanBlocked = true; applyGiftLockIcon(); }
       throw Object.assign(new Error(notLive ? GIFT.NOT_LIVE_MESSAGE : GIFT.errorMessage(code, data)), { code, status: res.status, data });
     }
     function gcErrText(err) { return isNetworkError(err) ? NET_MSG : (err && err.message) || 'Er ging iets mis. Probeer het opnieuw.'; }
@@ -8025,9 +8019,9 @@
       if (withTime) { o.hour = '2-digit'; o.minute = '2-digit'; }
       return d.toLocaleString('nl-NL', o);
     }
-    function gcBadge(status) {
-      const s = GC_STATUS[status] || { label: status || 'Onbekend', cls: 'empty' };
-      return `<span class="gc-badge ${s.cls}">${escapeHtml(s.label)}</span>`;
+    function gcBadge(g) {
+      const st = GIFT.giftStatus(g);
+      return `<span class="gc-badge ${st}">${escapeHtml(GIFT.STATUS_LABELS[st] || 'Onbekend')}</span>`;
     }
 
     // ---- Schermen: slot, niet live, probleem ----
@@ -8053,7 +8047,7 @@
     }
     // Handelt de fouten af die de hele pagina raken; true = afgehandeld.
     function gcPageError(err) {
-      if (err && err.code === 'plan_required') { renderGiftLock(); return true; }
+      if (err && GIFT.isPlanLock(err.code)) { renderGiftLock(); return true; }
       if (err && err.code === 'not_live') { renderGiftNotLive(); return true; }
       return err && err.code === 'unauthorized';
     }
@@ -8194,7 +8188,7 @@
             <span class="gc-sub"><span class="gc-code">${escapeHtml(g.short_code || '—')}</span> · ${escapeHtml(gcDate(g.created_at))}</span>
           </span>
           <span class="gc-amt"><b>${GIFT.formatCents(g.balance_cents)}</b><small>van ${GIFT.formatCents(g.initial_amount_cents)}</small></span>
-          ${gcBadge(g.status)}
+          ${gcBadge(g)}
         </button>`;
     }
 
@@ -8277,7 +8271,7 @@
         loadGiftList(true);
       } catch (err) {
         btn.disabled = false; btn.textContent = 'Cadeaubon aanmaken';
-        if (err && err.code === 'plan_required') { closeModal(); renderGiftLock(); return; }
+        if (err && GIFT.isPlanLock(err.code)) { closeModal(); renderGiftLock(); return; }
         say(gcErrText(err), 'error');
       }
     }
@@ -8322,7 +8316,7 @@
         renderGiftDetail(data.gift_card || {}, Array.isArray(data.transactions) ? data.transactions : []);
       } catch (err) {
         if (gcDetailId !== id) return;
-        if (err && (err.code === 'plan_required' || err.code === 'not_live')) { closeModal(); gcPageError(err); return; }
+        if (err && (GIFT.isPlanLock(err.code) || err.code === 'not_live')) { closeModal(); gcPageError(err); return; }
         modalBody.innerHTML = `<div class="gc-banner error">${escapeHtml(gcErrText(err))}</div>`;
       }
     }
@@ -8349,12 +8343,12 @@
               : isReversed ? '<span class="gc-reversed">Teruggedraaid</span>' : ''}</td>` : ''}
           </tr>`;
       }).join('');
-      const blocked = g.status === 'blocked';
+      const blocked = GIFT.giftStatus(g) === 'blocked';
       modalBody.innerHTML = `<div class="gc-detail">
           <div class="gc-hero">
             <small>Saldo</small>
             <div class="gc-bal">${GIFT.formatCents(g.balance_cents)}</div>
-            <span class="gc-bal-sub">van ${GIFT.formatCents(g.initial_amount_cents)} ${gcBadge(g.status)}</span>
+            <span class="gc-bal-sub">van ${GIFT.formatCents(g.initial_amount_cents)} ${gcBadge(g)}</span>
           </div>
           <div class="cd-rows">
             ${row('Korte code', `<span class="gc-code">${escapeHtml(g.short_code || '—')}</span>`, !g.short_code)}

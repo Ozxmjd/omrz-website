@@ -451,7 +451,10 @@
         .gift-bal { font-size: 56px; font-weight: 700; letter-spacing: -.045em; line-height: 1.05; color: var(--text-strong); margin: 4px 0 8px; }
         .gift-badge { display: inline-block; font-size: 13px; font-weight: 600; padding: 5px 13px; border-radius: 999px; }
         .gift-badge.active { color: #8fe0b0; background: rgba(74,222,128,.09); border: 1px solid rgba(74,222,128,.28); }
-        .gift-badge.bad { color: var(--red); background: rgba(255,80,80,.09); border: 1px solid rgba(255,80,80,.3); }
+        .gift-badge.blocked { color: var(--red); background: rgba(255,80,80,.09); border: 1px solid rgba(255,80,80,.3); }
+        .gift-badge.expired { color: #eab68a; background: rgba(251,146,60,.1); border: 1px solid rgba(251,146,60,.32); }
+        .gift-badge.empty { color: var(--muted); background: rgba(var(--ink), .06); border: 1px solid var(--border-strong); }
+        .gift-badge.unknown { color: var(--muted); border: 1px solid var(--border); }
         .gift-stop { margin: 22px 0 6px; padding: 22px 18px; border-radius: 18px; font-size: 22px; font-weight: 700; letter-spacing: -.02em;
             color: #fff; background: linear-gradient(135deg, #dc2626, #b91c1c); box-shadow: 0 14px 36px rgba(220,38,38,.3); }
         .gift-stop small { display: block; font-size: 14px; font-weight: 500; opacity: .9; margin-top: 6px; letter-spacing: 0; }
@@ -752,6 +755,7 @@
         </div>
     </div>
 
+    <script src="js/plan.js"></script>
     <script src="js/giftcards.js"></script>
     <script>
         const API_BASE = 'https://api.omrzdigital.nl'; // backend
@@ -1730,9 +1734,9 @@
                 const res = await apiCall(API_BASE + '/api/stamp/subscription');
                 const d = await res.json().catch(() => ({}));
                 if (seq !== giftAccessSeq || !res.ok) return;
-                const plan = String(d.plan || '').toLowerCase().replace(/[^a-z]/g, '');
-                const ok = d.free_access === true || plan === 'premiumplus' || String(d.access_status || '').toLowerCase() === 'trial';
-                setGiftEnabled(ok);
+                // Zelfde hulpfunctie als het dashboard (js/plan.js): alleen het pakket telt, een
+                // proef dus alleen als die op Premium Plus staat.
+                setGiftEnabled(window.OMRZPlan.isPremiumPlus(d.plan));
             } catch (_) { /* geen cadeaubonnen tonen; stempelen werkt gewoon */ }
         }
         function setGiftEnabled(on) {
@@ -1820,6 +1824,7 @@
                 if (!res.ok || data.success === false) {
                     $('cameraOpenWrap').style.display = 'flex';
                     showAlert('scanAlert', GIFT.isNotLive(res.status, data) ? GIFT.NOT_LIVE_MESSAGE : GIFT.errorMessage(data.code, data));
+                    if (GIFT.isPlanLock(data.code)) setGiftEnabled(false);   // backend leidend: alleen nog stempelen
                     return;
                 }
                 hideAlert('scanAlert');
@@ -1835,25 +1840,23 @@
             }
         }
 
-        const GIFT_STOP = {
-            blocked: ['Geblokkeerd', 'Deze cadeaubon kan niet worden gebruikt.'],
-            expired: ['Verlopen', 'Deze cadeaubon is niet meer geldig.'],
-            empty: ['Saldo op', 'Er staat niets meer op deze cadeaubon.'],
+        // Labels en voorrang (blocked, expired, empty, active) uit js/giftcards.js, gelijk aan het dashboard.
+        const GIFT_STOP_TEXT = {
+            blocked: 'Deze cadeaubon kan niet worden gebruikt.',
+            expired: 'Deze cadeaubon is niet meer geldig.',
+            empty: 'Er staat niets meer op deze cadeaubon.',
         };
-        function giftStatusKey(g) {
-            if (g.status === 'blocked' || g.status === 'expired') return g.status;
-            if (g.status === 'empty' || !(g.balance_cents > 0)) return 'empty';
-            return g.status === 'active' ? 'active' : g.status;
-        }
         function renderGift() {
             const g = gift.card;
             $('gShop').textContent = g.shop_name || store.biz || '';
             $('gTo').textContent = g.recipient_name ? 'Voor ' + g.recipient_name : 'Cadeaubon ' + (g.short_code || '');
             $('gBal').textContent = GIFT.formatCents(g.balance_cents);
-            const key = giftStatusKey(g);
-            const stop = GIFT_STOP[key] || (!gift.canRedeem ? ['Niet bruikbaar', 'Deze cadeaubon kan nu niet worden afgeschreven.'] : null);
-            $('gBadge').className = 'gift-badge ' + (stop ? 'bad' : 'active');
-            $('gBadge').textContent = stop ? stop[0] : 'Actief' + (g.expires_at ? ' · geldig t/m ' + new Date(g.expires_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' }) : '');
+            const key = GIFT.giftStatus(g);
+            const label = GIFT.STATUS_LABELS[key] || 'Niet bruikbaar';
+            const stop = GIFT_STOP_TEXT[key] ? [label, GIFT_STOP_TEXT[key]]
+                : (key !== 'active' || !gift.canRedeem ? ['Niet bruikbaar', 'Deze cadeaubon kan nu niet worden afgeschreven.'] : null);
+            $('gBadge').className = 'gift-badge ' + (GIFT.STATUS_LABELS[key] ? key : 'unknown');
+            $('gBadge').textContent = label + (key === 'active' && g.expires_at ? ' · geldig t/m ' + new Date(g.expires_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' }) : '');
             $('gStop').hidden = !stop;
             if (stop) $('gStop').innerHTML = esc(stop[0]) + '<small>' + esc(stop[1]) + '</small>';
             $('gForm').hidden = !!stop;
@@ -1951,6 +1954,7 @@
                 // Een duidelijk antwoord van de server: deze poging is klaar.
                 gAttempt = null;
                 if (GIFT.isNotLive(res.status, data)) { showAlert('giftAlert', GIFT.NOT_LIVE_MESSAGE); return; }
+                if (GIFT.isPlanLock(data.code)) { showAlert('giftAlert', GIFT.errorMessage(data.code, data)); setGiftEnabled(false); return; }
                 if (data.code === 'insufficient_balance' && Number.isInteger(data.balance_cents)) {
                     gift.card.balance_cents = data.balance_cents;
                     $('gBal').textContent = GIFT.formatCents(data.balance_cents);
