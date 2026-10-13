@@ -1,0 +1,8 @@
+{
+  "name": "omrz-website-browsertests",
+  "private": true,
+  "description": "Alleen voor npm run test:browser. Staat los van de root, zodat Vercel bij een deploy niets hoeft te installeren.",
+  "devDependencies": {
+    "playwright": "1.61.0"
+  }
+}
