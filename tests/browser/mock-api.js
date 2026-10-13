@@ -152,9 +152,17 @@ function api(req, res, url, body, rawBody) {
       if (mode === 'buyer' && !body.buyer_email) return fail(res, 400, 'buyer_email_required', 'E-mail koper vereist');
       const g = mk(card, body.amount_cents, { recipient_name: body.recipient_name || null, message: body.message || null, recipient_email: body.recipient_email || null,
         buyer_name: body.buyer_name || null, buyer_email: body.buyer_email || null, delivery_mode: mode, expires_at: body.expires_at || null });
-      const mail = { pass: { to: g.recipient_email, status: 'skipped', error: null }, buyer: { status: 'skipped', error: null } };
-      if (mode === 'recipient') mail.pass = sendMail(g, 'recipient');
-      if (mode === 'buyer') { const r = sendMail(g, 'buyer'); mail.buyer = { status: r.status, error: r.error }; }
+      // Zoals de backend (sendGiftCardMails): pass = de mail met de bon (pass.to = doel,
+      // pass.email = adres). Bij 'buyer' één bericht naar de koper, en beide kolommen gezet.
+      const mail = { pass: { to: null, email: null, status: 'skipped', error: null }, buyer: { email: null, status: 'skipped', error: null } };
+      if (mode === 'recipient') { const r = sendMail(g, 'recipient'); mail.pass = { to: 'recipient', email: r.to, status: r.status, error: r.error }; }
+      if (mode === 'buyer') {
+        const r = sendMail(g, 'buyer');
+        mail.pass = { to: 'buyer', email: r.to, status: r.status, error: r.error };
+        mail.buyer = { email: r.to, status: r.status, error: r.error };
+        g.pass_mail_sent_at = g.buyer_mail_sent_at; g.pass_mail_error = g.buyer_mail_error;
+      }
+      if (g.buyer_email && mode !== 'buyer') { const r = sendMail(g, 'buyer'); mail.buyer = { email: r.to, status: r.status, error: r.error }; }
       // Zelfde vorm als de backend: het referentienummer zit in transaction.
       const tx = S.txs[S.txs.length - 1];
       const out = { success: true, gift_card: pub(g), transaction: { id: tx.id, reference_number: tx.reference_number }, mail };

@@ -199,15 +199,20 @@
     if (isEmail(x.to)) return String(x.to).trim();
     return null;
   }
-  // Mailresultaat na het aanmaken: { pass: {to,status,error}, buyer: {status,error} }.
-  // Geeft de regels die het tonen waard zijn (sent/failed) en of er iets misging.
+  // Mailresultaat na het aanmaken: { pass: {to,email,status,error}, buyer: {email,status,error} }.
+  // pass is de mail mét de bon; pass.to zegt naar wie ('recipient' of 'buyer'). Bij 'buyer'
+  // gaan bon en aankoopbevestiging in één bericht naar de koper; buyer beschrijft dan
+  // hetzelfde bericht en tonen we niet nog eens. Anders is buyer de aankoopbevestiging.
+  // Regels: { target, kind: 'pass'|'confirmation', status, to, error }.
   function mailOutcome(mail) {
     const m = mail || {};
     const rows = [];
-    [['recipient', m.pass], ['buyer', m.buyer]].forEach(([target, x]) => {
-      if (!x || (x.status !== 'sent' && x.status !== 'failed')) return;   // skipped of onbekend: niets te melden
-      rows.push({ target, status: x.status, to: mailAddress(x), error: x.error || null });
-    });
+    const shown = x => x && (x.status === 'sent' || x.status === 'failed');   // skipped: niets te melden
+    const p = m.pass, passTarget = p && p.to === 'buyer' ? 'buyer' : 'recipient';
+    if (shown(p)) rows.push({ target: passTarget, kind: 'pass', status: p.status, to: mailAddress(p), error: p.error || null });
+    if (shown(m.buyer) && !(shown(p) && passTarget === 'buyer')) {
+      rows.push({ target: 'buyer', kind: 'confirmation', status: m.buyer.status, to: mailAddress(m.buyer), error: m.buyer.error || null });
+    }
     return { rows, failed: rows.some(r => r.status === 'failed') };
   }
 

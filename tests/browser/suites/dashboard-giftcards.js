@@ -334,7 +334,8 @@ module.exports = async function run(env) {
   body = (await state()).log.create.slice(-1)[0];
   check('10. Body met koper, ontvanger, bericht en delivery_mode recipient', body.buyer_name === 'Kees' && body.buyer_email === 'kees@example.nl' && body.recipient_name === 'Mila'
     && body.recipient_email === 'mila@example.nl' && body.message === 'Fijne dag!' && body.delivery_mode === 'recipient' && body.amount_cents === 5000, JSON.stringify(body));
-  check('10. Mail gelukt → "Mail verstuurd naar de ontvanger (mila@example.nl)"', /Mail verstuurd naar de ontvanger \(mila@example\.nl\)/.test(await txt(p, '.gc-mails')));
+  check('10. Mail gelukt → "Cadeaubon gemaild naar de ontvanger (mila@example.nl)" + bevestiging naar de koper', /Cadeaubon gemaild naar de ontvanger \(mila@example\.nl\)/.test(await txt(p, '.gc-mails'))
+    && /Aankoopbevestiging gemaild naar de koper \(kees@example\.nl\)/.test(await txt(p, '.gc-mails')), (await txt(p, '.gc-mails')).replace(/\s+/g, ' '));
   await p.click('[data-gc-close]');
   // Mail mislukt: bon bestaat wel, Opnieuw versturen
   await post('/__cfg', { mailFail: 'recipient' });
@@ -357,7 +358,9 @@ module.exports = async function run(env) {
   await post('/__cfg', { mailFail: 'buyer' });
   await newForm(); await p.click('[data-gc-quick="1000"]'); await p.fill('#gcBuyerEmail', 'koper@example.nl'); await p.check('input[name="gcDelivery"][value="buyer"]');
   await p.click('#gcNewBtn'); await p.waitForSelector('.gc-success');
-  check('10. "Ik stuur hem zelf door", mail koper mislukt → melding met knop voor de koper', /niet verstuurd/.test(await txt(p, '.gc-mails')) && /koper/.test(await txt(p, '.gc-mails')) && await vis(p, '[data-gc-resend-now="buyer"]'));
+  check('10. "Ik stuur hem zelf door", mail mislukt → één melding (bon naar de koper) met knop voor de koper, geen ontvanger-regel',
+    /niet verstuurd/.test(await txt(p, '.gc-mails')) && /Cadeaubon naar de koper/.test(await txt(p, '.gc-mails')) && await vis(p, '[data-gc-resend-now="buyer"]')
+    && !(await p.$('[data-gc-resend-now="recipient"]')) && (await p.$$('.gc-mail')).length === 1, (await txt(p, '.gc-mails')).replace(/\s+/g, ' '));
   await p.click('[data-gc-close]'); await post('/__cfg', { mailFail: null });
   // Netwerkfout bij aanmaken: opnieuw = zelfde sleutel, één bon
   await newForm(); await p.click('[data-gc-quick="2500"]');
@@ -388,8 +391,8 @@ module.exports = async function run(env) {
   const rosa = (await state()).gifts.find(g => g.recipient_name === 'Rosa');
   await p.evaluate(id => openGiftDetail(id), rosa.id); await p.waitForSelector('.gc-detail');
   const ms = await txt(p, '.gc-mailstat');
-  check('11. Verzendstatus (geneste gift_card.mail): ontvanger "Nog niet verstuurd", koper "Mislukt (tijdstip laatste poging): fout"',
-    /Mail ontvanger\s*Nog niet verstuurd/.test(ms) && /Mail koper\s*Mislukt \(\d+ \w+\.? 20\d\d, \d\d:\d\d\): .*Mailserver weigerde/.test(ms), ms.replace(/\s+/g, ' '));
+  check('11. Verzendstatus (geneste gift_card.mail), koper-modus: ontvanger "niet van toepassing", koper "Mislukt (tijdstip laatste poging): fout"',
+    /Mail ontvanger\s*Niet van toepassing/.test(ms) && /Mail koper \(bon en bevestiging\)\s*Mislukt \(\d+ \w+\.? 20\d\d, \d\d:\d\d\): .*Mailserver weigerde/.test(ms), ms.replace(/\s+/g, ' '));
   check('11. Koper en e-mail koper in de gegevens', /E-mail koper\s*oud@example\.nl/.test(await txt(p, '.gc-detail .cd-rows')));
   await p.click('.gc-detail [data-gc-copy]'); await p.waitForTimeout(150);
   check('11. "Link kopiëren" kopieert de deelbare link', (await p.evaluate(() => navigator.clipboard.readText())) === rosa.share_url && /Gekopieerd/.test(await txt(p, '.gc-detail [data-gc-copy]')));
@@ -403,7 +406,7 @@ module.exports = async function run(env) {
   check('11. "Opnieuw verstuurd naar de koper (nieuw@example.nl)": adres uit mail.email, nooit het doel', /Opnieuw verstuurd naar de koper \(nieuw@example\.nl\)/.test(await txt(p, '#gcDetailNote'))
     && !/\((recipient|buyer)\)/.test(await txt(p, '#gcDetailNote')), await txt(p, '#gcDetailNote'));
   check('11. Gecorrigeerd adres → body {target:"buyer", email:"nieuw@example.nl"}, status bijgewerkt', JSON.stringify((await state()).log.resend.slice(-1)[0]) === '{"target":"buyer","email":"nieuw@example.nl"}'
-    && /Mail koper\s*Verstuurd op/.test(await txt(p, '.gc-mailstat')) && /nieuw@example\.nl/.test(await txt(p, '.gc-detail .cd-rows')));
+    && /Mail koper \(bon en bevestiging\)\s*Verstuurd op/.test(await txt(p, '.gc-mailstat')) && /nieuw@example\.nl/.test(await txt(p, '.gc-detail .cd-rows')));
   await p.click('[data-gc-resend-open]');
   // De melding van de vorige keer staat er nog: wacht op het nieuwe verzoek én de nieuwe weergave.
   const nResend = (await state()).log.resend.length;

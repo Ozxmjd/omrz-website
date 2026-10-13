@@ -8465,12 +8465,13 @@
     function gcMailRowHTML(id, r, fallbackTo) {
       const who = r.target === 'buyer' ? 'koper' : 'ontvanger';
       const to = r.to || fallbackTo || '';
+      const what = r.kind === 'confirmation' ? 'Aankoopbevestiging' : 'Cadeaubon';
       if (r.status === 'sent') {
-        return `<div class="gc-mail ok" data-gc-mailrow="${r.target}">${GC_CHECK_SVG}<span>Mail verstuurd naar de ${who}${to ? ' (' + escapeHtml(to) + ')' : ''}.</span></div>`;
+        return `<div class="gc-mail ok" data-gc-mailrow="${r.target}">${GC_CHECK_SVG}<span>${what} gemaild naar de ${who}${to ? ' (' + escapeHtml(to) + ')' : ''}.</span></div>`;
       }
       return `<div class="gc-mail failed" data-gc-mailrow="${r.target}">
           <div><b>Bon is aangemaakt, mail is niet verstuurd</b>
-            <small>Mail naar de ${who}${to ? ' (' + escapeHtml(to) + ')' : ''}${r.error ? ': ' + escapeHtml(r.error) : ''}. De bon zelf is geldig.</small></div>
+            <small>${what} naar de ${who}${to ? ' (' + escapeHtml(to) + ')' : ''}${r.error ? ': ' + escapeHtml(r.error) : ''}. De bon zelf is geldig.</small></div>
           <button type="button" class="btn btn-ghost" data-gc-resend-now="${r.target}" data-gc-id="${escapeHtml(String(id))}">Opnieuw versturen</button>
           <div class="save-note" data-gc-resend-note></div>
         </div>`;
@@ -8596,8 +8597,10 @@
           ${g.share_url ? `<div class="gc-link" style="margin-top:14px"><input type="text" readonly value="${escapeHtml(g.share_url)}" aria-label="Deelbare link" /><button type="button" class="btn btn-ghost" data-gc-copy><span class="btn-label">Link kopiëren</span></button></div>` : ''}
           <h4>Verzending</h4>
           <div class="cd-rows gc-mailstat">
-            ${row('Mail ontvanger', gcMailStateHTML(g, 'recipient'), GIFT.mailStateOf(g, 'recipient').state === 'none')}
-            ${row('Mail koper', gcMailStateHTML(g, 'buyer'), GIFT.mailStateOf(g, 'buyer').state === 'none')}
+            ${g.delivery_mode === 'buyer'
+              ? row('Mail ontvanger', 'Niet van toepassing: de bon ging naar de koper om zelf door te sturen', true)
+              : row('Mail ontvanger', gcMailStateHTML(g, 'recipient'), GIFT.mailStateOf(g, 'recipient').state === 'none')}
+            ${row(g.delivery_mode === 'buyer' ? 'Mail koper (bon en bevestiging)' : 'Mail koper (bevestiging)', gcMailStateHTML(g, 'buyer'), GIFT.mailStateOf(g, 'buyer').state === 'none')}
           </div>
           ${owner ? `<div class="gc-actions"><button type="button" class="btn btn-ghost" data-gc-resend-open>Opnieuw versturen</button></div>
             <form class="gc-adjust" id="gcResend" hidden novalidate>

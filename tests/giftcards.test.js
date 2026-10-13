@@ -175,7 +175,7 @@ test('mailStateOf en mailOutcome: verzendstatus', () => {
   assert.deepEqual(G.mailStateOf({ mail: { pass: { sent_at: 't1' } } }, 'buyer'), { state: 'none', at: null, error: null });
   assert.deepEqual(G.mailStateOf({ pass_mail_sent_at: 't1' }, 'recipient'), { state: 'none', at: null, error: null });   // platte velden bestaan niet
   assert.deepEqual(G.mailStateOf({}, 'buyer'), { state: 'none', at: null, error: null });
-  const o = G.mailOutcome({ pass: { to: 'a@b.nl', status: 'failed', error: 'SMTP' }, buyer: { status: 'skipped' } });
+  const o = G.mailOutcome({ pass: { to: 'recipient', email: 'a@b.nl', status: 'failed', error: 'SMTP' }, buyer: { status: 'skipped' } });
   assert.equal(o.failed, true); assert.equal(o.rows.length, 1); assert.equal(o.rows[0].target, 'recipient');
   assert.deepEqual(G.mailOutcome(undefined), { rows: [], failed: false });
   assert.equal(G.mailOutcome({ pass: { to: 'a@b.nl', status: 'sent' }, buyer: { status: 'sent' } }).failed, false);
@@ -210,4 +210,14 @@ test('mailAddress: mail.email is het adres, mail.to alleen als het een adres is'
   assert.equal(G.mailAddress({ to: 'a@b.nl', status: 'failed' }), 'a@b.nl');
   assert.equal(G.mailAddress(null), null);
   for (const c of ['invalid_target', 'invalid_expires_at']) assert.ok(G.MESSAGES[c], c);
+});
+
+test('mailOutcome volgens de backend: pass.to bepaalt het doel, geen dubbele regel bij "buyer"', () => {
+  const rec = G.mailOutcome({ pass: { to: 'recipient', email: 'r@b.nl', status: 'sent' }, buyer: { email: 'k@b.nl', status: 'sent' } });
+  assert.deepEqual(rec.rows.map(r => [r.target, r.kind, r.to]), [['recipient', 'pass', 'r@b.nl'], ['buyer', 'confirmation', 'k@b.nl']]);
+  const buy = G.mailOutcome({ pass: { to: 'buyer', email: 'k@b.nl', status: 'failed', error: 'x' }, buyer: { email: 'k@b.nl', status: 'failed', error: 'x' } });
+  assert.deepEqual(buy.rows.map(r => [r.target, r.kind, r.status]), [['buyer', 'pass', 'failed']]);
+  assert.equal(buy.failed, true);
+  const none = G.mailOutcome({ pass: { to: null, email: null, status: 'skipped' }, buyer: { email: 'k@b.nl', status: 'sent' } });
+  assert.deepEqual(none.rows.map(r => [r.target, r.kind]), [['buyer', 'confirmation']]);
 });
