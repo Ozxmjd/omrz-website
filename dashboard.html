@@ -828,6 +828,110 @@
       background: rgba(var(--ink), .03); font-size: 13px; color: var(--muted); line-height: 1.55; }
     .vip-prev b { color: var(--text-strong); font-weight: 600; }
 
+    /* ---------- Cadeaubonnen ---------- */
+    .gc-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 22px; }
+    .gc-stats { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 22px; }
+    .gc-filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+    .gc-filters .cust-search { flex: 1 1 240px; margin: 0; }
+    .gc-select, .gc-date, .gc-input { font-family: inherit; font-size: 14px; color: var(--text-strong); background: rgba(var(--ink), .025);
+      border: 1px solid var(--border-strong); border-radius: 10px; padding: 10px 12px; min-width: 0; }
+    .gc-select:focus, .gc-date:focus, .gc-input:focus { outline: none; border-color: rgba(139,92,246,.5); box-shadow: 0 0 0 3px rgba(99,102,241,.14); }
+    .gc-select option { color: #111; }
+    .gc-list { display: grid; gap: 8px; }
+    .gc-row { display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px 16px; text-align: left; font-family: inherit; cursor: pointer;
+      border-radius: 14px; border: 1px solid var(--border); color: inherit; transition: border-color .2s var(--ease), background .2s var(--ease); }
+    .gc-row:hover { border-color: var(--border-strong); background: var(--card-hover); }
+    .gc-row:focus-visible { outline: none; border-color: rgba(139,92,246,.5); box-shadow: 0 0 0 3px rgba(99,102,241,.14); }
+    .gc-ic { width: 38px; height: 38px; flex: none; border-radius: 11px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent-2); }
+    .gc-ic svg { width: 18px; height: 18px; }
+    .gc-main { flex: 1; min-width: 0; }
+    .gc-name { display: block; font-size: 14.5px; font-weight: 500; color: var(--text-strong); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .gc-sub { display: block; font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+    .gc-code { font-family: ui-monospace, Menlo, Consolas, monospace; letter-spacing: .03em; }
+    .gc-amt { flex: none; text-align: right; }
+    .gc-amt b { display: block; font-size: 15px; font-weight: 600; color: var(--text-strong); letter-spacing: -.02em; white-space: nowrap; }
+    .gc-amt small { display: block; font-size: 11.5px; color: var(--muted); margin-top: 2px; white-space: nowrap; }
+    .gc-badge { flex: none; font-size: 11.5px; font-weight: 500; padding: 4px 10px; border-radius: 999px; white-space: nowrap; border: 1px solid transparent; }
+    .gc-badge.active { color: #8fe0b0; background: rgba(74,222,128,.08); border-color: rgba(74,222,128,.26); }
+    .gc-badge.empty { color: var(--muted); background: rgba(var(--ink), .05); border-color: var(--border); }
+    .gc-badge.blocked { color: #f0a8a8; background: rgba(255,80,80,.08); border-color: rgba(255,80,80,.26); }
+    .gc-badge.expired { color: #eab68a; background: rgba(251,146,60,.09); border-color: rgba(251,146,60,.28); }
+    [data-theme="light"] .gc-badge.active { color: #15803d; }
+    [data-theme="light"] .gc-badge.blocked { color: #b91c1c; }
+    [data-theme="light"] .gc-badge.expired { color: #b45309; }
+    .gc-more { margin-top: 14px; text-align: center; }
+    .gc-banner { display: flex; align-items: flex-start; gap: 11px; padding: 14px 16px; border-radius: 12px; font-size: 13px; line-height: 1.55;
+      color: var(--muted); background: rgba(var(--ink), .03); border: 1px solid var(--border); }
+    .gc-banner.error { color: #f0a8a8; background: rgba(255,80,80,.06); border-color: rgba(255,80,80,.22); }
+    [data-theme="light"] .gc-banner.error { color: #b91c1c; }
+    .gc-banner .btn { margin-left: auto; padding: 6px 12px; font-size: 12.5px; flex: none; }
+
+    .modal.gc-modal { max-width: 640px; }
+    .gc-quick { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+    .gc-chip { font-family: inherit; font-size: 13.5px; font-weight: 600; padding: 9px 15px; border-radius: 10px; cursor: pointer;
+      color: var(--pearl); background: rgba(var(--ink), .03); border: 1px solid var(--border-strong); transition: background .2s var(--ease), border-color .2s var(--ease); }
+    .gc-chip:hover { border-color: rgba(var(--ink), .22); }
+    .gc-chip.active { color: var(--text-strong); background: var(--accent-soft); border-color: rgba(139,92,246,.5); }
+    .gc-new .field input[type=date] { width: 100%; }
+    .gc-new .field input[type=date], .gc-detail .field select { font-family: inherit; font-size: 14px; color: var(--text-strong);
+      background: rgba(var(--ink), .025); border: 1px solid var(--border-strong); border-radius: 10px; padding: 10px 12px; }
+    .gc-hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
+    .gc-success { text-align: center; }
+    .gc-ok { width: 54px; height: 54px; margin: 2px auto 14px; border-radius: 16px; display: grid; place-items: center; background: var(--green-grad, linear-gradient(135deg,#34d399,#10b981)); color: #fff; }
+    .gc-ok svg { width: 26px; height: 26px; }
+    .gc-success h4 { font-size: 17px; font-weight: 600; color: var(--text-strong); margin-bottom: 14px; }
+    .gc-cash { padding: 13px 15px; border-radius: 12px; background: var(--accent-soft); border: 1px solid rgba(139,92,246,.28); font-size: 14px; color: var(--text-strong); margin-bottom: 16px; line-height: 1.5; }
+    .gc-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; text-align: left; }
+    .gc-fact { padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); background: rgba(var(--ink), .02); min-width: 0; }
+    .gc-fact small { display: block; font-size: 11.5px; color: var(--muted); margin-bottom: 4px; }
+    .gc-fact b { display: block; font-size: 16px; font-weight: 600; color: var(--text-strong); overflow-wrap: anywhere; }
+    .gc-link { display: flex; gap: 8px; margin-bottom: 10px; }
+    .gc-link input { flex: 1; min-width: 0; font-family: inherit; font-size: 13px; color: var(--text-strong); background: rgba(var(--ink), .025);
+      border: 1px solid var(--border-strong); border-radius: 10px; padding: 10px 12px; }
+    .gc-share { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 16px; }
+    .gc-qr { display: inline-block; padding: 12px; background: #fff; border-radius: 14px; margin-bottom: 16px; }
+    .gc-qr img, .gc-qr canvas { display: block; width: 180px; height: 180px; }
+
+    .gc-hero { text-align: center; padding: 6px 0 18px; }
+    .gc-hero small { display: block; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+    .gc-hero .gc-bal { font-size: 38px; font-weight: 650; letter-spacing: -.04em; color: var(--text-strong); margin: 4px 0 6px; }
+    .gc-hero .gc-bal-sub { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+    .gc-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 18px 0 6px; }
+    .gc-actions .btn { padding: 9px 14px; font-size: 13px; }
+    .gc-adjust { margin-top: 12px; padding: 16px; border-radius: 12px; border: 1px solid var(--border); background: rgba(var(--ink), .02); }
+    .gc-adjust-row { display: flex; gap: 8px; }
+    .gc-adjust-row select { flex: none; width: 92px; }
+    .gc-adjust-row input { flex: 1; }
+    .gc-detail h4 { font-size: 14px; font-weight: 600; color: var(--text-strong); margin: 22px 0 10px; }
+    .gc-table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; }
+    .gc-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .gc-table th { text-align: left; font-size: 11.5px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em;
+      padding: 10px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; background: rgba(var(--ink), .02); }
+    .gc-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--pearl); white-space: nowrap; }
+    .gc-table tr:last-child td { border-bottom: 0; }
+    .gc-table td.num, .gc-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .gc-table td.neg { color: #f0a8a8; }
+    .gc-table td.pos { color: #8fe0b0; }
+    [data-theme="light"] .gc-table td.neg { color: #b91c1c; }
+    [data-theme="light"] .gc-table td.pos { color: #15803d; }
+    .gc-table .btn { padding: 5px 10px; font-size: 12px; border-radius: 8px; }
+    .gc-report-filters { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+    .gc-report-filters label { display: block; font-size: 12px; font-weight: 500; color: var(--pearl); margin-bottom: 6px; }
+    .gc-report-filters .btn { margin-left: auto; }
+    .gc-explain { font-size: 12.5px; color: var(--muted); margin-top: 10px; }
+    @media (max-width: 560px) {
+      .gc-row { flex-wrap: wrap; }
+      .gc-main { flex-basis: calc(100% - 52px); }
+      .gc-amt { text-align: left; margin-left: 52px; }
+      .gc-badge { margin-left: auto; }
+      .gc-facts { grid-template-columns: 1fr; }
+      .gc-report-filters > div { flex: 1 1 140px; }
+      .gc-report-filters .gc-date, .gc-report-filters .gc-select { width: 100%; }
+      .gc-report-filters .btn { margin-left: 0; width: 100%; }
+      .gc-table th, .gc-table td { padding: 9px 8px; }
+      .gc-table th { font-size: 10.5px; letter-spacing: .03em; }
+    }
+
     /* ---------- Special Guests ---------- */
     /* Warm goud, los van de indigo VIP-niveaus: dit is geen niveau maar een uitzondering. */
     .sg-head-ic { display: inline-grid; place-items: center; width: 26px; height: 26px; margin-right: 8px; vertical-align: -6px;
@@ -1719,6 +1823,7 @@
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="js/giftcards.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 </head>
 <body>
@@ -1767,6 +1872,10 @@
         <div class="side-link" data-tab="loyaliteit" id="navLoyaliteit">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l4.5 3L12 4l4.5 6L21 7l-2 11H5z"/><path d="M5 21h14"/></svg>
           VIP &amp; Loyaliteit
+        </div>
+        <div class="side-link" data-tab="cadeaubonnen" id="navCadeaubonnen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>
+          Cadeaubonnen
         </div>
         <div class="side-link" data-tab="abonnement" id="navAbonnement">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2.5"/><path d="M2 10h20"/></svg>
@@ -2563,6 +2672,17 @@
           <div id="sgWrap"></div>
         </section>
 
+        <!-- ===== Cadeaubonnen (Premium Plus) ===== -->
+        <section class="panel" id="panel-cadeaubonnen">
+          <div class="panel-head">
+            <h2>Cadeaubonnen</h2>
+            <p>Verkoop digitale cadeaubonnen en schrijf ze af aan de kassa.</p>
+          </div>
+          <div id="gcWrap">
+            <div class="block glass"><div class="loader"><span class="spinner"></span> Cadeaubonnen laden…</div></div>
+          </div>
+        </section>
+
         <!-- ===== Mijn Abonnement ===== -->
         <section class="panel" id="panel-abonnement">
           <div class="panel-head">
@@ -3185,6 +3305,7 @@
       if (tab === 'statistieken') { loadChartStats(currentRange); loadDemographics(); }
       if (tab === 'enquete') loadSurvey();
       if (tab === 'loyaliteit') { loadLoyalty(); loadSpecialGuests(true); }
+      if (tab === 'cadeaubonnen') loadGiftCards();
       if (tab !== 'stempel') { stopScanner(); resetScanFlow(); } // camera vrijgeven + flow resetten bij verlaten van de scan-tab
     }
     links.forEach(l => l.addEventListener('click', () => activateTab(l.dataset.tab)));
@@ -3228,6 +3349,7 @@
       applyLockIcons();
       applyPlanGating();
       renderMailBlock();
+      applyGiftLockIcon();
       // Special Guests volgt de abonnementsregel van de Klanten-lijst; staat de tab al open,
       // dan meteen het juiste blok tonen (slot of lijst).
       if (document.getElementById('panel-loyaliteit').classList.contains('active')) loadSpecialGuests();
@@ -7837,6 +7959,579 @@
     });
 
     // ============================================================
+    //  Cadeaubonnen (Premium Plus)
+    // ============================================================
+    // Bedragen zijn overal hele centen; formatCents/parseEuroToCents komen uit js/giftcards.js.
+    const GIFT = window.OMRZGift;
+    const GC_PAGE = 50;
+    const GC_GIFT_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>';
+    const GC_CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+    const GC_STATUS = {
+      active: { label: 'Actief', cls: 'active' },
+      empty: { label: 'Leeg', cls: 'empty' },
+      blocked: { label: 'Geblokkeerd', cls: 'blocked' },
+      expired: { label: 'Verlopen', cls: 'expired' },
+    };
+    const GC_TX_TYPES = {
+      issue: 'Uitgifte', issued: 'Uitgifte', create: 'Uitgifte',
+      redeem: 'Afschrijving', redemption: 'Afschrijving',
+      reverse: 'Teruggedraaid', reversal: 'Teruggedraaid',
+      adjust: 'Correctie', adjustment: 'Correctie',
+      block: 'Geblokkeerd', unblock: 'Gedeblokkeerd',
+    };
+    const gcIsRedeemTx = t => t === 'redeem' || t === 'redemption';
+
+    let gcView = 'list';               // list | report
+    let gcItems = [];
+    let gcTotal = 0;
+    let gcListSeq = 0;
+    let gcSearchTimer = null;
+    let gcReportSeq = 0;
+    let gcReport = { from: null, to: null, location: '' };
+
+    // Premium Plus volgens het pakket (proefperiode telt mee). De backend blijft leidend:
+    // een plan_required zet het slot alsnog.
+    function giftPlanAllowed() {
+      if (!subscription.plan_known) return true;
+      return effectivePlan() === 'premium_plus' || subscription.access_status === 'trial';
+    }
+    let giftPlanBlocked = false;      // backend zei plan_required
+    function applyGiftLockIcon() {
+      const el = document.getElementById('navCadeaubonnen');
+      if (el) el.classList.toggle('locked', giftPlanBlocked || !giftPlanAllowed());
+    }
+
+    // Eén fetch-helper: 401 → uitloggen, en elke fout met een Nederlandse melding.
+    async function gcFetch(path, opts) {
+      const res = await fetch(API_BASE + path, Object.assign({ headers: authHeaders() }, opts || {}));
+      if (res.status === 401) { logoutToLogin(); throw Object.assign(new Error('Sessie verlopen'), { code: 'unauthorized' }); }
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data && data.success !== false) return data;
+      const notLive = GIFT.isNotLive(res.status, data);
+      const code = notLive ? 'not_live' : (data && data.code) || null;
+      if (code === 'plan_required') { giftPlanBlocked = true; applyGiftLockIcon(); }
+      throw Object.assign(new Error(notLive ? GIFT.NOT_LIVE_MESSAGE : GIFT.errorMessage(code, data)), { code, status: res.status, data });
+    }
+    function gcErrText(err) { return isNetworkError(err) ? NET_MSG : (err && err.message) || 'Er ging iets mis. Probeer het opnieuw.'; }
+
+    const gcDateKey = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    function gcDate(v, withTime) {
+      if (!v) return '—';
+      const d = new Date(v);
+      if (isNaN(d.getTime())) return '—';
+      const o = { day: 'numeric', month: 'short', year: 'numeric' };
+      if (withTime) { o.hour = '2-digit'; o.minute = '2-digit'; }
+      return d.toLocaleString('nl-NL', o);
+    }
+    function gcBadge(status) {
+      const s = GC_STATUS[status] || { label: status || 'Onbekend', cls: 'empty' };
+      return `<span class="gc-badge ${s.cls}">${escapeHtml(s.label)}</span>`;
+    }
+
+    // ---- Schermen: slot, niet live, probleem ----
+    function renderGiftLock() {
+      document.getElementById('gcWrap').innerHTML = `<div class="block glass">
+          <div class="sv-lock">
+            <div class="sv-lock-ic">${GC_GIFT_SVG}</div>
+            <h3>Cadeaubonnen is een Premium Plus functie</h3>
+            <p>Verkoop digitale cadeaubonnen die klanten via WhatsApp of e-mail delen, en schrijf ze aan de kassa af met de scanapp. Het saldo, de afschrijvingen en een rapport voor je boekhouder houden we voor je bij.</p>
+            <button type="button" class="btn btn-primary" data-plan-upgrade>Upgrade naar Premium Plus</button>
+          </div>
+        </div>`;
+    }
+    function renderGiftNotLive() {
+      document.getElementById('gcWrap').innerHTML = `<div class="block glass">
+          <div class="empty-state">
+            <span class="es-ic">${GC_GIFT_SVG}</span>
+            <h4>Cadeaubonnen komen eraan</h4>
+            <p>${escapeHtml(GIFT.NOT_LIVE_MESSAGE)} De rest van je dashboard werkt gewoon.</p>
+            <button type="button" class="btn btn-ghost" data-gc-retry>Opnieuw proberen</button>
+          </div>
+        </div>`;
+    }
+    // Handelt de fouten af die de hele pagina raken; true = afgehandeld.
+    function gcPageError(err) {
+      if (err && err.code === 'plan_required') { renderGiftLock(); return true; }
+      if (err && err.code === 'not_live') { renderGiftNotLive(); return true; }
+      return err && err.code === 'unauthorized';
+    }
+
+    // ---- Openen ----
+    function loadGiftCards() {
+      applyGiftLockIcon();
+      if (giftPlanBlocked || !giftPlanAllowed()) { renderGiftLock(); return; }
+      if (!cardId) {
+        document.getElementById('gcWrap').innerHTML = '<div class="block glass"><div class="gc-banner error">Geen stempelkaart gevonden. Log opnieuw in.</div></div>';
+        return;
+      }
+      if (!document.getElementById('gcListView')) renderGiftShell();
+      setGiftView(gcView);
+    }
+
+    function renderGiftShell() {
+      const today = new Date();
+      if (!gcReport.from) { gcReport.from = gcDateKey(new Date(today.getFullYear(), today.getMonth(), 1)); gcReport.to = gcDateKey(today); }
+      const locOpts = (!isManager && locations.length > 1)
+        ? `<div><label for="gcRepLoc">Vestiging</label><select class="gc-select" id="gcRepLoc">
+            <option value="">Alle vestigingen</option>
+            ${locations.map(l => `<option value="${escapeHtml(l.id)}">${escapeHtml(l.name)}</option>`).join('')}
+          </select></div>` : '';
+      document.getElementById('gcWrap').innerHTML = `
+        <div class="gc-top">
+          <div class="seg" role="tablist" aria-label="Cadeaubonnen">
+            <button type="button" role="tab" data-gc-view="list">Bonnen</button>
+            <button type="button" role="tab" data-gc-view="report">Rapport</button>
+          </div>
+          <button type="button" class="btn btn-primary" data-gc-new>Nieuwe cadeaubon</button>
+        </div>
+
+        <div id="gcListView">
+          <div class="stat-grid gc-stats">
+            <div class="stat glass">
+              <div class="s-top">${GC_GIFT_SVG}Openstaand tegoed</div>
+              <div class="s-val is-loading" id="gcOutstanding">—</div>
+              <div class="s-sub">Nog te besteden op alle bonnen</div>
+            </div>
+            <div class="stat glass">
+              <div class="s-top">${GC_GIFT_SVG}Actieve bonnen</div>
+              <div class="s-val is-loading" id="gcActive">—</div>
+              <div class="s-sub">Met saldo en niet geblokkeerd</div>
+            </div>
+          </div>
+          <div class="gc-filters">
+            <div class="cust-search">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+              <input type="text" id="gcSearch" placeholder="Zoek op naam of korte code…" autocomplete="off" />
+            </div>
+            <select class="gc-select" id="gcStatusFilter" aria-label="Status">
+              <option value="">Alle statussen</option>
+              <option value="active">Actief</option>
+              <option value="empty">Leeg</option>
+              <option value="blocked">Geblokkeerd</option>
+            </select>
+          </div>
+          <div id="gcListBox"></div>
+        </div>
+
+        <div id="gcReportView" hidden>
+          <div class="block glass gc-report-filters">
+            <div><label for="gcRepFrom">Van</label><input type="date" class="gc-date" id="gcRepFrom" value="${gcReport.from}" /></div>
+            <div><label for="gcRepTo">Tot en met</label><input type="date" class="gc-date" id="gcRepTo" value="${gcReport.to}" /></div>
+            ${locOpts}
+            <button type="button" class="btn btn-ghost" data-gc-csv>Download CSV</button>
+          </div>
+          <div id="gcReportBox"></div>
+        </div>`;
+      const sel = document.getElementById('gcRepLoc');
+      if (sel) sel.value = gcReport.location;
+      document.getElementById('gcSearch').addEventListener('input', () => {
+        clearTimeout(gcSearchTimer);
+        gcSearchTimer = setTimeout(() => loadGiftList(true), 250);
+      });
+      document.getElementById('gcStatusFilter').addEventListener('change', () => loadGiftList(true));
+      ['gcRepFrom', 'gcRepTo', 'gcRepLoc'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', () => {
+          gcReport.from = document.getElementById('gcRepFrom').value;
+          gcReport.to = document.getElementById('gcRepTo').value;
+          gcReport.location = sel ? sel.value : '';
+          loadGiftReport();
+        });
+      });
+    }
+
+    function setGiftView(view) {
+      gcView = view === 'report' ? 'report' : 'list';
+      document.querySelectorAll('[data-gc-view]').forEach(b => {
+        const on = b.dataset.gcView === gcView;
+        b.classList.toggle('active', on); b.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      document.getElementById('gcListView').hidden = gcView !== 'list';
+      document.getElementById('gcReportView').hidden = gcView !== 'report';
+      if (gcView === 'list') loadGiftList(true); else loadGiftReport();
+    }
+
+    // ---- Lijst ----
+    async function loadGiftList(reset) {
+      const box = document.getElementById('gcListBox');
+      if (!box) return;
+      const seq = ++gcListSeq;
+      const q = (document.getElementById('gcSearch') || {}).value || '';
+      const status = (document.getElementById('gcStatusFilter') || {}).value || '';
+      const offset = reset ? 0 : gcItems.length;
+      if (reset) box.innerHTML = '<div class="block glass"><div class="loader"><span class="spinner"></span> Cadeaubonnen laden…</div></div>';
+      const qs = new URLSearchParams({ card_id: cardId, limit: String(GC_PAGE), offset: String(offset) });
+      if (status) qs.set('status', status);
+      if (q.trim()) qs.set('q', q.trim());
+      try {
+        const data = await gcFetch('/api/stamp/gift-cards?' + qs.toString());
+        if (seq !== gcListSeq) return;   // er loopt al een nieuwere zoekopdracht
+        const list = Array.isArray(data.gift_cards) ? data.gift_cards : [];
+        gcItems = reset ? list : gcItems.concat(list);
+        gcTotal = Number.isInteger(data.total) ? data.total : gcItems.length;
+        const t = data.totals || {};
+        const out = document.getElementById('gcOutstanding'), act = document.getElementById('gcActive');
+        if (out) { out.textContent = GIFT.formatCents(t.outstanding_cents); out.classList.remove('is-loading'); }
+        if (act) { act.textContent = Number.isInteger(t.active_count) ? t.active_count.toLocaleString('nl-NL') : '—'; act.classList.remove('is-loading'); }
+        renderGiftList(q.trim() || status);
+      } catch (err) {
+        if (seq !== gcListSeq || gcPageError(err)) return;
+        box.innerHTML = `<div class="gc-banner error">${escapeHtml(gcErrText(err))}<button type="button" class="btn btn-ghost" data-gc-retry>Opnieuw proberen</button></div>`;
+        ['gcOutstanding', 'gcActive'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.remove('is-loading'); });
+      }
+    }
+
+    function giftRowHTML(g) {
+      const name = (g.recipient_name || '').trim();
+      return `<button type="button" class="gc-row glass" data-gc-id="${escapeHtml(String(g.id))}">
+          <span class="gc-ic">${GC_GIFT_SVG}</span>
+          <span class="gc-main">
+            <span class="gc-name">${escapeHtml(name || 'Zonder naam')}</span>
+            <span class="gc-sub"><span class="gc-code">${escapeHtml(g.short_code || '—')}</span> · ${escapeHtml(gcDate(g.created_at))}</span>
+          </span>
+          <span class="gc-amt"><b>${GIFT.formatCents(g.balance_cents)}</b><small>van ${GIFT.formatCents(g.initial_amount_cents)}</small></span>
+          ${gcBadge(g.status)}
+        </button>`;
+    }
+
+    function renderGiftList(filtered) {
+      const box = document.getElementById('gcListBox');
+      if (!gcItems.length) {
+        box.innerHTML = filtered
+          ? '<div class="block glass"><div class="empty-state"><span class="es-ic">' + GC_GIFT_SVG + '</span><h4>Geen cadeaubonnen gevonden</h4><p>Pas je zoekterm of statusfilter aan.</p></div></div>'
+          : '<div class="block glass"><div class="empty-state"><span class="es-ic">' + GC_GIFT_SVG + '</span><h4>Nog geen cadeaubonnen</h4><p>Maak je eerste cadeaubon en deel de link met je klant.</p><button type="button" class="btn btn-primary" data-gc-new>Nieuwe cadeaubon</button></div></div>';
+        return;
+      }
+      box.innerHTML = '<div class="gc-list">' + gcItems.map(giftRowHTML).join('') + '</div>'
+        + (gcItems.length < gcTotal
+          ? `<div class="gc-more"><button type="button" class="btn btn-ghost" data-gc-more>Meer laden (${gcItems.length} van ${gcTotal})</button></div>` : '');
+    }
+
+    // ---- Nieuwe cadeaubon ----
+    function openNewGiftCard() {
+      const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+      openModal('Nieuwe cadeaubon', `
+        <form class="gc-new" id="gcNewForm" novalidate>
+          <div class="field">
+            <label for="gcAmount">Bedrag</label>
+            <div class="gc-quick">
+              ${[1000, 2500, 5000, 10000].map(c => `<button type="button" class="gc-chip" data-gc-quick="${c}">${GIFT.formatCents(c).replace(',00', '')}</button>`).join('')}
+              <button type="button" class="gc-chip" data-gc-quick="own">Eigen bedrag</button>
+            </div>
+            <input type="text" id="gcAmount" inputmode="decimal" placeholder="Bijv. 30,00" autocomplete="off" />
+          </div>
+          <div class="field"><label for="gcRecName">Naam ontvanger <small style="color:var(--muted)">(optioneel)</small></label><input type="text" id="gcRecName" maxlength="80" /></div>
+          <div class="field"><label for="gcMessage">Boodschap <small style="color:var(--muted)">(optioneel)</small></label><textarea id="gcMessage" maxlength="500" placeholder="Bijv. Gefeliciteerd!"></textarea></div>
+          <div class="field"><label for="gcRecEmail">E-mail ontvanger <small style="color:var(--muted)">(optioneel)</small></label><input type="email" id="gcRecEmail" maxlength="160" /></div>
+          <div class="field"><label for="gcExpires">Vervaldatum <small style="color:var(--muted)">(optioneel)</small></label><input type="date" id="gcExpires" min="${gcDateKey(tomorrow)}" />
+            <div class="gc-hint">Leeg laten = geen vervaldatum.</div></div>
+          <div class="save-note" id="gcNewNote" style="margin-bottom:12px"></div>
+          <button type="submit" class="btn btn-primary" id="gcNewBtn" style="width:100%">Cadeaubon aanmaken</button>
+        </form>`);
+      modalOverlay.querySelector('.modal').classList.add('gc-modal');
+      const amount = document.getElementById('gcAmount');
+      const chips = [...document.querySelectorAll('[data-gc-quick]')];
+      const syncChips = () => {
+        const c = GIFT.parseEuroToCents(amount.value);
+        chips.forEach(ch => ch.classList.toggle('active', ch.dataset.gcQuick !== 'own' && Number(ch.dataset.gcQuick) === c));
+      };
+      chips.forEach(ch => ch.addEventListener('click', () => {
+        if (ch.dataset.gcQuick === 'own') { amount.value = ''; amount.focus(); }
+        else amount.value = GIFT.formatCents(Number(ch.dataset.gcQuick)).replace(/^€\s*/, '');
+        syncChips();
+      }));
+      amount.addEventListener('input', syncChips);
+      document.getElementById('gcNewForm').addEventListener('submit', (e) => { e.preventDefault(); createGiftCard(); });
+    }
+
+    async function createGiftCard() {
+      const note = document.getElementById('gcNewNote');
+      const btn = document.getElementById('gcNewBtn');
+      const say = (m, k) => { note.textContent = m || ''; note.className = 'save-note' + (k ? ' ' + k : ''); };
+      const cents = GIFT.parseEuroToCents(document.getElementById('gcAmount').value);
+      if (!cents) { say('Kies of vul een geldig bedrag in, bijvoorbeeld 25 of 30,50.', 'error'); return; }
+      const body = { card_id: cardId, amount_cents: cents };
+      const name = document.getElementById('gcRecName').value.trim();
+      const msg = document.getElementById('gcMessage').value.trim();
+      const email = document.getElementById('gcRecEmail').value.trim();
+      const exp = document.getElementById('gcExpires').value;
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { say('Dit e-mailadres klopt niet.', 'error'); return; }
+      if (exp) {
+        const [y, m, d] = exp.split('-').map(Number);
+        const end = new Date(y, m - 1, d, 23, 59, 59);      // tot en met die dag
+        if (isNaN(end.getTime()) || end <= new Date()) { say('Kies een vervaldatum in de toekomst.', 'error'); return; }
+        body.expires_at = end.toISOString();
+      }
+      if (name) body.recipient_name = name;
+      if (msg) body.message = msg;
+      if (email) body.recipient_email = email;
+      if (btn.disabled) return;
+      btn.disabled = true; btn.textContent = 'Aanmaken…'; say('');
+      try {
+        const data = await gcFetch('/api/stamp/gift-cards', { method: 'POST', body: JSON.stringify(body) });
+        renderGiftCreated(data.gift_card || {}, data.reference_number);
+        loadGiftList(true);
+      } catch (err) {
+        btn.disabled = false; btn.textContent = 'Cadeaubon aanmaken';
+        if (err && err.code === 'plan_required') { closeModal(); renderGiftLock(); return; }
+        say(gcErrText(err), 'error');
+      }
+    }
+
+    function renderGiftCreated(g, ref) {
+      const amount = GIFT.formatCents(g.initial_amount_cents);
+      const url = g.share_url || '';
+      const shop = card.business_name || 'ons';
+      const wa = `Je hebt een cadeaubon van ${amount} gekregen bij ${shop}!`
+        + (g.recipient_name ? ` Voor ${g.recipient_name}.` : '') + ` Bekijk hem hier: ${url}`;
+      modalTitle.textContent = 'Cadeaubon aangemaakt';
+      modalBody.innerHTML = `<div class="gc-success">
+          <div class="gc-ok">${GC_CHECK_SVG}</div>
+          <h4>Cadeaubon van ${escapeHtml(amount)} aangemaakt</h4>
+          <div class="gc-cash"><b>Boek op de kassa als verkoop cadeaubon:</b> ${escapeHtml(amount)}</div>
+          <div class="gc-facts">
+            <div class="gc-fact"><small>Korte code</small><b class="gc-code">${escapeHtml(g.short_code || '—')}</b></div>
+            <div class="gc-fact"><small>Referentienummer</small><b>${escapeHtml(ref || '—')}</b></div>
+          </div>
+          ${url ? `<div class="gc-link"><input type="text" readonly value="${escapeHtml(url)}" aria-label="Deelbare link" /><button type="button" class="btn btn-ghost" data-gc-copy><span class="btn-label">Kopieer</span></button></div>
+          <div class="gc-share"><a class="btn btn-ghost" href="https://wa.me/?text=${encodeURIComponent(wa)}" target="_blank" rel="noopener">Deel via WhatsApp</a></div>
+          <div class="gc-qr" id="gcQr" aria-label="QR-code van de link"></div>` : '<p class="gc-hint">De server stuurde geen deelbare link mee.</p>'}
+          <button type="button" class="btn btn-primary" data-gc-close style="width:100%">Klaar</button>
+        </div>`;
+      const copy = modalBody.querySelector('[data-gc-copy]');
+      if (copy) copy.addEventListener('click', () => copyToClipboard(url, copy, 'Gekopieerd ✓'));
+      const qr = document.getElementById('gcQr');
+      if (qr && url && typeof QRCode === 'function') {
+        new QRCode(qr, { text: url, width: 180, height: 180, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+      }
+    }
+
+    // ---- Detail ----
+    let gcDetailId = null;
+    async function openGiftDetail(id) {
+      gcDetailId = id;
+      openModal('Cadeaubon', '<div class="loader"><span class="spinner"></span> Laden…</div>');
+      modalOverlay.querySelector('.modal').classList.add('gc-modal');
+      try {
+        const data = await gcFetch('/api/stamp/gift-cards/' + encodeURIComponent(id));
+        if (gcDetailId !== id || modalOverlay.hidden) return;
+        renderGiftDetail(data.gift_card || {}, Array.isArray(data.transactions) ? data.transactions : []);
+      } catch (err) {
+        if (gcDetailId !== id) return;
+        if (err && (err.code === 'plan_required' || err.code === 'not_live')) { closeModal(); gcPageError(err); return; }
+        modalBody.innerHTML = `<div class="gc-banner error">${escapeHtml(gcErrText(err))}</div>`;
+      }
+    }
+
+    function renderGiftDetail(g, txs, note) {
+      const owner = !isManager;
+      modalTitle.textContent = 'Cadeaubon ' + (g.short_code || '');
+      const row = (lbl, val, empty) => detailRow(lbl, val, empty);
+      const txRows = txs.map(t => {
+        const amt = Number(t.amount_cents);
+        const cls = amt < 0 ? 'neg' : amt > 0 ? 'pos' : '';
+        const canReverse = owner && gcIsRedeemTx(t.type);
+        return `<tr>
+            <td>${escapeHtml(GC_TX_TYPES[t.type] || t.type || '—')}</td>
+            <td class="num ${cls}">${GIFT.formatCents(amt)}</td>
+            <td class="num">${GIFT.formatCents(t.balance_after_cents)}</td>
+            <td class="gc-code">${escapeHtml(t.reference_number || '—')}</td>
+            <td>${escapeHtml(gcDate(t.created_at, true))}</td>
+            ${owner ? `<td>${canReverse ? `<button type="button" class="btn btn-danger" data-gc-reverse="${escapeHtml(String(t.id))}" data-gc-amt="${amt}">Terugdraaien</button>` : ''}</td>` : ''}
+          </tr>`;
+      }).join('');
+      const blocked = g.status === 'blocked';
+      modalBody.innerHTML = `<div class="gc-detail">
+          <div class="gc-hero">
+            <small>Saldo</small>
+            <div class="gc-bal">${GIFT.formatCents(g.balance_cents)}</div>
+            <span class="gc-bal-sub">van ${GIFT.formatCents(g.initial_amount_cents)} ${gcBadge(g.status)}</span>
+          </div>
+          <div class="cd-rows">
+            ${row('Korte code', `<span class="gc-code">${escapeHtml(g.short_code || '—')}</span>`, !g.short_code)}
+            ${row('Ontvanger', escapeHtml(g.recipient_name || 'Niet opgegeven'), !g.recipient_name)}
+            ${row('E-mail ontvanger', escapeHtml(g.recipient_email || 'Niet opgegeven'), !g.recipient_email)}
+            ${g.message ? row('Boodschap', escapeHtml(g.message), false) : ''}
+            ${row('Vervaldatum', escapeHtml(g.expires_at ? gcDate(g.expires_at) : 'Geen'), !g.expires_at)}
+            ${row('Aangemaakt', escapeHtml(gcDate(g.created_at, true)), !g.created_at)}
+          </div>
+          ${g.share_url ? `<div class="gc-link" style="margin-top:14px"><input type="text" readonly value="${escapeHtml(g.share_url)}" aria-label="Deelbare link" /><button type="button" class="btn btn-ghost" data-gc-copy><span class="btn-label">Kopieer link</span></button></div>` : ''}
+          ${owner ? `<div class="gc-actions">
+              <button type="button" class="btn btn-ghost" data-gc-adjust-open>Saldo corrigeren</button>
+              <button type="button" class="btn ${blocked ? 'btn-ghost' : 'btn-danger'}" data-gc-block="${blocked ? 'unblock' : 'block'}">${blocked ? 'Deblokkeren' : 'Blokkeren'}</button>
+            </div>
+            <form class="gc-adjust" id="gcAdjust" hidden novalidate>
+              <div class="field"><label for="gcAdjAmt">Correctie</label>
+                <div class="gc-adjust-row">
+                  <select id="gcAdjSign" aria-label="Erbij of eraf"><option value="1">+ erbij</option><option value="-1">− eraf</option></select>
+                  <input type="text" id="gcAdjAmt" inputmode="decimal" placeholder="Bijv. 5,00" autocomplete="off" />
+                </div></div>
+              <div class="field"><label for="gcAdjNote">Notitie (verplicht)</label><textarea id="gcAdjNote" maxlength="300" placeholder="Waarom corrigeer je het saldo?"></textarea></div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button type="submit" class="btn btn-primary" id="gcAdjBtn">Correctie opslaan</button>
+                <button type="button" class="btn btn-ghost" data-gc-adjust-cancel>Annuleren</button>
+              </div>
+            </form>` : ''}
+          <div class="save-note" id="gcDetailNote" style="margin-top:10px"></div>
+          <h4>Transacties</h4>
+          ${txs.length ? `<div class="gc-table-wrap"><table class="gc-table">
+              <thead><tr><th>Type</th><th class="num">Bedrag</th><th class="num">Saldo na</th><th>Referentie</th><th>Datum</th>${owner ? '<th></th>' : ''}</tr></thead>
+              <tbody>${txRows}</tbody></table></div>` : '<p class="gc-hint">Nog geen transacties.</p>'}
+        </div>`;
+      if (note) satDetail(note.msg, note.kind);
+      const copy = modalBody.querySelector('[data-gc-copy]');
+      if (copy) copy.addEventListener('click', () => copyToClipboard(g.share_url, copy, 'Gekopieerd ✓'));
+      const adj = document.getElementById('gcAdjust');
+      if (adj) adj.addEventListener('submit', (e) => { e.preventDefault(); adjustGiftCard(g.id); });
+    }
+    function satDetail(msg, kind) {
+      const el = document.getElementById('gcDetailNote');
+      if (el) { el.textContent = msg || ''; el.className = 'save-note' + (kind ? ' ' + kind : ''); }
+    }
+
+    // Na een eigenaar-actie: detail en lijst opnieuw ophalen, met een melding.
+    async function gcAfterAction(id, msg) {
+      try {
+        const data = await gcFetch('/api/stamp/gift-cards/' + encodeURIComponent(id));
+        if (gcDetailId === id && !modalOverlay.hidden) renderGiftDetail(data.gift_card || {}, data.transactions || [], { msg, kind: 'ok' });
+      } catch (err) { satDetail(msg + ' Ververs de pagina om de nieuwe stand te zien.', 'ok'); }
+      loadGiftList(true);
+    }
+
+    async function adjustGiftCard(id) {
+      const btn = document.getElementById('gcAdjBtn');
+      const cents = GIFT.parseEuroToCents(document.getElementById('gcAdjAmt').value);
+      const sign = Number(document.getElementById('gcAdjSign').value) < 0 ? -1 : 1;
+      const note = document.getElementById('gcAdjNote').value.trim();
+      if (!cents) { satDetail('Vul een geldig bedrag in, bijvoorbeeld 5 of 2,50.', 'error'); return; }
+      if (!note) { satDetail('Een notitie is verplicht bij een correctie.', 'error'); return; }
+      if (btn.disabled) return;
+      btn.disabled = true; satDetail('Opslaan…');
+      try {
+        await gcFetch('/api/stamp/gift-cards/' + encodeURIComponent(id) + '/adjust',
+          { method: 'POST', body: JSON.stringify({ delta_cents: sign * cents, note }) });
+        gcAfterAction(id, 'Saldo gecorrigeerd met ' + GIFT.formatCents(sign * cents) + ' ✓');
+      } catch (err) { btn.disabled = false; satDetail(gcErrText(err), 'error'); }
+    }
+
+    async function toggleGiftBlock(id, action, btn) {
+      if (action === 'block' && !window.confirm('Deze cadeaubon blokkeren? Hij kan dan niet meer worden afgeschreven tot je hem deblokkeert.')) return;
+      if (btn.disabled) return;
+      btn.disabled = true; satDetail(action === 'block' ? 'Blokkeren…' : 'Deblokkeren…');
+      try {
+        await gcFetch('/api/stamp/gift-cards/' + encodeURIComponent(id) + '/' + action, { method: 'POST', body: '{}' });
+        gcAfterAction(id, action === 'block' ? 'Cadeaubon geblokkeerd ✓' : 'Cadeaubon gedeblokkeerd ✓');
+      } catch (err) { btn.disabled = false; satDetail(gcErrText(err), 'error'); }
+    }
+
+    async function reverseGiftTx(txId, amt, btn) {
+      const bedrag = GIFT.formatCents(Math.abs(Number(amt) || 0));
+      if (!window.confirm(`Afschrijving van ${bedrag} terugdraaien? Het bedrag komt terug op het saldo van de cadeaubon.`)) return;
+      const note = 'Teruggedraaid via dashboard';
+      if (btn.disabled) return;
+      btn.disabled = true; satDetail('Terugdraaien…');
+      try {
+        await gcFetch('/api/stamp/gift-cards/transactions/' + encodeURIComponent(txId) + '/reverse',
+          { method: 'POST', body: JSON.stringify({ note }) });
+        gcAfterAction(gcDetailId, `Afschrijving van ${bedrag} teruggedraaid ✓`);
+      } catch (err) { btn.disabled = false; satDetail(gcErrText(err), 'error'); }
+    }
+
+    // ---- Rapport ----
+    function gcReportQuery(format) {
+      const qs = new URLSearchParams({ card_id: cardId, from: gcReport.from, to: gcReport.to });
+      if (gcReport.location) qs.set('location_id', gcReport.location);
+      if (format) qs.set('format', format);
+      return qs.toString();
+    }
+    async function loadGiftReport() {
+      const box = document.getElementById('gcReportBox');
+      if (!box) return;
+      if (!gcReport.from || !gcReport.to || gcReport.from > gcReport.to) {
+        box.innerHTML = '<div class="gc-banner error">Kies een geldig datumbereik: "Van" mag niet na "Tot en met" liggen.</div>';
+        return;
+      }
+      const seq = ++gcReportSeq;
+      box.innerHTML = '<div class="block glass"><div class="loader"><span class="spinner"></span> Rapport laden…</div></div>';
+      try {
+        const data = await gcFetch('/api/stamp/gift-cards/report?' + gcReportQuery('json'));
+        if (seq !== gcReportSeq) return;
+        const t = data.totals || {};
+        const days = Array.isArray(data.days) ? data.days : [];
+        const card5 = (lbl, v, sub) => `<div class="stat glass"><div class="s-top">${lbl}</div><div class="s-val">${GIFT.formatCents(v)}</div><div class="s-sub">${sub}</div></div>`;
+        box.innerHTML = `<div class="stat-grid">
+            ${card5('Verkocht', t.issued_cents, 'Nieuwe bonnen in deze periode')}
+            ${card5('Ingewisseld', t.redeemed_cents, 'Afgeschreven aan de kassa')}
+            ${card5('Teruggedraaid', t.reversed_cents, 'Gecorrigeerde afschrijvingen')}
+            ${card5('Netto ingewisseld', t.net_redeemed_cents, 'Ingewisseld min teruggedraaid')}
+            ${card5('Openstaand', t.outstanding_cents, 'Nog te besteden saldo')}
+          </div>
+          ${days.length ? `<div class="gc-table-wrap"><table class="gc-table">
+              <thead><tr><th>Datum</th><th class="num">Verkocht</th><th class="num">Ingewisseld</th><th class="num">Netto ingewisseld</th></tr></thead>
+              <tbody>${days.map(d => `<tr><td>${escapeHtml(gcDate(d.date))}</td><td class="num">${GIFT.formatCents(d.issued_cents)}</td><td class="num">${GIFT.formatCents(d.redeemed_cents)}</td><td class="num">${GIFT.formatCents(d.net_redeemed_cents)}</td></tr>`).join('')}</tbody>
+            </table></div>` : '<div class="block glass"><div class="empty-state"><span class="es-ic">' + GC_GIFT_SVG + '</span><h4>Geen bewegingen</h4><p>In deze periode zijn er geen cadeaubonnen verkocht of ingewisseld.</p></div></div>'}
+          <p class="gc-explain">Verkocht en ingewisseld staan apart, handig voor uw boekhouder.</p>`;
+      } catch (err) {
+        if (seq !== gcReportSeq || gcPageError(err)) return;
+        box.innerHTML = `<div class="gc-banner error">${escapeHtml(gcErrText(err))}<button type="button" class="btn btn-ghost" data-gc-retry>Opnieuw proberen</button></div>`;
+      }
+    }
+
+    // CSV met de inlog-token ophalen (een gewone link kan geen Authorization-header meesturen).
+    async function downloadGiftCsv(btn) {
+      if (!gcReport.from || !gcReport.to || gcReport.from > gcReport.to) return;
+      if (btn.disabled) return;
+      const label = btn.textContent;
+      btn.disabled = true; btn.textContent = 'Downloaden…';
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/gift-cards/report?' + gcReportQuery('csv'), { headers: authHeaders() });
+        if (res.status === 401) { logoutToLogin(); return; }
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(GIFT.isNotLive(res.status, data) ? GIFT.NOT_LIVE_MESSAGE : GIFT.errorMessage(data.code, data));
+        }
+        const blob = await res.blob();
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `cadeaubonnen-${gcReport.from}-tm-${gcReport.to}.csv`;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+      } catch (err) {
+        const box = document.getElementById('gcReportBox');
+        if (box) box.insertAdjacentHTML('afterbegin', `<div class="gc-banner error" style="margin-bottom:14px">CSV downloaden mislukt: ${escapeHtml(gcErrText(err))}</div>`);
+      } finally {
+        btn.disabled = false; btn.textContent = label;
+      }
+    }
+
+    // ---- Klikken (pagina en modal) ----
+    document.getElementById('gcWrap').addEventListener('click', (e) => {
+      const v = e.target.closest('[data-gc-view]');
+      if (v) { setGiftView(v.dataset.gcView); return; }
+      if (e.target.closest('[data-gc-new]')) { openNewGiftCard(); return; }
+      if (e.target.closest('[data-gc-more]')) { loadGiftList(false); return; }
+      if (e.target.closest('[data-gc-csv]')) { downloadGiftCsv(e.target.closest('[data-gc-csv]')); return; }
+      if (e.target.closest('[data-gc-retry]')) {
+        if (!document.getElementById('gcListView')) { loadGiftCards(); return; }
+        if (gcView === 'list') loadGiftList(true); else loadGiftReport();
+        return;
+      }
+      const row = e.target.closest('[data-gc-id]');
+      if (row) openGiftDetail(row.dataset.gcId);
+    });
+    // getElementById i.p.v. de const modalBody: die wordt pas verderop in het script gedeclareerd.
+    document.getElementById('modalBody').addEventListener('click', (e) => {
+      if (!document.querySelector('#modalOverlay .modal').classList.contains('gc-modal')) return;
+      if (e.target.closest('[data-gc-close]')) { closeModal(); return; }
+      if (e.target.closest('[data-gc-adjust-open]')) { const f = document.getElementById('gcAdjust'); if (f) { f.hidden = false; document.getElementById('gcAdjAmt').focus(); } return; }
+      if (e.target.closest('[data-gc-adjust-cancel]')) { const f = document.getElementById('gcAdjust'); if (f) f.hidden = true; satDetail(''); return; }
+      const b = e.target.closest('[data-gc-block]');
+      if (b) { toggleGiftBlock(gcDetailId, b.dataset.gcBlock, b); return; }
+      const r = e.target.closest('[data-gc-reverse]');
+      if (r) reverseGiftTx(r.dataset.gcReverse, r.dataset.gcAmt, r);
+    });
+
+    // ============================================================
     //  Special Guests (op de VIP & Loyaliteit-pagina)
     // ============================================================
     // Een vaste klant die altijd gratis krijgt. Puur een weergave-vlag: zijn kaart staat
@@ -8619,6 +9314,7 @@
     const modalTitle = document.getElementById('modalTitle');
     const modalBody = document.getElementById('modalBody');
     function openModal(title, html) {
+      modalOverlay.querySelector('.modal').classList.remove('gc-modal');   // brede cadeaubon-variant niet laten hangen
       modalTitle.textContent = title;
       modalBody.innerHTML = html;
       modalOverlay.hidden = false;
