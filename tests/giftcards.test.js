@@ -1,0 +1,88 @@
+// Draaien: node --test tests/giftcards.test.js
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const G = require('../js/giftcards.js');
+
+const S = ' '; // formatCents gebruikt een vaste spatie, zodat "€" en het bedrag niet splitsen
+
+test('formatCents: nl-NL euro', () => {
+  assert.equal(G.formatCents(123450), `€${S}1.234,50`);
+  assert.equal(G.formatCents(3000), `€${S}30,00`);
+  assert.equal(G.formatCents(5), `€${S}0,05`);
+  assert.equal(G.formatCents(0), `€${S}0,00`);
+  assert.equal(G.formatCents(100000000), `€${S}1.000.000,00`);
+  assert.equal(G.formatCents(-2550), `-€${S}25,50`);
+});
+
+test('formatCents: ongeldig → streepje, nooit 0', () => {
+  for (const v of [null, undefined, '3000', 12.5, NaN, Infinity]) assert.equal(G.formatCents(v), '—');
+});
+
+test('parseEuroToCents: geaccepteerde notaties', () => {
+  assert.equal(G.parseEuroToCents('30'), 3000);
+  assert.equal(G.parseEuroToCents('30,5'), 3050);
+  assert.equal(G.parseEuroToCents('30.50'), 3050);
+  assert.equal(G.parseEuroToCents('€ 30,00'), 3000);
+  assert.equal(G.parseEuroToCents('€30'), 3000);
+  assert.equal(G.parseEuroToCents('  12,34 '), 1234);
+  assert.equal(G.parseEuroToCents('0,01'), 1);
+  assert.equal(G.parseEuroToCents(',50'), 50);
+  assert.equal(G.parseEuroToCents('1.234,50'), 123450);
+  assert.equal(G.parseEuroToCents('1,234.50'), 123450);
+  assert.equal(G.parseEuroToCents('1.234'), 123400);
+  assert.equal(G.parseEuroToCents('€ 1.000.000,00'), 100000000);
+});
+
+test('parseEuroToCents: weigert negatief, nul, >2 decimalen en onzin', () => {
+  for (const v of ['-5', '-€ 5', '0', '0,00', '0.0', '30,505', '1,234', '30.5050', '30.123,4,5', '', '   ', '€', 'abc', '3O', '1,2,3', '12.34.5', '30,5e2', null, undefined, {}]) {
+    assert.equal(G.parseEuroToCents(v), null, JSON.stringify(v));
+  }
+});
+
+test('normalizeShortCode', () => {
+  assert.equal(G.normalizeShortCode('abcd-efgh-jk'), 'ABCD-EFGH-JK');
+  assert.equal(G.normalizeShortCode('ABCDEFGHJK'), 'ABCD-EFGH-JK');
+  assert.equal(G.normalizeShortCode(' AB CD-EF GH-JK '), 'ABCD-EFGH-JK');
+  assert.equal(G.normalizeShortCode('ABCD-EFGH-J'), null);
+  assert.equal(G.normalizeShortCode('ABCD-EFGH-JKL'), null);
+});
+
+test('classifyScan: cadeaubon-links en korte codes', () => {
+  assert.deepEqual(G.classifyScan('https://omrzdigital.nl/cadeaubon/k9X2pQ7vLm3a'), { kind: 'gift', code: 'k9X2pQ7vLm3a' });
+  assert.deepEqual(G.classifyScan('https://api.omrzdigital.nl/cadeaubon/AbC123?utm=wa#x'), { kind: 'gift', code: 'AbC123' });
+  assert.deepEqual(G.classifyScan('HTTPS://OMRZDIGITAL.NL/CADEAUBON/XYZ'), { kind: 'gift', code: 'XYZ' });
+  assert.deepEqual(G.classifyScan('abcd-efgh-jk'), { kind: 'gift', code: 'ABCD-EFGH-JK' });
+});
+
+test('classifyScan: stempelkaart-QR (UUID) en andere tekst blijven stempelflow', () => {
+  const uuid = '3f2b8c1e-9a4d-4e6f-b7c2-1d0e5a9f8b34';
+  assert.deepEqual(G.classifyScan(uuid), { kind: 'stamp', code: uuid });
+  assert.equal(G.classifyScan('https://omrzdigital.nl/stamp/card/abc').kind, 'stamp');
+  assert.equal(G.classifyScan('QR-SANNE').kind, 'stamp');
+  assert.equal(G.classifyScan('').kind, 'stamp');
+});
+
+test('newIdempotencyKey: uuid v4, uniek', () => {
+  const a = G.newIdempotencyKey(), b = G.newIdempotencyKey();
+  assert.match(a, /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+  assert.notEqual(a, b);
+});
+
+test('errorMessage: elke contractcode heeft een Nederlandse melding', () => {
+  const codes = ['plan_required', 'gift_card_not_found', 'gift_card_blocked', 'gift_card_expired', 'gift_card_empty',
+    'insufficient_balance', 'invalid_amount', 'owner_only', 'already_reversed', 'rate_limited'];
+  for (const c of codes) {
+    const m = G.errorMessage(c, {});
+    assert.ok(m && m !== 'Er ging iets mis. Probeer het opnieuw.', c);
+  }
+  assert.equal(G.errorMessage('insufficient_balance', { balance_cents: 2000 }), `Onvoldoende saldo. Er staat nog €${S}20,00 op deze cadeaubon.`);
+  assert.equal(G.errorMessage('iets_nieuws', { error: 'Serverbericht' }), 'Serverbericht');
+  assert.equal(G.errorMessage(undefined, {}), 'Er ging iets mis. Probeer het opnieuw.');
+});
+
+test('isNotLive: 404 zonder code = backend niet live, met code = onbekende bon', () => {
+  assert.equal(G.isNotLive(404, {}), true);
+  assert.equal(G.isNotLive(404, null), true);
+  assert.equal(G.isNotLive(404, { code: 'gift_card_not_found' }), false);
+  assert.equal(G.isNotLive(500, {}), false);
+});
