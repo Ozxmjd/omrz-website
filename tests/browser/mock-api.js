@@ -181,6 +181,9 @@ function api(req, res, url, body, rawBody) {
       return send(res, 200, { success: true, mail: { status: r.status, to: target, email: r.to, error: r.error }, gift_card: pub(g) });
     }
     if (p === '/api/stamp/gift-cards/design') {
+      if (S.cfg.designFail === 404) { res.writeHead(404, { 'Content-Type': 'text/html' }); return res.end('Cannot ' + req.method); }
+      if (S.cfg.designFail === 503) return fail(res, 503, 'migration_missing', 'Draai migratie');
+      if (S.cfg.designFail === 'net') return req.socket.destroy();
       if (req.method === 'GET') {
         const d = designOf(card);
         return send(res, 200, { success: true, card_id: card, ...d, preview_url: BASE + '/__preview?card=' + card + '&v=' + S.designVersion });

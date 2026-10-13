@@ -8141,7 +8141,7 @@
           <div class="seg" role="tablist" aria-label="Cadeaubonnen">
             <button type="button" role="tab" data-gc-view="list">Bonnen</button>
             <button type="button" role="tab" data-gc-view="report">Rapport</button>
-            <button type="button" role="tab" data-gc-view="design">Ontwerp</button>
+            <button type="button" role="tab" data-gc-view="design" id="gcDesignTab" hidden>Ontwerp</button>
           </div>
           <button type="button" class="btn btn-primary" data-gc-new>Nieuwe cadeaubon</button>
         </div>
@@ -8191,6 +8191,7 @@
       if (sel) sel.value = gcReport.location;
       document.getElementById('gcScannerSwitch').addEventListener('change', (e) => toggleGiftScanner(e.target));
       loadGiftScannerSetting();
+      probeGiftDesign();
       document.getElementById('gcSearch').addEventListener('input', () => {
         clearTimeout(gcSearchTimer);
         gcSearchTimer = setTimeout(() => loadGiftList(true), 250);
@@ -8726,6 +8727,21 @@
           { method: 'POST', body: JSON.stringify({ note }) });
         gcAfterAction(gcDetailId, `Afschrijving van ${bedrag} teruggedraaid ✓`);
       } catch (err) { btn.disabled = false; satDetail(gcErrText(err), 'error'); }
+    }
+
+    // De tab Ontwerp verschijnt pas als GET /design een geldig antwoord geeft. Bestaat het
+    // endpoint (nog) niet, of is er een fout: tab stil verborgen, geen melding.
+    async function probeGiftDesign() {
+      let ok = false;
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/gift-cards/design?card_id=' + encodeURIComponent(cardId), { headers: authHeaders() });
+        const data = res.ok ? await res.json().catch(() => null) : null;
+        ok = !!(data && data.success === true);
+      } catch (_) { ok = false; }
+      const tab = document.getElementById('gcDesignTab');
+      if (!tab) return;
+      tab.hidden = !ok;
+      if (!ok && gcView === 'design') setGiftView('list');
     }
 
     // ---- Ontwerp van de cadeaubon (Premium Plus, alleen de eigenaar ziet deze pagina) ----

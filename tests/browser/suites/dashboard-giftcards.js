@@ -443,10 +443,24 @@ module.exports = async function run(env) {
   await p.screenshot({ path: OUT + '/gcd-detail-mail-1440.png' });
   await ctx.close();
 
+  // ===== 12a. Tab Ontwerp alleen als GET /design werkt =====
+  for (const [f, label] of [[404, '404 (endpoint bestaat niet)'], [503, '503'], ['net', 'netwerkfout']]) {
+    await post('/__reset');
+    await post('/__cfg', { designFail: f });
+    ({ ctx, p } = await open(b, 'tok-pp', 'pp', null, { expectErrors: true }));
+    await p.waitForSelector('.gc-row'); await p.waitForTimeout(500);
+    check(`12a. Zonder /design (${label}): tab Ontwerp verborgen, geen foutmelding`, !(await vis(p, '[data-gc-view="design"]'))
+      && (await p.$$('.gc-banner.error')).length === 0 && !/ontwerp/i.test(await txt(p, '#gcWrap .gc-top')));
+    await ctx.close();
+  }
+  await post('/__cfg', { designFail: null });
+
   // ===== 12. Ontwerp =====
   await post('/__reset');
   ({ ctx, p } = await open(b, 'tok-pp', 'pp'));
   await p.waitForSelector('.gc-row');
+  await p.waitForSelector('[data-gc-view="design"]:not([hidden])');
+  check('12a. Met /design: tab Ontwerp zichtbaar', await vis(p, '[data-gc-view="design"]'));
   await p.click('[data-gc-view="design"]'); await p.waitForSelector('#gcDesignFrame');
   const chips = await p.$$eval('.gc-drow .gc-dchip', c => c.map(x => x.textContent));
   check('12. Zes velden, allemaal "Van stempelkaart"', chips.length === 6 && chips.every(t => t === 'Van stempelkaart'), chips.join('|'));
@@ -485,6 +499,7 @@ module.exports = async function run(env) {
   for (const vp of [{ width: 820, height: 1180 }, { width: 390, height: 844 }]) {
     ({ ctx, p } = await open(b, 'tok-pp', 'pp', vp));
     await p.waitForSelector('.gc-row');
+    await p.waitForSelector('[data-gc-view="design"]:not([hidden])');
     await p.click('[data-gc-view="design"]'); await p.waitForSelector('#gcDesignFrame');
     check(`12. ${vp.width}px ontwerp: geen horizontale scroll`, await noH(p));
     await p.screenshot({ path: OUT + `/gcd-design-${vp.width}.png`, fullPage: true });
