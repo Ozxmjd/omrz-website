@@ -221,3 +221,18 @@ test('mailOutcome volgens de backend: pass.to bepaalt het doel, geen dubbele reg
   const none = G.mailOutcome({ pass: { to: null, email: null, status: 'skipped' }, buyer: { email: 'k@b.nl', status: 'sent' } });
   assert.deepEqual(none.rows.map(r => [r.target, r.kind]), [['buyer', 'confirmation']]);
 });
+
+test('kleuren in kleine letters: geen schijnwijziging en versturen in kleine letters', () => {
+  const o = { pass_color: { value: '#2e5b45', inherited: false }, text_color: { value: '#ffffff', inherited: true }, logo_url: { value: null, inherited: true },
+    background_url: { value: null, inherited: true }, business_name: { value: 'Zaak', inherited: true }, show_name: { value: true, inherited: true } };
+  const c = JSON.parse(JSON.stringify(o));
+  c.pass_color.value = '#2E5B45';
+  assert.deepEqual(G.designBody('c', c, o), { card_id: 'c' });                       // zelfde kleur, andere schrijfwijze
+  c.pass_color.value = '#AABBCC';
+  assert.deepEqual(G.designBody('c', c, o), { card_id: 'c', pass_color: '#aabbcc' });
+  c.text_color = { value: '#FFFFFF', inherited: false };
+  assert.equal(G.designBody('c', c, o).text_color, '#ffffff');
+  assert.equal(G.normalizeColor('#2E5B45'), '#2e5b45');
+  assert.equal(G.normalizeColor('rood'), 'rood');
+  assert.equal(G.designValue('business_name', 'ABC'), 'ABC');
+});

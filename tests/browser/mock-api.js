@@ -206,7 +206,7 @@ function api(req, res, url, body, rawBody) {
           if (v === null) { delete own[k]; continue; }
           if ((k === 'pass_color' || k === 'text_color') && !/^#[0-9a-fA-F]{6}$/.test(v)) return fail(res, 400, 'invalid_color', 'Ongeldige kleur');
           if ((k === 'logo_url' || k === 'background_url') && !/^https:\/\//.test(v)) return fail(res, 400, 'invalid_url', 'Ongeldige link');
-          own[k] = v;
+          own[k] = (k === 'pass_color' || k === 'text_color') ? v.toLowerCase() : v;   // backend: kleuren in kleine letters
         }
         S.design[card] = own; S.designVersion++;
         return send(res, 200, { success: true, card_id: card, ...designOf(card), preview_url: BASE + '/__preview?card=' + card + '&v=' + S.designVersion });

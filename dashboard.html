@@ -8766,9 +8766,9 @@
       const out = {};
       GIFT.DESIGN_FIELDS.forEach(k => {
         const f = data && data[k];
-        out[k] = (f && typeof f === 'object' && 'value' in f)
-          ? { value: f.value === undefined ? null : f.value, inherited: f.inherited === true }
-          : { value: f === undefined ? null : f, inherited: true };
+        const raw = (f && typeof f === 'object' && 'value' in f) ? f.value : f;
+        out[k] = { value: raw === undefined ? null : GIFT.designValue(k, raw),
+          inherited: (f && typeof f === 'object' && 'value' in f) ? f.inherited === true : true };
       });
       return out;
     }
@@ -8847,7 +8847,7 @@
     function gcDesignInput(k, value) {
       const m = GC_DESIGN_META[k];
       if (m.type === 'url' && String(value).trim() === '') gcDesign.current[k] = { value: gcDesign.original[k].inherited ? gcDesign.original[k].value : null, inherited: true };
-      else gcDesign.current[k] = { value: m.type === 'url' || m.type === 'text' ? String(value).trim() : value, inherited: false };
+      else gcDesign.current[k] = { value: m.type === 'url' || m.type === 'text' ? String(value).trim() : m.type === 'color' ? GIFT.designValue(k, String(value).trim()) : value, inherited: false };
       const row = document.querySelector(`[data-gc-drow="${k}"]`);
       if (row) {
         const fresh = document.createElement('div'); fresh.innerHTML = gcDesignRowHTML(k);
@@ -8990,6 +8990,7 @@
     });
     document.getElementById('gcWrap').addEventListener('change', (e) => {
       const t = e.target;
+      if (gcDesign && t.dataset.gcDinput && GC_DESIGN_META[t.dataset.gcDinput].type === 'color' && GIFT.isHexColor(t.value)) t.value = t.value.toLowerCase();
       if (gcDesign && t.dataset.gcDinput && GC_DESIGN_META[t.dataset.gcDinput].type === 'bool') gcDesignInput(t.dataset.gcDinput, t.checked);
     });
     // getElementById i.p.v. de const modalBody: die wordt pas verderop in het script gedeclareerd.

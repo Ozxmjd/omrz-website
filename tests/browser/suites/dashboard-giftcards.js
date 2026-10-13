@@ -472,6 +472,23 @@ module.exports = async function run(env) {
     /Apple Wallet-pas.*alleen als smalle strip.*of helemaal niet.*publieke cadeaubonpagina en in Google Wallet.*volledig/.test(await txt(p, '[data-gc-drow="background_url"] .gc-dwarn')));
   await p.click('#gcDesignSave'); await p.waitForTimeout(200);
   check('12. Niets gewijzigd → geen PUT', /niets gewijzigd/.test(await txt(p, '#gcDesignNote')) && (await state()).log.designPut.length === 0);
+  // Zelfde kleur in hoofdletters is geen wijziging (de backend geeft kleine letters).
+  // Eerst een eigen kleur zetten, in hoofdletters, zoals iemand die zou intikken.
+  await fetch(B + '/api/stamp/gift-cards/design', { method: 'PUT', headers: { Authorization: 'Bearer tok-pp', 'Content-Type': 'application/json' }, body: JSON.stringify({ card_id: 'pp', pass_color: '#2E5B45' }) });
+  await fetch(B + '/__cfg', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+  const putsBefore = (await state()).log.designPut.length;
+  await p.click('[data-gc-view="list"]'); await p.click('[data-gc-view="design"]'); await p.waitForSelector('#gcDesignFrame');
+  const orig = await p.inputValue('[data-gc-dinput="pass_color"]');
+  check('12. Kleur van de backend in kleine letters in kleurkiezer en code', orig === '#2e5b45' && (await p.inputValue('[data-gc-dcolor="pass_color"]')) === orig, orig);
+  await p.fill('[data-gc-dinput="pass_color"]', orig.toUpperCase()); await p.click('#gcDesignSave'); await p.waitForTimeout(200);
+  check('12. Zelfde kleur in hoofdletters → "niets gewijzigd", geen PUT', /niets gewijzigd/.test(await txt(p, '#gcDesignNote')) && (await state()).log.designPut.length === putsBefore);
+  await p.click('[data-gc-inherit="pass_color"]');
+  await p.fill('[data-gc-dinput="pass_color"]', '#12345A');
+  await p.click('#gcDesignSave'); await p.waitForFunction(() => /opgeslagen/.test((document.getElementById('gcDesignNote') || {}).textContent || ''));
+  check('12. Nieuwe kleur in hoofdletters → PUT in kleine letters', (await state()).log.designPut.slice(-1)[0].pass_color === '#12345a', JSON.stringify((await state()).log.designPut.slice(-1)[0]));
+  await p.click('[data-gc-inherit="pass_color"]'); await p.click('#gcDesignSave');
+  await p.waitForFunction(() => /opgeslagen/.test((document.getElementById('gcDesignNote') || {}).textContent || ''));
+  await post('/__reset'); await p.click('[data-gc-view="list"]'); await p.click('[data-gc-view="design"]'); await p.waitForSelector('#gcDesignFrame');
   await p.fill('[data-gc-dinput="pass_color"]', '#123456');
   check('12. Kleur wijzigen → "Eigen instelling" + knop "Overnemen van stempelkaart"', /Eigen instelling/.test(await txt(p, '[data-gc-drow="pass_color"]')) && await vis(p, '[data-gc-inherit="pass_color"]'));
   await p.uncheck('[data-gc-dinput="show_name"]');

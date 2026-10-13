@@ -220,6 +220,11 @@
   const DESIGN_FIELDS = ['pass_color', 'text_color', 'logo_url', 'background_url', 'business_name', 'show_name'];
   const isHexColor = v => /^#[0-9a-fA-F]{6}$/.test(String(v || ''));
   const isHttpsUrl = v => { try { const u = new URL(String(v)); return u.protocol === 'https:'; } catch (_) { return false; } };
+  // Kleuren komen van de backend altijd in kleine letters (#2e5b45). We vergelijken en
+  // versturen ze daarom ook zo; andere waarden blijven ongemoeid.
+  const COLOR_FIELDS = ['pass_color', 'text_color'];
+  function normalizeColor(v) { return isHexColor(v) ? String(v).toLowerCase() : v; }
+  function designValue(k, v) { return COLOR_FIELDS.indexOf(k) !== -1 ? normalizeColor(v) : v; }
   // Alleen gewijzigde velden; null = weer overnemen van de stempelkaart.
   // current/original: { veld: { value, inherited } }.
   function designBody(cardId, current, original) {
@@ -227,7 +232,8 @@
     DESIGN_FIELDS.forEach(k => {
       const c = current[k] || {}, o = original[k] || {};
       if (c.inherited) { if (!o.inherited) body[k] = null; return; }
-      if (o.inherited || c.value !== o.value) body[k] = c.value;
+      const cv = designValue(k, c.value), ov = designValue(k, o.value);
+      if (o.inherited || cv !== ov) body[k] = cv;
     });
     return body;
   }
@@ -291,7 +297,7 @@
   const api = { formatCents, parseEuroToCents, normalizeShortCode, classifyScan, newIdempotencyKey, endOfDayAmsterdamISO,
     giftStatus, STATUS_LABELS, isPlanLock, scannerEnabledFrom, referenceFrom, scannerSettingsBody, errorMessage, isNotLive, MESSAGES, NOT_LIVE_MESSAGE,
     DELIVERY_MODES, validateGiftDelivery, giftCreateBody, resendBody, mailStateOf, mailOutcome, mailAddress,
-    DESIGN_FIELDS, designBody, validateDesignValue, isHexColor, isHttpsUrl };
+    DESIGN_FIELDS, designBody, validateDesignValue, isHexColor, isHttpsUrl, normalizeColor, designValue };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.OMRZGift = api;
 })(typeof window !== 'undefined' ? window : globalThis);
