@@ -425,6 +425,72 @@
         .result-card.sg-only #giveControls, .result-card.sg-only #rewardControls { display: none !important; }
         .result-card.sg-only .cust-name { margin-bottom: 26px; }
 
+        /* ===== Cadeaubonnen (Premium Plus) ===== */
+        .mode-switch { display: flex; gap: 6px; max-width: 420px; margin: 0 auto 22px; padding: 5px; border-radius: 16px;
+            background: rgba(var(--ink), .03); border: 1px solid var(--border); }
+        .mode-switch[hidden] { display: none; }
+        .mode-switch button { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+            font-family: inherit; font-size: 16px; font-weight: 600; color: var(--muted); padding: 13px 10px; border-radius: 12px;
+            border: 1px solid transparent; background: none; cursor: pointer; transition: color .2s var(--ease), background .2s var(--ease); }
+        .mode-switch button svg { width: 19px; height: 19px; }
+        .mode-switch button.active { color: #fff; background: var(--accent-soft); border-color: rgba(139,92,246,.4); box-shadow: var(--shadow-sm); }
+        .gift-entry { display: none; max-width: 420px; margin: 4px auto 0; text-align: center; }
+        .gift-entry.on { display: block; }
+        .gift-code-row { display: flex; gap: 10px; margin-top: 12px; }
+        .gift-code-row input { flex: 1; min-width: 0; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 20px; letter-spacing: .08em;
+            text-transform: uppercase; text-align: center; color: var(--text-strong); background: rgba(var(--ink), .035);
+            border: 1px solid var(--border-strong); border-radius: 14px; padding: 14px 12px; }
+        .gift-code-row input:focus { outline: none; border-color: rgba(139,92,246,.5); box-shadow: 0 0 0 3px rgba(99,102,241,.15); }
+        .gift-code-row .btn { width: auto; margin-top: 0; padding: 0 22px; flex: none; }
+        .wrong-qr { max-width: 480px; margin: 0 auto 18px; }
+        .wrong-qr .btn { margin-top: 10px; }
+
+        .gift-shop { font-size: 14px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent-2); }
+        .gift-to { font-size: 22px; font-weight: 600; letter-spacing: -.03em; color: var(--text-strong); margin-top: 6px; }
+        .gift-bal-lbl { font-size: 13px; color: var(--muted); margin-top: 22px; text-transform: uppercase; letter-spacing: .1em; }
+        .gift-bal { font-size: 56px; font-weight: 700; letter-spacing: -.045em; line-height: 1.05; color: var(--text-strong); margin: 4px 0 8px; }
+        .gift-badge { display: inline-block; font-size: 13px; font-weight: 600; padding: 5px 13px; border-radius: 999px; }
+        .gift-badge.active { color: #8fe0b0; background: rgba(74,222,128,.09); border: 1px solid rgba(74,222,128,.28); }
+        .gift-badge.bad { color: var(--red); background: rgba(255,80,80,.09); border: 1px solid rgba(255,80,80,.3); }
+        .gift-stop { margin: 22px 0 6px; padding: 22px 18px; border-radius: 18px; font-size: 22px; font-weight: 700; letter-spacing: -.02em;
+            color: #fff; background: linear-gradient(135deg, #dc2626, #b91c1c); box-shadow: 0 14px 36px rgba(220,38,38,.3); }
+        .gift-stop small { display: block; font-size: 14px; font-weight: 500; opacity: .9; margin-top: 6px; letter-spacing: 0; }
+        .gift-stop[hidden], #gForm[hidden] { display: none; }
+        .gift-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 24px 0 12px; }
+        .gift-field { text-align: left; padding: 12px 14px; border-radius: 14px; cursor: pointer; font-family: inherit; color: inherit;
+            background: rgba(var(--ink), .03); border: 1px solid var(--border-strong); transition: border-color .2s var(--ease), background .2s var(--ease); }
+        .gift-field small { display: block; font-size: 12px; color: var(--muted); }
+        .gift-field b { display: block; font-size: 24px; font-weight: 650; letter-spacing: -.03em; color: var(--text-strong); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .gift-field.on { border-color: rgba(52,211,153,.7); background: rgba(52,211,153,.08); box-shadow: 0 0 0 3px rgba(52,211,153,.14); }
+        .gift-field.bill b { color: var(--pearl); }
+        .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-bottom: 12px; }
+        .keypad button { font-family: inherit; font-size: 26px; font-weight: 600; color: var(--text-strong); padding: 16px 0; border-radius: 14px; cursor: pointer;
+            background: rgba(var(--ink), .045); border: 1px solid var(--border); transition: background .15s var(--ease), transform .1s var(--ease); touch-action: manipulation; }
+        .keypad button:active { transform: scale(.96); background: rgba(var(--ink), .09); }
+        .keypad button.del { font-size: 20px; color: var(--muted); }
+        .gift-quick { display: flex; gap: 9px; margin-bottom: 14px; }
+        .gift-quick .btn { margin-top: 0; padding: 13px 14px; font-size: 15px; }
+        .gift-confirm { margin-top: 4px; padding: 18px 16px; border-radius: 18px; background: rgba(52,211,153,.07); border: 1px solid rgba(52,211,153,.3); }
+        .gift-confirm[hidden] { display: none; }
+        .gift-confirm p { font-size: 18px; color: var(--text-strong); margin-bottom: 4px; }
+        .gift-confirm p b { font-size: 26px; letter-spacing: -.03em; }
+
+        .gift-done .gd-ic { width: 76px; height: 76px; margin: 0 auto 18px; border-radius: 24px; display: grid; place-items: center;
+            background: var(--green-grad); color: #04231a; box-shadow: 0 14px 34px rgba(16,185,129,.3); }
+        .gift-done .gd-ic svg { width: 36px; height: 36px; }
+        .gd-lbl { font-size: 15px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; }
+        .gd-big { font-size: 58px; font-weight: 700; letter-spacing: -.045em; line-height: 1.05; color: var(--text-strong); margin: 4px 0 14px; }
+        .gd-bal { font-size: 22px; color: var(--pearl); margin-bottom: 8px; }
+        .gd-bal b { color: var(--text-strong); }
+        .gd-ref { font-size: 16px; color: var(--muted); margin-bottom: 18px; }
+        .gd-ref b { font-family: ui-monospace, Menlo, Consolas, monospace; color: var(--text-strong); font-size: 19px; letter-spacing: .04em; }
+        .gd-remain { margin: 0 0 16px; padding: 16px; border-radius: 16px; font-size: 22px; font-weight: 600; color: #fde68a;
+            background: rgba(245,196,81,.1); border: 1px solid rgba(245,196,81,.4); }
+        .gd-remain[hidden] { display: none; }
+        .gd-kassa { padding: 16px; border-radius: 16px; font-size: 16px; line-height: 1.5; color: var(--text-strong);
+            background: var(--accent-soft); border: 1px solid rgba(139,92,246,.3); margin-bottom: 14px; }
+        .gd-kassa .btn { margin-top: 10px; }
+
         /* ===== iPad & telefoon ===== */
         @media (max-width: 720px) {
             .box { padding: 32px 24px 28px; }
@@ -443,6 +509,10 @@
             .sg-banner { padding: 18px 16px 16px; }
             .sg-banner .sg-title { font-size: 22px; }
             .sg-banner .sg-sub { font-size: 15.5px; }
+            .gift-bal { font-size: 46px; }
+            .gd-big { font-size: 48px; }
+            .gift-field b { font-size: 21px; }
+            .keypad button { padding: 14px 0; font-size: 24px; }
         }
     </style>
 </head>
@@ -519,6 +589,11 @@
 
         <div class="scan-body">
             <div class="inner">
+                <!-- Premium Plus: kiezen tussen stempelen en cadeaubonnen -->
+                <div class="mode-switch" id="modeSwitch" role="tablist" aria-label="Wat wil je scannen?" hidden>
+                    <button type="button" role="tab" data-mode="stamp" class="active" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg>Stempel</button>
+                    <button type="button" role="tab" data-mode="gift" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>Cadeaubon</button>
+                </div>
                 <!-- Idle / camera -->
                 <div id="scanStage">
                     <div class="scan-title">Klaar om te scannen</div>
@@ -536,6 +611,22 @@
                         <button class="camera-open" id="cameraBtn" onclick="startCamera()"><span class="cam-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span> Camera openen</button>
                     </div>
                     <div class="alert hidden" id="scanAlert" style="text-align:center;"></div>
+                    <!-- Stempelkaart gescand terwijl "Cadeaubon" actief is -->
+                    <div class="wrong-qr" id="wrongQr" hidden>
+                        <div class="alert info" style="text-align:center;margin-bottom:0">Dit is een stempelkaart, geen cadeaubon.</div>
+                        <button type="button" class="btn btn-gold" id="wrongQrBtn">Naar stempelen</button>
+                    </div>
+                    <!-- Cadeaubon: korte code intypen als scannen niet lukt -->
+                    <div class="gift-entry" id="giftEntry">
+                        <button type="button" class="manual-link" id="giftCodeToggle">Scannen lukt niet? Code intypen →</button>
+                        <div id="giftCodePanel" hidden>
+                            <div class="gift-code-row">
+                                <input type="text" id="giftCodeInput" placeholder="XXXX-XXXX-XX" maxlength="14" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Korte code van de cadeaubon" />
+                                <button type="button" class="btn btn-green" id="giftCodeBtn">Zoeken</button>
+                            </div>
+                            <div class="alert hidden" id="giftCodeAlert" style="text-align:center;margin-top:12px"></div>
+                        </div>
+                    </div>
 
                     <!-- Alternatief: handmatig zoeken als de camera niet werkt -->
                     <div class="manual-wrap" id="manualHint">
@@ -582,6 +673,58 @@
                     </div>
                 </div>
 
+                <!-- Cadeaubon: saldo en afschrijven -->
+                <div class="result" id="giftStage">
+                    <div class="result-card glass slide-up">
+                        <div class="gift-shop" id="gShop"></div>
+                        <div class="gift-to" id="gTo"></div>
+                        <div class="gift-bal-lbl">Saldo</div>
+                        <div class="gift-bal" id="gBal">—</div>
+                        <span class="gift-badge" id="gBadge"></span>
+                        <div class="gift-stop" id="gStop" role="alert" hidden></div>
+                        <div id="gForm" hidden>
+                            <div class="gift-fields">
+                                <button type="button" class="gift-field on" data-gtarget="amount" aria-label="Af te schrijven bedrag invoeren"><small>Afschrijven</small><b id="gAmt">€ 0</b></button>
+                                <button type="button" class="gift-field bill" data-gtarget="bill" aria-label="Rekeningbedrag invoeren (optioneel)"><small>Rekeningbedrag (optioneel)</small><b id="gBill">—</b></button>
+                            </div>
+                            <div class="keypad" id="gPad">
+                                <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button>
+                                <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button>
+                                <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button>
+                                <button type="button" data-k=",">,</button><button type="button" data-k="0">0</button><button type="button" data-k="del" class="del" aria-label="Wissen">⌫</button>
+                            </div>
+                            <div class="gift-quick">
+                                <button type="button" class="btn btn-ghost" id="gFull">Volledig saldo</button>
+                                <button type="button" class="btn btn-ghost" id="gClear">Wis alles</button>
+                            </div>
+                            <div class="alert hidden" id="giftAlert" style="text-align:center;"></div>
+                            <button type="button" class="btn btn-green" id="gRedeem">Afschrijven</button>
+                            <div class="gift-confirm" id="gConfirm" hidden>
+                                <p>Afschrijven: <b id="gConfirmAmt"></b></p>
+                                <button type="button" class="btn btn-green" id="gConfirmBtn">Ja, afschrijven</button>
+                                <button type="button" class="btn btn-ghost" id="gConfirmBack">Terug</button>
+                            </div>
+                        </div>
+                        <button class="btn btn-ghost" id="gCancel">Annuleren</button>
+                    </div>
+                </div>
+
+                <!-- Cadeaubon: afgeschreven -->
+                <div class="result" id="giftDoneStage">
+                    <div class="result-card glass slide-up gift-done">
+                        <div class="gd-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+                        <div class="gd-lbl">Afgeschreven</div>
+                        <div class="gd-big" id="gdAmount"></div>
+                        <div class="gd-bal">Nieuw saldo <b id="gdBal"></b></div>
+                        <div class="gd-ref">Referentie <b id="gdRef"></b></div>
+                        <div class="gd-remain" id="gdRemain" hidden></div>
+                        <div class="gd-kassa">Boek op de kassa als betaalmethode Cadeaubon: <b id="gdKassa"></b>
+                            <button type="button" class="btn btn-ghost" id="gdCopy">Kopieer bedrag</button>
+                        </div>
+                        <button class="btn btn-gold" id="gdNext">Volgende scan</button>
+                    </div>
+                </div>
+
                 <!-- Success -->
                 <div class="result" id="successStage">
                     <div class="result-card glass slide-up">
@@ -609,6 +752,7 @@
         </div>
     </div>
 
+    <script src="js/giftcards.js"></script>
     <script>
         const API_BASE = 'https://api.omrzdigital.nl'; // backend
         const LS = {
@@ -828,6 +972,8 @@
                 store.card_id = data.card_id; store.email = email;
                 store.biz = data.business_name || email;   // tijdelijk, tot de kaart binnen is
                 localStorage.setItem(LS.biz, store.biz);
+                // Vestiging van een manager: gaat mee bij het afschrijven van een cadeaubon.
+                if (data.role === 'manager' && data.location_id) localStorage.setItem(GIFT_LOC_KEY, data.location_id);
                 renderAccount();
                 hideAlert('pairNote');
                 $('pairPassword').value = '';
@@ -933,6 +1079,7 @@
             resetToScan();
             showScreen('scan');
             loadTodayStats();
+            refreshGiftAccess();
         }
         function resetToScan() {
             stopCamera();
@@ -945,6 +1092,7 @@
             $('cameraOpenWrap').style.display = 'flex';
             hideAlert('scanAlert');
             hideManualSearch();
+            giftReset();
         }
         // Vergrendelen = opnieuw de gedeelde code vragen (alleen als er een code is).
         function lockScreen() {
@@ -1116,7 +1264,7 @@
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
                 const code = jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' });
-                if (code && code.data) { onQrDetected(code.data.trim()); return; }
+                if (code && code.data) { routeScan(code.data.trim()); return; }
             }
             rafId = requestAnimationFrame(tick);
         }
@@ -1556,6 +1704,316 @@
             const wrap = $('successReward'), next = $('nextCustomerBtn');
             if (wrap) wrap.style.display = on ? 'block' : 'none';
             if (next) next.className = on ? 'btn btn-ghost' : 'btn btn-gold';
+        }
+
+        // ================= CADEAUBONNEN (Premium Plus) =================
+        // Eén camera voor beide: routeScan herkent een cadeaubon (link met /cadeaubon/ of korte
+        // code) en stuurt al het andere ongewijzigd naar de stempelflow (onQrDetected).
+        const GIFT = window.OMRZGift;
+        const GIFT_LOC_KEY = 'stamp_location_id';   // valt onder stamp_*, dus clearSession wist hem mee
+        let giftEnabled = false;                    // Premium Plus (of proefperiode) volgens /subscription
+        let scanMode = 'stamp';                     // stamp | gift
+        let giftAccessSeq = 0;
+        let gift = null;                            // { code, card } na een lookup
+        let gTarget = 'amount';
+        let gAmtStr = '', gBillStr = '';
+        let gAttempt = null;                        // { key, amount, bill }: blijft tot de poging klaar is
+        let gBusy = false;
+        let gLastResult = null;
+
+        // Abonnement ophalen (werkt voor eigenaar én manager). Alleen bij Premium Plus de keuze tonen;
+        // bij elke twijfel blijft het de gewone stempelscanner.
+        async function refreshGiftAccess() {
+            const seq = ++giftAccessSeq;
+            setGiftEnabled(false);
+            try {
+                const res = await apiCall(API_BASE + '/api/stamp/subscription');
+                const d = await res.json().catch(() => ({}));
+                if (seq !== giftAccessSeq || !res.ok) return;
+                const plan = String(d.plan || '').toLowerCase().replace(/[^a-z]/g, '');
+                const ok = d.free_access === true || plan === 'premiumplus' || String(d.access_status || '').toLowerCase() === 'trial';
+                setGiftEnabled(ok);
+            } catch (_) { /* geen cadeaubonnen tonen; stempelen werkt gewoon */ }
+        }
+        function setGiftEnabled(on) {
+            giftEnabled = !!on;
+            $('modeSwitch').hidden = !giftEnabled;
+            if (!giftEnabled) setScanMode('stamp');
+        }
+
+        const STAMP_TEXTS = { title: null, hint: null };
+        function setScanMode(mode) {
+            scanMode = (mode === 'gift' && giftEnabled) ? 'gift' : 'stamp';
+            document.querySelectorAll('#modeSwitch [data-mode]').forEach(b => {
+                const on = b.dataset.mode === scanMode;
+                b.classList.toggle('active', on); b.setAttribute('aria-selected', on ? 'true' : 'false');
+            });
+            const title = document.querySelector('#scanStage .scan-title'), hint = document.querySelector('#scanStage .scan-hint-top');
+            if (STAMP_TEXTS.title === null) { STAMP_TEXTS.title = title.textContent; STAMP_TEXTS.hint = hint.textContent; }
+            const g = scanMode === 'gift';
+            title.textContent = g ? 'Cadeaubon scannen' : STAMP_TEXTS.title;
+            hint.textContent = g ? 'Richt de camera op de QR-code van de cadeaubon, of typ de korte code in.' : STAMP_TEXTS.hint;
+            $('manualHint').style.display = g ? 'none' : '';
+            $('giftEntry').classList.toggle('on', g);
+            $('wrongQr').hidden = true;
+            if (!g) { $('giftCodePanel').hidden = true; hideAlert('giftCodeAlert'); }
+        }
+        document.getElementById('modeSwitch').addEventListener('click', (e) => {
+            const b = e.target.closest('[data-mode]');
+            if (!b || b.dataset.mode === scanMode) return;
+            resetToScan();
+            setScanMode(b.dataset.mode);
+        });
+
+        // Elke camera-scan komt hier binnen.
+        function routeScan(text) {
+            if (!giftEnabled) { onQrDetected(text); return; }          // ander plan: precies zoals altijd
+            const c = GIFT.classifyScan(text);
+            if (c.kind === 'gift') { openGift(c.code); return; }       // ongeacht welke knop actief is
+            if (scanMode === 'gift') {
+                stopCamera();
+                $('cameraWrap').classList.remove('on');
+                $('cameraOpenWrap').style.display = 'flex';
+                $('wrongQr').hidden = false;
+                $('wrongQrBtn').onclick = () => { $('wrongQr').hidden = true; setScanMode('stamp'); onQrDetected(text); };
+                return;
+            }
+            onQrDetected(text);
+        }
+
+        // ---- Korte code intypen ----
+        $('giftCodeToggle').addEventListener('click', () => {
+            const p = $('giftCodePanel'); p.hidden = !p.hidden;
+            if (!p.hidden) $('giftCodeInput').focus();
+        });
+        $('giftCodeInput').addEventListener('input', (e) => {
+            // Streepjes zelf plaatsen: ABCDEFGHJK → ABCD-EFGH-JK
+            const raw = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
+            e.target.value = [raw.slice(0, 4), raw.slice(4, 8), raw.slice(8, 10)].filter(Boolean).join('-');
+        });
+        $('giftCodeInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); $('giftCodeBtn').click(); } });
+        $('giftCodeBtn').addEventListener('click', () => {
+            const code = GIFT.normalizeShortCode($('giftCodeInput').value);
+            if (!code) { showAlert('giftCodeAlert', 'Een korte code heeft 10 tekens: XXXX-XXXX-XX.'); return; }
+            hideAlert('giftCodeAlert');
+            openGift(code);
+        });
+
+        // ---- Lookup ----
+        function showGiftStage(id) {
+            $('scanStage').style.display = 'none';
+            ['resultStage', 'successStage', 'giftStage', 'giftDoneStage'].forEach(s => $(s).classList.toggle('on', s === id));
+            const rc = $(id).querySelector('.result-card');
+            rc.classList.remove('slide-up'); void rc.offsetWidth; rc.classList.add('slide-up');
+        }
+        async function openGift(code) {
+            stopCamera();
+            $('cameraWrap').classList.remove('on');
+            $('wrongQr').hidden = true;
+            hideAlert('scanAlert');
+            showAlert('scanAlert', 'Cadeaubon ophalen…');
+            $('scanAlert').classList.add('info');
+            try {
+                const res = await apiCall(API_BASE + '/api/stamp/gift-cards/lookup?code=' + encodeURIComponent(code) + '&card_id=' + encodeURIComponent(activeCardId()));
+                const data = await res.json().catch(() => ({}));
+                $('scanAlert').classList.remove('info');
+                if (!res.ok || data.success === false) {
+                    $('cameraOpenWrap').style.display = 'flex';
+                    showAlert('scanAlert', GIFT.isNotLive(res.status, data) ? GIFT.NOT_LIVE_MESSAGE : GIFT.errorMessage(data.code, data));
+                    return;
+                }
+                hideAlert('scanAlert');
+                gift = { code, card: data.gift_card || {}, canRedeem: data.can_redeem === true };
+                gAttempt = null; gAmtStr = ''; gBillStr = ''; gTarget = 'amount';
+                renderGift();
+                showGiftStage('giftStage');
+            } catch (err) {
+                $('scanAlert').classList.remove('info');
+                if (err.handled) return;
+                $('cameraOpenWrap').style.display = 'flex';
+                showAlert('scanAlert', err.network ? err.message : 'Kon de cadeaubon niet ophalen. Probeer het opnieuw.');
+            }
+        }
+
+        const GIFT_STOP = {
+            blocked: ['Geblokkeerd', 'Deze cadeaubon kan niet worden gebruikt.'],
+            expired: ['Verlopen', 'Deze cadeaubon is niet meer geldig.'],
+            empty: ['Saldo op', 'Er staat niets meer op deze cadeaubon.'],
+        };
+        function giftStatusKey(g) {
+            if (g.status === 'blocked' || g.status === 'expired') return g.status;
+            if (g.status === 'empty' || !(g.balance_cents > 0)) return 'empty';
+            return g.status === 'active' ? 'active' : g.status;
+        }
+        function renderGift() {
+            const g = gift.card;
+            $('gShop').textContent = g.shop_name || store.biz || '';
+            $('gTo').textContent = g.recipient_name ? 'Voor ' + g.recipient_name : 'Cadeaubon ' + (g.short_code || '');
+            $('gBal').textContent = GIFT.formatCents(g.balance_cents);
+            const key = giftStatusKey(g);
+            const stop = GIFT_STOP[key] || (!gift.canRedeem ? ['Niet bruikbaar', 'Deze cadeaubon kan nu niet worden afgeschreven.'] : null);
+            $('gBadge').className = 'gift-badge ' + (stop ? 'bad' : 'active');
+            $('gBadge').textContent = stop ? stop[0] : 'Actief' + (g.expires_at ? ' · geldig t/m ' + new Date(g.expires_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' }) : '');
+            $('gStop').hidden = !stop;
+            if (stop) $('gStop').innerHTML = esc(stop[0]) + '<small>' + esc(stop[1]) + '</small>';
+            $('gForm').hidden = !!stop;
+            $('gCancel').textContent = stop ? 'Volgende scan' : 'Annuleren';
+            hideAlert('giftAlert');
+            renderGiftInputs();
+        }
+
+        // ---- Numeriek pad ----
+        const gCents = s => (s ? GIFT.parseEuroToCents(s) : null);
+        function gShow(str) {
+            if (!str) return '€ 0';
+            const [w, f] = str.split(',');
+            const whole = (w || '0').replace(/^0+(?=\d)/, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            return '€ ' + whole + (f !== undefined ? ',' + f : '');
+        }
+        function renderGiftInputs() {
+            $('gAmt').textContent = gShow(gAmtStr);
+            $('gBill').textContent = gBillStr ? gShow(gBillStr) : '—';
+            document.querySelectorAll('[data-gtarget]').forEach(b => b.classList.toggle('on', b.dataset.gtarget === gTarget));
+            const c = gCents(gAmtStr);
+            $('gRedeem').disabled = gBusy || !c;
+            $('gRedeem').textContent = c ? 'Afschrijven ' + GIFT.formatCents(c) : 'Afschrijven';
+            $('gConfirm').hidden = true;
+            $('gRedeem').hidden = false;
+        }
+        // Een ander bedrag is een nieuwe poging: de oude sleutel hoort bij het oude bedrag.
+        function giftInputChanged() { gAttempt = null; hideAlert('giftAlert'); renderGiftInputs(); }
+        function typeKey(str, k) {
+            if (k === 'del') return str.slice(0, -1);
+            if (k === ',') return str.includes(',') ? str : (str || '0') + ',';
+            const [w, f] = str.split(',');
+            if (f !== undefined) return f.length >= 2 ? str : str + k;
+            if ((w || '').replace(/^0+/, '').length >= 6) return str;      // tot € 999.999
+            return (w === '0' ? '' : str) + k;
+        }
+        $('gPad').addEventListener('click', (e) => {
+            const b = e.target.closest('[data-k]');
+            if (!b || gBusy) return;
+            if (gTarget === 'bill') {
+                gBillStr = typeKey(gBillStr, b.dataset.k);
+                // Rekening lager dan het saldo: dat is wat er afgeschreven wordt. Hoger: het hele saldo.
+                const bill = gCents(gBillStr);
+                if (bill) gAmtStr = centsToStr(Math.min(bill, gift.card.balance_cents));
+            } else {
+                gAmtStr = typeKey(gAmtStr, b.dataset.k);
+            }
+            giftInputChanged();
+        });
+        document.querySelectorAll('[data-gtarget]').forEach(b => b.addEventListener('click', () => { gTarget = b.dataset.gtarget; renderGiftInputs(); }));
+        function centsToStr(c) { return Math.floor(c / 100) + ',' + String(c % 100).padStart(2, '0'); }
+        $('gFull').addEventListener('click', () => { if (gBusy) return; gAmtStr = centsToStr(gift.card.balance_cents); gTarget = 'amount'; giftInputChanged(); });
+        $('gClear').addEventListener('click', () => { if (gBusy) return; gAmtStr = ''; gBillStr = ''; gTarget = 'amount'; giftInputChanged(); });
+
+        // ---- Afschrijven ----
+        $('gRedeem').addEventListener('click', () => {
+            const c = gCents(gAmtStr);
+            if (!c) { showAlert('giftAlert', GIFT.MESSAGES.invalid_amount); return; }
+            if (c > gift.card.balance_cents) { showAlert('giftAlert', GIFT.errorMessage('insufficient_balance', { balance_cents: gift.card.balance_cents })); return; }
+            $('gConfirmAmt').textContent = GIFT.formatCents(c);
+            $('gRedeem').hidden = true;
+            $('gConfirm').hidden = false;
+        });
+        $('gConfirmBack').addEventListener('click', () => { if (!gBusy) renderGiftInputs(); });
+        $('gConfirmBtn').addEventListener('click', redeemGift);
+
+        async function redeemGift() {
+            if (gBusy) return;                                   // herhaalde tik tijdens het verzoek
+            const amount = gCents(gAmtStr);
+            if (!amount) return;
+            const bill = gCents(gBillStr);
+            // Zelfde poging (zelfde bedrag) = zelfde sleutel; de server schrijft die maar één keer af.
+            if (!gAttempt || gAttempt.amount !== amount || gAttempt.bill !== bill) {
+                gAttempt = { key: GIFT.newIdempotencyKey(), amount, bill };
+            }
+            const body = { code: gift.code, amount_cents: amount, idempotency_key: gAttempt.key };
+            if (bill) body.bill_total_cents = bill;
+            const loc = localStorage.getItem(GIFT_LOC_KEY);
+            if (loc) body.location_id = loc;
+            gBusy = true;
+            const btn = $('gConfirmBtn'), back = $('gConfirmBack');
+            btn.disabled = true; back.disabled = true; btn.textContent = 'Bezig…';
+            hideAlert('giftAlert');
+            try {
+                const res = await apiCall(API_BASE + '/api/stamp/gift-cards/redeem', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+                });
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.success !== false) {
+                    gAttempt = null;                              // poging klaar
+                    showGiftDone(data, amount);
+                    return;
+                }
+                if (res.status >= 500) throw Object.assign(new Error('server'), { retry: true });
+                // Een duidelijk antwoord van de server: deze poging is klaar.
+                gAttempt = null;
+                if (GIFT.isNotLive(res.status, data)) { showAlert('giftAlert', GIFT.NOT_LIVE_MESSAGE); return; }
+                if (data.code === 'insufficient_balance' && Number.isInteger(data.balance_cents)) {
+                    gift.card.balance_cents = data.balance_cents;
+                    $('gBal').textContent = GIFT.formatCents(data.balance_cents);
+                }
+                if (['gift_card_blocked', 'gift_card_expired', 'gift_card_empty'].includes(data.code)) {
+                    gift.card.status = data.code === 'gift_card_blocked' ? 'blocked' : data.code === 'gift_card_expired' ? 'expired' : 'empty';
+                    if (data.code === 'gift_card_empty') gift.card.balance_cents = 0;
+                    renderGift();
+                    return;
+                }
+                showAlert('giftAlert', GIFT.errorMessage(data.code, data));
+            } catch (err) {
+                if (err.handled) return;
+                // Netwerk of server: onbekend of het gelukt is. De sleutel blijft, zodat opnieuw
+                // proberen nooit dubbel afschrijft.
+                showAlert('giftAlert', (err.network ? err.message : 'De server reageerde niet goed.') + ' Tik nogmaals op "Ja, afschrijven"; er wordt niet dubbel afgeschreven.');
+            } finally {
+                gBusy = false;
+                btn.disabled = false; back.disabled = false; btn.textContent = 'Ja, afschrijven';
+            }
+        }
+
+        function showGiftDone(d, fallbackAmount) {
+            const amount = Number.isInteger(d.amount_cents) ? d.amount_cents : fallbackAmount;
+            gLastResult = { amount };
+            $('gdAmount').textContent = GIFT.formatCents(amount);
+            $('gdBal').textContent = GIFT.formatCents(d.balance_after_cents);
+            $('gdRef').textContent = d.reference_number || '—';
+            $('gdKassa').textContent = GIFT.formatCents(amount);
+            const rem = d.remaining_to_pay_cents;
+            $('gdRemain').hidden = !Number.isInteger(rem);
+            if (Number.isInteger(rem)) $('gdRemain').textContent = 'Nog te betalen: ' + GIFT.formatCents(rem);
+            $('gdCopy').textContent = 'Kopieer bedrag';
+            showGiftStage('giftDoneStage');
+        }
+        $('gdCopy').addEventListener('click', async () => {
+            if (!gLastResult) return;
+            const plain = centsToStr(gLastResult.amount);           // "30,00": zo plakt het in elke kassa
+            const btn = $('gdCopy');
+            try {
+                if (navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(plain);
+                else {
+                    const ta = document.createElement('textarea'); ta.value = plain; ta.style.position = 'fixed'; ta.style.opacity = '0';
+                    document.body.appendChild(ta); ta.select(); const ok = document.execCommand('copy'); ta.remove();
+                    if (!ok) throw new Error('kopiëren geweigerd');
+                }
+                btn.textContent = 'Gekopieerd: ' + plain;
+            } catch (_) { btn.textContent = 'Kopiëren mislukt'; }
+            setTimeout(() => { btn.textContent = 'Kopieer bedrag'; }, 2200);
+        });
+        $('gdNext').addEventListener('click', () => resetToScan());
+        $('gCancel').addEventListener('click', () => { if (!gBusy) resetToScan(); });
+
+        // Vanuit resetToScan: cadeaubonschermen dicht en de staat leeg.
+        function giftReset() {
+            if (gBusy) return;
+            gift = null; gAttempt = null; gAmtStr = ''; gBillStr = ''; gTarget = 'amount'; gLastResult = null;
+            $('giftStage').classList.remove('on');
+            $('giftDoneStage').classList.remove('on');
+            $('wrongQr').hidden = true;
+            $('scanAlert').classList.remove('info');
+            $('giftCodeInput').value = '';
+            hideAlert('giftCodeAlert');
         }
 
         // ================= CONFETTI =================
