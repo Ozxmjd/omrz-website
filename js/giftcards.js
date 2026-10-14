@@ -81,8 +81,16 @@
     const h = String(host || '').toLowerCase();
     return h === 'omrzdigital.nl' || h.endsWith('.omrzdigital.nl');
   }
+  // Sinds backend e101948 staat er in de QR van een bon OMRZCB1:<32 hex>. Dat voorvoegsel
+  // gebruikt alleen een cadeaubon; oudere bonnen hebben alleen de 32 hex.
+  const GIFT_QR_PREFIX = 'OMRZCB1:';
   function classifyScan(text) {
     const raw = String(text == null ? '' : text).trim();
+    if (raw.toUpperCase().startsWith(GIFT_QR_PREFIX)) {
+      const rest = raw.slice(GIFT_QR_PREFIX.length).trim();
+      if (LONG_RX.test(rest)) return { kind: 'gift', code: rest.toLowerCase() };
+      return { kind: 'gift', code: normalizeShortCode(rest) || raw };       // voorvoegsel = altijd een bon
+    }
     if (UUID_RX.test(raw)) return { kind: 'stamp', code: raw };                // stempelkaart, altijd eerst
     if (LONG_RX.test(raw)) return { kind: 'gift', code: raw.toLowerCase() };
     if (/^https?:\/\//i.test(raw)) {
@@ -344,7 +352,7 @@
     return (data && typeof data.error === 'string' && data.error) || 'Er ging iets mis. Probeer het opnieuw.';
   }
 
-  const api = { formatCents, parseEuroToCents, normalizeShortCode, classifyScan, giftShareUrl, giftShortCodeDisplay, redeemResult, newIdempotencyKey, endOfDayAmsterdamISO,
+  const api = { formatCents, parseEuroToCents, normalizeShortCode, classifyScan, GIFT_QR_PREFIX, giftShareUrl, giftShortCodeDisplay, redeemResult, newIdempotencyKey, endOfDayAmsterdamISO,
     giftStatus, STATUS_LABELS, isPlanLock, scannerEnabledFrom, referenceFrom, scannerSettingsBody, errorMessage, isNotLive, MESSAGES, NOT_LIVE_MESSAGE,
     DELIVERY_MODES, validateGiftDelivery, giftCreateBody, resendBody, mailStateOf, mailOutcome, mailAddress,
     DESIGN_FIELDS, NO_INHERIT_FIELDS, designBody, validateDesignValue, isHexColor, isHttpsUrl, normalizeColor, designValue };

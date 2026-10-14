@@ -8716,7 +8716,11 @@
       try {
         await gcFetch('/api/stamp/gift-cards/' + encodeURIComponent(id) + '/' + action, { method: 'POST', body: '{}' });
         gcAfterAction(id, action === 'block' ? 'Cadeaubon geblokkeerd ✓' : 'Cadeaubon gedeblokkeerd ✓');
-      } catch (err) { btn.disabled = false; satDetail(gcErrText(err), 'error'); }
+      } catch (err) {
+        btn.disabled = false;
+        // De route bestaat (nog) niet in de backend: dat is iets anders dan "cadeaubonnen niet beschikbaar".
+        satDetail(err && err.code === 'not_live' ? (action === 'block' ? 'Blokkeren' : 'Deblokkeren') + ' is nog niet beschikbaar. Probeer het later opnieuw.' : gcErrText(err), 'error');
+      }
     }
 
     async function reverseGiftTx(txId, amt, btn) {

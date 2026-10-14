@@ -435,6 +435,11 @@ module.exports = async function run(env) {
   const daan = (await state()).gifts.find(g => g.short_code === 'BZKD000001');
   await p.evaluate(id => openGiftDetail(id), daan.id); await p.waitForSelector('.gc-detail');
   check('11. Geblokkeerd: uitleg dat de pas in de Wallet blijft staan en dat toont', /De pas blijft in de Wallet van de klant staan en toont dat de bon geblokkeerd is/.test(await txt(p, '.gc-passnote')));
+  // Blokkeren-route ontbreekt in de backend (404 zonder code): eerlijke melding
+  await p.route('**/unblock', r => r.fulfill({ status: 404, contentType: 'text/html', body: 'Cannot POST' }));
+  await p.click('[data-gc-block="unblock"]'); await p.waitForTimeout(300);
+  check('11. Deblokkeren zonder backend-route → "Deblokkeren is nog niet beschikbaar"', /Deblokkeren is nog niet beschikbaar/.test(await txt(p, '#gcDetailNote')) && !/Cadeaubonnen zijn nog niet beschikbaar/.test(await txt(p, '#gcDetailNote')), await txt(p, '#gcDetailNote'));
+  await p.unroute('**/unblock');
   await p.click('[data-gc-resend-open]'); await p.fill('#gcResendEmail', 'daan@example.nl'); await p.click('#gcResendBtn'); await p.waitForTimeout(400);
   check('11. 409 gift_card_blocked → nette melding', /geblokkeerd/.test(await txt(p, '#gcResendNote')));
   await p.click('#modalClose');

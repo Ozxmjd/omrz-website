@@ -80,7 +80,9 @@ const pub = g => {
 const send = (res, st, obj) => { res.writeHead(st, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' }); res.end(JSON.stringify(obj)); };
 const fail = (res, st, code, error, extra) => send(res, st, { success: false, code, error, ...(extra || {}) });
 const findCode = (card, code) => {
-  let c = String(code || '').trim(); const m = c.match(/\/cadeaubon\/([^/?#]+)/i); if (m) c = m[1];
+  let c = String(code || '').trim();
+  if (c.toUpperCase().startsWith('OMRZCB1:')) c = c.slice(8).trim();          // QR-voorvoegsel (backend e101948)
+  const m = c.match(/\/cadeaubon\/([^/?#]+)/i); if (m) c = m[1];
   if (/^[0-9a-f]{32}$/i.test(c)) return S.gifts.find(g => g.card_id === card && g.code === c.toLowerCase());
   return S.gifts.find(g => g.card_id === card && g.short_code === normShort(c));
 };

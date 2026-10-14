@@ -271,3 +271,12 @@ test('kleuren in kleine letters: geen schijnwijziging en versturen in kleine let
   assert.equal(G.normalizeColor('rood'), 'rood');
   assert.equal(G.designValue('business_name', 'ABC'), 'ABC');
 });
+
+test('classifyScan: het QR-voorvoegsel OMRZCB1: (backend e101948) is altijd een cadeaubon', () => {
+  assert.deepEqual(G.classifyScan('OMRZCB1:' + LONG), { kind: 'gift', code: LONG });
+  assert.deepEqual(G.classifyScan('omrzcb1:' + LONG.toUpperCase()), { kind: 'gift', code: LONG });
+  assert.deepEqual(G.classifyScan(' OMRZCB1: ' + LONG + ' '), { kind: 'gift', code: LONG });
+  assert.deepEqual(G.classifyScan('OMRZCB1:7K3M-P9QR-2X'), { kind: 'gift', code: '7K3M-P9QR-2X' });
+  assert.equal(G.classifyScan('OMRZCB1:iets-vreemds').kind, 'gift');
+  assert.equal(G.classifyScan('3f2b8c1e-9a4d-4e6f-b7c2-1d0e5a9f8b34').kind, 'stamp');
+});

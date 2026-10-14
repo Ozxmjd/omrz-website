@@ -269,6 +269,14 @@ module.exports = async function run(env) {
       await p.click('#gCancel');
     }
     check('R1. Lookup kreeg de lange code (kleine letters) en card_id', (await state()).log.lookup.slice(-1)[0] === LONG);
+    for (const qr of ['OMRZCB1:' + LONG, 'omrzcb1:' + LONG.toUpperCase()]) {
+      await giftMode(p); await scan(p, qr); await p.waitForTimeout(300);
+      check(`R1. QR met voorvoegsel "${qr.slice(0, 8)}…" → cadeaubonflow, in beide modi`, await vis(p, '#giftStage') && !(await vis(p, '#wrongQr')));
+      await p.click('#gCancel'); await p.evaluate(() => setScanMode('stamp'));
+      await scan(p, qr); await p.waitForTimeout(300);
+      check(`R1. Stempel-modus, "${qr.slice(0, 8)}…" → cadeaubonflow`, await vis(p, '#giftStage') && stampLookups.length === 0);
+      await p.click('#gCancel');
+    }
     await giftMode(p); await scan(p, '3f2b8c1e-9a4d-4e6f-b7c2-1d0e5a9f8b34'); await p.waitForTimeout(200);
     check('R1. Stempelkaart (UUID) in cadeaubon-modus → "Dit is een stempelkaart"', await vis(p, '#wrongQr') && !(await vis(p, '#giftStage')));
     await p.click('#giftBack');
