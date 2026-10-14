@@ -8753,26 +8753,27 @@
     const GC_DESIGN_META = {
       pass_color: { label: 'Kleur van de pas', type: 'color' },
       text_color: { label: 'Tekstkleur', type: 'color' },
-      logo_url: { label: 'Logo', type: 'url', hint: 'Link naar een afbeelding (https://…). Leeg laten = logo van de stempelkaart.' },
-      background_url: { label: 'Achtergrondafbeelding', type: 'url', hint: 'Link naar een afbeelding (https://…). Leeg laten = achtergrond van de stempelkaart.',
+      logo_url: { label: 'Logo', type: 'url', hint: 'Link naar een afbeelding in de eigen opslag van OMRZ (https://…supabase.co/…). Leeg laten = logo van de stempelkaart.' },
+      background_url: { label: 'Achtergrondafbeelding', type: 'url', hint: 'Link naar een afbeelding in de eigen opslag van OMRZ (https://…supabase.co/…). Leeg laten = achtergrond van de stempelkaart.',
         warn: 'Let op: op de Apple Wallet-pas wordt een achtergrondafbeelding alleen als smalle strip getoond, of helemaal niet. Op de publieke cadeaubonpagina en in Google Wallet ziet de klant hem wel volledig.' },
-      business_name: { label: 'Naam op de cadeaubon', type: 'text' },
-      show_name: { label: 'Naam van de zaak tonen', type: 'bool' },
+      business_name: { label: 'Naam op de cadeaubon', type: 'text', hint: 'Leeg laten = naam van de stempelkaart.' },
+      show_name: { label: 'Naam van de zaak tonen', type: 'bool', noInherit: true },
     };
     let gcDesign = null;               // { original, current, preview_url }
     let gcDesignSeq = 0;
 
     function gcNormalizeDesign(data) {
       const out = {};
+      const src = (data && data.design && typeof data.design === 'object') ? data.design : (data || {});   // backend: onder design
       GIFT.DESIGN_FIELDS.forEach(k => {
-        const f = data && data[k];
+        const f = src[k];
         const raw = (f && typeof f === 'object' && 'value' in f) ? f.value : f;
         out[k] = { value: raw === undefined ? null : GIFT.designValue(k, raw),
           inherited: (f && typeof f === 'object' && 'value' in f) ? f.inherited === true : true };
       });
       return out;
     }
-    async function loadGiftDesign(note) {
+    async function loadGiftDesign(note, reloadPreview) {
       const box = document.getElementById('gcDesignBox');
       if (!box) return;
       const seq = ++gcDesignSeq;
@@ -8782,7 +8783,7 @@
         if (seq !== gcDesignSeq) return;
         const original = gcNormalizeDesign(data);
         gcDesign = { original, current: JSON.parse(JSON.stringify(original)), preview_url: data.preview_url || null };
-        renderGiftDesign(note);
+        renderGiftDesign(note, reloadPreview);
       } catch (err) {
         if (seq !== gcDesignSeq || gcPageError(err)) return;
         box.innerHTML = `<div class="gc-banner error">${escapeHtml(err && err.code === 'migration_missing' ? 'Het ontwerp van cadeaubonnen is nog niet beschikbaar.' : gcErrText(err))}<button type="button" class="btn btn-ghost" data-gc-retry>Opnieuw proberen</button></div>`;
@@ -8797,28 +8798,34 @@
         ctl = `<input type="color" value="${escapeHtml(hex)}" data-gc-dcolor="${k}" aria-label="${escapeHtml(m.label)}" />
           <input type="text" class="gc-input gc-hex" value="${escapeHtml(v || '')}" maxlength="7" placeholder="#1F4D2B" data-gc-dinput="${k}" aria-label="${escapeHtml(m.label)} (kleurcode)" />`;
       } else if (m.type === 'bool') {
-        ctl = `<label class="gc-check"><input type="checkbox" ${v ? 'checked' : ''} data-gc-dinput="${k}" /> Naam tonen op de cadeaubon</label>`;
+        ctl = `<label class="gc-check"><input type="checkbox" ${v ? 'checked' : ''} data-gc-dinput="${k}" /> Naam tonen op de cadeaubon (van de ontvanger, anders de koper)</label>`;
       } else {
         ctl = `<input type="${m.type === 'url' ? 'url' : 'text'}" class="gc-input gc-dtext" value="${escapeHtml(v || '')}" ${m.type === 'url' ? 'placeholder="https://…"' : 'maxlength="60"'} data-gc-dinput="${k}" aria-label="${escapeHtml(m.label)}" />`;
       }
-      const chip = c.inherited
-        ? (o.inherited ? '<span class="gc-dchip">Van stempelkaart</span>' : '<span class="gc-dchip pending">Wordt overgenomen van de stempelkaart na opslaan</span>')
-        : '<span class="gc-dchip own">Eigen instelling</span>';
+      const chip = m.noInherit ? ''
+        : c.inherited
+          ? (o.inherited ? '<span class="gc-dchip">Van stempelkaart</span>' : '<span class="gc-dchip pending">Wordt overgenomen van de stempelkaart na opslaan</span>')
+          : '<span class="gc-dchip own">Eigen instelling</span>';
       return `<div class="gc-drow" data-gc-drow="${k}">
           <div class="gc-dhead"><b>${escapeHtml(m.label)}</b>${chip}</div>
           <div class="gc-dctl">${ctl}</div>
           ${m.hint ? `<div class="gc-hint">${escapeHtml(m.hint)}</div>` : ''}
           ${m.warn ? `<div class="gc-dwarn">${escapeHtml(m.warn)}</div>` : ''}
-          ${c.inherited ? '' : `<button type="button" class="btn btn-ghost gc-dinherit" data-gc-inherit="${k}">Overnemen van stempelkaart</button>`}
+          ${c.inherited || m.noInherit ? '' : `<button type="button" class="btn btn-ghost gc-dinherit" data-gc-inherit="${k}">Overnemen van stempelkaart</button>`}
         </div>`;
     }
-    function renderGiftDesign(note) {
+    function renderGiftDesign(note, reloadPreview) {
       const box = document.getElementById('gcDesignBox');
       if (!box || !gcDesign) return;
       const frame = document.getElementById('gcDesignFrame');
-      const keepFrame = frame && gcDesign.preview_url && frame.getAttribute('src') === gcDesign.preview_url;
-      const preview = gcDesign.preview_url
-        ? `<iframe id="gcDesignFrame" src="${escapeHtml(gcDesign.preview_url)}" title="Voorbeeld van de cadeaubon" loading="lazy" referrerpolicy="no-referrer"></iframe>`
+      // preview_url is per zaak vast (ondertekend, zonder versie). Na opslaan laden we hem
+      // daarom opnieuw, met een extra parameter tegen een gecachete versie.
+      const src = gcDesign.preview_url
+        ? gcDesign.preview_url + (reloadPreview ? (gcDesign.preview_url.indexOf('?') === -1 ? '?' : '&') + '_=' + Date.now() : '')
+        : null;
+      const keepFrame = !reloadPreview && frame && src && frame.dataset.base === gcDesign.preview_url;
+      const preview = src
+        ? `<iframe id="gcDesignFrame" src="${escapeHtml(src)}" data-base="${escapeHtml(gcDesign.preview_url)}" title="Voorbeeld van de cadeaubon" loading="lazy" referrerpolicy="no-referrer"></iframe>`
         : '<div class="empty-state"><span class="es-ic">' + GC_GIFT_SVG + '</span><h4>Geen voorbeeld</h4><p>De server gaf geen voorbeeld mee.</p></div>';
       box.innerHTML = `<div class="gc-design">
           <div class="block glass">
@@ -8846,7 +8853,8 @@
     // Een veld wijzigen maakt het een eigen instelling; een lege link betekent: van de stempelkaart.
     function gcDesignInput(k, value) {
       const m = GC_DESIGN_META[k];
-      if (m.type === 'url' && String(value).trim() === '') gcDesign.current[k] = { value: gcDesign.original[k].inherited ? gcDesign.original[k].value : null, inherited: true };
+      if (m.noInherit) gcDesign.current[k] = { value: value === true, inherited: false };
+      else if ((m.type === 'url' || m.type === 'text') && String(value).trim() === '') gcDesign.current[k] = { value: gcDesign.original[k].inherited ? gcDesign.original[k].value : null, inherited: true };
       else gcDesign.current[k] = { value: m.type === 'url' || m.type === 'text' ? String(value).trim() : m.type === 'color' ? GIFT.designValue(k, String(value).trim()) : value, inherited: false };
       const row = document.querySelector(`[data-gc-drow="${k}"]`);
       if (row) {
@@ -8873,11 +8881,15 @@
       try {
         await gcFetch('/api/stamp/gift-cards/design', { method: 'PUT', body: JSON.stringify(body) });
         gcDesign = null;                               // vers ophalen: nieuwe waarden én nieuw voorbeeld
-        await loadGiftDesign({ msg: 'Ontwerp opgeslagen ✓', kind: 'ok' });
+        await loadGiftDesign({ msg: 'Ontwerp opgeslagen ✓', kind: 'ok' }, true);
       } catch (err) {
         btn.disabled = false;
         if (err && GIFT.isPlanLock(err.code)) { renderGiftLock(); return; }
-        gcDesignNote('Niet opgeslagen: ' + gcErrText(err), 'error');
+        const d = (err && err.data) || {};
+        const veld = d.field && GC_DESIGN_META[d.field] ? GC_DESIGN_META[d.field].label + ': ' : '';
+        // Bij invalid_url zegt de server welk domein mag; die tekst is preciezer dan de onze.
+        const tekst = err && err.code === 'invalid_url' && d.error ? d.error : gcErrText(err);
+        gcDesignNote('Niet opgeslagen: ' + veld + tekst, 'error');
       }
     }
 

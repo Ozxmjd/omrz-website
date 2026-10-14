@@ -47,6 +47,7 @@ function designOf(card) {
   const own = S.design[card] || {};
   const out = {};
   Object.keys(CARD_DESIGN).forEach(k => { out[k] = k in own ? { value: own[k], inherited: false } : { value: CARD_DESIGN[k], inherited: true }; });
+  out.show_name = { value: 'show_name' in own ? own.show_name : true, inherited: false };   // backend: eigen kolom, nooit overgenomen
   return out;
 }
 // Mail versturen (nep): mislukt als cfg.mailFail dat doel noemt.
@@ -192,24 +193,36 @@ function api(req, res, url, body, rawBody) {
       if (S.cfg.designFail === 404) { res.writeHead(404, { 'Content-Type': 'text/html' }); return res.end('Cannot ' + req.method); }
       if (S.cfg.designFail === 503) return fail(res, 503, 'migration_missing', 'Draai migratie');
       if (S.cfg.designFail === 'net') return req.socket.destroy();
-      if (req.method === 'GET') {
-        const d = designOf(card);
-        return send(res, 200, { success: true, card_id: card, ...d, preview_url: BASE + '/__preview?card=' + card + '&v=' + S.designVersion });
-      }
+      // Zoals ai-review-bot 2222342: velden onder design, vaste ondertekende preview_url.
+      const previewUrl = BASE + '/__preview?card=' + card + '&token=t-' + card;
+      if (req.method === 'GET') return send(res, 200, { success: true, card_id: card, design: designOf(card), preview_url: previewUrl });
       if (req.method === 'PUT') {
         if (!tok.owner) return fail(res, 403, 'owner_only', 'Alleen eigenaar');
         S.log.designPut.push(body);
         const own = Object.assign({}, S.design[card] || {});
-        for (const k of Object.keys(CARD_DESIGN)) {
-          if (!(k in body)) continue;
-          const v = body[k];
-          if (v === null) { delete own[k]; continue; }
-          if ((k === 'pass_color' || k === 'text_color') && !/^#[0-9a-fA-F]{6}$/.test(v)) return fail(res, 400, 'invalid_color', 'Ongeldige kleur');
-          if ((k === 'logo_url' || k === 'background_url') && !/^https:\/\//.test(v)) return fail(res, 400, 'invalid_url', 'Ongeldige link');
-          own[k] = (k === 'pass_color' || k === 'text_color') ? v.toLowerCase() : v;   // backend: kleuren in kleine letters
+        let touched = false;
+        for (const k of ['pass_color', 'text_color']) {
+          if (body[k] === undefined) continue; touched = true;
+          if (body[k] === null || body[k] === '') { delete own[k]; continue; }
+          if (!/^#[0-9a-fA-F]{6}$/.test(body[k])) return send(res, 400, { error: 'Dit is geen geldige kleurcode.', code: 'invalid_color', field: k });
+          own[k] = body[k].toLowerCase();
         }
-        S.design[card] = own; S.designVersion++;
-        return send(res, 200, { success: true, card_id: card, ...designOf(card), preview_url: BASE + '/__preview?card=' + card + '&v=' + S.designVersion });
+        for (const k of ['logo_url', 'background_url']) {
+          if (body[k] === undefined) continue; touched = true;
+          if (body[k] === null || body[k] === '') { delete own[k]; continue; }
+          let okHost = false; try { const u = new URL(body[k]); okHost = u.protocol === 'https:' && u.hostname.endsWith('.supabase.co'); } catch (_) {}
+          if (!okHost) return send(res, 400, { error: 'Deze afbeelding moet via https van onze eigen opslag komen (.supabase.co).', code: 'invalid_url', field: k });
+          own[k] = body[k];
+        }
+        if (body.business_name !== undefined) { touched = true; const n = body.business_name === null ? '' : String(body.business_name).trim().slice(0, 60); if (n) own.business_name = n; else delete own.business_name; }
+        if (body.show_name !== undefined) {
+          touched = true;
+          if (typeof body.show_name !== 'boolean') return send(res, 400, { error: 'show_name moet true of false zijn.', code: 'invalid_show_name', field: 'show_name' });
+          own.show_name = body.show_name;
+        }
+        if (!touched) return send(res, 400, { error: 'Er is niets om op te slaan.', code: 'nothing_to_update' });
+        S.design[card] = own;
+        return send(res, 200, { success: true, card_id: card, design: designOf(card), preview_url: previewUrl });
       }
     }
     if (p === '/api/stamp/gift-cards' && req.method === 'GET') {

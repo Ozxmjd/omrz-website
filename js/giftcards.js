@@ -223,6 +223,8 @@
   // Kleuren komen van de backend altijd in kleine letters (#2e5b45). We vergelijken en
   // versturen ze daarom ook zo; andere waarden blijven ongemoeid.
   const COLOR_FIELDS = ['pass_color', 'text_color'];
+  // show_name heeft geen stempelkaart-waarde om over te nemen: altijd een eigen instelling.
+  const NO_INHERIT_FIELDS = ['show_name'];
   function normalizeColor(v) { return isHexColor(v) ? String(v).toLowerCase() : v; }
   function designValue(k, v) { return COLOR_FIELDS.indexOf(k) !== -1 ? normalizeColor(v) : v; }
   // Alleen gewijzigde velden; null = weer overnemen van de stempelkaart.
@@ -231,6 +233,7 @@
     const body = { card_id: cardId };
     DESIGN_FIELDS.forEach(k => {
       const c = current[k] || {}, o = original[k] || {};
+      if (NO_INHERIT_FIELDS.indexOf(k) !== -1) { if (c.value !== o.value) body[k] = c.value === true; return; }
       if (c.inherited) { if (!o.inherited) body[k] = null; return; }
       const cv = designValue(k, c.value), ov = designValue(k, o.value);
       if (o.inherited || cv !== ov) body[k] = cv;
@@ -272,7 +275,9 @@
     invalid_target: 'Kies of de mail naar de ontvanger of naar de koper moet.',
     invalid_expires_at: 'De vervaldatum klopt niet of ligt in het verleden. Kies een datum in de toekomst.',
     invalid_color: 'Deze kleur klopt niet. Gebruik een kleurcode zoals #1F4D2B.',
-    invalid_url: 'Deze link klopt niet. Gebruik een volledige link die begint met https://.',
+    invalid_url: 'Deze afbeelding moet een https-link uit de eigen opslag van OMRZ zijn.',
+    invalid_show_name: 'Kies of de naam wel of niet op de cadeaubon komt.',
+    nothing_to_update: 'Er is niets gewijzigd.',
   };
   const NOT_LIVE_MESSAGE = 'Cadeaubonnen zijn nog niet beschikbaar. Probeer het later opnieuw.';
 
@@ -297,7 +302,7 @@
   const api = { formatCents, parseEuroToCents, normalizeShortCode, classifyScan, newIdempotencyKey, endOfDayAmsterdamISO,
     giftStatus, STATUS_LABELS, isPlanLock, scannerEnabledFrom, referenceFrom, scannerSettingsBody, errorMessage, isNotLive, MESSAGES, NOT_LIVE_MESSAGE,
     DELIVERY_MODES, validateGiftDelivery, giftCreateBody, resendBody, mailStateOf, mailOutcome, mailAddress,
-    DESIGN_FIELDS, designBody, validateDesignValue, isHexColor, isHttpsUrl, normalizeColor, designValue };
+    DESIGN_FIELDS, NO_INHERIT_FIELDS, designBody, validateDesignValue, isHexColor, isHttpsUrl, normalizeColor, designValue };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.OMRZGift = api;
 })(typeof window !== 'undefined' ? window : globalThis);
