@@ -57,28 +57,73 @@
     return cents;
   }
 
-  // Korte code "ABCD-EFGH-JK" in een vaste vorm, of null als het er geen is.
-  const SHORT_RX = /^([A-Z0-9]{4})-?([A-Z0-9]{4})-?([A-Z0-9]{2})$/;
+  // Korte code: 10 tekens Crockford base32 (zonder I, L, O, U), getoond als XXXX-XXXX-XX.
+  // Zelfde regels als de backend: hoofdletters, O → 0, I en L → 1, streepjes en spaties weg.
+  // Een U komt in geen echte code voor; dan is het geen korte code. Geeft null als het er
+  // geen is.
   function normalizeShortCode(input) {
-    const s = String(input == null ? '' : input).toUpperCase().replace(/[\s ]/g, '');
-    const m = s.match(SHORT_RX);
-    return m ? m[1] + '-' + m[2] + '-' + m[3] : null;
+    const s = String(input == null ? '' : input).toUpperCase().replace(/[\s .\-]/g, '')
+      .replace(/O/g, '0').replace(/[IL]/g, '1');
+    if (!/^[0-9A-HJKMNP-TV-Z]{10}$/.test(s)) return null;
+    return s.slice(0, 4) + '-' + s.slice(4, 8) + '-' + s.slice(8);
   }
 
-  // Wat de camera las: een cadeaubon (link met /cadeaubon/ of een korte code) of iets
-  // anders, dat dan naar de bestaande stempelflow gaat. Stempelkaart-QR's zijn UUID's en
-  // vallen dus nooit onder de korte code.
+  // Wat de camera las. In elke cadeaubon-QR (Apple- en Google-pas, bonpagina, mail) staat de
+  // lange code: 32 hex-tekens. Een stempelkaart-QR is altijd een UUID met streepjes
+  // (8-4-4-4-12). Die twee vormen overlappen nooit. Herkend als cadeaubon:
+  //  - de lange code (32 hex, hoofd- of kleine letters);
+  //  - een link naar /cadeaubon/<code> op een domein van OMRZ (omrzdigital.nl en subdomeinen);
+  //  - de korte code, met of zonder streepjes.
+  // Al het andere gaat ongewijzigd naar de stempelflow.
+  const UUID_RX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const LONG_RX = /^[0-9a-f]{32}$/i;
+  function isOurHost(host) {
+    const h = String(host || '').toLowerCase();
+    return h === 'omrzdigital.nl' || h.endsWith('.omrzdigital.nl');
+  }
   function classifyScan(text) {
     const raw = String(text == null ? '' : text).trim();
-    const m = raw.match(/\/cadeaubon\/([^/?#\s]+)/i);
-    if (m) {
-      let code = m[1];
-      try { code = decodeURIComponent(code); } catch (_) { /* laat zoals hij is */ }
-      return { kind: 'gift', code: code };
+    if (UUID_RX.test(raw)) return { kind: 'stamp', code: raw };                // stempelkaart, altijd eerst
+    if (LONG_RX.test(raw)) return { kind: 'gift', code: raw.toLowerCase() };
+    if (/^https?:\/\//i.test(raw)) {
+      try {
+        const u = new URL(raw);
+        const m = u.pathname.match(/^\/cadeaubon\/([^/]+)\/?$/i);
+        if (isOurHost(u.hostname) && m) {
+          let code = m[1];
+          try { code = decodeURIComponent(code); } catch (_) { /* laat zoals hij is */ }
+          if (LONG_RX.test(code)) return { kind: 'gift', code: code.toLowerCase() };
+          const sc = normalizeShortCode(code);
+          if (sc) return { kind: 'gift', code: sc };
+        }
+      } catch (_) { /* geen geldige link: verder als gewone tekst */ }
+      return { kind: 'stamp', code: raw };
     }
     const short = normalizeShortCode(raw);
     if (short) return { kind: 'gift', code: short };
     return { kind: 'stamp', code: raw };
+  }
+  // De deellink van een bon: de backend noemt hem url (share_url uit het eerste contract).
+  function giftShareUrl(g) { return (g && (g.url || g.share_url)) || ''; }
+  // De korte code zoals op de bon: short_code_display, anders zelf opgemaakt.
+  function giftShortCodeDisplay(g) {
+    if (!g) return '';
+    return g.short_code_display || normalizeShortCode(g.short_code) || g.short_code || '';
+  }
+  // Het resultaat van een afschrijving: de backend zet bedrag, saldo en referentie onder
+  // transaction. Nog te betalen rekenen we zelf uit het rekeningbedrag als de backend het
+  // niet geeft.
+  function redeemResult(data, amountSent, billCents) {
+    const d = data || {}, t = d.transaction || {};
+    const pick = (a, b) => (Number.isInteger(a) ? a : Number.isInteger(b) ? b : null);
+    const amount = pick(t.amount_cents, d.amount_cents);
+    const amountAbs = amount === null ? amountSent : Math.abs(amount);
+    let balance = pick(t.balance_after_cents, d.balance_after_cents);
+    if (balance === null && d.gift_card && Number.isInteger(d.gift_card.balance_cents)) balance = d.gift_card.balance_cents;
+    const remaining = Number.isInteger(d.remaining_to_pay_cents) ? d.remaining_to_pay_cents
+      : (Number.isInteger(billCents) && billCents > amountAbs ? billCents - amountAbs : null);
+    return { amount_cents: amountAbs, balance_after_cents: balance, reference_number: t.reference_number || d.reference_number || null,
+      remaining_to_pay_cents: remaining, replayed: d.replayed === true };
   }
 
   // Eén sleutel per afschrijfpoging: dezelfde poging opnieuw versturen schrijft nooit dubbel af.
@@ -299,7 +344,7 @@
     return (data && typeof data.error === 'string' && data.error) || 'Er ging iets mis. Probeer het opnieuw.';
   }
 
-  const api = { formatCents, parseEuroToCents, normalizeShortCode, classifyScan, newIdempotencyKey, endOfDayAmsterdamISO,
+  const api = { formatCents, parseEuroToCents, normalizeShortCode, classifyScan, giftShareUrl, giftShortCodeDisplay, redeemResult, newIdempotencyKey, endOfDayAmsterdamISO,
     giftStatus, STATUS_LABELS, isPlanLock, scannerEnabledFrom, referenceFrom, scannerSettingsBody, errorMessage, isNotLive, MESSAGES, NOT_LIVE_MESSAGE,
     DELIVERY_MODES, validateGiftDelivery, giftCreateBody, resendBody, mailStateOf, mailOutcome, mailAddress,
     DESIGN_FIELDS, NO_INHERIT_FIELDS, designBody, validateDesignValue, isHexColor, isHttpsUrl, normalizeColor, designValue };

@@ -34,8 +34,8 @@ module.exports = async function run(env) {
   const badges = await p.$$eval('.gc-row', rs => Object.fromEntries(rs.map(r => [r.querySelector('.gc-code').textContent, [r.querySelector('.gc-badge').className.replace('gc-badge ', ''), r.querySelector('.gc-badge').textContent]])));
   const sortObj = o => JSON.stringify(Object.keys(o).sort().map(k => [k, o[k]]));
   check('1. Lijst: eigen label en kleurklasse per status', sortObj(badges) === sortObj({
-    'PAST-0000-05': ['expired', 'Verlopen'], 'EMPT-0000-02': ['empty', 'Leeg'], 'BLKD-0000-01': ['blocked', 'Geblokkeerd'],
-    'ABCD-EFGH-JK': ['active', 'Actief'], 'EXPI-0000-03': ['expired', 'Verlopen'] }), JSON.stringify(badges));
+    'PAST-0000-05': ['expired', 'Verlopen'], 'EMPT-0000-02': ['empty', 'Leeg'], 'BZKD-0000-01': ['blocked', 'Geblokkeerd'],
+    'ABCD-EFGH-JK': ['active', 'Actief'], 'EXPR-0000-03': ['expired', 'Verlopen'] }), JSON.stringify(badges));
   const colors = await p.$$eval('.gc-badge', bs => [...new Set(bs.map(b => b.className + '|' + getComputedStyle(b).color))]);
   check('1. Vier statussen, vier verschillende kleuren', new Set(colors.map(c => c.split('|')[1])).size === 4, colors.join(' '));
   check('1. Status "active" met verstreken vervaldatum → Verlopen (voorrang)', badges['PAST-0000-05'][0] === 'expired');
@@ -76,9 +76,9 @@ module.exports = async function run(env) {
     const shown = await p.$$eval('.gc-success .gc-fact', fs => (fs.find(f => /Referentienummer/.test(f.innerText)) || {}).innerText || '');
     check('2. Referentienummer uit transaction.reference_number in beeld (niet "—")', shown.includes(issue.reference_number) && !/—/.test(shown), shown.replace(/\s+/g, ' '));
   }
-  check('2. Succes: kassa-instructie, korte code, referentie', /Boek op de kassa als verkoop cadeaubon:\s*€\s25,00/.test(succ) && /CB-\d{4}/.test(succ) && /[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{2}/.test(succ));
+  check('2. Succes: kassa-instructie, korte code, referentie', /Boek op de kassa als verkoop cadeaubon:\s*€\s25,00/.test(succ) && /CB-\d{4}/.test(succ) && /[0-9A-HJKMNP-TV-Z]{4}-[0-9A-HJKMNP-TV-Z]{4}-[0-9A-HJKMNP-TV-Z]{2}/.test(succ));
   const link = await p.inputValue('.gc-success .gc-link input');
-  check('2. Deelbare link getoond', /^https:\/\/omrzdigital\.nl\/cadeaubon\//.test(link), link);
+  check('2. Deelbare link getoond', /^https:\/\/api\.omrzdigital\.nl\/cadeaubon\/[0-9a-f]{32}$/.test(link), link);
   const wa = await p.getAttribute('.gc-success a[href^="https://wa.me/"]', 'href');
   check('2. WhatsApp-knop met voorgevulde tekst + link', decodeURIComponent(wa).includes(link) && /cadeaubon van €\s25,00 gekregen bij Loris Parfum/.test(decodeURIComponent(wa)));
   check('2. QR-code van de link gerenderd', await p.evaluate(() => !!document.querySelector('#gcQr img, #gcQr canvas')));
@@ -132,7 +132,7 @@ module.exports = async function run(env) {
   // Terugdraaien op de lege bon (afschrijving van €10)
   await p.click('.gc-row >> text=Zonder naam'); await p.waitForSelector('.gc-detail');
   // Er zijn er mogelijk twee "Zonder naam"; zoek de lege bon
-  const g = (await state()).gifts.find(x => x.short_code === 'EMPT-0000-02');
+  const g = (await state()).gifts.find(x => x.short_code === 'EMPT000002');
   await p.evaluate(id => openGiftDetail(id), g.id); await p.waitForSelector('[data-gc-reverse]');
   const revId = await p.getAttribute('[data-gc-reverse]', 'data-gc-reverse');
   await p.click('[data-gc-reverse]');
@@ -395,7 +395,7 @@ module.exports = async function run(env) {
     /Mail ontvanger\s*Niet van toepassing/.test(ms) && /Mail koper \(bon en bevestiging\)\s*Mislukt \(\d+ \w+\.? 20\d\d, \d\d:\d\d\): .*Mailserver weigerde/.test(ms), ms.replace(/\s+/g, ' '));
   check('11. Koper en e-mail koper in de gegevens', /E-mail koper\s*oud@example\.nl/.test(await txt(p, '.gc-detail .cd-rows')));
   await p.click('.gc-detail [data-gc-copy]'); await p.waitForTimeout(150);
-  check('11. "Link kopiëren" kopieert de deelbare link', (await p.evaluate(() => navigator.clipboard.readText())) === rosa.share_url && /Gekopieerd/.test(await txt(p, '.gc-detail [data-gc-copy]')));
+  check('11. "Link kopiëren" kopieert de deelbare link', (await p.evaluate(() => navigator.clipboard.readText())) === 'https://api.omrzdigital.nl/cadeaubon/' + rosa.code && /Gekopieerd/.test(await txt(p, '.gc-detail [data-gc-copy]')));
   await p.click('[data-gc-resend-open]');
   check('11. Opnieuw versturen: ontvanger voorgeselecteerd met haar adres', await p.isChecked('input[name="gcResendTarget"][value="recipient"]') && (await p.inputValue('#gcResendEmail')) === 'rosa@example.nl');
   await p.check('input[name="gcResendTarget"][value="buyer"]');
@@ -426,13 +426,13 @@ module.exports = async function run(env) {
   check('11. Server invalid_target → nette melding', /naar de ontvanger of naar de koper/.test(await txt(p, '#gcResendNote')), await txt(p, '#gcResendNote'));
   await p.unroute('**/resend'); await p.click('#modalClose');
   // Bon zonder e-mailadressen: no_email_for_target
-  const sanne = (await state()).gifts.find(g => g.short_code === 'ABCD-EFGH-JK');
+  const sanne = (await state()).gifts.find(g => g.short_code === 'ABCDEFGHJK');
   await p.evaluate(id => openGiftDetail(id), sanne.id); await p.waitForSelector('.gc-detail');
   await p.click('[data-gc-resend-open]'); await p.click('#gcResendBtn'); await p.waitForTimeout(400);
   check('11. Geen adres bekend → "geen e-mailadres bekend"', /geen e-mailadres bekend/.test(await txt(p, '#gcResendNote')) && /error/.test(await p.getAttribute('#gcResendNote', 'class')));
   await p.click('#modalClose');
   // Geblokkeerde bon
-  const daan = (await state()).gifts.find(g => g.short_code === 'BLKD-0000-01');
+  const daan = (await state()).gifts.find(g => g.short_code === 'BZKD000001');
   await p.evaluate(id => openGiftDetail(id), daan.id); await p.waitForSelector('.gc-detail');
   check('11. Geblokkeerd: uitleg dat de pas in de Wallet blijft staan en dat toont', /De pas blijft in de Wallet van de klant staan en toont dat de bon geblokkeerd is/.test(await txt(p, '.gc-passnote')));
   await p.click('[data-gc-resend-open]'); await p.fill('#gcResendEmail', 'daan@example.nl'); await p.click('#gcResendBtn'); await p.waitForTimeout(400);

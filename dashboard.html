@@ -8322,7 +8322,7 @@
           <span class="gc-ic">${GC_GIFT_SVG}</span>
           <span class="gc-main">
             <span class="gc-name">${escapeHtml(name || 'Zonder naam')}</span>
-            <span class="gc-sub"><span class="gc-code">${escapeHtml(g.short_code || '—')}</span> · ${escapeHtml(gcDate(g.created_at))}</span>
+            <span class="gc-sub"><span class="gc-code">${escapeHtml(GIFT.giftShortCodeDisplay(g) || 'Zonder code')}</span> · ${escapeHtml(gcDate(g.created_at))}</span>
           </span>
           <span class="gc-amt"><b>${GIFT.formatCents(g.balance_cents)}</b><small>van ${GIFT.formatCents(g.initial_amount_cents)}</small></span>
           ${gcBadge(g)}
@@ -8479,7 +8479,7 @@
 
     function renderGiftCreated(g, ref, mail, form) {
       const amount = GIFT.formatCents(g.initial_amount_cents);
-      const url = g.share_url || '';
+      const url = GIFT.giftShareUrl(g);
       const shop = card.business_name || 'ons';
       const wa = `Je hebt een cadeaubon van ${amount} gekregen bij ${shop}!`
         + (g.recipient_name ? ` Voor ${g.recipient_name}.` : '') + ` Bekijk hem hier: ${url}`;
@@ -8495,7 +8495,7 @@
           <div class="gc-cash"><b>Boek op de kassa als verkoop cadeaubon:</b> ${escapeHtml(amount)}</div>
           <div class="gc-mails">${mailHTML}</div>
           <div class="gc-facts">
-            <div class="gc-fact"><small>Korte code</small><b class="gc-code">${escapeHtml(g.short_code || '—')}</b></div>
+            <div class="gc-fact"><small>Korte code</small><b class="gc-code">${escapeHtml(GIFT.giftShortCodeDisplay(g) || 'Volgt in het overzicht')}</b></div>
             <div class="gc-fact"><small>Referentienummer</small><b>${escapeHtml(ref || '—')}</b></div>
           </div>
           ${url ? `<div class="gc-link"><input type="text" readonly value="${escapeHtml(url)}" aria-label="Deelbare link" /><button type="button" class="btn btn-ghost" data-gc-copy><span class="btn-label">Link kopiëren</span></button></div>
@@ -8552,7 +8552,7 @@
       // Afschrijvingen die al zijn teruggedraaid: een reverse-transactie wijst ernaar.
       const reversed = new Set(txs.filter(t => (t.type === 'reverse' || t.type === 'reversal') && t.reverses_transaction_id)
         .map(t => String(t.reverses_transaction_id)));
-      modalTitle.textContent = 'Cadeaubon ' + (g.short_code || '');
+      modalTitle.textContent = 'Cadeaubon ' + GIFT.giftShortCodeDisplay(g);
       const row = (lbl, val, empty) => detailRow(lbl, val, empty);
       const txRows = txs.map(t => {
         const amt = Number(t.amount_cents);
@@ -8584,7 +8584,7 @@
             <span class="gc-bal-sub">van ${GIFT.formatCents(g.initial_amount_cents)} ${gcBadge(g)}</span>
           </div>
           <div class="cd-rows">
-            ${row('Korte code', `<span class="gc-code">${escapeHtml(g.short_code || '—')}</span>`, !g.short_code)}
+            ${row('Korte code', `<span class="gc-code">${escapeHtml(GIFT.giftShortCodeDisplay(g) || 'Onbekend')}</span>`, !g.short_code)}
             ${row('Ontvanger', escapeHtml(g.recipient_name || 'Niet opgegeven'), !g.recipient_name)}
             ${row('E-mail ontvanger', escapeHtml(g.recipient_email || 'Niet opgegeven'), !g.recipient_email)}
             ${g.message ? row('Persoonlijk bericht', escapeHtml(g.message), false) : ''}
@@ -8594,7 +8594,7 @@
             ${row('Aangemaakt', escapeHtml(gcDate(g.created_at, true)), !g.created_at)}
           </div>
           ${passNote ? `<p class="gc-passnote">${escapeHtml(passNote)}</p>` : ''}
-          ${g.share_url ? `<div class="gc-link" style="margin-top:14px"><input type="text" readonly value="${escapeHtml(g.share_url)}" aria-label="Deelbare link" /><button type="button" class="btn btn-ghost" data-gc-copy><span class="btn-label">Link kopiëren</span></button></div>` : ''}
+          ${GIFT.giftShareUrl(g) ? `<div class="gc-link" style="margin-top:14px"><input type="text" readonly value="${escapeHtml(GIFT.giftShareUrl(g))}" aria-label="Deelbare link" /><button type="button" class="btn btn-ghost" data-gc-copy><span class="btn-label">Link kopiëren</span></button></div>` : ''}
           <h4>Verzending</h4>
           <div class="cd-rows gc-mailstat">
             ${g.delivery_mode === 'buyer'
@@ -8641,7 +8641,7 @@
         </div>`;
       if (note) satDetail(note.msg, note.kind);
       const copy = modalBody.querySelector('[data-gc-copy]');
-      if (copy) copy.addEventListener('click', () => copyToClipboard(g.share_url, copy, 'Gekopieerd ✓'));
+      if (copy) copy.addEventListener('click', () => copyToClipboard(GIFT.giftShareUrl(g), copy, 'Gekopieerd ✓'));
       const adj = document.getElementById('gcAdjust');
       if (adj) adj.addEventListener('submit', (e) => { e.preventDefault(); adjustGiftCard(g.id); });
       const rs = document.getElementById('gcResend');

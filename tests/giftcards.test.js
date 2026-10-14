@@ -39,27 +39,62 @@ test('parseEuroToCents: weigert negatief, nul, >2 decimalen en onzin', () => {
   }
 });
 
-test('normalizeShortCode', () => {
+test('normalizeShortCode: Crockford zoals de backend', () => {
   assert.equal(G.normalizeShortCode('abcd-efgh-jk'), 'ABCD-EFGH-JK');
   assert.equal(G.normalizeShortCode('ABCDEFGHJK'), 'ABCD-EFGH-JK');
   assert.equal(G.normalizeShortCode(' AB CD-EF GH-JK '), 'ABCD-EFGH-JK');
+  assert.equal(G.normalizeShortCode('7K3M.P9QR.2X'), '7K3M-P9QR-2X');
+  assert.equal(G.normalizeShortCode('ABCO-EFGH-JL'), 'ABC0-EFGH-J1');          // O → 0, L → 1
+  assert.equal(G.normalizeShortCode('IBCD-EFGH-JK'), '1BCD-EFGH-JK');          // I → 1
+  assert.equal(G.normalizeShortCode('ABCU-EFGH-JK'), null);                    // U komt nooit voor
   assert.equal(G.normalizeShortCode('ABCD-EFGH-J'), null);
   assert.equal(G.normalizeShortCode('ABCD-EFGH-JKL'), null);
 });
 
-test('classifyScan: cadeaubon-links en korte codes', () => {
-  assert.deepEqual(G.classifyScan('https://omrzdigital.nl/cadeaubon/k9X2pQ7vLm3a'), { kind: 'gift', code: 'k9X2pQ7vLm3a' });
-  assert.deepEqual(G.classifyScan('https://api.omrzdigital.nl/cadeaubon/AbC123?utm=wa#x'), { kind: 'gift', code: 'AbC123' });
-  assert.deepEqual(G.classifyScan('HTTPS://OMRZDIGITAL.NL/CADEAUBON/XYZ'), { kind: 'gift', code: 'XYZ' });
-  assert.deepEqual(G.classifyScan('abcd-efgh-jk'), { kind: 'gift', code: 'ABCD-EFGH-JK' });
+// De echte vormen uit de backend: in elke cadeaubon-QR (Apple, Google, bonpagina, mail) staat
+// bon.code = 32 hex; de deellink is https://api.omrzdigital.nl/cadeaubon/<code>.
+const LONG = '9f3c2a7d1e4b5c6d7e8f9a0b1c2d3e4f';
+test('classifyScan: elke vorm van een echte cadeaubon is een cadeaubon', () => {
+  const g = t => G.classifyScan(t);
+  assert.deepEqual(g(LONG), { kind: 'gift', code: LONG });
+  assert.deepEqual(g(LONG.toUpperCase()), { kind: 'gift', code: LONG });
+  assert.deepEqual(g('  ' + LONG + '\n'), { kind: 'gift', code: LONG });
+  for (const host of ['https://api.omrzdigital.nl', 'https://omrzdigital.nl', 'https://www.omrzdigital.nl', 'http://omrzdigital.nl']) {
+    assert.deepEqual(g(host + '/cadeaubon/' + LONG), { kind: 'gift', code: LONG }, host);
+    assert.deepEqual(g(host + '/cadeaubon/' + LONG + '/?utm_source=wa#x'), { kind: 'gift', code: LONG }, host + ' met query');
+  }
+  assert.deepEqual(g('HTTPS://API.OMRZDIGITAL.NL/cadeaubon/' + LONG.toUpperCase()), { kind: 'gift', code: LONG });
+  assert.deepEqual(g('https://api.omrzdigital.nl/cadeaubon/7K3M-P9QR-2X'), { kind: 'gift', code: '7K3M-P9QR-2X' });
+  assert.deepEqual(g('7k3m-p9qr-2x'), { kind: 'gift', code: '7K3M-P9QR-2X' });
+  assert.deepEqual(g('7K3MP9QR2X'), { kind: 'gift', code: '7K3M-P9QR-2X' });
 });
 
-test('classifyScan: stempelkaart-QR (UUID) en andere tekst blijven stempelflow', () => {
+test('classifyScan: een stempelkaart-QR is nooit een cadeaubon, en vreemde links ook niet', () => {
   const uuid = '3f2b8c1e-9a4d-4e6f-b7c2-1d0e5a9f8b34';
   assert.deepEqual(G.classifyScan(uuid), { kind: 'stamp', code: uuid });
+  assert.equal(G.classifyScan(uuid.toUpperCase()).kind, 'stamp');
+  assert.equal(G.classifyScan('https://evil.example/cadeaubon/' + LONG).kind, 'stamp');           // niet ons domein
+  assert.equal(G.classifyScan('https://omrzdigital.nl.evil.example/cadeaubon/' + LONG).kind, 'stamp');
+  assert.equal(G.classifyScan('https://omrzdigital.nl/cadeaubon/voorbeeld?card_id=x&token=y').kind, 'stamp');  // voorbeeldpagina
   assert.equal(G.classifyScan('https://omrzdigital.nl/stamp/card/abc').kind, 'stamp');
+  assert.equal(G.classifyScan('loc-a1b2c3d4e5f6').kind, 'stamp');
+  assert.equal(G.classifyScan(LONG.slice(0, 31)).kind, 'stamp');                                   // 31 hex
+  assert.equal(G.classifyScan(LONG + '0').kind, 'stamp');                                           // 33 hex
   assert.equal(G.classifyScan('QR-SANNE').kind, 'stamp');
   assert.equal(G.classifyScan('').kind, 'stamp');
+});
+
+test('giftShareUrl, giftShortCodeDisplay en redeemResult volgens de backend', () => {
+  assert.equal(G.giftShareUrl({ url: 'https://api.omrzdigital.nl/cadeaubon/' + LONG }), 'https://api.omrzdigital.nl/cadeaubon/' + LONG);
+  assert.equal(G.giftShareUrl({ share_url: 'x' }), 'x');
+  assert.equal(G.giftShareUrl({}), '');
+  assert.equal(G.giftShortCodeDisplay({ short_code: '7K3MP9QR2X', short_code_display: '7K3M-P9QR-2X' }), '7K3M-P9QR-2X');
+  assert.equal(G.giftShortCodeDisplay({ short_code: '7K3MP9QR2X' }), '7K3M-P9QR-2X');
+  const r = G.redeemResult({ success: true, replayed: false, transaction: { id: 't', reference_number: 'CB-0412', amount_cents: 3000, balance_after_cents: 2000 } }, 3000, null);
+  assert.deepEqual(r, { amount_cents: 3000, balance_after_cents: 2000, reference_number: 'CB-0412', remaining_to_pay_cents: null, replayed: false });
+  assert.equal(G.redeemResult({ transaction: { amount_cents: 2000, balance_after_cents: 0 } }, 2000, 2500).remaining_to_pay_cents, 500);   // zelf berekend
+  assert.equal(G.redeemResult({ transaction: { amount_cents: -2000 } }, 2000, null).amount_cents, 2000);
+  assert.equal(G.redeemResult({ replayed: true, transaction: {} }, 1000, null).replayed, true);
 });
 
 test('newIdempotencyKey: uuid v4, uniek', () => {

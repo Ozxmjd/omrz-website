@@ -17,21 +17,21 @@ let S;
 function reset() {
   S = { gifts: [], txs: [], ref: 400, idem: {}, cfg: { notLive: false, rateLimited: false, redeemDelay: 0, failLookup: false, settingsFail: null, mailFail: null, resendWait: 60 }, settings: {}, design: {}, designVersion: 1, createIdem: {}, log: { redeem: [], create: [], lookup: [], give: [], redeemStamp: [], settingsPut: [], settingsGet: 0, resend: [], designPut: [] }, holders: { 'vip-0000-9a4d-4e6f-b7c2-1d0e5a9f8b34': { name: 'Vaste Gast', stamps: 2, vip: true } } };
   const now = Date.now();
-  mk('pp', 5000, { recipient_name: 'Sanne de Vries', message: 'Gefeliciteerd!' }, now - 5 * 864e5, 'ABCD-EFGH-JK', 'longcodeSanne123');
-  mk('pp', 2500, { recipient_name: 'Daan' }, now - 3 * 864e5, 'BLKD-0000-01', 'longcodeBlocked1').status = 'blocked';
-  const e = mk('pp', 1000, {}, now - 2 * 864e5, 'EMPT-0000-02', 'longcodeEmpty001'); redeemRaw(e, 1000, 'L1');
-  mk('pp', 3000, { recipient_name: 'Verlopen Vera', expires_at: new Date(now - 864e5).toISOString() }, now - 40 * 864e5, 'EXPI-0000-03', 'longcodeExpired1').status = 'expired';
-  mk('basic', 2000, { recipient_name: 'Basic klant' }, now, 'BASI-0000-04', 'longcodeBasic001');
+  mk('pp', 5000, { recipient_name: 'Sanne de Vries', message: 'Gefeliciteerd!' }, now - 5 * 864e5, 'ABCD-EFGH-JK', 'a1b2c3d4e5f60718293a4b5c6d7e8f90');
+  mk('pp', 2500, { recipient_name: 'Daan' }, now - 3 * 864e5, 'BZKD-0000-01', 'b1000000000000000000000000000001').status = 'blocked';
+  const e = mk('pp', 1000, {}, now - 2 * 864e5, 'EMPT-0000-02', 'c2000000000000000000000000000002'); redeemRaw(e, 1000, 'L1');
+  mk('pp', 3000, { recipient_name: 'Verlopen Vera', expires_at: new Date(now - 864e5).toISOString() }, now - 40 * 864e5, 'EXPR-0000-03', 'e3000000000000000000000000000003').status = 'expired';
+  mk('basic', 2000, { recipient_name: 'Basic klant' }, now, 'BASC-0000-04', 'ba500000000000000000000000000004');
   // Staat nog op 'active' maar de vervaldatum is voorbij: moet als Verlopen getoond worden.
-  mk('pp', 1500, { recipient_name: 'Peter Verstreken', expires_at: new Date(now - 3600e3).toISOString() }, now - 20 * 864e5, 'PAST-0000-05', 'longcodePast0001');
-  mk('pptrial', 2000, { recipient_name: 'Proefklant' }, now, 'PROE-0000-06', 'longcodeProef001');
+  mk('pp', 1500, { recipient_name: 'Peter Verstreken', expires_at: new Date(now - 3600e3).toISOString() }, now - 20 * 864e5, 'PAST-0000-05', 'f5000000000000000000000000000005');
+  mk('pptrial', 2000, { recipient_name: 'Proefklant' }, now, 'PREV-0000-06', 'd6000000000000000000000000000006');
 }
 const ref = () => 'CB-' + String(++S.ref).padStart(4, '0');
 function mk(card, cents, extra, t, short, code) {
-  const g = { id: crypto.randomUUID(), card_id: card, code: code || crypto.randomBytes(9).toString('base64url'), short_code: short || [4, 4, 2].map(n => crypto.randomBytes(8).toString('hex').toUpperCase().slice(0, n)).join('-'),
+  const g = { id: crypto.randomUUID(), card_id: card, code: code || crypto.randomBytes(16).toString('hex'),
+    short_code: (short || Array.from(crypto.randomBytes(10), b => '0123456789ABCDEFGHJKMNPQRSTVWXYZ'[b % 32]).join('')).replace(/-/g, ''),
     initial_amount_cents: cents, balance_cents: cents, status: 'active', recipient_name: null, recipient_email: null, message: null, expires_at: null, created_at: new Date(t || Date.now()).toISOString(),
     buyer_name: null, buyer_email: null, delivery_mode: 'none', pass_mail_sent_at: null, pass_mail_error: null, buyer_mail_sent_at: null, buyer_mail_error: null, ...extra };
-  g.share_url = 'https://omrzdigital.nl/cadeaubon/' + g.code;
   S.gifts.push(g);
   S.txs.push({ id: crypto.randomUUID(), gift_card_id: g.id, card_id: card, type: 'issue', amount_cents: cents, balance_after_cents: cents, reference_number: ref(), location_id: null, actor: 'owner', note: null, created_at: g.created_at });
   return g;
@@ -62,8 +62,17 @@ function sendMail(g, target) {
 }
 reset();
 // Publieke vorm van de bon, zoals de backend: verzendstatus genest onder mail.
+// Korte code zoals de backend: Crockford, opgeslagen zonder streepjes.
+const normShort = v => String(v || '').toUpperCase().replace(/[^0-9A-Z]/g, '').replace(/O/g, '0').replace(/[IL]/g, '1');
+const fmtShort = c => c.length === 10 ? c.slice(0, 4) + '-' + c.slice(4, 8) + '-' + c.slice(8) : c;
+// Zonder code en url, zoals giftCardPublic(bon) bij de lookup.
+const lookupPub = g => ({ id: g.id, card_id: g.card_id, short_code: g.short_code, short_code_display: fmtShort(g.short_code), initial_amount_cents: g.initial_amount_cents,
+  balance_cents: g.balance_cents, status: g.status, recipient_name: g.recipient_name, recipient_email: g.recipient_email, message: g.message, expires_at: g.expires_at,
+  expired: !!(g.expires_at && Date.parse(g.expires_at) <= Date.now()), created_at: g.created_at });
 const pub = g => {
   const { card_id, pass_mail_tried_ms, buyer_mail_tried_ms, pass_mail_sent_at, pass_mail_error, buyer_mail_sent_at, buyer_mail_error, last_mail_attempt_at, ...r } = g;
+  r.short_code_display = fmtShort(g.short_code);
+  r.url = 'https://api.omrzdigital.nl/cadeaubon/' + g.code;                   // backend: url, niet share_url
   r.mail = { pass: { sent_at: pass_mail_sent_at || null, error: pass_mail_error || null },
     buyer: { sent_at: buyer_mail_sent_at || null, error: buyer_mail_error || null }, last_attempt_at: last_mail_attempt_at || null };
   return r;
@@ -72,7 +81,8 @@ const send = (res, st, obj) => { res.writeHead(st, { 'Content-Type': 'applicatio
 const fail = (res, st, code, error, extra) => send(res, st, { success: false, code, error, ...(extra || {}) });
 const findCode = (card, code) => {
   let c = String(code || '').trim(); const m = c.match(/\/cadeaubon\/([^/?#]+)/i); if (m) c = m[1];
-  return S.gifts.find(g => g.card_id === card && (g.code === c || g.short_code === c.toUpperCase()));
+  if (/^[0-9a-f]{32}$/i.test(c)) return S.gifts.find(g => g.card_id === card && g.code === c.toLowerCase());
+  return S.gifts.find(g => g.card_id === card && g.short_code === normShort(c));
 };
 
 function api(req, res, url, body, rawBody) {
@@ -228,22 +238,30 @@ function api(req, res, url, body, rawBody) {
     if (p === '/api/stamp/gift-cards' && req.method === 'GET') {
       let list = S.gifts.filter(g => g.card_id === card).sort((a, b) => b.created_at.localeCompare(a.created_at));
       if (q.get('status')) list = list.filter(g => g.status === q.get('status'));
-      if (q.get('q')) { const t = q.get('q').toLowerCase(); list = list.filter(g => (g.recipient_name || '').toLowerCase().includes(t) || g.short_code.toLowerCase().includes(t)); }
+      if (q.get('q')) { const t = q.get('q').toLowerCase(); list = list.filter(g => (g.recipient_name || '').toLowerCase().includes(t) || g.short_code.toLowerCase().includes(normShort(t).toLowerCase())); }
       const all = S.gifts.filter(g => g.card_id === card && g.status === 'active');
       const off = Number(q.get('offset') || 0), lim = Number(q.get('limit') || 50);
       return send(res, 200, { success: true, gift_cards: list.slice(off, off + lim).map(pub), total: list.length, totals: { outstanding_cents: all.reduce((n, g) => n + g.balance_cents, 0), active_count: all.length } });
     }
     if (p === '/api/stamp/gift-cards/lookup') {
       S.log.lookup.push(q.get('code'));
+      if (!q.get('card_id')) return fail(res, 400, 'card_id_required', 'card_id is verplicht');
+      if (!q.get('code')) return fail(res, 400, 'code_required', 'code is verplicht');
       const g = findCode(card, q.get('code'));
       if (!g) return fail(res, 404, 'gift_card_not_found', 'Niet gevonden');
-      return send(res, 200, { success: true, gift_card: { id: g.id, shop_name: tok.biz, balance_cents: g.balance_cents, status: g.status, recipient_name: g.recipient_name, expires_at: g.expires_at, short_code: g.short_code }, can_redeem: g.status === 'active' && g.balance_cents > 0 });
+      const blk = g.status === 'blocked' ? 'gift_card_blocked' : (g.status === 'expired' || (g.expires_at && Date.parse(g.expires_at) <= Date.now())) ? 'gift_card_expired' : g.balance_cents <= 0 ? 'gift_card_empty' : null;
+      return send(res, 200, { success: true, gift_card: lookupPub(g), can_redeem: !blk, blocked_reason: blk, blocked_message: blk ? 'Niet bruikbaar' : null });
     }
     if (p === '/api/stamp/gift-cards/redeem' && req.method === 'POST') {
       S.log.redeem.push({ ...body, auth: tok.owner ? 'owner' : 'mgr' });
       const done = () => {
-        if (S.idem[body.idempotency_key]) return send(res, 200, S.idem[body.idempotency_key]);
-        const g = findCode(card, body.code);
+        if (S.idem[body.idempotency_key]) return send(res, 200, { ...S.idem[body.idempotency_key], replayed: true });
+        let g;
+        if (body.gift_card_id) g = S.gifts.find(x => x.id === body.gift_card_id && x.card_id === card);
+        else if (body.code) {
+          if (!body.card_id) return fail(res, 400, 'card_id_required', 'card_id is verplicht bij een code');   // zoals de backend
+          g = findCode(body.card_id, body.code);
+        } else return fail(res, 400, 'code_required', 'code of gift_card_id is verplicht');
         if (!g) return fail(res, 404, 'gift_card_not_found', 'Niet gevonden');
         if (g.status === 'blocked') return fail(res, 409, 'gift_card_blocked', 'Geblokkeerd');
         if (g.status === 'expired' || (g.expires_at && Date.parse(g.expires_at) <= Date.now())) return fail(res, 409, 'gift_card_expired', 'Verlopen');
@@ -251,9 +269,8 @@ function api(req, res, url, body, rawBody) {
         if (!Number.isInteger(body.amount_cents) || body.amount_cents <= 0) return fail(res, 400, 'invalid_amount', 'Ongeldig');
         if (body.amount_cents > g.balance_cents) return fail(res, 409, 'insufficient_balance', 'Onvoldoende', { balance_cents: g.balance_cents });
         const tx = redeemRaw(g, body.amount_cents, body.location_id || tok.location || null);
-        const bill = body.bill_total_cents;
-        const out = { success: true, reference_number: tx.reference_number, gift_card_id: g.id, amount_cents: body.amount_cents, balance_after_cents: g.balance_cents,
-          remaining_to_pay_cents: Number.isInteger(bill) && bill > body.amount_cents ? bill - body.amount_cents : null, status: g.status };
+        // Zoals de backend: bedrag, saldo en referentie onder transaction; geen remaining_to_pay_cents.
+        const out = { success: true, replayed: false, transaction: { id: tx.id, reference_number: tx.reference_number, amount_cents: body.amount_cents, balance_after_cents: g.balance_cents }, gift_card: pub(g) };
         S.idem[body.idempotency_key] = out;
         send(res, 200, out);
       };

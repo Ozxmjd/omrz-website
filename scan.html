@@ -1879,7 +1879,7 @@
         function renderGift() {
             const g = gift.card;
             $('gShop').textContent = g.shop_name || store.biz || '';
-            $('gTo').textContent = g.recipient_name ? 'Voor ' + g.recipient_name : 'Cadeaubon ' + (g.short_code || '');
+            $('gTo').textContent = g.recipient_name ? 'Voor ' + g.recipient_name : 'Cadeaubon ' + GIFT.giftShortCodeDisplay(g);
             $('gBal').textContent = GIFT.formatCents(g.balance_cents);
             const key = GIFT.giftStatus(g);
             const label = GIFT.STATUS_LABELS[key] || 'Niet bruikbaar';
@@ -1962,7 +1962,10 @@
             if (!gAttempt || gAttempt.amount !== amount || gAttempt.bill !== bill) {
                 gAttempt = { key: GIFT.newIdempotencyKey(), amount, bill };
             }
-            const body = { code: gift.code, amount_cents: amount, idempotency_key: gAttempt.key };
+            // De backend wil bij een code ook de kaart (card_id); met gift_card_id uit de lookup
+            // weet hij meteen welke bon het is.
+            const body = { card_id: activeCardId(), code: gift.code, amount_cents: amount, idempotency_key: gAttempt.key };
+            if (gift.card && gift.card.id) body.gift_card_id = gift.card.id;
             if (bill) body.bill_total_cents = bill;
             const loc = localStorage.getItem(GIFT_LOC_KEY);
             if (loc) body.location_id = loc;
@@ -1977,7 +1980,7 @@
                 const data = await res.json().catch(() => ({}));
                 if (res.ok && data.success !== false) {
                     gAttempt = null;                              // poging klaar
-                    showGiftDone(data, amount);
+                    showGiftDone(GIFT.redeemResult(data, amount, bill));
                     return;
                 }
                 if (res.status >= 500) throw Object.assign(new Error('server'), { retry: true });
@@ -2007,12 +2010,14 @@
             }
         }
 
-        function showGiftDone(d, fallbackAmount) {
-            const amount = Number.isInteger(d.amount_cents) ? d.amount_cents : fallbackAmount;
+        // r = GIFT.redeemResult(...): bedrag, nieuw saldo en referentie uit transaction.
+        function showGiftDone(r) {
+            const amount = r.amount_cents;
             gLastResult = { amount };
             $('gdAmount').textContent = GIFT.formatCents(amount);
-            $('gdBal').textContent = GIFT.formatCents(d.balance_after_cents);
-            $('gdRef').textContent = d.reference_number || '—';
+            $('gdBal').textContent = Number.isInteger(r.balance_after_cents) ? GIFT.formatCents(r.balance_after_cents) : 'zie de bon';
+            $('gdRef').textContent = r.reference_number || 'volgt in het overzicht';
+            const d = r;
             $('gdKassa').textContent = GIFT.formatCents(amount);
             const rem = d.remaining_to_pay_cents;
             $('gdRemain').hidden = !Number.isInteger(rem);
