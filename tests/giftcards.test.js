@@ -366,3 +366,64 @@ test('rapport: CSV met puntkomma, komma-decimalen, elke dag en een totaal', () =
   assert.equal(rows[4], 'Totaal;25,00;1;12,50;2');
   assert.ok(!/btw/i.test(csv));
 });
+
+test('ontwerp v2: tien velden, alleen wijzigingen, null = overnemen, nooit null voor show_name/amount_size', () => {
+  assert.deepEqual(G.DESIGN_FIELDS.slice().sort(), ['accent_color', 'amount_size', 'background_url', 'business_name', 'font', 'logo_url', 'pass_color', 'show_name', 'text_color', 'theme']);
+  const orig = {
+    theme: { value: 'klassiek', inherited: true }, pass_color: { value: '#1f4d2b', inherited: true }, text_color: { value: '#ffffff', inherited: true },
+    accent_color: { value: '#d4a373', inherited: false }, logo_url: { value: null, inherited: true }, background_url: { value: null, inherited: true },
+    business_name: { value: 'Loris', inherited: true }, show_name: { value: true, inherited: false }, font: { value: 'Inter', inherited: true }, amount_size: { value: 'normaal', inherited: false } };
+  const cur = JSON.parse(JSON.stringify(orig));
+  assert.deepEqual(G.designBody('c', cur, orig), { card_id: 'c' });
+  cur.theme = { value: 'feestelijk', inherited: false };
+  cur.accent_color = { value: '#D4A373', inherited: false };                     // zelfde kleur, andere letters: geen wijziging
+  cur.font = { value: 'Playfair Display', inherited: false };
+  cur.amount_size = { value: 'groot', inherited: false };
+  assert.deepEqual(G.designBody('c', cur, orig), { card_id: 'c', theme: 'feestelijk', font: 'Playfair Display', amount_size: 'groot' });
+  cur.accent_color = { value: null, inherited: true };                          // overnemen
+  cur.amount_size = { value: null, inherited: true };                           // kan niet overnemen: niet versturen
+  const body = G.designBody('c', cur, orig);
+  assert.equal(body.accent_color, null); assert.ok(!('amount_size' in body));
+  cur.show_name = { value: false, inherited: false };
+  assert.strictEqual(G.designBody('c', cur, orig).show_name, false);
+  // Onbekend veld bij een oudere backend: niet aanraken
+  const o2 = Object.assign({}, orig); delete o2.font; const c2 = Object.assign({}, cur); delete c2.font;
+  assert.ok(!('font' in G.designBody('c', c2, o2)));
+});
+
+test('ontwerp v2: controle vooraf tegen de opties uit GET /design', () => {
+  const opt = { themes: ['klassiek', 'modern', 'minimaal', 'feestelijk'], fonts: ['Inter', 'Playfair Display'], amount_sizes: ['klein', 'normaal', 'groot'] };
+  assert.equal(G.validateDesignValue('accent_color', '#12'), 'invalid_color');
+  assert.equal(G.validateDesignValue('accent_color', '#123abc'), null);
+  assert.equal(G.validateDesignValue('theme', 'retro', opt), 'invalid_theme');
+  assert.equal(G.validateDesignValue('theme', 'modern', opt), null);
+  assert.equal(G.validateDesignValue('font', 'playfair display', opt), null);
+  assert.equal(G.validateDesignValue('font', 'Comic Sans', opt), 'invalid_font');
+  assert.equal(G.validateDesignValue('amount_size', 'reuze', opt), 'invalid_amount_size');
+  assert.equal(G.validateDesignValue('show_name', 'false'), 'invalid_show_name');
+  for (const c of ['invalid_theme', 'invalid_font', 'invalid_amount_size', 'upload_type', 'upload_size', 'upload_empty', 'upload_failed']) assert.ok(G.MESSAGES[c], c);
+});
+
+test('ontwerp v2: contrast, kanalen en uploadcontrole', () => {
+  assert.equal(G.contrastRatio('#ffffff', '#000000'), 21);
+  assert.ok(G.contrastRatio('#ffffff', '#ffff00') < 4.5);
+  assert.equal(G.contrastRatio('#fff', '#000'), null);
+  const at = { theme: ['page', 'mail'], accent_color: ['page', 'mail', 'google'], pass_color: ['google', 'apple', 'page', 'mail'] };
+  assert.deepEqual(G.channelsOf(at, 'accent_color'), ['page', 'mail', 'google']);
+  assert.deepEqual(G.channelsOf(at, 'pass_color'), ['page', 'mail', 'apple', 'google']);
+  assert.equal(G.channelsOf(at, 'font'), null);
+  assert.equal(G.channelsOf(null, 'theme'), null);
+  assert.equal(G.validateUpload({ type: 'image/png', size: 1000, name: 'a.png' }), null);
+  assert.equal(G.validateUpload({ type: 'image/webp', size: 5 * 1024 * 1024, name: 'a.webp' }), null);
+  assert.equal(G.validateUpload({ type: 'image/png', size: 5 * 1024 * 1024 + 1, name: 'a.png' }), 'upload_size');
+  assert.equal(G.validateUpload({ type: 'image/gif', size: 10, name: 'a.gif' }), 'upload_type');
+  assert.equal(G.validateUpload({ type: 'image/svg+xml', size: 10, name: 'a.svg' }), 'upload_type');
+  assert.equal(G.validateUpload({ type: '', size: 10, name: 'foto.JPEG' }), null);
+  assert.equal(G.validateUpload(null), 'upload_empty');
+  assert.equal(G.uploadErrorMessage(400, { error: 'Bestand is te groot (max 5MB)' }), G.MESSAGES.upload_size);
+  assert.equal(G.uploadErrorMessage(400, { error: 'Alleen afbeeldingen toegestaan (png, jpg, jpeg, webp)' }), G.MESSAGES.upload_type);
+  assert.equal(G.uploadErrorMessage(400, { error: 'Geen bestand ontvangen (veld "file")' }), G.MESSAGES.upload_empty);
+  assert.equal(G.uploadErrorMessage(403, { error: 'x' }), G.MESSAGES.owner_only);
+  assert.equal(G.uploadErrorMessage(500, { error: 'storage kapot' }), G.MESSAGES.upload_failed);
+  assert.equal(G.uploadErrorMessage(401, {}), G.MESSAGES.unauthorized);
+});

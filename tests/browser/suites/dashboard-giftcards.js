@@ -450,87 +450,17 @@ module.exports = async function run(env) {
   }
   await post('/__cfg', { designFail: null });
 
-  // ===== 12. Ontwerp =====
+  // ===== 12. Ontwerp (uitgebreid in suites/dashboard-design.js) =====
   await post('/__reset');
   ({ ctx, p } = await open(b, 'tok-pp', 'pp'));
   await p.waitForSelector('.gc-row');
   await p.waitForSelector('[data-gc-view="design"]:not([hidden])');
   check('12a. Met /design: tab Ontwerp zichtbaar', await vis(p, '[data-gc-view="design"]'));
-  await p.click('[data-gc-view="design"]'); await p.waitForSelector('#gcDesignFrame');
-  const BASE_PV = B + '/__preview?card=pp&token=t-pp';
-  const bgColor = () => p.frameLocator('#gcDesignFrame').locator('body').evaluate(b => getComputedStyle(b).backgroundColor);
-  const saved = () => p.waitForFunction(() => /opgeslagen/.test((document.getElementById('gcDesignNote') || {}).textContent || ''));
-  const lastPut = async () => JSON.stringify((await state()).log.designPut.slice(-1)[0]);
-  const chips = await p.$$eval('.gc-drow', rows => rows.map(r => [r.dataset.gcDrow, (r.querySelector('.gc-dchip') || {}).textContent || '']));
-  check('12. Velden onder design gelezen: vijf "Van stempelkaart", Naam tonen zonder chip', JSON.stringify(chips) === JSON.stringify([['pass_color', 'Van stempelkaart'], ['text_color', 'Van stempelkaart'],
-    ['logo_url', 'Van stempelkaart'], ['background_url', 'Van stempelkaart'], ['business_name', 'Van stempelkaart'], ['show_name', '']]), JSON.stringify(chips));
-  check('12. Waarden van de backend in beeld (kleur, naam, Naam tonen aan)', (await p.inputValue('[data-gc-dinput="pass_color"]')) === '#1f4d2b'
-    && (await p.inputValue('[data-gc-dinput="business_name"]')) === 'Loris Parfum' && await p.isChecked('[data-gc-dinput="show_name"]'));
-  check('12. Naam tonen: geen knop "Overnemen van stempelkaart"', !(await p.$('[data-gc-inherit="show_name"]')));
-  check('12. Voorbeeld = iframe op de ondertekende preview_url', (await p.getAttribute('#gcDesignFrame', 'src')) === BASE_PV);
-  check('12. Waarschuwing bij achtergrond: Apple-pas alleen strip of niets, publieke pagina en Google Wallet volledig',
-    /Apple Wallet-pas.*alleen als smalle strip.*of helemaal niet.*publieke cadeaubonpagina en in Google Wallet.*volledig/.test(await txt(p, '[data-gc-drow="background_url"] .gc-dwarn')));
-  await p.click('#gcDesignSave'); await p.waitForTimeout(200);
-  check('12. Niets gewijzigd → geen PUT', /niets gewijzigd/.test(await txt(p, '#gcDesignNote')) && (await state()).log.designPut.length === 0);
-  // Kleur, en Naam tonen uit
-  await p.fill('[data-gc-dinput="pass_color"]', '#123456');
-  check('12. Kleur wijzigen → "Eigen instelling" + knop "Overnemen van stempelkaart"', /Eigen instelling/.test(await txt(p, '[data-gc-drow="pass_color"]')) && await vis(p, '[data-gc-inherit="pass_color"]'));
-  await p.uncheck('[data-gc-dinput="show_name"]');
-  await p.click('#gcDesignSave'); await saved();
-  check('12. Opslaan → PUT met alleen de wijzigingen, show_name als boolean', (await lastPut()) === '{"card_id":"pp","pass_color":"#123456","show_name":false}', await lastPut());
-  const src2 = await p.getAttribute('#gcDesignFrame', 'src');
-  check('12. Voorbeeld opnieuw geladen (zelfde preview_url, verse lading) en toont de nieuwe kleur', src2.startsWith(BASE_PV + '&_=') && (await bgColor()) === 'rgb(18, 52, 86)', src2);
-  check('12. Naam tonen blijft uit na opnieuw ophalen', !(await p.isChecked('[data-gc-dinput="show_name"]')) && !(await p.$('[data-gc-inherit="show_name"]')));
-  // Kleur weer overnemen
-  await p.click('[data-gc-inherit="pass_color"]');
-  check('12. "Overnemen van stempelkaart" → wordt overgenomen na opslaan', /overgenomen van de stempelkaart na opslaan/.test(await txt(p, '[data-gc-drow="pass_color"]')));
-  await p.click('#gcDesignSave'); await saved();
-  check('12. PUT met null = weer overnemen; daarna "Van stempelkaart" en oude kleur in het voorbeeld', (await lastPut()) === '{"card_id":"pp","pass_color":null}'
-    && /Van stempelkaart/.test(await txt(p, '[data-gc-drow="pass_color"]')) && (await bgColor()) === 'rgb(31, 77, 43)');
-  // Naam: eigen naam, dan leeg = overnemen
-  await p.fill('[data-gc-dinput="business_name"]', 'Loris Cadeau');
-  await p.click('#gcDesignSave'); await saved();
-  check('12. Eigen naam opgeslagen', (await lastPut()) === '{"card_id":"pp","business_name":"Loris Cadeau"}' && /Eigen instelling/.test(await txt(p, '[data-gc-drow="business_name"]')));
-  await p.fill('[data-gc-dinput="business_name"]', '');
-  await p.click('#gcDesignSave'); await saved();
-  check('12. Naam leeg = weer overnemen (null)', (await lastPut()) === '{"card_id":"pp","business_name":null}' && /Van stempelkaart/.test(await txt(p, '[data-gc-drow="business_name"]')));
-  // Kleuren: de backend geeft kleine letters; hoofdletters van dezelfde kleur zijn geen wijziging
-  await p.fill('[data-gc-dinput="pass_color"]', '#2E5B45'); await p.click('#gcDesignSave'); await saved();
-  check('12. Nieuwe kleur in hoofdletters → PUT in kleine letters', (await lastPut()) === '{"card_id":"pp","pass_color":"#2e5b45"}', await lastPut());
-  check('12. Kleur van de backend in kleine letters in kleurkiezer en code', (await p.inputValue('[data-gc-dinput="pass_color"]')) === '#2e5b45' && (await p.inputValue('[data-gc-dcolor="pass_color"]')) === '#2e5b45');
-  const putsHL = (await state()).log.designPut.length;
-  await p.fill('[data-gc-dinput="pass_color"]', '#2E5B45'); await p.click('#gcDesignSave'); await p.waitForTimeout(200);
-  check('12. Zelfde kleur in hoofdletters → "niets gewijzigd", geen PUT', /niets gewijzigd/.test(await txt(p, '#gcDesignNote')) && (await state()).log.designPut.length === putsHL);
-  await p.click('[data-gc-inherit="pass_color"]'); await p.click('#gcDesignSave'); await saved();
-  // Fouten
-  const puts = (await state()).log.designPut.length;
-  await p.fill('[data-gc-dinput="text_color"]', 'rood'); await p.click('#gcDesignSave'); await p.waitForTimeout(200);
-  check('12. Ongeldige kleur → melding vooraf, geen PUT', /Tekstkleur: Deze kleur klopt niet/.test(await txt(p, '#gcDesignNote')) && (await state()).log.designPut.length === puts);
-  await p.click('[data-gc-inherit="text_color"]');
-  await p.fill('[data-gc-dinput="logo_url"]', 'http://onveilig.supabase.co/logo.png'); await p.click('#gcDesignSave'); await p.waitForTimeout(200);
-  check('12. Link zonder https → melding vooraf, geen PUT', /Logo: Deze afbeelding moet een https-link uit de eigen opslag van OMRZ zijn/.test(await txt(p, '#gcDesignNote')) && (await state()).log.designPut.length === puts);
-  await p.fill('[data-gc-dinput="logo_url"]', 'https://cdn.example.nl/logo.png'); await p.click('#gcDesignSave'); await p.waitForTimeout(300);
-  check('12. Server invalid_url (ander domein) → melding van de server met veld en toegestaan domein',
-    /Niet opgeslagen: Logo: Deze afbeelding moet via https van onze eigen opslag komen \(\.supabase\.co\)/.test(await txt(p, '#gcDesignNote')), await txt(p, '#gcDesignNote'));
-  await p.fill('[data-gc-dinput="logo_url"]', 'https://abc.supabase.co/storage/v1/object/public/logos/loris.png'); await p.click('#gcDesignSave'); await saved();
-  check('12. Logo uit de eigen opslag → opgeslagen', (await lastPut()) === '{"card_id":"pp","logo_url":"https://abc.supabase.co/storage/v1/object/public/logos/loris.png"}');
-  for (const [code, field, re] of [['invalid_color', 'text_color', /Niet opgeslagen: Tekstkleur: Deze kleur klopt niet/], ['invalid_show_name', 'show_name', /Niet opgeslagen: Naam van de zaak tonen: Kies of de naam/],
-    ['nothing_to_update', null, /Niet opgeslagen: Er is niets gewijzigd/]]) {
-    await p.route('**/api/stamp/gift-cards/design', r => r.request().method() === 'PUT' ? r.fulfill({ status: 400, contentType: 'application/json', body: JSON.stringify({ success: false, code, error: 'x', ...(field ? { field } : {}) }) }) : r.continue());
-    await p.fill('[data-gc-dinput="text_color"]', '#ABCDEF'); await p.click('#gcDesignSave'); await p.waitForTimeout(250);
-    check(`12. Server ${code} → nette melding${field ? ' met veld' : ''}`, re.test(await txt(p, '#gcDesignNote')), await txt(p, '#gcDesignNote'));
-    await p.unroute('**/api/stamp/gift-cards/design');
-  }
-  await p.screenshot({ path: OUT + '/gcd-design-1440.png', fullPage: true });
   await ctx.close();
   for (const vp of [{ width: 820, height: 1180 }, { width: 390, height: 844 }]) {
     ({ ctx, p } = await open(b, 'tok-pp', 'pp', vp));
     await p.waitForSelector('.gc-row');
-    await p.waitForSelector('[data-gc-view="design"]:not([hidden])');
-    await p.click('[data-gc-view="design"]'); await p.waitForSelector('#gcDesignFrame');
-    check(`12. ${vp.width}px ontwerp: geen horizontale scroll`, await noH(p));
-    await p.screenshot({ path: OUT + `/gcd-design-${vp.width}.png`, fullPage: true });
-    await p.click('[data-gc-view="list"]'); await p.click('[data-gc-new]'); await p.waitForSelector('#gcNewForm');
+    await p.click('[data-gc-new]'); await p.waitForSelector('#gcNewForm');
     check(`12. ${vp.width}px nieuw formulier: geen horizontale scroll`, await noH(p));
     await p.screenshot({ path: OUT + `/gcd-newform-${vp.width}.png`, fullPage: true });
     await ctx.close();

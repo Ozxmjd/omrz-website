@@ -15,6 +15,7 @@ const SUITES = [
   ['scanapp', 'Scanapp: stempelflow, cadeaubonnen en onderdeel S (stempelreeks zonder reload)'],
   ['stamp-regression', 'Stempelflow-regressie (scan.html en Geef Stempel)'],
   ['dashboard-giftcards', 'Dashboard: pagina Cadeaubonnen'],
+  ['dashboard-design', 'Dashboard: Cadeaubonnen → Ontwerp'],
   ['dashboard-report', 'Dashboard: Cadeaubonnen → Rapport'],
   ['dashboard-scanner', 'Dashboard: Geef Stempel met keuze Stempelen | Cadeaubon'],
 ];

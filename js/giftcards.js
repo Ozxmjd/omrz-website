@@ -311,14 +311,16 @@
   }
 
   // ---- Ontwerp van de cadeaubon ----
-  const DESIGN_FIELDS = ['pass_color', 'text_color', 'logo_url', 'background_url', 'business_name', 'show_name'];
+  // De tien ontwerpvelden van GET/PUT /gift-cards/design (backend de7021f), elk { value, inherited }.
+  const DESIGN_FIELDS = ['theme', 'pass_color', 'text_color', 'accent_color', 'logo_url', 'background_url',
+    'business_name', 'show_name', 'font', 'amount_size'];
   const isHexColor = v => /^#[0-9a-fA-F]{6}$/.test(String(v || ''));
   const isHttpsUrl = v => { try { const u = new URL(String(v)); return u.protocol === 'https:'; } catch (_) { return false; } };
   // Kleuren komen van de backend altijd in kleine letters (#2e5b45). We vergelijken en
   // versturen ze daarom ook zo; andere waarden blijven ongemoeid.
-  const COLOR_FIELDS = ['pass_color', 'text_color'];
-  // show_name heeft geen stempelkaart-waarde om over te nemen: altijd een eigen instelling.
-  const NO_INHERIT_FIELDS = ['show_name'];
+  const COLOR_FIELDS = ['pass_color', 'text_color', 'accent_color'];
+  // Geen stempelkaart-waarde om over te nemen (backend: altijd inherited false): nooit null sturen.
+  const NO_INHERIT_FIELDS = ['show_name', 'amount_size'];
   function normalizeColor(v) { return isHexColor(v) ? String(v).toLowerCase() : v; }
   function designValue(k, v) { return COLOR_FIELDS.indexOf(k) !== -1 ? normalizeColor(v) : v; }
   // Alleen gewijzigde velden; null = weer overnemen van de stempelkaart.
@@ -326,20 +328,71 @@
   function designBody(cardId, current, original) {
     const body = { card_id: cardId };
     DESIGN_FIELDS.forEach(k => {
-      const c = current[k] || {}, o = original[k] || {};
-      if (NO_INHERIT_FIELDS.indexOf(k) !== -1) { if (c.value !== o.value) body[k] = c.value === true; return; }
+      const c = current[k], o = original[k];
+      if (!c || !o) return;                                   // veld onbekend bij deze backend: niet aanraken
+      if (k === 'show_name') { if (c.value !== o.value) body[k] = c.value === true; return; }
+      if (NO_INHERIT_FIELDS.indexOf(k) !== -1) { if (c.value !== o.value && c.value != null) body[k] = c.value; return; }
       if (c.inherited) { if (!o.inherited) body[k] = null; return; }
       const cv = designValue(k, c.value), ov = designValue(k, o.value);
       if (o.inherited || cv !== ov) body[k] = cv;
     });
     return body;
   }
-  // Fout van een ontwerpveld vooraf: invalid_color, invalid_url of null.
-  function validateDesignValue(field, value) {
+  // Fout van een ontwerpveld vooraf, of null. options: { themes, fonts, amount_sizes } uit GET /design.
+  function validateDesignValue(field, value, options) {
     if (value === null) return null;
-    if (field === 'pass_color' || field === 'text_color') return isHexColor(value) ? null : 'invalid_color';
+    const o = options || {};
+    const inList = (list, v) => !Array.isArray(list) || list.some(x => String(x).toLowerCase() === String(v).toLowerCase());
+    if (COLOR_FIELDS.indexOf(field) !== -1) return isHexColor(value) ? null : 'invalid_color';
     if (field === 'logo_url' || field === 'background_url') return value === '' || isHttpsUrl(value) ? null : 'invalid_url';
+    if (field === 'theme') return inList(o.themes, value) ? null : 'invalid_theme';
+    if (field === 'font') return inList(o.fonts, value) ? null : 'invalid_font';
+    if (field === 'amount_size') return inList(o.amount_sizes, value) ? null : 'invalid_amount_size';
+    if (field === 'show_name') return typeof value === 'boolean' ? null : 'invalid_show_name';
     return null;
+  }
+  // Leesbaarheid van tekst op de paskleur (WCAG-contrast). < 4,5 verdient een waarschuwing.
+  function contrastRatio(a, b) {
+    if (!isHexColor(a) || !isHexColor(b)) return null;
+    const lum = h => { const c = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255).map(x => (x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4)));
+      return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+    const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m);
+    return Math.round((x + 0.05) / (y + 0.05) * 100) / 100;
+  }
+
+  // Waar een ontwerpveld effect heeft (applies_to uit GET /design): page, mail, apple, google.
+  const CHANNELS = ['page', 'mail', 'apple', 'google'];
+  const CHANNEL_LABELS = { page: 'Bonpagina', mail: 'E-mail', apple: 'Apple Wallet', google: 'Google Wallet' };
+  function channelsOf(appliesTo, field) {
+    const list = appliesTo && Array.isArray(appliesTo[field]) ? appliesTo[field] : null;
+    return list ? CHANNELS.filter(c => list.indexOf(c) !== -1) : null;
+  }
+
+  // Uploads (POST /gift-cards/upload-logo en /upload-background): png, jpg/jpeg of webp, max 5 MB.
+  const UPLOAD_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+  const UPLOAD_MAX_BYTES = 5 * 1024 * 1024;
+  function validateUpload(file) {
+    if (!file) return 'upload_empty';
+    const typeOk = UPLOAD_TYPES.indexOf(String(file.type || '').toLowerCase()) !== -1
+      || (!file.type && /\.(png|jpe?g|webp)$/i.test(String(file.name || '')));
+    if (!typeOk) return 'upload_type';
+    if (file.size > UPLOAD_MAX_BYTES) return 'upload_size';
+    if (!file.size) return 'upload_empty';
+    return null;
+  }
+  // De backend geeft bij een upload alleen { error } (Engelse multer-tekst of Nederlands);
+  // vertaal op status en herkenbare tekst naar een vaste nette melding.
+  function uploadErrorMessage(status, data) {
+    const e = String((data && data.error) || '');
+    if (status === 401) return MESSAGES.unauthorized;
+    if (status === 403) return MESSAGES.owner_only;
+    if (status === 400) {
+      if (/te groot|too large|5\s?mb/i.test(e)) return MESSAGES.upload_size;
+      if (/png|jpg|jpeg|webp|afbeelding/i.test(e)) return MESSAGES.upload_type;
+      if (/geen bestand|file/i.test(e)) return MESSAGES.upload_empty;
+      return MESSAGES.upload_failed;
+    }
+    return MESSAGES.upload_failed;
   }
 
   const PLAN_LOCK_CODES = ['premium_plus_required', 'plan_required'];
@@ -380,6 +433,13 @@
     invalid_url: 'Deze afbeelding moet een https-link uit de eigen opslag van OMRZ zijn.',
     invalid_show_name: 'Kies of de naam wel of niet op de cadeaubon komt.',
     nothing_to_update: 'Er is niets gewijzigd.',
+    invalid_theme: 'Kies een van de thema\'s uit de lijst.',
+    invalid_font: 'Kies een lettertype uit de lijst.',
+    invalid_amount_size: 'Kies klein, normaal of groot.',
+    upload_type: 'Dit bestandstype kan niet. Kies een PNG-, JPG- of WebP-afbeelding.',
+    upload_size: 'Deze afbeelding is groter dan 5 MB. Kies een kleinere afbeelding.',
+    upload_empty: 'Er is geen afbeelding gekozen.',
+    upload_failed: 'Uploaden is niet gelukt. Probeer het opnieuw.',
   };
   const NOT_LIVE_MESSAGE = 'Cadeaubonnen zijn nog niet beschikbaar. Probeer het later opnieuw.';
 
@@ -466,7 +526,8 @@
     giftStatus, STATUS_LABELS, isPlanLock, scannerEnabledFrom, referenceFrom, scannerSettingsBody, errorMessage, isNotLive, MESSAGES, NOT_LIVE_MESSAGE,
     DELIVERY_MODES, validateGiftDelivery, giftCreateBody, resendBody, mailStateOf, mailOutcome, mailAddress,
     REPORT_PRESETS, reportQuery, fillDays, locationLabel, reportHasCards, REPORT_TX_FIELD, reportRecentTx, reportCsv,
-    DESIGN_FIELDS, NO_INHERIT_FIELDS, designBody, validateDesignValue, isHexColor, isHttpsUrl, normalizeColor, designValue };
+    DESIGN_FIELDS, NO_INHERIT_FIELDS, designBody, validateDesignValue, contrastRatio, CHANNELS, CHANNEL_LABELS, channelsOf,
+    UPLOAD_TYPES, UPLOAD_MAX_BYTES, validateUpload, uploadErrorMessage, isHexColor, isHttpsUrl, normalizeColor, designValue };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.OMRZGift = api;
 })(typeof window !== 'undefined' ? window : globalThis);

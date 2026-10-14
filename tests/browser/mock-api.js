@@ -41,14 +41,45 @@ function redeemRaw(g, cents, loc) {
   const tx = { id: crypto.randomUUID(), gift_card_id: g.id, card_id: g.card_id, type: 'redeem', amount_cents: cents, balance_after_cents: g.balance_cents, reference_number: ref(), location_id: loc || null, actor: 'staff', note: null, created_at: new Date().toISOString() };
   S.txs.push(tx); return tx;
 }
-// Stempelkaart-waarden waar het ontwerp van de cadeaubon op terugvalt.
-const CARD_DESIGN = { pass_color: '#1f4d2b', text_color: '#ffffff', logo_url: 'https://omrzdigital.nl/images/logo.png', background_url: null, business_name: 'Loris Parfum', show_name: true };
+// Stempelkaart-waarden waar het ontwerp van de cadeaubon op terugvalt (zoals giftDesign in de7021f).
+const CARD_DESIGN = { pass_color: '#1f4d2b', text_color: '#ffffff', accent_color: '#d4a373', logo_url: 'https://omrz.supabase.co/storage/v1/object/public/stamp-cards/logos/kaart.png',
+  background_url: null, business_name: 'Loris Parfum', theme: 'modern', font: 'Inter' };
+const GIFT_THEMES = ['klassiek', 'modern', 'minimaal', 'feestelijk'];
+const GIFT_FONTS = ['inter', 'playfair display', 'poppins', 'montserrat', 'lora', 'bebas neue'];
+const GIFT_SIZES = ['klein', 'normaal', 'groot'];
+const fontLabel = k => String(k || '').replace(/\b\w/g, c => c.toUpperCase());
+const DESIGN_OPTIONS = { themes: GIFT_THEMES, fonts: GIFT_FONTS.map(fontLabel), amount_sizes: GIFT_SIZES };
+const APPLIES_TO = { pass_color: ['page', 'mail', 'apple', 'google'], text_color: ['page', 'mail', 'apple', 'google'], accent_color: ['page', 'mail', 'google'],
+  logo_url: ['page', 'mail', 'apple', 'google'], background_url: ['page', 'google'], business_name: ['page', 'mail', 'apple', 'google'], show_name: ['page', 'apple', 'google'],
+  theme: ['page', 'mail'], font: ['page', 'mail'], amount_size: ['page', 'mail'] };
 function designOf(card) {
   const own = S.design[card] || {};
   const out = {};
-  Object.keys(CARD_DESIGN).forEach(k => { out[k] = k in own ? { value: own[k], inherited: false } : { value: CARD_DESIGN[k], inherited: true }; });
-  out.show_name = { value: 'show_name' in own ? own.show_name : true, inherited: false };   // backend: eigen kolom, nooit overgenomen
+  ['pass_color', 'text_color', 'accent_color', 'logo_url', 'background_url', 'business_name', 'theme'].forEach(k => {
+    out[k] = own[k] != null ? { value: own[k], inherited: false } : { value: CARD_DESIGN[k], inherited: true };
+  });
+  out.font = own.font ? { value: fontLabel(own.font), inherited: false } : { value: CARD_DESIGN.font, inherited: true };
+  out.show_name = { value: own.show_name !== false, inherited: false };       // eigen kolom, nooit overgenomen
+  out.amount_size = { value: own.amount_size || 'normaal', inherited: false };
   return out;
+}
+// Eén bestand uit multipart/form-data halen (veld "file"), genoeg voor de nep-API.
+function multipartFile(req) {
+  const m = /boundary=(?:"([^"]+)"|([^;]+))/i.exec(req.headers['content-type'] || '');
+  if (!m || !req.rawBuffer) return null;
+  const sep = Buffer.from('--' + (m[1] || m[2]));
+  const buf = req.rawBuffer; let pos = buf.indexOf(sep);
+  while (pos !== -1) {
+    const next = buf.indexOf(sep, pos + sep.length); if (next === -1) break;
+    const part = buf.slice(pos + sep.length + 2, next - 2);
+    const h = part.indexOf('\r\n\r\n'); const head = part.slice(0, h).toString();
+    if (/name="file"/.test(head) && /filename="/.test(head)) {
+      const ct = (/content-type:\s*([^\r\n]+)/i.exec(head) || [])[1] || '';
+      return { type: ct.trim().toLowerCase(), size: part.length - h - 4, name: (/filename="([^"]*)"/.exec(head) || [])[1] };
+    }
+    pos = next;
+  }
+  return null;
 }
 // Mail versturen (nep): mislukt als cfg.mailFail dat doel noemt.
 function sendMail(g, target) {
@@ -96,8 +127,11 @@ async function api(req, res, url, body, rawBody) {
   if (p === '/__preview') {
     const d = designOf(q.get('card') || 'pp');
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    return res.end(`<!doctype html><meta charset="utf-8"><body style="margin:0;font-family:sans-serif;background:${d.pass_color.value};color:${d.text_color.value}">
-      <div id="pv" data-version="${q.get('v')}" style="padding:24px"><h2>${d.show_name.value ? d.business_name.value : ''}</h2><p>Cadeaubon € 25,00</p></div></body>`);
+    const px = { klein: 30, normaal: 44, groot: 60 }[d.amount_size.value];
+    return res.end(`<!doctype html><meta charset="utf-8"><body style="margin:0;font-family:${d.font.value},sans-serif;background:${d.pass_color.value};color:${d.text_color.value}">
+      <div id="pv" data-theme="${d.theme.value}" data-accent="${d.accent_color.value}" data-size="${d.amount_size.value}" data-logo="${d.logo_url.value || ''}" style="padding:24px">
+      <small style="opacity:.7;text-transform:uppercase;letter-spacing:.1em">Thema ${d.theme.value}</small><h2>${d.show_name.value ? d.business_name.value : ''}</h2>
+      <p style="font-size:${px}px;font-weight:700;color:${d.accent_color.value};margin:8px 0">€ 25,00</p><p>Cadeaubon</p></div></body>`);
   }
   if (p === '/__settings') { S.settings[body.card] = body.on === true; return send(res, 200, S.settings); }
   if (p === '/api/stamp/subscription') { if (!tok) return send(res, 401, { error: 'Niet ingelogd' }); return send(res, 200, { success: true, plan: tok.plan, access_status: tok.access_status || 'active', has_access: true }); }
@@ -163,8 +197,27 @@ async function api(req, res, url, body, rawBody) {
   }
   if (p.startsWith('/api/stamp/gift-cards')) {
     if (S.cfg.notLive) { res.writeHead(404, { 'Content-Type': 'text/html' }); return res.end('<pre>Cannot ' + req.method + ' ' + p + '</pre>'); }
+    // Uploads zoals de7021f (uploadStampImage): eerst multer (5 MB, png/jpg/jpeg/webp), dan alleen
+    // de eigenaar, dan "geen bestand". Fouten hebben alleen { error }, geen code. Geen Premium Plus-eis.
+    if ((m = p.match(/^\/api\/stamp\/gift-cards\/upload-(logo|background)$/)) && req.method === 'POST') {
+      S.log.upload = (S.log.upload || []).concat([{ kind: m[1], contentType: req.headers['content-type'] || '', auth: req.headers.authorization || '' }]);
+      if (S.cfg.uploadDelay) await new Promise(r => setTimeout(r, S.cfg.uploadDelay));
+      const f = multipartFile(req);
+      if (f && f.size > 5 * 1024 * 1024) return send(res, 400, { error: 'Bestand is te groot (max 5MB)' });
+      if (f && !['image/png', 'image/jpeg', 'image/jpg', 'image/webp'].includes(f.type)) return send(res, 400, { error: 'Alleen afbeeldingen toegestaan (png, jpg, jpeg, webp)' });
+      if (!tok) return send(res, 401, { error: 'Niet geautoriseerd' });
+      if (!tok.owner) return send(res, 403, { error: 'Alleen de eigenaar kan dit doen.' });
+      if (!f) return send(res, 400, { error: 'Geen bestand ontvangen (veld "file")' });
+      if (S.cfg.uploadFail) return send(res, 500, { error: 'storage kapot' });
+      const ext = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/jpg': 'jpg', 'image/webp': 'webp' }[f.type];
+      const path = `gift/gift-${m[1] === 'logo' ? 'logo' : 'bg'}-${tok.card}-${Date.now()}.${ext}`;
+      const url = 'https://omrz.supabase.co/storage/v1/object/public/stamp-cards/' + path;
+      S.design[tok.card] = Object.assign({}, S.design[tok.card] || {}, { [m[1] === 'logo' ? 'logo_url' : 'background_url']: url });
+      return send(res, 200, { success: true, path, url });
+    }
     if (!tok) return fail(res, 401, 'unauthorized', 'Niet ingelogd');
-    if (tok.plan !== 'premium_plus') return fail(res, 403, 'premium_plus_required', 'Cadeaubonnen horen bij Premium Plus.', { upgrade_required: true });
+    // GET /design mag zonder Premium Plus (backend: wie downgradet ziet zijn instellingen nog).
+    if (tok.plan !== 'premium_plus' && !(p === '/api/stamp/gift-cards/design' && req.method === 'GET')) return fail(res, 403, 'premium_plus_required', 'Cadeaubonnen horen bij Premium Plus.', { upgrade_required: true });
     if (S.cfg.rateLimited) return fail(res, 429, 'rate_limited', 'Te veel verzoeken');
     const card = tok.card;
     // Instelling: cadeaubon-scanner voor medewerkers (standaard uit). Lezen mag iedereen van de zaak,
@@ -241,36 +294,47 @@ async function api(req, res, url, body, rawBody) {
       if (S.cfg.designFail === 404) { res.writeHead(404, { 'Content-Type': 'text/html' }); return res.end('Cannot ' + req.method); }
       if (S.cfg.designFail === 503) return fail(res, 503, 'migration_missing', 'Draai migratie');
       if (S.cfg.designFail === 'net') return req.socket.destroy();
-      // Zoals ai-review-bot 2222342: velden onder design, vaste ondertekende preview_url.
+      // Zoals ai-review-bot de7021f: tien velden onder design, opties, applies_to (alleen GET),
+      // vaste ondertekende preview_url.
       const previewUrl = BASE + '/__preview?card=' + card + '&token=t-' + card;
-      if (req.method === 'GET') return send(res, 200, { success: true, card_id: card, design: designOf(card), preview_url: previewUrl });
+      if (req.method === 'GET') return send(res, 200, { success: true, card_id: card, design: designOf(card), options: DESIGN_OPTIONS, preview_url: previewUrl, applies_to: APPLIES_TO });
       if (req.method === 'PUT') {
         if (!tok.owner) return fail(res, 403, 'owner_only', 'Alleen eigenaar');
         S.log.designPut.push(body);
+        if (S.cfg.designPutDelay) await new Promise(r => setTimeout(r, S.cfg.designPutDelay));
         const own = Object.assign({}, S.design[card] || {});
-        let touched = false;
-        for (const k of ['pass_color', 'text_color']) {
-          if (body[k] === undefined) continue; touched = true;
-          if (body[k] === null || body[k] === '') { delete own[k]; continue; }
-          if (!/^#[0-9a-fA-F]{6}$/.test(body[k])) return send(res, 400, { error: 'Dit is geen geldige kleurcode.', code: 'invalid_color', field: k });
-          own[k] = body[k].toLowerCase();
+        const patch = {};
+        const errs = [];
+        for (const k of ['pass_color', 'text_color', 'accent_color']) {
+          if (body[k] === undefined) continue;
+          if (body[k] === null || body[k] === '') { patch[k] = null; continue; }
+          if (!/^#[0-9a-fA-F]{6}$/.test(body[k])) { errs.push({ error: 'Dit is geen geldige kleurcode.', code: 'invalid_color', field: k }); continue; }
+          patch[k] = body[k].toLowerCase();
         }
         for (const k of ['logo_url', 'background_url']) {
-          if (body[k] === undefined) continue; touched = true;
-          if (body[k] === null || body[k] === '') { delete own[k]; continue; }
+          if (body[k] === undefined) continue;
+          if (body[k] === null || body[k] === '') { patch[k] = null; continue; }
           let okHost = false; try { const u = new URL(body[k]); okHost = u.protocol === 'https:' && u.hostname.endsWith('.supabase.co'); } catch (_) {}
-          if (!okHost) return send(res, 400, { error: 'Deze afbeelding moet via https van onze eigen opslag komen (.supabase.co).', code: 'invalid_url', field: k });
-          own[k] = body[k];
+          if (!okHost) { errs.push({ error: 'Deze afbeelding moet via https van onze eigen opslag komen (.supabase.co).', code: 'invalid_url', field: k }); continue; }
+          patch[k] = body[k];
         }
-        if (body.business_name !== undefined) { touched = true; const n = body.business_name === null ? '' : String(body.business_name).trim().slice(0, 60); if (n) own.business_name = n; else delete own.business_name; }
+        for (const [k, list, code] of [['theme', GIFT_THEMES, 'invalid_theme'], ['amount_size', GIFT_SIZES, 'invalid_amount_size'], ['font', GIFT_FONTS, 'invalid_font']]) {
+          if (body[k] === undefined) continue;
+          if (body[k] === null || body[k] === '') { patch[k] = null; continue; }
+          const v = String(body[k]).trim().toLowerCase();
+          if (!list.includes(v)) { errs.push({ error: `Dit is geen geldige keuze. Kies uit: ${list.join(', ')}.`, code, field: k }); continue; }
+          patch[k] = v;
+        }
+        if (errs.length) return send(res, 400, errs[0]);
+        if (body.business_name !== undefined) { const n = body.business_name === null ? null : String(body.business_name).trim().slice(0, 60); patch.business_name = n || null; }
         if (body.show_name !== undefined) {
-          touched = true;
           if (typeof body.show_name !== 'boolean') return send(res, 400, { error: 'show_name moet true of false zijn.', code: 'invalid_show_name', field: 'show_name' });
-          own.show_name = body.show_name;
+          patch.show_name = body.show_name;
         }
-        if (!touched) return send(res, 400, { error: 'Er is niets om op te slaan.', code: 'nothing_to_update' });
+        if (!Object.keys(patch).length) return send(res, 400, { error: 'Er is niets om op te slaan.', code: 'nothing_to_update' });
+        Object.keys(patch).forEach(k => { if (patch[k] === null) delete own[k]; else own[k] = patch[k]; });
         S.design[card] = own;
-        return send(res, 200, { success: true, card_id: card, design: designOf(card), preview_url: previewUrl });
+        return send(res, 200, { success: true, card_id: card, design: designOf(card), options: DESIGN_OPTIONS, preview_url: previewUrl });
       }
     }
     if (p === '/api/stamp/gift-cards' && req.method === 'GET') {
@@ -404,7 +468,7 @@ http.createServer((req, res) => {
   const url = new URL(req.url, BASE);
   if (req.method === 'OPTIONS') { res.writeHead(204, { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*', 'Access-Control-Allow-Methods': '*' }); return res.end(); }
   if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/__')) {
-    let b = ''; req.on('data', c => b += c); req.on('end', () => { let body = {}; try { body = JSON.parse(b || '{}'); } catch (_) {} Promise.resolve(api(req, res, url, body, b)).catch(e => { console.error(e); send(res, 500, { error: String(e) }); }); }); return;
+    const chunks = []; req.on('data', c => chunks.push(c)); req.on('end', () => { const buf = Buffer.concat(chunks); const b = buf.toString('utf8'); let body = {}; try { body = JSON.parse(b || '{}'); } catch (_) {} req.rawBuffer = buf; Promise.resolve(api(req, res, url, body, b)).catch(e => { console.error(e); send(res, 500, { error: String(e) }); }); }); return;
   }
   const f = path.join(SITE, url.pathname === '/' ? 'index.html' : url.pathname);
   if (!f.startsWith(SITE) || !fs.existsSync(f)) { res.writeHead(404); return res.end(); }

@@ -896,7 +896,7 @@
     /* ---------- Cadeaubonnen ---------- */
     .gc-setting { margin-bottom: 20px; }
     .gc-design { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
-    @media (max-width: 1000px) { .gc-design { grid-template-columns: 1fr; } }
+    @media (max-width: 1000px) { .gc-design { grid-template-columns: minmax(0, 1fr); } }
     .gc-design h3 { margin-bottom: 6px; }
     .gc-drow { padding: 14px 0; border-top: 1px solid var(--border); }
     .gc-drow:first-of-type { border-top: 0; }
@@ -916,6 +916,82 @@
     .gc-dinherit { margin-top: 8px; padding: 6px 11px; font-size: 12.5px; }
     .gc-dsave { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
     .gc-dpreview iframe { width: 100%; height: 560px; border: 1px solid var(--border); border-radius: 14px; background: #fff; display: block; }
+    /* ---- Ontwerp v2 (fase D) ---- */
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+    .gc-dcol { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+    .gc-dsec h3 { font-size: 15px; font-weight: 600; color: var(--text-strong); }
+    .gc-dsec > .b-sub { margin-bottom: 6px; }
+    .gc-dpreview { position: sticky; top: 84px; }
+    @media (max-width: 1000px) { .gc-dpreview { position: static; } }
+    .gc-themes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 4px; }
+    .gc-theme { display: flex; flex-direction: column; gap: 8px; padding: 8px; border-radius: 14px; border: 1px solid var(--border-strong); background: none;
+      cursor: pointer; text-align: left; font: inherit; color: var(--pearl); transition: border-color .2s, box-shadow .2s; }
+    .gc-theme:hover { border-color: rgba(139,92,246,.35); }
+    .gc-theme[aria-checked="true"] { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .gc-theme:focus-visible { outline: 2px solid var(--accent-line); outline-offset: 2px; }
+    .gc-theme b { font-size: 13.5px; font-weight: 600; color: var(--text-strong); display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+    .gc-theme small { font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .gc-theme .tick { width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: #fff; visibility: hidden; flex: none; }
+    .gc-theme .tick svg { width: 11px; height: 11px; }
+    .gc-theme[aria-checked="true"] .tick { visibility: visible; }
+    .gc-tmini { height: 86px; border-radius: 10px; padding: 10px; display: flex; flex-direction: column; justify-content: flex-end; gap: 4px; overflow: hidden; position: relative; }
+    .gc-tmini .p { border-radius: 7px; padding: 7px 8px; }
+    .gc-tmini .amt { font-weight: 700; font-size: 15px; line-height: 1; }
+    .gc-tmini .ln { height: 4px; border-radius: 2px; width: 60%; opacity: .5; margin-top: 4px; }
+    .gc-tmini.klassiek .amt { font-family: Georgia, 'Times New Roman', serif; font-weight: 600; }
+    .gc-tmini.minimaal { background: #fbfbfa !important; }
+    .gc-tmini.minimaal .p { background: #fff !important; border: 1px solid rgba(0,0,0,.09) !important; }
+    .gc-tmini.minimaal .ln { background: #1a1a1a !important; }
+    .gc-dfield { padding: 14px 0; border-top: 1px solid var(--border); }
+    .gc-dfield:first-of-type { border-top: 0; }
+    .gc-dfield.has-err .gc-input, .gc-dfield.has-err .gc-select { border-color: rgba(248,113,113,.7); }
+    .gc-derr { font-size: 12.5px; color: #ff8f8f; margin-top: 6px; }
+    .gc-derr:empty { display: none; }
+    [data-theme="light"] .gc-derr { color: #b91c1c; }
+    .gc-dfoot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+    .gc-chan { font-size: 11.5px; color: var(--faint); }
+    .gc-chan b { font-weight: 500; color: var(--muted); }
+    .gc-linkbtn { border: 0; background: none; padding: 4px 0; font: inherit; font-size: 12.5px; color: var(--accent-2); cursor: pointer; }
+    .gc-linkbtn:hover { text-decoration: underline; }
+    .gc-linkbtn:disabled { color: var(--faint); cursor: default; text-decoration: none; }
+    .gc-contrast { margin-top: 8px; font-size: 12.5px; color: #eab68a; }
+    [data-theme="light"] .gc-contrast { color: #92400e; }
+    .gc-sizes { display: inline-flex; }
+    .gc-sizes button { min-width: 72px; }
+    .gc-dctl .gc-select { min-width: 220px; }
+    .gc-uploads { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 6px; }
+    @media (max-width: 560px) { .gc-uploads { grid-template-columns: 1fr; } }
+    .gc-up { border: 1px solid var(--border-strong); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+    .gc-up.drag { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .gc-up-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+    .gc-up-head b { font-size: 13.5px; font-weight: 600; color: var(--text-strong); }
+    .gc-up-img { height: 110px; border-radius: 10px; display: grid; place-items: center; overflow: hidden;
+      background: repeating-conic-gradient(rgba(var(--ink), .05) 0 25%, transparent 0 50%) 0 0 / 16px 16px; border: 1px dashed var(--border-strong); }
+    .gc-up-img img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+    .gc-up-img.bg img { width: 100%; height: 100%; object-fit: cover; }
+    .gc-up-img span { font-size: 12.5px; color: var(--muted); padding: 0 10px; text-align: center; }
+    .gc-up-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .gc-up-actions .btn { padding: 8px 14px; font-size: 13px; min-height: 40px; display: inline-flex; align-items: center; }
+    .gc-up-prog { height: 6px; border-radius: 99px; background: rgba(var(--ink), .08); overflow: hidden; }
+    .gc-up-prog[hidden] { display: none; }
+    .gc-up-prog i { display: block; height: 100%; width: 0; background: var(--accent-grad); transition: width .15s linear; }
+    .gc-up-note { font-size: 12px; color: var(--muted); min-height: 16px; }
+    .gc-up-note.error { color: #ff8f8f; }
+    [data-theme="light"] .gc-up-note.error { color: #b91c1c; }
+    .gc-up-note.ok { color: #6ee7a0; }
+    [data-theme="light"] .gc-up-note.ok { color: #15803d; }
+    .gc-dbar { position: static; bottom: 12px; z-index: 5; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 14px;
+      border-radius: 14px; background: var(--menu-bg); border: 1px solid var(--border-strong); box-shadow: var(--shadow-lg); }
+    .gc-dbar.dirty { position: sticky; }
+    .gc-dbar .save-note { flex: 1; min-width: 160px; }
+    .gc-matrix { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 8px; }
+    .gc-matrix th, .gc-matrix td { padding: 7px 6px; border-bottom: 1px solid var(--border); text-align: center; }
+    .gc-matrix th:first-child, .gc-matrix td:first-child { text-align: left; color: var(--pearl); }
+    .gc-matrix th { font-size: 11px; font-weight: 600; color: var(--muted); }
+    .gc-matrix .yes { color: #4ade80; } .gc-matrix .no { color: var(--faint); }
+    [data-theme="light"] .gc-matrix .yes { color: #15803d; }
+    .gc-matrix svg { width: 15px; height: 15px; vertical-align: -3px; }
+    .gc-ptabs { margin: 6px 0 10px; }
     @media (max-width: 560px) { .gc-dpreview iframe { height: 460px; } }
     .gc-fs { border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px 4px; margin: 0 0 14px; min-width: 0; }
     .gc-fs legend { font-size: 13px; font-weight: 600; color: var(--text-strong); padding: 0 6px; }
@@ -9197,30 +9273,57 @@
     // ---- Ontwerp van de cadeaubon (Premium Plus, alleen de eigenaar ziet deze pagina) ----
     // GET geeft per veld { value, inherited }; PUT met null = weer overnemen van de stempelkaart.
     // Het voorbeeld is altijd de iframe op preview_url van de server, nooit zelf getekend.
+    // ===== Ontwerp van de cadeaubon (GET/PUT /gift-cards/design, uploads; backend de7021f) =====
+    // Elk veld { value, inherited }. null versturen = weer overnemen van de stempelkaart (niet
+    // voor show_name en amount_size). Keuzelijsten komen uit options, de kanalen uit applies_to.
     const GC_DESIGN_META = {
-      pass_color: { label: 'Kleur van de pas', type: 'color' },
+      theme: { label: 'Thema' },
+      pass_color: { label: 'Kleur van de bon', type: 'color', hint: 'Achtergrond van de bonpagina en de pas.' },
       text_color: { label: 'Tekstkleur', type: 'color' },
-      logo_url: { label: 'Logo', type: 'url', hint: 'Link naar een afbeelding in de eigen opslag van OMRZ (https://…supabase.co/…). Leeg laten = logo van de stempelkaart.' },
-      background_url: { label: 'Achtergrondafbeelding', type: 'url', hint: 'Link naar een afbeelding in de eigen opslag van OMRZ (https://…supabase.co/…). Leeg laten = achtergrond van de stempelkaart.',
-        warn: 'Let op: op de Apple Wallet-pas wordt een achtergrondafbeelding alleen als smalle strip getoond, of helemaal niet. Op de publieke cadeaubonpagina en in Google Wallet ziet de klant hem wel volledig.' },
+      accent_color: { label: 'Accentkleur', type: 'color', hint: 'Bedrag, knoppen en accentlijnen.' },
+      logo_url: { label: 'Logo', type: 'image', upload: 'upload-logo' },
+      background_url: { label: 'Achtergrondafbeelding', type: 'image', upload: 'upload-background' },
       business_name: { label: 'Naam op de cadeaubon', type: 'text', hint: 'Leeg laten = naam van de stempelkaart.' },
-      show_name: { label: 'Naam van de zaak tonen', type: 'bool', noInherit: true },
+      show_name: { label: 'Naam van de ontvanger op de pas', type: 'bool', noInherit: true },
+      font: { label: 'Lettertype', type: 'select' },
+      amount_size: { label: 'Grootte van het bedrag', type: 'size', noInherit: true },
     };
-    let gcDesign = null;               // { original, current, preview_url }
+    // Wat elk thema doet, zoals de backend het tekent (giftPageThemeCss).
+    const GC_THEME_INFO = {
+      klassiek: { name: 'Klassiek', desc: 'Paneel met dunne rand, bedrag in een sierlijke schreefletter.' },
+      modern: { name: 'Modern', desc: 'Plat en strak, met een groot schreefloos bedrag.' },
+      minimaal: { name: 'Minimaal', desc: 'Wit papier; uw kleur alleen als accent.' },
+      feestelijk: { name: 'Feestelijk', desc: 'Verloop van bonkleur naar accentkleur, royaal gezet.' },
+    };
+    const GC_SIZE_LABELS = { klein: 'Klein', normaal: 'Normaal', groot: 'Groot' };
+    const GC_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+    let gcDesign = null;               // { original, current, options, applies_to, preview_url }
     let gcDesignSeq = 0;
+    let gcPreviewTab = 'page';
+    let gcDesignErr = {};              // veld → foutmelding van de laatste opslagpoging
 
     function gcNormalizeDesign(data) {
       const out = {};
-      const src = (data && data.design && typeof data.design === 'object') ? data.design : (data || {});   // backend: onder design
+      const src = (data && data.design && typeof data.design === 'object') ? data.design : {};
       GIFT.DESIGN_FIELDS.forEach(k => {
         const f = src[k];
-        const raw = (f && typeof f === 'object' && 'value' in f) ? f.value : f;
-        out[k] = { value: raw === undefined ? null : GIFT.designValue(k, raw),
-          inherited: (f && typeof f === 'object' && 'value' in f) ? f.inherited === true : true };
+        if (!f || typeof f !== 'object' || !('value' in f)) return;          // oudere backend: veld bestaat niet
+        out[k] = { value: f.value === undefined ? null : GIFT.designValue(k, f.value), inherited: f.inherited === true };
       });
       return out;
     }
-    async function loadGiftDesign(note, reloadPreview) {
+    const gcClone = o => JSON.parse(JSON.stringify(o));
+    // Na een nieuwe GET de nog niet opgeslagen wijzigingen behouden (bijv. na een upload).
+    function gcKeepDirty(prev, fresh, except) {
+      if (!prev) return gcClone(fresh);
+      const out = gcClone(fresh);
+      Object.keys(prev.current).forEach(k => {
+        if (k === except || !out[k]) return;
+        if (JSON.stringify(prev.current[k]) !== JSON.stringify(prev.original[k])) out[k] = gcClone(prev.current[k]);
+      });
+      return out;
+    }
+    async function loadGiftDesign(note, reloadPreview, opts) {
       const box = document.getElementById('gcDesignBox');
       if (!box) return;
       const seq = ++gcDesignSeq;
@@ -9229,97 +9332,226 @@
         const data = await gcFetch('/api/stamp/gift-cards/design?card_id=' + encodeURIComponent(cardId));
         if (seq !== gcDesignSeq) return;
         const original = gcNormalizeDesign(data);
-        gcDesign = { original, current: JSON.parse(JSON.stringify(original)), preview_url: data.preview_url || null };
+        const prev = opts && opts.keepDirty ? gcDesign : null;
+        gcDesign = { original, current: prev ? gcKeepDirty(prev, original, opts.except) : gcClone(original),
+          options: data.options || {}, applies_to: data.applies_to || (prev && prev.applies_to) || null, preview_url: data.preview_url || null };
+        if (!prev) gcDesignErr = {};
         renderGiftDesign(note, reloadPreview);
       } catch (err) {
         if (seq !== gcDesignSeq || gcPageError(err)) return;
         box.innerHTML = `<div class="gc-banner error">${escapeHtml(err && err.code === 'migration_missing' ? 'Het ontwerp van cadeaubonnen is nog niet beschikbaar.' : gcErrText(err))}<button type="button" class="btn btn-ghost" data-gc-retry>Opnieuw proberen</button></div>`;
       }
     }
-    function gcDesignRowHTML(k) {
+
+    // ---- Onderdelen ----
+    function gcChip(k) {
       const m = GC_DESIGN_META[k], c = gcDesign.current[k], o = gcDesign.original[k];
-      const v = c.value;
-      let ctl;
-      if (m.type === 'color') {
-        const hex = GIFT.isHexColor(v) ? v : '#000000';
-        ctl = `<input type="color" value="${escapeHtml(hex)}" data-gc-dcolor="${k}" aria-label="${escapeHtml(m.label)}" />
-          <input type="text" class="gc-input gc-hex" value="${escapeHtml(v || '')}" maxlength="7" placeholder="#1F4D2B" data-gc-dinput="${k}" aria-label="${escapeHtml(m.label)} (kleurcode)" />`;
-      } else if (m.type === 'bool') {
-        ctl = `<label class="gc-check"><input type="checkbox" ${v ? 'checked' : ''} data-gc-dinput="${k}" /> Naam tonen op de cadeaubon (van de ontvanger, anders de koper)</label>`;
-      } else {
-        ctl = `<input type="${m.type === 'url' ? 'url' : 'text'}" class="gc-input gc-dtext" value="${escapeHtml(v || '')}" ${m.type === 'url' ? 'placeholder="https://…"' : 'maxlength="60"'} data-gc-dinput="${k}" aria-label="${escapeHtml(m.label)}" />`;
-      }
-      const chip = m.noInherit ? ''
-        : c.inherited
-          ? (o.inherited ? '<span class="gc-dchip">Van stempelkaart</span>' : '<span class="gc-dchip pending">Wordt overgenomen van de stempelkaart na opslaan</span>')
-          : '<span class="gc-dchip own">Eigen instelling</span>';
-      return `<div class="gc-drow" data-gc-drow="${k}">
-          <div class="gc-dhead"><b>${escapeHtml(m.label)}</b>${chip}</div>
+      if (m.noInherit) return '';
+      if (c.inherited) return o.inherited ? '<span class="gc-dchip">Van stempelkaart</span>' : '<span class="gc-dchip pending">Wordt overgenomen na opslaan</span>';
+      return '<span class="gc-dchip own">Eigen instelling</span>';
+    }
+    function gcChannelsLine(k) {
+      const ch = GIFT.channelsOf(gcDesign.applies_to, k);
+      if (!ch) return '';
+      return `<span class="gc-chan">Zichtbaar op: <b>${ch.map(c => GIFT.CHANNEL_LABELS[c]).join(' · ')}</b></span>`;
+    }
+    function gcFoot(k) {
+      const m = GC_DESIGN_META[k], c = gcDesign.current[k];
+      const inherit = m.noInherit || c.inherited ? '' : `<button type="button" class="gc-linkbtn" data-gc-inherit="${k}">Overnemen van stempelkaart</button>`;
+      return `<div class="gc-dfoot">${gcChannelsLine(k)}${inherit}</div>`;
+    }
+    function gcField(k, ctl, extra) {
+      if (!gcDesign.current[k]) return '';
+      const m = GC_DESIGN_META[k];
+      return `<div class="gc-dfield${gcDesignErr[k] ? ' has-err' : ''}" data-gc-drow="${k}">
+          <div class="gc-dhead"><b>${escapeHtml(m.label)}</b>${gcChip(k)}</div>
           <div class="gc-dctl">${ctl}</div>
           ${m.hint ? `<div class="gc-hint">${escapeHtml(m.hint)}</div>` : ''}
-          ${m.warn ? `<div class="gc-dwarn">${escapeHtml(m.warn)}</div>` : ''}
-          ${c.inherited || m.noInherit ? '' : `<button type="button" class="btn btn-ghost gc-dinherit" data-gc-inherit="${k}">Overnemen van stempelkaart</button>`}
+          ${extra || ''}
+          <div class="gc-derr" data-gc-derr="${k}" role="alert">${escapeHtml(gcDesignErr[k] || '')}</div>
+          ${gcFoot(k)}
         </div>`;
     }
+    function gcColorCtl(k) {
+      const v = gcDesign.current[k].value, hex = GIFT.isHexColor(v) ? v : '#000000', m = GC_DESIGN_META[k];
+      return `<input type="color" value="${escapeHtml(hex)}" data-gc-dcolor="${k}" aria-label="${escapeHtml(m.label)}" />
+        <input type="text" class="gc-input gc-hex" value="${escapeHtml(v || '')}" maxlength="7" placeholder="#1f4d2b" data-gc-dinput="${k}" aria-label="${escapeHtml(m.label)} (kleurcode)" spellcheck="false" />`;
+    }
+    function gcContrastNote() {
+      const c = gcDesign.current;
+      if (!c.pass_color || !c.text_color) return '';
+      const r = GIFT.contrastRatio(c.pass_color.value, c.text_color.value);
+      return r !== null && r < 4.5
+        ? `<div class="gc-contrast" id="gcContrast">Let op: de tekst is slecht leesbaar op deze bonkleur (contrast ${String(r).replace('.', ',')} : 1, minimaal 4,5 aanbevolen).</div>` : '<div id="gcContrast"></div>';
+    }
+    function gcThemeMini(t) {
+      const c = gcDesign.current;
+      const pc = (c.pass_color && c.pass_color.value) || '#1f4d2b', tc = (c.text_color && c.text_color.value) || '#ffffff', ac = (c.accent_color && c.accent_color.value) || pc;
+      const bg = t === 'feestelijk' ? `linear-gradient(160deg, ${pc}, ${ac})` : pc;
+      const panel = t === 'klassiek' ? `border:1px solid ${tc}40;background:${tc}12` : t === 'modern' ? `background:${tc}14` : t === 'feestelijk' ? `background:${tc}18;border-radius:10px` : '';
+      return `<div class="gc-tmini ${escapeHtml(t)}" style="background:${escapeHtml(bg)}"><div class="p" style="${escapeHtml(panel)}">
+          <div class="amt" style="color:${escapeHtml(ac)}">€ 25</div><div class="ln" style="background:${escapeHtml(t === 'minimaal' ? '#1a1a1a' : tc)}"></div></div></div>`;
+    }
+    function gcThemeSection() {
+      if (!gcDesign.current.theme) return '';
+      const list = Array.isArray(gcDesign.options.themes) && gcDesign.options.themes.length ? gcDesign.options.themes : Object.keys(GC_THEME_INFO);
+      const cur = gcDesign.current.theme.value;
+      const cards = list.map(t => {
+        const info = GC_THEME_INFO[t] || { name: t.charAt(0).toUpperCase() + t.slice(1), desc: '' };
+        return `<button type="button" class="gc-theme" role="radio" aria-checked="${t === cur ? 'true' : 'false'}" data-gc-theme="${escapeHtml(t)}">
+            ${gcThemeMini(t)}<b>${escapeHtml(info.name)}<span class="tick">${GC_CHECK}</span></b>${info.desc ? `<small>${escapeHtml(info.desc)}</small>` : ''}</button>`;
+      }).join('');
+      return `<section class="block glass gc-dsec" id="gcDsTheme">
+          <div class="gc-dhead"><h3>Thema</h3>${gcChip('theme')}</div>
+          <p class="b-sub">Bepaalt de opmaak van de bonpagina en de e-mail. Een thema verandert uw kleuren niet.</p>
+          <div class="gc-themes" role="radiogroup" aria-label="Thema">${cards}</div>
+          <div class="gc-derr" data-gc-derr="theme" role="alert">${escapeHtml(gcDesignErr.theme || '')}</div>
+          ${gcFoot('theme')}
+        </section>`;
+    }
+    function gcUploadTile(k) {
+      if (!gcDesign.current[k]) return '';
+      const m = GC_DESIGN_META[k], c = gcDesign.current[k], o = gcDesign.original[k];
+      const v = c.value;
+      const img = v ? `<img src="${escapeHtml(v)}" alt="${escapeHtml(m.label)}" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'), { textContent: 'Afbeelding kon niet worden geladen.' }))" />`
+        : `<span>${k === 'logo_url' ? 'Geen logo. De bon toont alleen de naam.' : 'Geen achtergrond. De bon gebruikt de bonkleur.'}</span>`;
+      const own = !c.inherited;
+      return `<div class="gc-up" data-gc-drow="${k}" data-gc-drop="${k}">
+          <div class="gc-up-head"><b>${escapeHtml(m.label)}</b>${gcChip(k)}</div>
+          <div class="gc-up-img${k === 'background_url' ? ' bg' : ''}" data-src="${escapeHtml(v || '')}">${img}</div>
+          <div class="gc-up-prog" hidden data-gc-prog="${k}"><i></i></div>
+          <div class="gc-up-actions">
+            <label class="btn btn-ghost" tabindex="0" role="button">${own ? 'Vervangen' : 'Uploaden'}<input type="file" accept="image/png,image/jpeg,image/webp" hidden data-gc-file="${k}" /></label>
+            ${own && o && !o.inherited ? `<button type="button" class="gc-linkbtn" data-gc-inherit-now="${k}">Overnemen van stempelkaart</button>` : ''}
+          </div>
+          <div class="gc-up-note" data-gc-upnote="${k}" role="status">PNG, JPG of WebP, maximaal 5 MB.</div>
+          <div class="gc-derr" data-gc-derr="${k}" role="alert">${escapeHtml(gcDesignErr[k] || '')}</div>
+          ${gcChannelsLine(k)}
+        </div>`;
+    }
+    function gcPreviewPanel(src) {
+      const at = gcDesign.applies_to;
+      const tabs = `<div class="seg gc-ptabs" role="tablist" aria-label="Kanaal">${[['page', 'Bonpagina'], ['mail', 'E-mail'], ['wallet', 'Wallet']].map(([k, l]) =>
+        `<button type="button" role="tab" data-gc-ptab="${k}" class="${gcPreviewTab === k ? 'active' : ''}" aria-selected="${gcPreviewTab === k}">${l}</button>`).join('')}</div>`;
+      const fieldsFor = (ch, yes) => GIFT.DESIGN_FIELDS.filter(k => gcDesign.current[k] && GIFT.channelsOf(at, k))
+        .filter(k => GIFT.channelsOf(at, k).includes(ch) === yes).map(k => GC_DESIGN_META[k].label.toLowerCase());
+      const list = arr => arr.length ? escapeHtml(arr.join(', ')) : 'niets';
+      let body;
+      if (gcPreviewTab === 'page') {
+        body = src ? `<div id="gcDesignFrameWrap"><iframe id="gcDesignFrame" src="${escapeHtml(src)}" data-base="${escapeHtml(gcDesign.preview_url)}" title="Voorbeeld van de cadeaubonpagina" loading="lazy" referrerpolicy="no-referrer"></iframe></div>
+            <p class="gc-hint">Zo ziet de klant de bonpagina. Het voorbeeld komt van de server en ververst na elke opslag.</p>`
+          : '<div class="empty-state"><span class="es-ic">' + GC_GIFT_SVG + '</span><h4>Geen voorbeeld</h4><p>Het voorbeeld is nu niet beschikbaar. Uw instellingen kunt u wel opslaan.</p></div>';
+      } else if (gcPreviewTab === 'mail') {
+        body = at ? `<p class="gc-hint" id="gcChanText">Er is geen apart voorbeeld van de e-mail; die volgt de bonpagina.<br><b>Verandert in de e-mail:</b> ${list(fieldsFor('mail', true))}.<br><b>Niet in de e-mail:</b> ${list(fieldsFor('mail', false))}.</p>` : '';
+      } else {
+        body = at ? `<p class="gc-hint" id="gcChanText"><b>Apple Wallet</b> toont alleen: ${list(fieldsFor('apple', true))}.<br><b>Google Wallet</b> toont: ${list(fieldsFor('google', true))}.<br>
+            Thema, lettertype en bedraggrootte gelden niet voor de Wallet-passen. Wijzigingen verschijnen op bestaande passen zodra de Wallet ze ververst.</p>` : '';
+      }
+      const matrix = at ? `<table class="gc-matrix" id="gcMatrix"><caption class="sr-only">Wat verandert waar</caption>
+          <thead><tr><th>Wat verandert waar</th>${GIFT.CHANNELS.map(c => `<th>${GIFT.CHANNEL_LABELS[c]}</th>`).join('')}</tr></thead>
+          <tbody>${GIFT.DESIGN_FIELDS.filter(k => gcDesign.current[k] && GIFT.channelsOf(at, k)).map(k => `<tr data-field="${k}"><td>${escapeHtml(GC_DESIGN_META[k].label)}</td>${GIFT.CHANNELS.map(c =>
+            GIFT.channelsOf(at, k).includes(c) ? `<td class="yes" aria-label="Ja">${GC_CHECK}</td>` : '<td class="no" aria-label="Nee">niet</td>').join('')}</tr>`).join('')}</tbody></table>` : '';
+      return `<aside class="block glass gc-dpreview"><h3>Voorbeeld</h3>${tabs}${body}${matrix}</aside>`;
+    }
+
     function renderGiftDesign(note, reloadPreview) {
       const box = document.getElementById('gcDesignBox');
       if (!box || !gcDesign) return;
       const frame = document.getElementById('gcDesignFrame');
-      // preview_url is per zaak vast (ondertekend, zonder versie). Na opslaan laden we hem
-      // daarom opnieuw, met een extra parameter tegen een gecachete versie.
+      // preview_url is per zaak vast (ondertekend). Na opslaan opnieuw laden met een extra
+      // parameter tegen een gecachete versie.
       const src = gcDesign.preview_url
         ? gcDesign.preview_url + (reloadPreview ? (gcDesign.preview_url.indexOf('?') === -1 ? '?' : '&') + '_=' + Date.now() : '')
         : null;
       const keepFrame = !reloadPreview && frame && src && frame.dataset.base === gcDesign.preview_url;
-      const preview = src
-        ? `<iframe id="gcDesignFrame" src="${escapeHtml(src)}" data-base="${escapeHtml(gcDesign.preview_url)}" title="Voorbeeld van de cadeaubon" loading="lazy" referrerpolicy="no-referrer"></iframe>`
-        : '<div class="empty-state"><span class="es-ic">' + GC_GIFT_SVG + '</span><h4>Geen voorbeeld</h4><p>De server gaf geen voorbeeld mee.</p></div>';
+      const c = gcDesign.current, opts = gcDesign.options || {};
+      const fonts = Array.isArray(opts.fonts) && opts.fonts.length ? opts.fonts : (c.font ? [c.font.value] : []);
+      const sizes = Array.isArray(opts.amount_sizes) && opts.amount_sizes.length ? opts.amount_sizes : ['klein', 'normaal', 'groot'];
+      const colors = ['pass_color', 'text_color', 'accent_color'].filter(k => c[k]);
       box.innerHTML = `<div class="gc-design">
-          <div class="block glass">
-            <h3>Ontwerp van de cadeaubon</h3>
-            <p class="b-sub">Standaard neemt de cadeaubon het ontwerp van uw stempelkaart over. Pas hier aan wat anders moet; met "Overnemen van stempelkaart" zet u een veld weer terug.</p>
-            ${GIFT.DESIGN_FIELDS.map(gcDesignRowHTML).join('')}
-            <div class="gc-dsave">
-              <button type="button" class="btn btn-primary" id="gcDesignSave">Ontwerp opslaan</button>
+          <div class="gc-dcol">
+            <p class="b-sub" style="margin:0">Standaard neemt de cadeaubon het ontwerp van uw stempelkaart over. Pas hier aan wat anders moet.</p>
+            ${gcThemeSection()}
+            ${colors.length ? `<section class="block glass gc-dsec" id="gcDsColors"><h3>Kleuren</h3>
+              ${colors.map(k => gcField(k, gcColorCtl(k), k === 'text_color' ? gcContrastNote() : '')).join('')}</section>` : ''}
+            ${c.logo_url || c.background_url ? `<section class="block glass gc-dsec" id="gcDsImages"><h3>Logo en achtergrond</h3>
+              <p class="b-sub">Een upload wordt meteen opgeslagen. De achtergrond is alleen zichtbaar op de bonpagina en in Google Wallet.</p>
+              <div class="gc-uploads">${gcUploadTile('logo_url')}${gcUploadTile('background_url')}</div></section>` : ''}
+            <section class="block glass gc-dsec" id="gcDsText"><h3>Tekst en opmaak</h3>
+              ${gcField('business_name', `<input type="text" class="gc-input gc-dtext" maxlength="60" value="${escapeHtml((c.business_name && c.business_name.value) || '')}" data-gc-dinput="business_name" aria-label="Naam op de cadeaubon" />`)}
+              ${c.show_name ? gcField('show_name', `<label class="switch-row" style="width:100%"><span class="switch-tx"><small>Toont de naam van de ontvanger, anders die van de koper. Zet uit als u bonnen anoniem verkoopt.</small></span>
+                  <input type="checkbox" class="switch" data-gc-dinput="show_name" ${c.show_name.value ? 'checked' : ''} aria-label="Naam van de ontvanger op de pas" /></label>`) : ''}
+              ${c.font ? gcField('font', `<select class="gc-select" data-gc-dinput="font" aria-label="Lettertype">${fonts.map(f => `<option value="${escapeHtml(f)}" ${String(f).toLowerCase() === String(c.font.value).toLowerCase() ? 'selected' : ''}>${escapeHtml(f)}</option>`).join('')}</select>`) : ''}
+              ${c.amount_size ? gcField('amount_size', `<div class="seg gc-sizes" role="radiogroup" aria-label="Grootte van het bedrag">${sizes.map(z => `<button type="button" role="radio" data-gc-size="${escapeHtml(z)}" class="${z === c.amount_size.value ? 'active' : ''}" aria-checked="${z === c.amount_size.value}">${escapeHtml(GC_SIZE_LABELS[z] || z)}</button>`).join('')}</div>`) : ''}
+            </section>
+            <div class="gc-dbar" id="gcDesignBar">
               <span class="save-note" id="gcDesignNote"></span>
+              <button type="button" class="btn btn-ghost" id="gcDesignUndo">Wijzigingen ongedaan maken</button>
+              <button type="button" class="btn btn-primary" id="gcDesignSave">Ontwerp opslaan</button>
             </div>
           </div>
-          <div class="block glass gc-dpreview">
-            <h3>Voorbeeld</h3>
-            <div id="gcDesignFrameWrap">${preview}</div>
-            <p class="gc-hint">Zo ziet de klant de cadeaubon. Het voorbeeld komt van de server en ververst na opslaan.</p>
-          </div>
+          ${gcPreviewPanel(src)}
         </div>`;
-      if (keepFrame) document.getElementById('gcDesignFrameWrap').replaceChildren(frame);   // niet onnodig herladen
-      if (note) gcDesignNote(note.msg, note.kind);
+      if (keepFrame && document.getElementById('gcDesignFrameWrap')) document.getElementById('gcDesignFrameWrap').replaceChildren(frame);
+      gcDesignDirtyNote();
+      if (note) {
+        // Melding tonen, maar niet verzwijgen dat er nog iets openstaat (bijv. na een upload).
+        const n = gcDesignChanges();
+        gcDesignNote(note.msg + (n ? ' ' + (n === 1 ? '1 wijziging' : n + ' wijzigingen') + ' nog niet opgeslagen.' : ''), note.kind);
+      }
     }
     function gcDesignNote(msg, kind) {
       const el = document.getElementById('gcDesignNote');
       if (el) { el.textContent = msg || ''; el.className = 'save-note' + (kind ? ' ' + kind : ''); }
     }
-    // Een veld wijzigen maakt het een eigen instelling; een lege link betekent: van de stempelkaart.
-    function gcDesignInput(k, value) {
+    function gcDesignChanges() { return gcDesign ? Object.keys(GIFT.designBody(cardId, gcDesign.current, gcDesign.original)).length - 1 : 0; }
+    function gcDesignDirtyNote() {
+      const n = gcDesignChanges();
+      const save = document.getElementById('gcDesignSave'), undo = document.getElementById('gcDesignUndo');
+      if (save) save.disabled = n === 0;
+      if (undo) undo.hidden = n === 0;
+      const bar = document.getElementById('gcDesignBar'); if (bar) bar.classList.toggle('dirty', n > 0);
+      gcDesignNote(n ? (n === 1 ? '1 wijziging nog niet opgeslagen' : n + ' wijzigingen nog niet opgeslagen') : 'Alles is opgeslagen.');
+    }
+    // Een veld wijzigen maakt het een eigen instelling; een lege tekst betekent: van de stempelkaart.
+    function gcDesignInput(k, value, rerender) {
       const m = GC_DESIGN_META[k];
-      if (m.noInherit) gcDesign.current[k] = { value: value === true, inherited: false };
-      else if ((m.type === 'url' || m.type === 'text') && String(value).trim() === '') gcDesign.current[k] = { value: gcDesign.original[k].inherited ? gcDesign.original[k].value : null, inherited: true };
-      else gcDesign.current[k] = { value: m.type === 'url' || m.type === 'text' ? String(value).trim() : m.type === 'color' ? GIFT.designValue(k, String(value).trim()) : value, inherited: false };
+      if (k === 'show_name') gcDesign.current[k] = { value: value === true, inherited: false };
+      else if (m.noInherit) gcDesign.current[k] = { value, inherited: false };
+      else if (m.type === 'text' && String(value).trim() === '') gcDesign.current[k] = { value: gcDesign.original[k].inherited ? gcDesign.original[k].value : null, inherited: true };
+      else gcDesign.current[k] = { value: m.type === 'text' ? String(value).trim() : m.type === 'color' ? GIFT.designValue(k, String(value).trim()) : value, inherited: false };
+      delete gcDesignErr[k];
       const row = document.querySelector(`[data-gc-drow="${k}"]`);
       if (row) {
-        const fresh = document.createElement('div'); fresh.innerHTML = gcDesignRowHTML(k);
-        // Alleen het label en de knop bijwerken, zodat het invoerveld zijn focus houdt.
-        row.querySelector('.gc-dhead').replaceWith(fresh.querySelector('.gc-dhead'));
-        const oldBtn = row.querySelector('.gc-dinherit'), newBtn = fresh.querySelector('.gc-dinherit');
-        if (oldBtn && !newBtn) oldBtn.remove();
-        if (!oldBtn && newBtn) row.appendChild(newBtn);
+        row.classList.remove('has-err');
+        const e = row.querySelector('[data-gc-derr]'); if (e) e.textContent = '';
+        const head = row.querySelector('.gc-dhead');
+        if (head) { const chip = head.querySelector('.gc-dchip'); const fresh = document.createElement('div'); fresh.innerHTML = gcChip(k); if (chip) chip.replaceWith(...fresh.childNodes); else head.append(...fresh.childNodes); }
+        const foot = row.querySelector('.gc-dfoot'); if (foot) { const f = document.createElement('div'); f.innerHTML = gcFoot(k); foot.replaceWith(f.firstElementChild); }
       }
-      gcDesignNote('');
+      if (rerender) renderGiftDesign();
+      else {
+        if (k === 'pass_color' || k === 'text_color') { const cn = document.getElementById('gcContrast'); if (cn) { const f = document.createElement('div'); f.innerHTML = gcContrastNote(); cn.replaceWith(f.firstElementChild); } }
+        if (k === 'pass_color' || k === 'text_color' || k === 'accent_color') document.querySelectorAll('[data-gc-theme]').forEach(b => { const f = document.createElement('div'); f.innerHTML = gcThemeMini(b.dataset.gcTheme); b.querySelector('.gc-tmini').replaceWith(f.firstElementChild); });
+      }
+      gcDesignDirtyNote();
+    }
+    function gcShowFieldError(k, msg) {
+      gcDesignErr[k] = msg;
+      const row = document.querySelector(`[data-gc-drow="${k}"]`) || (k === 'theme' ? document.getElementById('gcDsTheme') : null);
+      if (!row) return false;
+      row.classList.add('has-err');
+      const e = row.querySelector(`[data-gc-derr="${k}"]`); if (e) e.textContent = msg;
+      row.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      const ctl = row.querySelector('[data-gc-dinput], [data-gc-theme], [data-gc-size]'); if (ctl) ctl.focus({ preventScroll: true });
+      return true;
     }
     async function saveGiftDesign(btn) {
       for (const k of GIFT.DESIGN_FIELDS) {
         const c = gcDesign.current[k];
-        if (c.inherited) continue;
-        const bad = GIFT.validateDesignValue(k, c.value);
-        if (bad) { gcDesignNote(GC_DESIGN_META[k].label + ': ' + GIFT.MESSAGES[bad], 'error'); return; }
+        if (!c || c.inherited) continue;
+        const bad = GIFT.validateDesignValue(k, c.value, gcDesign.options);
+        if (bad) { gcShowFieldError(k, GIFT.MESSAGES[bad]); gcDesignNote('Controleer de gemarkeerde instelling.', 'error'); return; }
       }
       const body = GIFT.designBody(cardId, gcDesign.current, gcDesign.original);
       if (Object.keys(body).length === 1) { gcDesignNote('Er is niets gewijzigd.'); return; }
@@ -9327,17 +9559,63 @@
       btn.disabled = true; gcDesignNote('Opslaan…');
       try {
         await gcFetch('/api/stamp/gift-cards/design', { method: 'PUT', body: JSON.stringify(body) });
-        gcDesign = null;                               // vers ophalen: nieuwe waarden én nieuw voorbeeld
-        await loadGiftDesign({ msg: 'Ontwerp opgeslagen ✓', kind: 'ok' }, true);
+        gcDesignErr = {};
+        gcDesign = null;                               // vers ophalen: nieuwe waarden, applies_to en voorbeeld
+        await loadGiftDesign({ msg: 'Ontwerp opgeslagen. Het voorbeeld is ververst.', kind: 'ok' }, true);
       } catch (err) {
         btn.disabled = false;
         if (err && GIFT.isPlanLock(err.code)) { renderGiftLock(); return; }
         const d = (err && err.data) || {};
-        const veld = d.field && GC_DESIGN_META[d.field] ? GC_DESIGN_META[d.field].label + ': ' : '';
         // Bij invalid_url zegt de server welk domein mag; die tekst is preciezer dan de onze.
         const tekst = err && err.code === 'invalid_url' && d.error ? d.error : gcErrText(err);
-        gcDesignNote('Niet opgeslagen: ' + veld + tekst, 'error');
+        if (d.field && GC_DESIGN_META[d.field] && gcShowFieldError(d.field, tekst)) gcDesignNote('Niet opgeslagen. Controleer de gemarkeerde instelling.', 'error');
+        else gcDesignNote('Niet opgeslagen: ' + tekst, 'error');
       }
+    }
+    // Overnemen van een afbeelding gaat meteen (net als uploaden): PUT met alleen dat veld op null.
+    async function gcInheritImageNow(k, btn) {
+      if (btn) btn.disabled = true;
+      gcUploadNote(k, 'Bezig…');
+      try {
+        await gcFetch('/api/stamp/gift-cards/design', { method: 'PUT', body: JSON.stringify({ card_id: cardId, [k]: null }) });
+        await loadGiftDesign({ msg: GC_DESIGN_META[k].label + ' komt weer van de stempelkaart.', kind: 'ok' }, true, { keepDirty: true, except: k });
+      } catch (err) {
+        if (btn) btn.disabled = false;
+        if (err && GIFT.isPlanLock(err.code)) { renderGiftLock(); return; }
+        gcUploadNote(k, gcErrText(err), 'error');
+      }
+    }
+    function gcUploadNote(k, msg, kind) {
+      const el = document.querySelector(`[data-gc-upnote="${k}"]`);
+      if (el) { el.textContent = msg; el.className = 'gc-up-note' + (kind ? ' ' + kind : ''); }
+    }
+    // Upload met voortgang (XHR: fetch geeft geen uploadvoortgang). De backend slaat de url
+    // meteen op; daarna lezen we de stand opnieuw met GET /design.
+    function gcUpload(k, file) {
+      const bad = GIFT.validateUpload(file);
+      if (bad) { gcUploadNote(k, GIFT.MESSAGES[bad], 'error'); return; }
+      const m = GC_DESIGN_META[k];
+      const prog = document.querySelector(`[data-gc-prog="${k}"]`);
+      const input = document.querySelector(`[data-gc-file="${k}"]`);
+      if (input) input.disabled = true;
+      if (prog) { prog.hidden = false; prog.firstElementChild.style.width = '0%'; }
+      gcUploadNote(k, 'Uploaden…');
+      const fd = new FormData(); fd.append('file', file);
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', API_BASE + '/api/stamp/gift-cards/' + m.upload);
+      const token = localStorage.getItem('omrz_token');
+      if (token) xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+      xhr.upload.onprogress = e => { if (e.lengthComputable && prog) { const pct = Math.round(e.loaded / e.total * 100); prog.firstElementChild.style.width = pct + '%'; gcUploadNote(k, 'Uploaden… ' + pct + '%'); } };
+      const done = () => { if (input) input.disabled = false; if (prog) prog.hidden = true; };
+      xhr.onerror = () => { done(); gcUploadNote(k, NET_MSG, 'error'); };
+      xhr.onload = async () => {
+        done();
+        let data = {}; try { data = JSON.parse(xhr.responseText || '{}'); } catch (_) {}
+        if (xhr.status === 401) { logoutToLogin(); return; }
+        if (xhr.status < 200 || xhr.status >= 300 || !data.url) { gcUploadNote(k, GIFT.uploadErrorMessage(xhr.status, data), 'error'); return; }
+        await loadGiftDesign({ msg: m.label + ' geüpload en opgeslagen. Het voorbeeld is ververst.', kind: 'ok' }, true, { keepDirty: true, except: k });
+      };
+      xhr.send(fd);
     }
 
     // ---- Rapport (GET /gift-cards/report, backend de7021f) ----
@@ -9594,9 +9872,29 @@
       if (inh && gcDesign) {
         const k = inh.dataset.gcInherit, o = gcDesign.original[k];
         gcDesign.current[k] = { value: o.inherited ? o.value : gcDesign.current[k].value, inherited: true };
-        const row = document.querySelector(`[data-gc-drow="${k}"]`);
-        if (row) { const t = document.createElement('div'); t.innerHTML = gcDesignRowHTML(k); row.replaceWith(t.firstElementChild); }
-        gcDesignNote('');
+        delete gcDesignErr[k];
+        renderGiftDesign();
+        return;
+      }
+      const inhNow = e.target.closest('[data-gc-inherit-now]');
+      if (inhNow && gcDesign) { gcInheritImageNow(inhNow.dataset.gcInheritNow, inhNow); return; }
+      const th = e.target.closest('[data-gc-theme]');
+      if (th && gcDesign) {                              // alleen het thema; kleuren blijven zoals ze zijn
+        gcDesignInput('theme', th.dataset.gcTheme);
+        document.querySelectorAll('[data-gc-theme]').forEach(b => b.setAttribute('aria-checked', b === th ? 'true' : 'false'));
+        return;
+      }
+      const sz = e.target.closest('[data-gc-size]');
+      if (sz && gcDesign) {
+        gcDesignInput('amount_size', sz.dataset.gcSize);
+        document.querySelectorAll('[data-gc-size]').forEach(b => { const on = b === sz; b.classList.toggle('active', on); b.setAttribute('aria-checked', on ? 'true' : 'false'); });
+        return;
+      }
+      const pt = e.target.closest('[data-gc-ptab]');
+      if (pt && gcDesign) { gcPreviewTab = pt.dataset.gcPtab; renderGiftDesign(); return; }
+      if (e.target.closest('#gcDesignUndo') && gcDesign) {
+        gcDesign.current = gcClone(gcDesign.original); gcDesignErr = {};
+        renderGiftDesign({ msg: 'Wijzigingen ongedaan gemaakt.' });
         return;
       }
       if (e.target.closest('#gcDesignSave')) { saveGiftDesign(e.target.closest('#gcDesignSave')); return; }
@@ -9620,9 +9918,23 @@
     });
     document.getElementById('gcWrap').addEventListener('change', (e) => {
       const t = e.target;
+      if (gcDesign && t.dataset.gcFile) { const f = t.files && t.files[0]; t.value = ''; if (f) gcUpload(t.dataset.gcFile, f); return; }
+      if (gcDesign && t.dataset.gcDinput === 'font') { gcDesignInput('font', t.value); return; }
       if (gcDesign && t.dataset.gcDinput && GC_DESIGN_META[t.dataset.gcDinput].type === 'color' && GIFT.isHexColor(t.value)) t.value = t.value.toLowerCase();
       if (gcDesign && t.dataset.gcDinput && GC_DESIGN_META[t.dataset.gcDinput].type === 'bool') gcDesignInput(t.dataset.gcDinput, t.checked);
     });
+    // Uploadtegel: Enter/spatie opent de bestandskiezer; slepen en neerzetten werkt ook.
+    document.getElementById('gcWrap').addEventListener('keydown', (e) => {
+      const lbl = e.target.closest('.gc-up-actions label');
+      if (lbl && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); lbl.querySelector('input[type=file]').click(); }
+    });
+    ['dragover', 'dragleave', 'drop'].forEach(ev => document.getElementById('gcWrap').addEventListener(ev, (e) => {
+      const tile = e.target.closest('[data-gc-drop]');
+      if (!tile || !gcDesign) return;
+      e.preventDefault();
+      tile.classList.toggle('drag', ev === 'dragover');
+      if (ev === 'drop') { const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if (f) gcUpload(tile.dataset.gcDrop, f); }
+    }));
     // getElementById i.p.v. de const modalBody: die wordt pas verderop in het script gedeclareerd.
     document.getElementById('modalBody').addEventListener('click', (e) => {
       if (!document.querySelector('#modalOverlay .modal').classList.contains('gc-modal')) return;
