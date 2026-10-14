@@ -50,7 +50,7 @@ module.exports = async function run(env) {
   }
   // Backend weigert alsnog: scanapp valt terug op alleen stempelen
   ({ ctx, p } = await open('tok-pp'));
-  await p.route('**/gift-cards/lookup**', r => r.fulfill({ status: 403, contentType: 'application/json', body: JSON.stringify({ success: false, code: 'premium_plus_required', error: 'x' }) }));
+  await p.route('**/scan/resolve**', r => r.fulfill({ status: 403, contentType: 'application/json', body: JSON.stringify({ success: false, code: 'premium_plus_required', error: 'x' }) }));
   await scan(p, 'ABCD-EFGH-JK'); await p.waitForTimeout(300);
   check('A2. premium_plus_required bij lookup → melding en blok weg', /Premium Plus/.test(await txt(p, '#scanAlert')) && !(await vis(p, '#giftBlock')));
   await ctx.close();
@@ -84,7 +84,7 @@ module.exports = async function run(env) {
   check('B3. Kopieer bedrag → "30,00" op het klembord', (await p.evaluate(() => navigator.clipboard.readText())) === '30,00');
   await p.screenshot({ path: OUT + '/' + 'gcs-done-820.png', fullPage: true });
   let st = await state(); const r1 = st.log.redeem.slice(-1)[0];
-  check('B3. Verzoek: code, amount_cents 3000, uuid-sleutel, geen location_id/bill', r1.code === 'a1b2c3d4e5f60718293a4b5c6d7e8f90' && r1.amount_cents === 3000 && /^[0-9a-f-]{36}$/.test(r1.idempotency_key) && !('location_id' in r1) && !('bill_total_cents' in r1), JSON.stringify(r1));
+  check('B3. Verzoek: code, amount_cents 3000, uuid-sleutel, geen location_id/bill', r1.code === 'https://omrzdigital.nl/cadeaubon/a1b2c3d4e5f60718293a4b5c6d7e8f90' && r1.gift_card_id && r1.card_id === 'pp' && r1.amount_cents === 3000 && /^[0-9a-f-]{36}$/.test(r1.idempotency_key) && !('location_id' in r1) && !('bill_total_cents' in r1), JSON.stringify(r1));
   await p.click('#gdNext');
   check('B3. Volgende scan → terug naar scannen', await vis(p, '#scanStage') && !(await vis(p, '#giftDoneStage')));
 
@@ -268,15 +268,7 @@ module.exports = async function run(env) {
       check(`R1. Stempel-modus, ${label} → cadeaubonflow, geen stempel-lookup`, await vis(p, '#giftStage') && stampLookups.length === 0);
       await p.click('#gCancel');
     }
-    check('R1. Lookup kreeg de lange code (kleine letters) en card_id', (await state()).log.lookup.slice(-1)[0] === LONG);
-    for (const qr of ['OMRZCB1:' + LONG, 'omrzcb1:' + LONG.toUpperCase()]) {
-      await giftMode(p); await scan(p, qr); await p.waitForTimeout(300);
-      check(`R1. QR met voorvoegsel "${qr.slice(0, 8)}…" → cadeaubonflow, in beide modi`, await vis(p, '#giftStage') && !(await vis(p, '#wrongQr')));
-      await p.click('#gCancel'); await p.evaluate(() => setScanMode('stamp'));
-      await scan(p, qr); await p.waitForTimeout(300);
-      check(`R1. Stempel-modus, "${qr.slice(0, 8)}…" → cadeaubonflow`, await vis(p, '#giftStage') && stampLookups.length === 0);
-      await p.click('#gCancel');
-    }
+    check('R1. Backend beslist via /scan/resolve; geen aparte lookup nodig', (await state()).log.resolve >= 8 && (await state()).log.lookup.length === 0, 'resolve ' + (await state()).log.resolve + ', lookup ' + (await state()).log.lookup.length);
     await giftMode(p); await scan(p, '3f2b8c1e-9a4d-4e6f-b7c2-1d0e5a9f8b34'); await p.waitForTimeout(200);
     check('R1. Stempelkaart (UUID) in cadeaubon-modus → "Dit is een stempelkaart"', await vis(p, '#wrongQr') && !(await vis(p, '#giftStage')));
     await p.click('#giftBack');
@@ -307,6 +299,62 @@ module.exports = async function run(env) {
     const r = await fetch(B + '/api/stamp/gift-cards/redeem', { method: 'POST', headers: { Authorization: 'Bearer tok-pp', 'Content-Type': 'application/json' }, body: JSON.stringify({ code: LONG, amount_cents: 100, idempotency_key: 'x-1' }) });
     const j = await r.json();
     check('R2. Nep-API weigert een code zonder card_id, net als de backend', r.status === 400 && j.code === 'card_id_required' && j.error === 'card_id is verplicht bij een code');
+  }
+
+  // ===== R3. /scan/resolve (backend e101948): QR met voorvoegsel, splitsen op kind, terugval =====
+  {
+    const LONG = 'a1b2c3d4e5f60718293a4b5c6d7e8f90', QR = 'OMRZCB1:' + LONG, UUID2 = '7a2b8c1e-9a4d-4e6f-b7c2-1d0e5a9f8b35';
+    await post('/__reset');
+    ({ ctx, p } = await open('tok-pp'));
+    const calls = []; p.on('request', r => { const u = r.url(); if (/scan\/resolve|stamp\/lookup|gift-cards\/lookup/.test(u)) calls.push(new URL(u).pathname + ' ' + new URL(u).searchParams.get('code')); });
+    await scan(p, QR); await p.waitForSelector('#giftStage.on', { timeout: 4000 }).catch(() => {});
+    check('R3. Stempel-modus, QR "OMRZCB1:<code>" → resolve zegt gift_card → cadeaubonflow zonder lookup', await vis(p, '#giftStage') && calls.join('|') === '/api/stamp/scan/resolve ' + QR, calls.join('|'));
+    await p.click('#gCancel'); calls.length = 0;
+    await giftMode(p); await scan(p, QR); await p.waitForTimeout(300);
+    check('R3. Cadeaubon-modus, zelfde QR → cadeaubonflow', await vis(p, '#giftStage') && !(await vis(p, '#wrongQr')));
+    await keys(p, '5'); await p.click('#gRedeem'); await p.click('#gConfirmBtn'); await p.waitForSelector('#giftDoneStage.on');
+    const rb = (await state()).log.redeem.slice(-1)[0];
+    check('R3. Afschrijven na resolve: gift_card_id, card_id en de gescande code', rb.gift_card_id && rb.card_id === 'pp' && rb.code === QR, JSON.stringify(rb));
+    await p.click('#gdNext'); calls.length = 0;
+    await p.evaluate(() => setScanMode('stamp'));
+    await scan(p, UUID2); await p.waitForSelector('#resultStage.on', { timeout: 4000 }).catch(() => {});
+    check('R3. Stempelkaart → resolve zegt stamp_holder → bestaande stempelflow (lookup)', await vis(p, '#giveBtn') && calls[0] === '/api/stamp/scan/resolve ' + UUID2 && calls.some(c => c.startsWith('/api/stamp/lookup')), calls.join('|'));
+    await p.click('#giveBtn'); await p.waitForSelector('#successStage.on', { timeout: 3000 }).catch(() => {});
+    check('R3. Stempelen werkt daarna gewoon', await vis(p, '#successStage'));
+    await p.click('#nextCustomerBtn');
+    await giftMode(p); await scan(p, 'iets-dat-niemand-kent'); await p.waitForTimeout(300);
+    check('R3. Cadeaubon-modus, onbekende code → "hoort niet bij een cadeaubon of een stempelkaart"', /hoort niet bij een cadeaubon of een stempelkaart/.test(await txt(p, '#scanAlert')) && !(await vis(p, '#giftStage')));
+    await p.click('#giftBack');
+    await giftMode(p); await scan(p, 'OMRZCB1:ffffffffffffffffffffffffffffffff'); await p.waitForTimeout(300);
+    check('R3. Onbekende bon → nette melding, geen stempelkaart-melding', /bestaat niet of hoort niet bij deze zaak/.test(await txt(p, '#scanAlert')) && !(await vis(p, '#wrongQr')));
+    await p.click('#giftBack');
+    // Code intypen gaat ook via resolve
+    await giftMode(p); calls.length = 0;
+    await p.evaluate(() => { document.getElementById('giftCodePanel').hidden = false; });
+    await p.fill('#giftCodeInput', 'abcdefghjk'); await p.click('#giftCodeBtn'); await p.waitForSelector('#giftStage.on', { timeout: 4000 }).catch(() => {});
+    check('R3. Code intypen → resolve → cadeaubonflow', await vis(p, '#giftStage') && calls[0] === '/api/stamp/scan/resolve ABCD-EFGH-JK', calls.join('|'));
+    await p.click('#gCancel');
+    await ctx.close();
+    // Terugval: resolve ontbreekt, faalt of is onbereikbaar
+    for (const [f, label] of [[404, 'route bestaat niet (404)'], [500, 'serverfout'], ['net', 'netwerkfout']]) {
+      await post('/__reset'); await post('/__cfg', { resolveFail: f });
+      ({ ctx, p } = await open('tok-pp', null, { expectErrors: true }));
+      await scan(p, QR); await p.waitForSelector('#giftStage.on', { timeout: 6000 }).catch(() => {});
+      const okGift = await vis(p, '#giftStage');
+      if (okGift) await p.click('#gCancel');
+      await scan(p, UUID2); await p.waitForSelector('#resultStage.on', { timeout: 6000 }).catch(() => {});
+      check(`R3. Terugval bij ${label}: bon-QR → cadeaubonflow (via lookup), stempelkaart → stempelflow`, okGift && await vis(p, '#giveBtn'));
+      await ctx.close();
+    }
+    await post('/__cfg', { resolveFail: null });
+    // Zaak zonder cadeaubonnen: nooit resolve, stempelen precies als altijd
+    await post('/__reset');
+    ({ ctx, p } = await open('tok-basic'));
+    await scan(p, UUID2); await p.waitForSelector('#resultStage.on');
+    await p.click('#giveBtn'); await p.waitForSelector('#successStage.on');
+    await p.click('#nextCustomerBtn'); await scan(p, QR); await p.waitForTimeout(200);
+    check('R3. Basic: geen enkele resolve-aanroep; stempelen werkt; bon-QR → "Cadeaubonnen staan uit"', !(await state()).log.resolve && /Cadeaubonnen staan uit/.test(await txt(p, '#scanAlert')));
+    await ctx.close();
   }
 
   // ===== G. Schermformaten =====

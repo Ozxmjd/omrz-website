@@ -277,6 +277,23 @@ test('classifyScan: het QR-voorvoegsel OMRZCB1: (backend e101948) is altijd een 
   assert.deepEqual(G.classifyScan('omrzcb1:' + LONG.toUpperCase()), { kind: 'gift', code: LONG });
   assert.deepEqual(G.classifyScan(' OMRZCB1: ' + LONG + ' '), { kind: 'gift', code: LONG });
   assert.deepEqual(G.classifyScan('OMRZCB1:7K3M-P9QR-2X'), { kind: 'gift', code: '7K3M-P9QR-2X' });
-  assert.equal(G.classifyScan('OMRZCB1:iets-vreemds').kind, 'gift');
+  assert.equal(G.classifyScan('OMRZCB1:iets-vreemds').kind, 'gift');                  // voorvoegsel = bon, backend zegt welke
   assert.equal(G.classifyScan('3f2b8c1e-9a4d-4e6f-b7c2-1d0e5a9f8b34').kind, 'stamp');
+});
+
+test('resolveOutcome: het antwoord van /scan/resolve', () => {
+  const gc = { id: 'g1', balance_cents: 500, status: 'active' };
+  assert.deepEqual(G.resolveOutcome(200, { success: true, kind: 'gift_card', gift_card: gc, can_redeem: true, blocked_reason: null }),
+    { kind: 'gift', gift_card: gc, can_redeem: true, blocked_reason: null });
+  assert.equal(G.resolveOutcome(200, { success: true, kind: 'stamp_holder', holder: { id: 'h' } }).kind, 'stamp');
+  assert.deepEqual(G.resolveOutcome(404, { code: 'gift_card_not_found', kind: 'gift_card' }), { kind: 'gift', error: 'gift_card_not_found' });
+  assert.deepEqual(G.resolveOutcome(403, { code: 'premium_plus_required' }), { kind: 'gift', error: 'premium_plus_required' });
+  assert.deepEqual(G.resolveOutcome(503, { code: 'migration_missing' }), { kind: 'gift', error: 'migration_missing' });
+  assert.equal(G.resolveOutcome(404, { code: 'holder_not_found', kind: 'stamp_holder' }).kind, 'stamp');
+  assert.equal(G.resolveOutcome(403, { code: 'wrong_location' }).kind, 'stamp');
+  assert.equal(G.resolveOutcome(404, { code: 'unknown_code', kind: 'unknown' }).kind, 'unknown');
+  for (const [st, d] of [[404, {}], [404, null], [500, { error: 'x' }], [429, { code: 'rate_limited' }], [0, null], [200, { success: true }]]) {
+    assert.equal(G.resolveOutcome(st, d).kind, 'fallback', st + ' ' + JSON.stringify(d));
+  }
+  assert.ok(G.MESSAGES.unknown_code);
 });

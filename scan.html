@@ -1792,24 +1792,85 @@
         $('giftBlockBtn').addEventListener('click', () => { resetToScan(); setScanMode('gift'); startCamera(); });
         $('giftBack').addEventListener('click', () => { resetToScan(); setScanMode('stamp'); });
 
-        // Elke camera-scan komt hier binnen.
-        function routeScan(text) {
-            const c = GIFT.classifyScan(text);
-            if (c.kind === 'gift') {
-                if (giftEnabled) { openGift(c.code); return; }
-                // Scanner uit (of geen Premium Plus): niets doen behalve het zeggen.
-                stopCamera();
-                $('cameraWrap').classList.remove('on');
-                $('cameraOpenWrap').style.display = 'flex';
-                showAlert('scanAlert', 'Cadeaubonnen staan uit voor deze zaak.');
+        // Wat is deze scan? Bij een zaak met cadeaubonnen beslist de backend (GET /scan/resolve).
+        // Geeft hij geen bruikbaar antwoord (geen route, netwerk, 5xx, te veel verzoeken), dan
+        // valt de app terug op de eigen herkenning. Resultaat: zie GIFT.resolveOutcome.
+        const RESOLVE_TIMEOUT_MS = 5000;
+        async function resolveScan(raw) {
+            const ac = new AbortController();
+            const t = setTimeout(() => ac.abort(), RESOLVE_TIMEOUT_MS);
+            try {
+                const res = await apiCall(API_BASE + '/api/stamp/scan/resolve?card_id=' + encodeURIComponent(activeCardId())
+                    + '&code=' + encodeURIComponent(raw), { signal: ac.signal });
+                const data = await res.json().catch(() => null);
+                return GIFT.resolveOutcome(res.status, data);
+            } catch (err) {
+                if (err && err.handled) return { kind: 'handled' };          // sessie verlopen: al uitgelogd
+                return { kind: 'fallback' };
+            } finally { clearTimeout(t); }
+        }
+        function giftScanBusy(on) {
+            $('scanAlert').classList.toggle('info', on);
+            if (on) showAlert('scanAlert', 'Cadeaubon ophalen…'); else hideAlert('scanAlert');
+        }
+        function giftScanProblem(msg) {
+            stopCamera();
+            $('cameraWrap').classList.remove('on');
+            $('cameraOpenWrap').style.display = 'flex';
+            $('scanAlert').classList.remove('info');
+            showAlert('scanAlert', msg);
+        }
+        // Gescand of ingetypt, met de cadeaubon-scanner aan: laat de backend zeggen wat het is.
+        async function handleGiftEnabledScan(text) {
+            const o = await resolveScan(text);
+            if (o.kind === 'handled') return;
+            let kind = o.kind;
+            if (kind === 'fallback') kind = GIFT.classifyScan(text).kind === 'gift' ? 'gift-lookup' : 'stamp';
+            if (kind === 'gift' && o.gift_card) { showResolvedGift(text, o); return; }
+            if (kind === 'gift') {                                         // bon, maar niet te gebruiken of niet gevonden
+                giftScanProblem(GIFT.errorMessage(o.error, {}));
+                if (GIFT.isPlanLock(o.error)) setGiftEnabled(false);
                 return;
             }
+            if (kind === 'gift-lookup') { openGift(GIFT.classifyScan(text).code); return; }
+            if (kind === 'unknown' && scanMode === 'gift') { giftScanProblem(GIFT.MESSAGES.unknown_code); return; }
+            routeStamp(text);                                              // stempelkaart (of onbekend in stempel-modus)
+        }
+        function routeStamp(text) {
             if (scanMode === 'gift') {
                 stopCamera();
                 $('cameraWrap').classList.remove('on');
                 $('cameraOpenWrap').style.display = 'flex';
                 $('wrongQr').hidden = false;
                 $('wrongQrBtn').onclick = () => { $('wrongQr').hidden = true; setScanMode('stamp'); onQrDetected(text); };
+                return;
+            }
+            onQrDetected(text);                                         // stempelkaart: precies zoals altijd
+        }
+        // Bon uit het resolve-antwoord tonen; geen tweede lookup nodig.
+        function showResolvedGift(text, o) {
+            stopCamera();
+            $('cameraWrap').classList.remove('on');
+            $('wrongQr').hidden = true;
+            hideAlert('scanAlert'); $('scanAlert').classList.remove('info');
+            gift = { code: String(text).trim(), card: o.gift_card || {}, canRedeem: o.can_redeem === true };
+            gAttempt = null; gAmtStr = ''; gBillStr = ''; gTarget = 'amount';
+            renderGift();
+            showGiftStage('giftStage');
+        }
+
+        // Elke camera-scan komt hier binnen.
+        function routeScan(text) {
+            if (giftEnabled) { handleGiftEnabledScan(text); return; }
+            // Zaak zonder cadeaubonnen: geen extra netwerkstap, de stempelscanner blijft zoals hij was.
+            // Alleen een cadeaubon-QR wordt tegengehouden.
+            const c = GIFT.classifyScan(text);
+            if (c.kind === 'gift') {
+                // Scanner uit (of geen Premium Plus): niets doen behalve het zeggen.
+                stopCamera();
+                $('cameraWrap').classList.remove('on');
+                $('cameraOpenWrap').style.display = 'flex';
+                showAlert('scanAlert', 'Cadeaubonnen staan uit voor deze zaak.');
                 return;
             }
             onQrDetected(text);                                         // stempelkaart: precies zoals altijd
@@ -1830,7 +1891,9 @@
             const code = GIFT.normalizeShortCode($('giftCodeInput').value);
             if (!code) { showAlert('giftCodeAlert', 'Een korte code heeft 10 tekens: XXXX-XXXX-XX.'); return; }
             hideAlert('giftCodeAlert');
-            openGift(code);
+            stopCamera(); $('cameraWrap').classList.remove('on');
+            giftScanBusy(true);
+            handleGiftEnabledScan(code).finally(() => { if ($('scanAlert').classList.contains('info')) giftScanBusy(false); });
         });
 
         // ---- Lookup ----

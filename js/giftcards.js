@@ -82,14 +82,16 @@
     return h === 'omrzdigital.nl' || h.endsWith('.omrzdigital.nl');
   }
   // Sinds backend e101948 staat er in de QR van een bon OMRZCB1:<32 hex>. Dat voorvoegsel
-  // gebruikt alleen een cadeaubon; oudere bonnen hebben alleen de 32 hex.
+  // gebruikt alleen een cadeaubon. Dit is de terugval voor als /scan/resolve niet antwoordt;
+  // normaal beslist de backend wat een scan is.
   const GIFT_QR_PREFIX = 'OMRZCB1:';
   function classifyScan(text) {
-    const raw = String(text == null ? '' : text).trim();
+    let raw = String(text == null ? '' : text).trim();
     if (raw.toUpperCase().startsWith(GIFT_QR_PREFIX)) {
       const rest = raw.slice(GIFT_QR_PREFIX.length).trim();
       if (LONG_RX.test(rest)) return { kind: 'gift', code: rest.toLowerCase() };
-      return { kind: 'gift', code: normalizeShortCode(rest) || raw };       // voorvoegsel = altijd een bon
+      const sc = normalizeShortCode(rest);
+      return { kind: 'gift', code: sc || raw };                               // voorvoegsel = altijd een bon
     }
     if (UUID_RX.test(raw)) return { kind: 'stamp', code: raw };                // stempelkaart, altijd eerst
     if (LONG_RX.test(raw)) return { kind: 'gift', code: raw.toLowerCase() };
@@ -111,6 +113,24 @@
     if (short) return { kind: 'gift', code: short };
     return { kind: 'stamp', code: raw };
   }
+  // Het antwoord van GET /api/stamp/scan/resolve, vertaald naar wat de scanapp moet doen.
+  // { kind: 'gift', gift_card, can_redeem, blocked_reason } | { kind: 'gift', error }
+  // | { kind: 'stamp' } | { kind: 'unknown' } | { kind: 'fallback' } (backend gaf geen bruikbaar
+  // antwoord: dan beslist de lokale herkenning, classifyScan).
+  function resolveOutcome(status, data) {
+    const d = data || {};
+    if (status === 200 && d.success !== false) {
+      if (d.kind === 'gift_card' && d.gift_card) return { kind: 'gift', gift_card: d.gift_card, can_redeem: d.can_redeem === true, blocked_reason: d.blocked_reason || null };
+      if (d.kind === 'stamp_holder') return { kind: 'stamp', holder: d.holder || null };
+      return { kind: 'fallback' };
+    }
+    if (isPlanLock(d.code)) return { kind: 'gift', error: d.code };
+    if (d.code === 'gift_card_not_found' || d.code === 'migration_missing' || (d.kind === 'gift_card' && d.code)) return { kind: 'gift', error: d.code };
+    if (d.code === 'holder_not_found' || d.code === 'wrong_location' || d.kind === 'stamp_holder') return { kind: 'stamp' };
+    if (d.code === 'unknown_code') return { kind: 'unknown' };
+    return { kind: 'fallback' };                                              // 404 zonder code, 5xx, 429, netwerk
+  }
+
   // De deellink van een bon: de backend noemt hem url (share_url uit het eerste contract).
   function giftShareUrl(g) { return (g && (g.url || g.share_url)) || ''; }
   // De korte code zoals op de bon: short_code_display, anders zelf opgemaakt.
@@ -318,6 +338,7 @@
     owner_only: 'Alleen de eigenaar van de zaak kan dit doen.',
     already_reversed: 'Deze afschrijving is al teruggedraaid.',
     rate_limited: 'Te veel pogingen achter elkaar. Wacht even en probeer het opnieuw.',
+    unknown_code: 'Deze code hoort niet bij een cadeaubon of een stempelkaart.',
     buyer_email_required: 'Vul het e-mailadres van de koper in: bij "Ik stuur hem zelf door" mailen we de link naar de koper.',
     invalid_buyer_email: 'Het e-mailadres van de koper klopt niet.',
     recipient_email_required: 'Vul het e-mailadres van de ontvanger in: bij "Direct naar de ontvanger" mailen we de bon naar de ontvanger.',
@@ -352,7 +373,7 @@
     return (data && typeof data.error === 'string' && data.error) || 'Er ging iets mis. Probeer het opnieuw.';
   }
 
-  const api = { formatCents, parseEuroToCents, normalizeShortCode, classifyScan, GIFT_QR_PREFIX, giftShareUrl, giftShortCodeDisplay, redeemResult, newIdempotencyKey, endOfDayAmsterdamISO,
+  const api = { formatCents, parseEuroToCents, normalizeShortCode, classifyScan, resolveOutcome, GIFT_QR_PREFIX, giftShareUrl, giftShortCodeDisplay, redeemResult, newIdempotencyKey, endOfDayAmsterdamISO,
     giftStatus, STATUS_LABELS, isPlanLock, scannerEnabledFrom, referenceFrom, scannerSettingsBody, errorMessage, isNotLive, MESSAGES, NOT_LIVE_MESSAGE,
     DELIVERY_MODES, validateGiftDelivery, giftCreateBody, resendBody, mailStateOf, mailOutcome, mailAddress,
     DESIGN_FIELDS, NO_INHERIT_FIELDS, designBody, validateDesignValue, isHexColor, isHttpsUrl, normalizeColor, designValue };

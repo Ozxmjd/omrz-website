@@ -125,6 +125,36 @@ function api(req, res, url, body, rawBody) {
     return send(res, 200, { success: true });
   }
 
+  // GET /api/stamp/scan/resolve, zoals ai-review-bot e101948.
+  if (p === '/api/stamp/scan/resolve') {
+    S.log.resolve = (S.log.resolve || 0) + 1;
+    const f = S.cfg.notLive ? 404 : S.cfg.resolveFail;                          // backend niet live: route bestaat niet
+    if (S.cfg.rateLimited) return fail(res, 429, 'rate_limited', 'Te veel verzoeken');   // zelfde limiter als de cadeaubon-routes
+    if (f === 404) { res.writeHead(404, { 'Content-Type': 'text/html' }); return res.end('Cannot GET'); }
+    if (f === 500) return send(res, 500, { error: 'boem' });
+    if (f === 'net') return req.socket.destroy();
+    if (!tok) return send(res, 401, { error: 'Niet geautoriseerd' });
+    const cardId = q.get('card_id'), code = q.get('code');
+    if (!cardId) return fail(res, 400, 'card_id_required', 'card_id is verplicht');
+    if (!code) return fail(res, 400, 'code_required', 'code is verplicht');
+    let v = String(code).trim();
+    if (v.toUpperCase().startsWith('OMRZCB1:')) v = v.slice(8).trim();
+    if (/^https?:\/\//i.test(v)) { try { const d = new URL(v).pathname.split('/').filter(Boolean); v = d.length ? d[d.length - 1] : ''; } catch (_) { v = ''; } }
+    const isGift = /^[0-9a-f]{32}$/i.test(v) || normShort(v).length === 10 && /^[0-9A-HJKMNP-TV-Z]{10}$/.test(normShort(v));
+    if (isGift && !/^[0-9a-f]{8}-/i.test(v)) {
+      if (tok.plan !== 'premium_plus') return fail(res, 403, 'premium_plus_required', 'Cadeaubonnen horen bij Premium Plus.');
+      const g = findCode(cardId, code);
+      if (!g) return send(res, 404, { error: 'Deze cadeaubon bestaat niet.', code: 'gift_card_not_found', kind: 'gift_card' });
+      const blk = g.status === 'blocked' ? 'gift_card_blocked' : (g.status === 'expired' || (g.expires_at && Date.parse(g.expires_at) <= Date.now())) ? 'gift_card_expired' : g.balance_cents <= 0 ? 'gift_card_empty' : null;
+      return send(res, 200, { success: true, kind: 'gift_card', gift_card: lookupPub(g), can_redeem: !blk, blocked_reason: blk, blocked_message: blk ? 'Niet bruikbaar' : null });
+    }
+    // Stempeltak: elke code wordt als klantcode geprobeerd (in deze nep-API: elke UUID is een klant).
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v) || /^vip-/.test(v) || /^QR-/.test(v)) {
+      return send(res, 200, { success: true, kind: 'stamp_holder', holder: { id: crypto.randomUUID(), customer_qr_code: v, first_name: 'Stempel', last_name: 'Klant' },
+        lookup_url: '/api/stamp/lookup?card_id=' + encodeURIComponent(cardId) + '&customer_qr_code=' + encodeURIComponent(v) });
+    }
+    return send(res, 404, { error: 'Deze code hoort niet bij een cadeaubon of een stempelkaart.', code: 'unknown_code', kind: 'unknown' });
+  }
   if (p.startsWith('/api/stamp/gift-cards')) {
     if (S.cfg.notLive) { res.writeHead(404, { 'Content-Type': 'text/html' }); return res.end('<pre>Cannot ' + req.method + ' ' + p + '</pre>'); }
     if (!tok) return fail(res, 401, 'unauthorized', 'Niet ingelogd');
