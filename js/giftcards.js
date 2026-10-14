@@ -113,22 +113,43 @@
     if (short) return { kind: 'gift', code: short };
     return { kind: 'stamp', code: raw };
   }
-  // Het antwoord van GET /api/stamp/scan/resolve, vertaald naar wat de scanapp moet doen.
-  // { kind: 'gift', gift_card, can_redeem, blocked_reason } | { kind: 'gift', error }
-  // | { kind: 'stamp' } | { kind: 'unknown' } | { kind: 'fallback' } (backend gaf geen bruikbaar
-  // antwoord: dan beslist de lokale herkenning, classifyScan).
+  // Het antwoord van GET /api/stamp/scan/resolve (backend de7021f), vertaald naar wat een
+  // scanner moet doen:
+  //   { kind: 'gift', gift_card, can_redeem, blocked_reason, blocked_message }
+  //   { kind: 'stamp', holder }                 klant gevonden: verder met /api/stamp/lookup
+  //   { kind: 'error', code, message, planLock } nette melding, geen afschrijving
+  //   { kind: 'fallback' }                      backend gaf geen bruikbaar antwoord (netwerk,
+  //                                             429, 5xx, oude backend zonder route): dan
+  //                                             beslist de eigen herkenning, classifyScan.
+  // 503 migration_missing is wel een antwoord (de bonnen bestaan nog niet), geen terugval.
   function resolveOutcome(status, data) {
     const d = data || {};
     if (status === 200 && d.success !== false) {
-      if (d.kind === 'gift_card' && d.gift_card) return { kind: 'gift', gift_card: d.gift_card, can_redeem: d.can_redeem === true, blocked_reason: d.blocked_reason || null };
-      if (d.kind === 'stamp_holder') return { kind: 'stamp', holder: d.holder || null };
+      if (d.kind === 'gift_card' && d.gift_card) {
+        const can = d.can_redeem === true;
+        const reason = can ? null : (d.blocked_reason || null);
+        return { kind: 'gift', gift_card: d.gift_card, can_redeem: can, blocked_reason: reason,
+          blocked_message: can ? null : (d.blocked_message || MESSAGES[reason] || MESSAGES.gift_card_unusable) };
+      }
+      if (d.kind === 'stamp_holder' && d.holder) return { kind: 'stamp', holder: d.holder };
       return { kind: 'fallback' };
     }
-    if (isPlanLock(d.code)) return { kind: 'gift', error: d.code };
-    if (d.code === 'gift_card_not_found' || d.code === 'migration_missing' || (d.kind === 'gift_card' && d.code)) return { kind: 'gift', error: d.code };
-    if (d.code === 'holder_not_found' || d.code === 'wrong_location' || d.kind === 'stamp_holder') return { kind: 'stamp' };
-    if (d.code === 'unknown_code') return { kind: 'unknown' };
-    return { kind: 'fallback' };                                              // 404 zonder code, 5xx, 429, netwerk
+    const code = typeof d.code === 'string' ? d.code : '';
+    const known = status === 400 || status === 401 || status === 403 || status === 404 || (status === 503 && code === 'migration_missing');
+    if (!known || (status === 404 && !code)) return { kind: 'fallback' };    // 404 zonder code: route bestaat nog niet
+    const key = code || (status === 401 ? 'unauthorized' : status === 403 ? 'forbidden' : 'unknown_code');
+    return { kind: 'error', code: key, message: errorMessage(key, d), planLock: isPlanLock(key) };
+  }
+
+  // De keuze Stempelen/Cadeaubon bovenaan de scanner, onthouden per apparaat. Bewust geen
+  // stamp_*-sleutel: die wist de scanapp bij uitloggen, en dit is een voorkeur van het
+  // apparaat, niet van de sessie. Standaard en bij elke twijfel: stempelen.
+  const SCAN_MODE_KEY = 'omrz_scan_mode';
+  function readScanMode(storage) {
+    try { return storage && storage.getItem(SCAN_MODE_KEY) === 'gift' ? 'gift' : 'stamp'; } catch (_) { return 'stamp'; }
+  }
+  function saveScanMode(storage, mode) {
+    try { if (storage) storage.setItem(SCAN_MODE_KEY, mode === 'gift' ? 'gift' : 'stamp'); } catch (_) { /* privévenster: dan niet onthouden */ }
   }
 
   // De deellink van een bon: de backend noemt hem url (share_url uit het eerste contract).
@@ -339,6 +360,13 @@
     already_reversed: 'Deze afschrijving is al teruggedraaid.',
     rate_limited: 'Te veel pogingen achter elkaar. Wacht even en probeer het opnieuw.',
     unknown_code: 'Deze code hoort niet bij een cadeaubon of een stempelkaart.',
+    gift_card_unusable: 'Deze cadeaubon kan nu niet worden afgeschreven.',
+    holder_not_found: 'Klant niet gevonden. Deze stempelkaart hoort niet bij deze zaak.',
+    wrong_location: 'Deze klant hoort bij een andere vestiging.',
+    card_id_required: 'Er is geen stempelkaart actief. Log opnieuw in en probeer het nog eens.',
+    code_required: 'Er is geen code gelezen. Scan opnieuw of typ de code in.',
+    unauthorized: 'Je sessie is verlopen. Log opnieuw in.',
+    forbidden: 'Je hebt geen toegang tot deze stempelkaart.',
     buyer_email_required: 'Vul het e-mailadres van de koper in: bij "Ik stuur hem zelf door" mailen we de link naar de koper.',
     invalid_buyer_email: 'Het e-mailadres van de koper klopt niet.',
     recipient_email_required: 'Vul het e-mailadres van de ontvanger in: bij "Direct naar de ontvanger" mailen we de bon naar de ontvanger.',
@@ -373,7 +401,7 @@
     return (data && typeof data.error === 'string' && data.error) || 'Er ging iets mis. Probeer het opnieuw.';
   }
 
-  const api = { formatCents, parseEuroToCents, normalizeShortCode, classifyScan, resolveOutcome, GIFT_QR_PREFIX, giftShareUrl, giftShortCodeDisplay, redeemResult, newIdempotencyKey, endOfDayAmsterdamISO,
+  const api = { formatCents, parseEuroToCents, normalizeShortCode, classifyScan, resolveOutcome, SCAN_MODE_KEY, readScanMode, saveScanMode, GIFT_QR_PREFIX, giftShareUrl, giftShortCodeDisplay, redeemResult, newIdempotencyKey, endOfDayAmsterdamISO,
     giftStatus, STATUS_LABELS, isPlanLock, scannerEnabledFrom, referenceFrom, scannerSettingsBody, errorMessage, isNotLive, MESSAGES, NOT_LIVE_MESSAGE,
     DELIVERY_MODES, validateGiftDelivery, giftCreateBody, resendBody, mailStateOf, mailOutcome, mailAddress,
     DESIGN_FIELDS, NO_INHERIT_FIELDS, designBody, validateDesignValue, isHexColor, isHttpsUrl, normalizeColor, designValue };

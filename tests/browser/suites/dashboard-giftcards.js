@@ -236,8 +236,8 @@ module.exports = async function run(env) {
   const put1 = st9.log.settingsPut.slice(-1)[0];
   check('9. Aanzetten → PUT body exact {"card_id":"pp","enabled":true} (echte boolean), Content-Type application/json',
     put1.raw === '{"card_id":"pp","enabled":true}' && put1.body.enabled === true && typeof put1.body.enabled === 'boolean' && /^application\/json/.test(put1.contentType || ''), JSON.stringify(put1));
-  check('9. Aanzetten → schakelaar aan + bevestiging over het blok "Cadeaubon scannen"', true
-    && /Cadeaubon scannen/.test(await txt(p, '#gcScannerNote')) && await p.isChecked('#gcScannerSwitch') && p.dialogs.length === 0);
+  check('9. Aanzetten → schakelaar aan + bevestiging over de keuze Stempelen of Cadeaubon', true
+    && /keuze Stempelen of Cadeaubon/.test(await txt(p, '#gcScannerNote')) && await p.isChecked('#gcScannerSwitch') && p.dialogs.length === 0);
   const open9 = (await state()).gifts.filter(g => g.card_id === 'pp' && g.status === 'active').reduce((n, g) => n + g.balance_cents, 0);
   const euro = '€' + NB + (open9 / 100).toFixed(2).replace('.', ',');
   const want9 = `Er staat nog ${euro} aan tegoed open. Uitzetten verbergt de scanner voor uw medewerkers. Bestaande bonnen blijven geldig en kunnen weer worden ingewisseld zodra u de scanner aanzet.`;

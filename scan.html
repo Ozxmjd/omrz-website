@@ -426,20 +426,22 @@
         .result-card.sg-only .cust-name { margin-bottom: 26px; }
 
         /* ===== Cadeaubonnen (Premium Plus) ===== */
-        /* Cadeaubon scannen: apart blok onder de stempelscanner, alleen als de eigenaar het aanzette */
-        .gift-block { max-width: 480px; margin: 34px auto 0; padding: 22px 20px 20px; border-radius: 20px; text-align: left;
-            border: 1px solid var(--border-strong); background: rgba(var(--ink), .03); }
-        .gift-block[hidden] { display: none; }
-        .gift-block-sep { display: flex; align-items: center; gap: 12px; margin: -34px 0 22px; color: var(--faint); font-size: 12px;
-            text-transform: uppercase; letter-spacing: .12em; transform: translateY(-11px); }
-        .gift-block-sep::before, .gift-block-sep::after { content: ""; flex: 1; height: 1px; background: var(--border-strong); }
-        .gift-block-head { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
-        .gift-block-ic { width: 46px; height: 46px; flex: none; border-radius: 14px; display: grid; place-items: center;
-            background: var(--accent-soft); color: var(--accent-2); border: 1px solid rgba(139,92,246,.3); }
-        .gift-block-ic svg { width: 22px; height: 22px; }
-        .gift-block-head b { display: block; font-size: 18px; font-weight: 600; letter-spacing: -.02em; color: var(--text-strong); }
-        .gift-block-head small { display: block; font-size: 13.5px; color: var(--muted); margin-top: 3px; line-height: 1.45; }
-        .gift-back { display: block; margin: 16px auto 0; }
+        /* Keuze bovenaan de scanner: Stempelen | Cadeaubon. Alleen bij Premium Plus én als de
+           eigenaar de cadeaubon-scanner aanzette. De pil schuift onder de actieve knop. */
+        .mode-seg { position: relative; display: grid; grid-template-columns: 1fr 1fr; max-width: 420px; margin: 0 auto 26px;
+            padding: 4px; border-radius: 16px; background: rgba(var(--ink), .045); border: 1px solid var(--border-strong); }
+        .mode-seg[hidden] { display: none; }
+        .mode-pill { position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); border-radius: 12px;
+            background: rgba(var(--ink), .1); border: 1px solid rgba(var(--ink), .14); box-shadow: var(--shadow-sm);
+            transition: transform .32s var(--ease); }
+        .mode-seg[data-mode="gift"] .mode-pill { transform: translateX(100%); }
+        .mode-seg button { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; gap: 9px;
+            min-height: 52px; padding: 0 12px; border: 0; background: none; border-radius: 12px; cursor: pointer;
+            font: inherit; font-size: 15.5px; font-weight: 600; letter-spacing: -.01em; color: var(--muted); transition: color .2s; }
+        .mode-seg button svg { width: 19px; height: 19px; flex: none; }
+        .mode-seg button[aria-selected="true"] { color: var(--text-strong); }
+        .mode-seg button:focus-visible { outline: 2px solid rgba(139,92,246,.6); outline-offset: 2px; }
+        @media (prefers-reduced-motion: reduce) { .mode-pill { transition: none; } }
         .gift-entry { display: none; max-width: 420px; margin: 4px auto 0; text-align: center; }
         .gift-entry.on { display: block; }
         .gift-code-row { display: flex; gap: 10px; margin-top: 12px; }
@@ -448,8 +450,6 @@
             border: 1px solid var(--border-strong); border-radius: 14px; padding: 14px 12px; }
         .gift-code-row input:focus { outline: none; border-color: rgba(139,92,246,.5); box-shadow: 0 0 0 3px rgba(99,102,241,.15); }
         .gift-code-row .btn { width: auto; margin-top: 0; padding: 0 22px; flex: none; }
-        .wrong-qr { max-width: 480px; margin: 0 auto 18px; }
-        .wrong-qr .btn { margin-top: 10px; }
 
         .gift-shop { font-size: 14px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--accent-2); }
         .gift-to { font-size: 22px; font-weight: 600; letter-spacing: -.03em; color: var(--text-strong); margin-top: 6px; }
@@ -600,6 +600,11 @@
             <div class="inner">
                 <!-- Idle / camera -->
                 <div id="scanStage">
+                    <div class="mode-seg" id="modeSeg" role="tablist" aria-label="Wat wil je scannen?" data-mode="stamp" hidden>
+                        <span class="mode-pill" aria-hidden="true"></span>
+                        <button type="button" role="tab" id="modeStamp" data-mode="stamp" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg>Stempelen</button>
+                        <button type="button" role="tab" id="modeGift" data-mode="gift" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>Cadeaubon</button>
+                    </div>
                     <div class="scan-title">Klaar om te scannen</div>
                     <div class="scan-hint-top">Richt de camera op de QR-code van de klant om een stempel te geven.</div>
                     <div class="camera-wrap" id="cameraWrap">
@@ -615,11 +620,6 @@
                         <button class="camera-open" id="cameraBtn" onclick="startCamera()"><span class="cam-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span> Camera openen</button>
                     </div>
                     <div class="alert hidden" id="scanAlert" style="text-align:center;"></div>
-                    <!-- Stempelkaart gescand terwijl "Cadeaubon" actief is -->
-                    <div class="wrong-qr" id="wrongQr" hidden>
-                        <div class="alert info" style="text-align:center;margin-bottom:0">Dit is een stempelkaart, geen cadeaubon.</div>
-                        <button type="button" class="btn btn-gold" id="wrongQrBtn">Naar stempelen</button>
-                    </div>
                     <!-- Cadeaubon: korte code intypen als scannen niet lukt -->
                     <div class="gift-entry" id="giftEntry">
                         <button type="button" class="manual-link" id="giftCodeToggle">Scannen lukt niet? Code intypen →</button>
@@ -630,7 +630,6 @@
                             </div>
                             <div class="alert hidden" id="giftCodeAlert" style="text-align:center;margin-top:12px"></div>
                         </div>
-                        <button type="button" class="link-btn gift-back" id="giftBack">← Terug naar stempelen</button>
                     </div>
 
                     <!-- Alternatief: handmatig zoeken als de camera niet werkt -->
@@ -644,16 +643,6 @@
                             <div class="alert hidden" id="manualAlert" style="text-align:center;"></div>
                             <div id="manualResults"></div>
                         </div>
-                    </div>
-
-                    <!-- Cadeaubon scannen: alleen bij Premium Plus én als de eigenaar de scanner aanzette -->
-                    <div class="gift-block" id="giftBlock" hidden>
-                        <div class="gift-block-sep">of</div>
-                        <div class="gift-block-head">
-                            <span class="gift-block-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg></span>
-                            <div><b>Cadeaubon scannen</b><small>Betaalt de klant met een cadeaubon? Scan de QR-code of typ de korte code in.</small></div>
-                        </div>
-                        <button type="button" class="btn btn-ghost" id="giftBlockBtn" style="margin-top:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>Cadeaubon scannen</button>
                     </div>
                 </div>
 
@@ -1095,7 +1084,7 @@
             resetToScan();
             showScreen('scan');
             loadTodayStats();
-            setGiftEnabled(false);           // tot het antwoord er is: geen blok
+            setGiftEnabled(false);           // tot het antwoord er is: alleen stempelen
             refreshGiftAccess();
         }
         function resetToScan() {
@@ -1154,18 +1143,27 @@
                 return;
             }
             if (btn) { btn.disabled = true; btn.innerHTML = CAM_ICON + ' Camera starten…'; }
+            const gen = ++camGen;
+            camPending = true;
             try {
-                stream = await navigator.mediaDevices.getUserMedia({
+                const s = await navigator.mediaDevices.getUserMedia({
                     video: { facingMode: { ideal: 'environment' } }, audio: false,
                 });
+                // Intussen gestopt (ander scherm, of gewisseld tussen Stempelen en Cadeaubon)?
+                // Dan deze stream meteen weer dicht, anders blijft het cameralampje branden.
+                if (gen !== camGen) { s.getTracks().forEach(t => t.stop()); return; }
+                camPending = false;
+                stream = s;
                 const video = $('video');
                 video.srcObject = stream;
                 await video.play();
+                if (gen !== camGen) return;               // tijdens het starten alweer gestopt
                 $('cameraWrap').classList.add('on');
                 $('cameraOpenWrap').style.display = 'none';
                 scanning = true;
                 tick();
             } catch (err) {
+                if (gen !== camGen) return;               // achterhaalde start: geen melding
                 // Geef per foutsoort een begrijpelijke uitleg.
                 const n = err && err.name;
                 if (n === 'NotAllowedError' || n === 'PermissionDeniedError' || n === 'SecurityError') {
@@ -1178,7 +1176,8 @@
                     cameraProblem('Camera niet beschikbaar. Controleer of je toestemming hebt gegeven voor cameratoegang.');
                 }
             } finally {
-                if (btn) { btn.disabled = false; btn.innerHTML = CAM_ICON + ' Camera openen'; }
+                if (gen === camGen) camPending = false;
+                if (btn && (gen === camGen || !camPending)) { btn.disabled = false; btn.innerHTML = CAM_ICON + ' Camera openen'; }
             }
         }
         // Camera-probleem tonen + het handmatig-zoeken alternatief openen.
@@ -1266,7 +1265,11 @@
             hideManualSearch();
             showCustomer();
         }
+        let camGen = 0;                              // elke start/stop een nieuw nummer
+        let camPending = false;                      // getUserMedia loopt nog
         function stopCamera() {
+            camGen++;
+            camPending = false;
             scanning = false;
             if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
             if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
@@ -1759,9 +1762,13 @@
             if (seq === giftAccessSeq) setGiftEnabled(on);
         }
         function setGiftEnabled(on) {
+            const was = giftEnabled;
             giftEnabled = !!on;
-            if (!giftEnabled && scanMode === 'gift') setScanMode('stamp');
-            $('giftBlock').hidden = !giftEnabled || scanMode === 'gift';
+            $('modeSeg').hidden = !giftEnabled;
+            // Net aangezet: de keuze van dit apparaat terugzetten. Uitgezet: alleen stempelen,
+            // maar de onthouden keuze blijft staan voor als de eigenaar hem weer aanzet.
+            if (giftEnabled && !was) setScanMode(GIFT.readScanMode(window.localStorage));
+            else if (!giftEnabled) setScanMode('stamp');
         }
         // Wijzigt de eigenaar de instelling, dan neemt de iPad die over zodra de pagina weer in beeld
         // komt, zonder opnieuw in te loggen. visibilitychange en focus vallen vaak samen: één keer.
@@ -1781,20 +1788,41 @@
             const title = document.querySelector('#scanStage .scan-title'), hint = document.querySelector('#scanStage .scan-hint-top');
             if (STAMP_TEXTS.title === null) { STAMP_TEXTS.title = title.textContent; STAMP_TEXTS.hint = hint.textContent; }
             const g = scanMode === 'gift';
+            $('modeSeg').dataset.mode = scanMode;
+            $('modeStamp').setAttribute('aria-selected', g ? 'false' : 'true');
+            $('modeGift').setAttribute('aria-selected', g ? 'true' : 'false');
             title.textContent = g ? 'Cadeaubon scannen' : STAMP_TEXTS.title;
             hint.textContent = g ? 'Richt de camera op de QR-code van de cadeaubon, of typ de korte code in.' : STAMP_TEXTS.hint;
             $('manualHint').style.display = g ? 'none' : '';
             $('giftEntry').classList.toggle('on', g);
-            $('giftBlock').hidden = !giftEnabled || g;
-            $('wrongQr').hidden = true;
             if (!g) { $('giftCodePanel').hidden = true; hideAlert('giftCodeAlert'); }
         }
-        $('giftBlockBtn').addEventListener('click', () => { resetToScan(); setScanMode('gift'); startCamera(); });
-        $('giftBack').addEventListener('click', () => { resetToScan(); setScanMode('stamp'); });
+        // Wisselen door de medewerker: onthouden op dit apparaat. Liep de camera, dan stopt hij
+        // en start hij opnieuw, zodat er nooit een scan van de vorige modus doorheen glipt.
+        function chooseScanMode(mode) {
+            if (!giftEnabled || mode === scanMode) return;
+            const camOn = scanning || !!stream || camPending;
+            stopCamera();
+            $('cameraWrap').classList.remove('on');
+            $('cameraOpenWrap').style.display = 'flex';
+            hideAlert('scanAlert'); $('scanAlert').classList.remove('info');
+            hideManualSearch();
+            setScanMode(mode);
+            GIFT.saveScanMode(window.localStorage, scanMode);
+            if (camOn) startCamera();
+        }
+        $('modeStamp').addEventListener('click', () => chooseScanMode('stamp'));
+        $('modeGift').addEventListener('click', () => chooseScanMode('gift'));
+        $('modeSeg').addEventListener('keydown', (e) => {            // pijltjes, zoals bij elke tablist
+            if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+            e.preventDefault();
+            chooseScanMode(scanMode === 'gift' ? 'stamp' : 'gift');
+            $(scanMode === 'gift' ? 'modeGift' : 'modeStamp').focus();
+        });
 
-        // Wat is deze scan? Bij een zaak met cadeaubonnen beslist de backend (GET /scan/resolve).
-        // Geeft hij geen bruikbaar antwoord (geen route, netwerk, 5xx, te veel verzoeken), dan
-        // valt de app terug op de eigen herkenning. Resultaat: zie GIFT.resolveOutcome.
+        // Wat is deze scan? In de cadeaubon-modus beslist de backend (GET /scan/resolve, de7021f).
+        // Geeft hij geen bruikbaar antwoord (netwerk, 429, 5xx), dan valt de app terug op de eigen
+        // herkenning (classifyScan, ook OMRZCB1:). Resultaat: zie GIFT.resolveOutcome.
         const RESOLVE_TIMEOUT_MS = 5000;
         async function resolveScan(raw) {
             const ac = new AbortController();
@@ -1820,40 +1848,32 @@
             $('scanAlert').classList.remove('info');
             showAlert('scanAlert', msg);
         }
-        // Gescand of ingetypt, met de cadeaubon-scanner aan: laat de backend zeggen wat het is.
+        // Cadeaubon-modus (of een bon-QR in de stempelmodus): laat de backend zeggen wat het is.
         async function handleGiftEnabledScan(text) {
-            const o = await resolveScan(text);
-            if (o.kind === 'handled') return;
-            let kind = o.kind;
-            if (kind === 'fallback') kind = GIFT.classifyScan(text).kind === 'gift' ? 'gift-lookup' : 'stamp';
-            if (kind === 'gift' && o.gift_card) { showResolvedGift(text, o); return; }
-            if (kind === 'gift') {                                         // bon, maar niet te gebruiken of niet gevonden
-                giftScanProblem(GIFT.errorMessage(o.error, {}));
-                if (GIFT.isPlanLock(o.error)) setGiftEnabled(false);
-                return;
-            }
-            if (kind === 'gift-lookup') { openGift(GIFT.classifyScan(text).code); return; }
-            if (kind === 'unknown' && scanMode === 'gift') { giftScanProblem(GIFT.MESSAGES.unknown_code); return; }
-            routeStamp(text);                                              // stempelkaart (of onbekend in stempel-modus)
-        }
-        function routeStamp(text) {
-            if (scanMode === 'gift') {
-                stopCamera();
-                $('cameraWrap').classList.remove('on');
-                $('cameraOpenWrap').style.display = 'flex';
-                $('wrongQr').hidden = false;
-                $('wrongQrBtn').onclick = () => { $('wrongQr').hidden = true; setScanMode('stamp'); onQrDetected(text); };
-                return;
-            }
-            onQrDetected(text);                                         // stempelkaart: precies zoals altijd
-        }
-        // Bon uit het resolve-antwoord tonen; geen tweede lookup nodig.
-        function showResolvedGift(text, o) {
             stopCamera();
             $('cameraWrap').classList.remove('on');
-            $('wrongQr').hidden = true;
+            $('cameraOpenWrap').style.display = 'flex';
+            giftScanBusy(true);
+            const o = await resolveScan(text);
+            if (o.kind === 'handled') return;
+            giftScanBusy(false);
+            if (o.kind === 'gift') { showResolvedGift(o); return; }
+            if (o.kind === 'stamp') { onQrDetected(o.holder.customer_qr_code || o.holder.id || text); return; }   // klant: de bestaande stempelflow
+            if (o.kind === 'error') {
+                giftScanProblem(o.message);
+                if (o.planLock) setGiftEnabled(false);                         // backend leidend: alleen nog stempelen
+                return;
+            }
+            // Terugval: zelf herkennen, precies zoals vóór de resolver.
+            const c = GIFT.classifyScan(text);
+            if (c.kind === 'gift') { openGift(c.code); return; }
+            onQrDetected(text);
+        }
+        // Bon uit het resolve-antwoord tonen; geen tweede lookup nodig. Afschrijven gaat op
+        // gift_card.id (gift_card_id) met card_id, want de code zit niet in dit antwoord.
+        function showResolvedGift(o) {
             hideAlert('scanAlert'); $('scanAlert').classList.remove('info');
-            gift = { code: String(text).trim(), card: o.gift_card || {}, canRedeem: o.can_redeem === true };
+            gift = { code: null, card: o.gift_card || {}, canRedeem: o.can_redeem === true, blockedMessage: o.blocked_message || null };
             gAttempt = null; gAmtStr = ''; gBillStr = ''; gTarget = 'amount';
             renderGift();
             showGiftStage('giftStage');
@@ -1861,12 +1881,12 @@
 
         // Elke camera-scan komt hier binnen.
         function routeScan(text) {
-            if (giftEnabled) { handleGiftEnabledScan(text); return; }
-            // Zaak zonder cadeaubonnen: geen extra netwerkstap, de stempelscanner blijft zoals hij was.
-            // Alleen een cadeaubon-QR wordt tegengehouden.
+            if (giftEnabled && scanMode === 'gift') { handleGiftEnabledScan(text); return; }
+            // Stempelmodus: geen extra netwerkstap, de stempelscanner blijft zoals hij was. Alleen een
+            // cadeaubon-QR wordt herkend: met de scanner aan door naar de bon, anders netjes zeggen.
             const c = GIFT.classifyScan(text);
             if (c.kind === 'gift') {
-                // Scanner uit (of geen Premium Plus): niets doen behalve het zeggen.
+                if (giftEnabled) { handleGiftEnabledScan(text); return; }
                 stopCamera();
                 $('cameraWrap').classList.remove('on');
                 $('cameraOpenWrap').style.display = 'flex';
@@ -1891,9 +1911,7 @@
             const code = GIFT.normalizeShortCode($('giftCodeInput').value);
             if (!code) { showAlert('giftCodeAlert', 'Een korte code heeft 10 tekens: XXXX-XXXX-XX.'); return; }
             hideAlert('giftCodeAlert');
-            stopCamera(); $('cameraWrap').classList.remove('on');
-            giftScanBusy(true);
-            handleGiftEnabledScan(code).finally(() => { if ($('scanAlert').classList.contains('info')) giftScanBusy(false); });
+            handleGiftEnabledScan(code);
         });
 
         // ---- Lookup ----
@@ -1906,7 +1924,6 @@
         async function openGift(code) {
             stopCamera();
             $('cameraWrap').classList.remove('on');
-            $('wrongQr').hidden = true;
             hideAlert('scanAlert');
             showAlert('scanAlert', 'Cadeaubon ophalen…');
             $('scanAlert').classList.add('info');
@@ -1946,8 +1963,10 @@
             $('gBal').textContent = GIFT.formatCents(g.balance_cents);
             const key = GIFT.giftStatus(g);
             const label = GIFT.STATUS_LABELS[key] || 'Niet bruikbaar';
-            const stop = GIFT_STOP_TEXT[key] ? [label, GIFT_STOP_TEXT[key]]
-                : (key !== 'active' || !gift.canRedeem ? ['Niet bruikbaar', 'Deze cadeaubon kan nu niet worden afgeschreven.'] : null);
+            // Kan niet worden afgeschreven: de reden van de backend (blocked_message) gaat voor.
+            const blocked = key !== 'active' || !gift.canRedeem;
+            const stop = !blocked ? null
+                : [GIFT_STOP_TEXT[key] ? label : 'Niet bruikbaar', gift.blockedMessage || GIFT_STOP_TEXT[key] || GIFT.MESSAGES.gift_card_unusable];
             $('gBadge').className = 'gift-badge ' + (GIFT.STATUS_LABELS[key] ? key : 'unknown');
             $('gBadge').textContent = label + (key === 'active' && g.expires_at ? ' · geldig t/m ' + new Date(g.expires_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' }) : '');
             $('gStop').hidden = !stop;
@@ -2027,7 +2046,8 @@
             }
             // De backend wil bij een code ook de kaart (card_id); met gift_card_id uit de lookup
             // weet hij meteen welke bon het is.
-            const body = { card_id: activeCardId(), code: gift.code, amount_cents: amount, idempotency_key: gAttempt.key };
+            const body = { card_id: activeCardId(), amount_cents: amount, idempotency_key: gAttempt.key };
+            if (gift.code) body.code = gift.code;
             if (gift.card && gift.card.id) body.gift_card_id = gift.card.id;
             if (bill) body.bill_total_cents = bill;
             const loc = localStorage.getItem(GIFT_LOC_KEY);
@@ -2112,7 +2132,6 @@
             gift = null; gAttempt = null; gAmtStr = ''; gBillStr = ''; gTarget = 'amount'; gLastResult = null;
             $('giftStage').classList.remove('on');
             $('giftDoneStage').classList.remove('on');
-            $('wrongQr').hidden = true;
             $('scanAlert').classList.remove('info');
             $('giftCodeInput').value = '';
             hideAlert('giftCodeAlert');

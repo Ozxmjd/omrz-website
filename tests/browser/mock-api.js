@@ -68,7 +68,7 @@ const fmtShort = c => c.length === 10 ? c.slice(0, 4) + '-' + c.slice(4, 8) + '-
 // Zonder code en url, zoals giftCardPublic(bon) bij de lookup.
 const lookupPub = g => ({ id: g.id, card_id: g.card_id, short_code: g.short_code, short_code_display: fmtShort(g.short_code), initial_amount_cents: g.initial_amount_cents,
   balance_cents: g.balance_cents, status: g.status, recipient_name: g.recipient_name, recipient_email: g.recipient_email, message: g.message, expires_at: g.expires_at,
-  expired: !!(g.expires_at && Date.parse(g.expires_at) <= Date.now()), created_at: g.created_at });
+  expired: !!(g.expires_at && Date.parse(g.expires_at) <= Date.now()), created_at: g.created_at, updated_at: g.updated_at || g.created_at || null });
 const pub = g => {
   const { card_id, pass_mail_tried_ms, buyer_mail_tried_ms, pass_mail_sent_at, pass_mail_error, buyer_mail_sent_at, buyer_mail_error, last_mail_attempt_at, ...r } = g;
   r.short_code_display = fmtShort(g.short_code);
@@ -125,13 +125,15 @@ function api(req, res, url, body, rawBody) {
     return send(res, 200, { success: true });
   }
 
-  // GET /api/stamp/scan/resolve, zoals ai-review-bot e101948.
+  // GET /api/stamp/scan/resolve, zoals ai-review-bot de7021f.
   if (p === '/api/stamp/scan/resolve') {
     S.log.resolve = (S.log.resolve || 0) + 1;
     const f = S.cfg.notLive ? 404 : S.cfg.resolveFail;                          // backend niet live: route bestaat niet
     if (S.cfg.rateLimited) return fail(res, 429, 'rate_limited', 'Te veel verzoeken');   // zelfde limiter als de cadeaubon-routes
     if (f === 404) { res.writeHead(404, { 'Content-Type': 'text/html' }); return res.end('Cannot GET'); }
     if (f === 500) return send(res, 500, { error: 'boem' });
+    if (f === 503) return send(res, 503, { error: 'Service Unavailable' });
+    if (f === 'migration') return fail(res, 503, 'migration_missing', 'De cadeaubonnen staan nog niet in de database. Draai migratie 038_gift_cards.sql.');
     if (f === 'net') return req.socket.destroy();
     if (!tok) return send(res, 401, { error: 'Niet geautoriseerd' });
     const cardId = q.get('card_id'), code = q.get('code');
@@ -146,9 +148,13 @@ function api(req, res, url, body, rawBody) {
       const g = findCode(cardId, code);
       if (!g) return send(res, 404, { error: 'Deze cadeaubon bestaat niet.', code: 'gift_card_not_found', kind: 'gift_card' });
       const blk = g.status === 'blocked' ? 'gift_card_blocked' : (g.status === 'expired' || (g.expires_at && Date.parse(g.expires_at) <= Date.now())) ? 'gift_card_expired' : g.balance_cents <= 0 ? 'gift_card_empty' : null;
-      return send(res, 200, { success: true, kind: 'gift_card', gift_card: lookupPub(g), can_redeem: !blk, blocked_reason: blk, blocked_message: blk ? 'Niet bruikbaar' : null });
+      const BLK_TEXT = { gift_card_blocked: 'Deze cadeaubon is geblokkeerd.', gift_card_expired: 'Deze cadeaubon is verlopen.', gift_card_empty: 'Deze cadeaubon is leeg.' };
+      return send(res, 200, { success: true, kind: 'gift_card', gift_card: lookupPub(g), can_redeem: !blk, blocked_reason: blk, blocked_message: blk ? BLK_TEXT[blk] : null });
     }
-    // Stempeltak: elke code wordt als klantcode geprobeerd (in deze nep-API: elke UUID is een klant).
+    // Stempeltak: elke code wordt als klantcode geprobeerd (in deze nep-API: elke UUID is een klant,
+    // behalve 00000000-… (bestaat niet) en 11111111-… (andere vestiging, voor een manager)).
+    if (/^00000000-/.test(v)) return send(res, 404, { error: 'Deze klant hoort niet bij deze stempelkaart.', code: 'holder_not_found', kind: 'stamp_holder' });
+    if (/^11111111-/.test(v) && !tok.owner) return send(res, 403, { error: 'Deze klant hoort niet bij jouw vestiging', code: 'wrong_location' });
     if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v) || /^vip-/.test(v) || /^QR-/.test(v)) {
       return send(res, 200, { success: true, kind: 'stamp_holder', holder: { id: crypto.randomUUID(), customer_qr_code: v, first_name: 'Stempel', last_name: 'Klant' },
         lookup_url: '/api/stamp/lookup?card_id=' + encodeURIComponent(cardId) + '&customer_qr_code=' + encodeURIComponent(v) });

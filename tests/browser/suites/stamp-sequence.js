@@ -18,8 +18,8 @@ async function stampSequence(b, check, pageErrors, base, opts) {
     const p = await ctx.newPage();
     p.on('pageerror', e => pageErrors.push('stampseq ' + tok + ': ' + e.message));
     await p.goto(B + '/scan.html'); await p.waitForTimeout(800);
-    if (o.scannerOn) check(`S0. ${tok}${tag}: blok ${tok === 'tok-pp' ? 'zichtbaar' : 'niet zichtbaar (geen Premium Plus)'}`,
-      (await p.evaluate(() => !document.getElementById('giftBlock').hidden)) === (tok === 'tok-pp'));
+    if (o.scannerOn) check(`S0. ${tok}${tag}: keuze Stempelen/Cadeaubon ${tok === 'tok-pp' ? 'zichtbaar, op Stempelen' : 'niet zichtbaar (geen Premium Plus)'}`,
+      (await p.evaluate(() => !document.getElementById('modeSeg').hidden && scanMode === 'stamp')) === (tok === 'tok-pp'));
     const scan = q => p.evaluate(q => routeScan(q), q);
     const vis = s => p.evaluate(s => { const e = document.querySelector(s); if (!e) return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; }, s);
     const gives = async () => (await state()).log.give;

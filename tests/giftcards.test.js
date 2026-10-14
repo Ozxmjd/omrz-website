@@ -281,19 +281,42 @@ test('classifyScan: het QR-voorvoegsel OMRZCB1: (backend e101948) is altijd een 
   assert.equal(G.classifyScan('3f2b8c1e-9a4d-4e6f-b7c2-1d0e5a9f8b34').kind, 'stamp');
 });
 
-test('resolveOutcome: het antwoord van /scan/resolve', () => {
-  const gc = { id: 'g1', balance_cents: 500, status: 'active' };
-  assert.deepEqual(G.resolveOutcome(200, { success: true, kind: 'gift_card', gift_card: gc, can_redeem: true, blocked_reason: null }),
-    { kind: 'gift', gift_card: gc, can_redeem: true, blocked_reason: null });
-  assert.equal(G.resolveOutcome(200, { success: true, kind: 'stamp_holder', holder: { id: 'h' } }).kind, 'stamp');
-  assert.deepEqual(G.resolveOutcome(404, { code: 'gift_card_not_found', kind: 'gift_card' }), { kind: 'gift', error: 'gift_card_not_found' });
-  assert.deepEqual(G.resolveOutcome(403, { code: 'premium_plus_required' }), { kind: 'gift', error: 'premium_plus_required' });
-  assert.deepEqual(G.resolveOutcome(503, { code: 'migration_missing' }), { kind: 'gift', error: 'migration_missing' });
-  assert.equal(G.resolveOutcome(404, { code: 'holder_not_found', kind: 'stamp_holder' }).kind, 'stamp');
-  assert.equal(G.resolveOutcome(403, { code: 'wrong_location' }).kind, 'stamp');
-  assert.equal(G.resolveOutcome(404, { code: 'unknown_code', kind: 'unknown' }).kind, 'unknown');
-  for (const [st, d] of [[404, {}], [404, null], [500, { error: 'x' }], [429, { code: 'rate_limited' }], [0, null], [200, { success: true }]]) {
+test('resolveOutcome: het antwoord van /scan/resolve (de7021f)', () => {
+  const gc = { id: 'g1', card_id: 'c1', balance_cents: 500, status: 'active' };
+  assert.deepEqual(G.resolveOutcome(200, { success: true, kind: 'gift_card', gift_card: gc, can_redeem: true, blocked_reason: null, blocked_message: null }),
+    { kind: 'gift', gift_card: gc, can_redeem: true, blocked_reason: null, blocked_message: null });
+  // can_redeem false: de tekst van de backend (blocked_message) wordt getoond
+  const blk = G.resolveOutcome(200, { success: true, kind: 'gift_card', gift_card: gc, can_redeem: false, blocked_reason: 'gift_card_blocked', blocked_message: 'Deze cadeaubon is geblokkeerd.' });
+  assert.equal(blk.can_redeem, false); assert.equal(blk.blocked_message, 'Deze cadeaubon is geblokkeerd.');
+  assert.ok(G.resolveOutcome(200, { success: true, kind: 'gift_card', gift_card: gc, can_redeem: false, blocked_reason: 'gift_card_empty' }).blocked_message);
+  const holder = { id: 'h', customer_qr_code: 'q', first_name: 'A', last_name: null };
+  assert.deepEqual(G.resolveOutcome(200, { success: true, kind: 'stamp_holder', holder, lookup_url: '/x' }), { kind: 'stamp', holder });
+  // fouten: altijd een nette Nederlandse tekst, nooit de code zelf
+  const cases = [[400, 'card_id_required'], [400, 'code_required'], [403, 'premium_plus_required'], [403, 'wrong_location'],
+    [404, 'gift_card_not_found'], [404, 'holder_not_found'], [404, 'unknown_code'], [503, 'migration_missing']];
+  for (const [st, code] of cases) {
+    const o = G.resolveOutcome(st, { error: 'x', code });
+    assert.equal(o.kind, 'error', code); assert.equal(o.code, code);
+    assert.ok(o.message && o.message !== code && !/_/.test(o.message), code + ' → ' + o.message);
+  }
+  assert.equal(G.resolveOutcome(403, { code: 'premium_plus_required' }).planLock, true);
+  assert.equal(G.resolveOutcome(403, { code: 'wrong_location' }).planLock, false);
+  assert.equal(G.resolveOutcome(401, { error: 'Niet geautoriseerd' }).code, 'unauthorized');
+  assert.equal(G.resolveOutcome(403, { error: 'Geen toegang tot deze stempelkaart' }).message, G.MESSAGES.forbidden);
+  // terugval: netwerk, 429, 5xx, oude backend (404 zonder code), vreemd 200-antwoord
+  for (const [st, d] of [[404, {}], [404, null], [500, { error: 'x' }], [502, null], [503, { error: 'x' }], [429, { code: 'rate_limited' }], [0, null], [200, { success: true }], [200, { success: true, kind: 'stamp_holder' }]]) {
     assert.equal(G.resolveOutcome(st, d).kind, 'fallback', st + ' ' + JSON.stringify(d));
   }
-  assert.ok(G.MESSAGES.unknown_code);
+});
+
+test('scan-modus: per apparaat onthouden, standaard stempelen', () => {
+  const mem = () => { const m = {}; return { getItem: k => (k in m ? m[k] : null), setItem: (k, v) => { m[k] = String(v); }, m }; };
+  const st = mem();
+  assert.equal(G.readScanMode(st), 'stamp');
+  G.saveScanMode(st, 'gift'); assert.equal(G.readScanMode(st), 'gift'); assert.equal(st.m[G.SCAN_MODE_KEY], 'gift');
+  G.saveScanMode(st, 'iets'); assert.equal(G.readScanMode(st), 'stamp');
+  assert.ok(!G.SCAN_MODE_KEY.startsWith('stamp_'), 'uitloggen wist stamp_*; de keuze hoort te blijven');
+  const broken = { getItem() { throw new Error('blocked'); }, setItem() { throw new Error('blocked'); } };
+  assert.equal(G.readScanMode(broken), 'stamp'); G.saveScanMode(broken, 'gift');
+  assert.equal(G.readScanMode(null), 'stamp');
 });

@@ -551,6 +551,71 @@
     .scan-stage.found .scan-found { display: block; }
     .scan-stage.found .scan-frame span { border-color: #16a34a; }
 
+    /* Keuze bovenaan de scanner: Stempelen | Cadeaubon (Premium Plus + scanner aan) */
+    .mode-seg { position: relative; display: grid; grid-template-columns: 1fr 1fr; width: 100%; margin: 0 0 18px;
+      padding: 4px; border-radius: 14px; background: rgba(var(--ink), .04); border: 1px solid var(--border-strong); }
+    .mode-seg[hidden] { display: none; }
+    .mode-pill { position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); border-radius: 10px;
+      background: rgba(var(--ink), .09); border: 1px solid rgba(var(--ink), .12); box-shadow: var(--shadow-sm);
+      transition: transform .32s var(--ease); }
+    [data-theme="light"] .mode-pill { background: #fff; border-color: var(--border-strong); }
+    .mode-seg[data-mode="gift"] .mode-pill { transform: translateX(100%); }
+    .mode-seg button { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+      min-height: 48px; padding: 0 10px; border: 0; background: none; border-radius: 10px; cursor: pointer;
+      font: inherit; font-size: 15px; font-weight: 600; letter-spacing: -.01em; color: var(--muted); transition: color .2s; }
+    .mode-seg button svg { width: 18px; height: 18px; flex: none; }
+    .mode-seg button[aria-selected="true"] { color: var(--text-strong); }
+    .mode-seg button:focus-visible { outline: 2px solid var(--accent-line); outline-offset: 2px; }
+    @media (prefers-reduced-motion: reduce) { .mode-pill { transition: none; } }
+    .gift-code-entry { width: 100%; margin-top: 14px; }
+    .gift-code-entry[hidden] { display: none; }
+    .gift-code-entry label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; text-align: center; }
+    .gift-code-entry .row { display: flex; gap: 8px; }
+    .gift-code-entry input { flex: 1; min-width: 0; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 17px; letter-spacing: .08em;
+      text-transform: uppercase; text-align: center; color: var(--text-strong); background: rgba(var(--ink), .03);
+      border: 1px solid var(--border-strong); border-radius: 12px; padding: 12px; }
+    .gift-code-entry input:focus { outline: none; border-color: var(--accent-line); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .gift-code-entry .btn { flex: none; }
+
+    /* Cadeaubon afschrijven (scanner en bonnenlijst) */
+    .gift-scan-view { width: 100%; }
+    .gift-scan-view[hidden] { display: none; }
+    .gr { width: 100%; padding: 22px; border-radius: 20px; background: var(--card); border: 1px solid var(--border-strong); box-shadow: var(--shadow-md); }
+    .gr-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .gr-to { font-size: 17px; font-weight: 600; color: var(--text-strong); letter-spacing: -.02em; }
+    .gr-code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px; color: var(--muted); margin-top: 3px; letter-spacing: .06em; }
+    .gr-bal-lbl { font-size: 12.5px; color: var(--muted); margin-top: 20px; }
+    .gr-bal { font-size: 40px; font-weight: 600; letter-spacing: -.035em; color: var(--text-strong); font-variant-numeric: tabular-nums; line-height: 1.1; }
+    .gr-of { font-size: 13px; color: var(--muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
+    .gr-bar { height: 6px; border-radius: 99px; background: rgba(var(--ink), .07); margin-top: 10px; overflow: hidden; }
+    .gr-bar i { display: block; height: 100%; border-radius: inherit; background: var(--accent-grad); transition: width .4s var(--ease); }
+    .gr-stop { margin-top: 18px; padding: 14px 16px; border-radius: 14px; background: rgba(255,80,80,.07); border: 1px solid rgba(255,80,80,.24); color: #f0a8a8; font-size: 14.5px; font-weight: 500; }
+    [data-theme="light"] .gr-stop { color: #b91c1c; background: #fef2f2; border-color: #fecaca; }
+    .gr-form { margin-top: 20px; }
+    .gr-form label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+    .gr-amt { display: flex; align-items: center; gap: 8px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--border-strong); background: rgba(var(--ink), .03); }
+    .gr-amt:focus-within { border-color: var(--accent-line); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .gr-amt span { font-size: 20px; color: var(--muted); }
+    .gr-amt input { flex: 1; min-width: 0; border: 0; background: none; padding: 13px 0; font: inherit; font-size: 22px; font-weight: 600; color: var(--text-strong); font-variant-numeric: tabular-nums; outline: none; }
+    .gr-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .gr-chip { padding: 8px 12px; border-radius: 999px; border: 1px solid var(--border-strong); background: none; color: var(--pearl); font: inherit; font-size: 13px; cursor: pointer; font-variant-numeric: tabular-nums; }
+    .gr-chip:hover { background: rgba(var(--ink), .05); }
+    .gr-msg { min-height: 20px; margin-top: 10px; font-size: 13.5px; color: #ff8f8f; }
+    [data-theme="light"] .gr-msg { color: #b91c1c; }
+    .gr-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+    .gr-actions .btn { width: 100%; justify-content: center; padding: 14px 18px; font-size: 15.5px; }
+    .gr-confirm { margin-top: 18px; padding: 16px; border-radius: 14px; background: var(--accent-soft); border: 1px solid var(--accent-line); text-align: center; }
+    .gr-confirm b { display: block; font-size: 24px; color: var(--text-strong); font-variant-numeric: tabular-nums; margin: 2px 0 4px; }
+    .gr-confirm small { font-size: 13px; color: var(--muted); }
+    .gr-done { text-align: center; }
+    .gr-done .gr-check { width: 58px; height: 58px; margin: 0 auto 12px; border-radius: 50%; display: grid; place-items: center; background: rgba(22,163,74,.14); color: #4ade80; }
+    .gr-done .gr-check svg { width: 28px; height: 28px; }
+    .gr-done h4 { font-size: 20px; font-weight: 600; color: var(--text-strong); letter-spacing: -.02em; }
+    .gr-rows { margin: 16px 0 6px; text-align: left; border-top: 1px solid var(--border); }
+    .gr-rows div { display: flex; justify-content: space-between; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--border); font-size: 14.5px; }
+    .gr-rows dt { color: var(--muted); }
+    .gr-rows dd { color: var(--text-strong); font-weight: 600; font-variant-numeric: tabular-nums; }
+
     /* STAP 2 · klantkaart + teller */
     .cust-name { font-size: 23px; font-weight: 600; color: var(--text-strong); text-align: center; margin-bottom: 18px; letter-spacing: -.025em; }
     .customer-view .stampcard { margin-bottom: 22px; }
@@ -2407,10 +2472,15 @@
         <section class="panel" id="panel-stempel">
           <div class="panel-head">
             <h2>Geef Stempel</h2>
-            <p>Scan de QR-code van je klant om een stempel toe te kennen.</p>
+            <p id="stempelIntro">Scan de QR-code van je klant om een stempel toe te kennen.</p>
           </div>
 
           <div class="scan-wrap">
+            <div class="mode-seg" id="dModeSeg" role="tablist" aria-label="Wat wil je scannen?" data-mode="stamp" hidden>
+              <span class="mode-pill" aria-hidden="true"></span>
+              <button type="button" role="tab" id="dModeStamp" data-mode="stamp" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg>Stempelen</button>
+              <button type="button" role="tab" id="dModeGift" data-mode="gift" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>Cadeaubon</button>
+            </div>
 
             <!-- STAP 1 · Scannen -->
             <div class="scan-view" id="scanView">
@@ -2434,7 +2504,19 @@
                 <span class="btn-label">Scan klant QR</span>
               </button>
               <button class="btn btn-ghost scan-btn" id="stopCamBtn" hidden>Camera sluiten</button>
+
+              <!-- Cadeaubon-modus: korte code intypen (op een laptop vaak handiger dan de camera) -->
+              <div class="gift-code-entry" id="dGiftEntry" hidden>
+                <label for="dGiftCode">Of typ de korte code van de bon</label>
+                <div class="row">
+                  <input type="text" id="dGiftCode" placeholder="XXXX-XXXX-XX" maxlength="14" autocomplete="off" autocapitalize="characters" spellcheck="false" />
+                  <button type="button" class="btn btn-primary" id="dGiftCodeBtn">Zoeken</button>
+                </div>
+              </div>
             </div>
+
+            <!-- Cadeaubon: saldo en afschrijven -->
+            <div class="gift-scan-view" id="giftScanView" hidden></div>
 
             <!-- STAP 2 · Klantkaart + teller -->
             <div class="customer-view" id="customerView" hidden>
@@ -3360,6 +3442,7 @@
       if (tab === 'enquete') loadSurvey();
       if (tab === 'loyaliteit') { loadLoyalty(); loadSpecialGuests(true); }
       if (tab === 'cadeaubonnen') loadGiftCards();
+      if (tab === 'stempel') refreshDashGiftAccess();
       if (tab !== 'stempel') { stopScanner(); resetScanFlow(); } // camera vrijgeven + flow resetten bij verlaten van de scan-tab
     }
     links.forEach(l => l.addEventListener('click', () => activateTab(l.dataset.tab)));
@@ -3404,6 +3487,7 @@
       applyPlanGating();
       renderMailBlock();
       applyGiftLockIcon();
+      if (document.getElementById('panel-stempel').classList.contains('active')) refreshDashGiftAccess();
       // Special Guests volgt de abonnementsregel van de Klanten-lijst; staat de tab al open,
       // dan meteen het juiste blok tonen (slot of lijst).
       if (document.getElementById('panel-loyaliteit').classList.contains('active')) loadSpecialGuests();
@@ -5483,6 +5567,7 @@
     const scanStatus = document.getElementById('scanStatus');
     const openCamBtn = document.getElementById('openCamBtn');
     const stopCamBtn = document.getElementById('stopCamBtn');
+    const giftScanView = document.getElementById('giftScanView');
     // Klantkaart-view
     const customerView = document.getElementById('customerView');
     const custName = document.getElementById('custName');
@@ -5565,10 +5650,13 @@
     }
 
     // ===== STAP 1 · Scannen =====
+    let scanGen = 0;                 // elke start/stop een nieuw nummer: een trage start mag geen stream laten lekken
+    let scanPending = false;         // getUserMedia loopt nog
     async function startScanner() {
       // Terug naar de camera-view
       customerView.hidden = true;
       stampResult.hidden = true;
+      giftScanView.hidden = true;
       scanView.hidden = false;
       scanStage.classList.remove('found');
       scanBusy = false;
@@ -5580,24 +5668,35 @@
         setScanStatus('QR-scanner kon niet laden. Controleer je verbinding.', true); return;
       }
       setScanStatus('Camera starten…');
+      const gen = ++scanGen;
+      scanPending = true;
       try {
-        mediaStream = await navigator.mediaDevices.getUserMedia({
+        const st = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: { ideal: 'environment' } }, audio: false,
         });
+        // Intussen gestopt (andere tab, of gewisseld tussen Stempelen en Cadeaubon)? Dan dicht.
+        if (gen !== scanGen) { st.getTracks().forEach(t => t.stop()); return; }
+        scanPending = false;
+        mediaStream = st;
         scanVideo.srcObject = mediaStream;
         await scanVideo.play();
+        if (gen !== scanGen) return;
         scanStage.classList.add('live');
         openCamBtn.hidden = true;
         stopCamBtn.hidden = false;
-        setScanStatus('Camera actief. Richt op de QR-code van je klant.');
+        setScanStatus(dScanMode === 'gift' ? 'Camera actief. Richt op de QR-code van de cadeaubon.' : 'Camera actief. Richt op de QR-code van je klant.');
         scanRAF = requestAnimationFrame(scanTick);
       } catch (err) {
+        if (gen !== scanGen) return;
+        scanPending = false;
         setScanStatus('Geen toegang tot de camera. Sta cameratoegang toe en probeer opnieuw.', true);
         stopScanner();
       }
     }
 
     function stopScanner() {
+      scanGen++;
+      scanPending = false;
       if (scanRAF) { cancelAnimationFrame(scanRAF); scanRAF = null; }
       if (mediaStream) { mediaStream.getTracks().forEach(t => t.stop()); mediaStream = null; }
       scanVideo.srcObject = null;
@@ -5616,7 +5715,7 @@
           ctx.drawImage(scanVideo, 0, 0, w, h);
           const img = ctx.getImageData(0, 0, w, h);
           const code = jsQR(img.data, w, h, { inversionAttempts: 'dontInvert' });
-          if (code && code.data) { onQrDetected(code.data); return; }
+          if (code && code.data) { routeDashScan(code.data); return; }
         }
       }
       scanRAF = requestAnimationFrame(scanTick);
@@ -6030,6 +6129,8 @@
 
     // ===== Navigatie / reset =====
     function resetScanFlow() {
+      giftScanView.hidden = true;
+      giftScanView.innerHTML = '';
       holderLoyalty = null;
       renderHolderVip();               // geen VIP-blok van de vorige klant laten staan
       holderSpecial = null;
@@ -6053,6 +6154,272 @@
     nextBtn.addEventListener('click', () => { startScanner(); });
     // Camera vrijgeven wanneer de pagina/tab wordt verlaten
     window.addEventListener('pagehide', stopScanner);
+
+    // ===== Geef Stempel: keuze Stempelen | Cadeaubon =====
+    // Zelfde regels als de scanapp: de keuze staat er alleen bij een Premium Plus-pakket én als de
+    // eigenaar de cadeaubon-scanner aanzette. In de cadeaubon-modus beslist GET /scan/resolve wat
+    // een scan is; bij een netwerkfout, 429 of 5xx valt het terug op de eigen herkenning. In de
+    // stempelmodus blijft alles zoals het was (geen extra netwerkstap).
+    // var i.p.v. let: applySubscription kan hier al naar kijken voordat dit blok is uitgevoerd.
+    var dGiftEnabled = false, dScanMode = 'stamp', dGiftSeq = 0;
+    const dModeSeg = document.getElementById('dModeSeg');
+    const dModeStamp = document.getElementById('dModeStamp');
+    const dModeGift = document.getElementById('dModeGift');
+    const dGiftEntry = document.getElementById('dGiftEntry');
+    const dGiftCode = document.getElementById('dGiftCode');
+    const STAMP_INTRO = 'Scan de QR-code van je klant om een stempel toe te kennen.';
+
+    async function refreshDashGiftAccess() {
+      const seq = ++dGiftSeq;
+      let on = false;
+      if (isPremiumPlusPlan() && activeCardId()) {
+        try {
+          const data = await gcFetch('/api/stamp/gift-cards/settings?card_id=' + encodeURIComponent(activeCardId()));
+          on = GIFT.scannerEnabledFrom(data);
+        } catch (_) { on = false; }        // bij elke twijfel: alleen stempelen
+      }
+      if (seq === dGiftSeq) setDashGiftEnabled(on);
+    }
+    function setDashGiftEnabled(on) {
+      const was = dGiftEnabled;
+      dGiftEnabled = !!on;
+      dModeSeg.hidden = !dGiftEnabled;
+      if (dGiftEnabled && !was) setDashScanMode(GIFT.readScanMode(window.localStorage));
+      else if (!dGiftEnabled) setDashScanMode('stamp');
+    }
+    function setDashScanMode(mode) {
+      dScanMode = mode === 'gift' && dGiftEnabled ? 'gift' : 'stamp';
+      const g = dScanMode === 'gift';
+      dModeSeg.dataset.mode = dScanMode;
+      dModeStamp.setAttribute('aria-selected', g ? 'false' : 'true');
+      dModeGift.setAttribute('aria-selected', g ? 'true' : 'false');
+      document.getElementById('stempelIntro').textContent = g ? 'Scan de QR-code van een cadeaubon, of typ de korte code in.' : STAMP_INTRO;
+      openCamBtn.querySelector('.btn-label').textContent = g ? 'Scan cadeaubon' : 'Scan klant QR';
+      const hint = document.querySelector('#scanIdle .scan-hint');
+      if (hint) hint.textContent = g ? 'Richt de camera op de QR-code van de cadeaubon.' : 'Richt de camera op de QR-code in de wallet van je klant.';
+      dGiftEntry.hidden = !g;
+      if (mediaStream) setScanStatus(g ? 'Camera actief. Richt op de QR-code van de cadeaubon.' : 'Camera actief. Richt op de QR-code van je klant.');
+    }
+    // Wisselen: onthouden op dit apparaat (zelfde sleutel als de scanapp). Liep de camera, dan stopt
+    // hij en start hij opnieuw, zodat er geen scan van de vorige modus doorheen glipt.
+    function chooseDashScanMode(mode) {
+      if (!dGiftEnabled || mode === dScanMode) return;
+      const camOn = !!mediaStream || scanPending;
+      stopScanner();
+      resetScanFlow();
+      setDashScanMode(mode);
+      GIFT.saveScanMode(window.localStorage, dScanMode);
+      if (camOn) startScanner();
+    }
+    dModeStamp.addEventListener('click', () => chooseDashScanMode('stamp'));
+    dModeGift.addEventListener('click', () => chooseDashScanMode('gift'));
+    dModeSeg.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      e.preventDefault();
+      chooseDashScanMode(dScanMode === 'gift' ? 'stamp' : 'gift');
+      (dScanMode === 'gift' ? dModeGift : dModeStamp).focus();
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && document.getElementById('panel-stempel').classList.contains('active')) refreshDashGiftAccess();
+    });
+
+    // Korte code intypen
+    dGiftCode.addEventListener('input', (e) => {
+      const raw = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
+      e.target.value = [raw.slice(0, 4), raw.slice(4, 8), raw.slice(8, 10)].filter(Boolean).join('-');
+    });
+    dGiftCode.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); document.getElementById('dGiftCodeBtn').click(); } });
+    document.getElementById('dGiftCodeBtn').addEventListener('click', () => {
+      const code = GIFT.normalizeShortCode(dGiftCode.value);
+      if (!code) { setScanStatus('Een korte code heeft 10 tekens: XXXX-XXXX-XX.', true); return; }
+      dashGiftScan(code);
+    });
+
+    // Elke camera-scan in het dashboard komt hier binnen.
+    function routeDashScan(text) {
+      if (dGiftEnabled && dScanMode === 'gift') { dashGiftScan(text); return; }
+      const c = GIFT.classifyScan(text);
+      if (c.kind === 'gift') {
+        if (dGiftEnabled) { dashGiftScan(text); return; }
+        stopScanner();
+        setScanStatus('Cadeaubonnen staan uit voor deze zaak.', true);
+        return;
+      }
+      onQrDetected(text);                                     // stempelkaart: precies zoals altijd
+    }
+    async function dashResolve(raw) {
+      const ac = new AbortController();
+      const t = setTimeout(() => ac.abort(), 5000);
+      try {
+        const res = await fetch(API_BASE + '/api/stamp/scan/resolve?card_id=' + encodeURIComponent(activeCardId())
+          + '&code=' + encodeURIComponent(raw), { headers: authHeaders(), signal: ac.signal });
+        if (res.status === 401) { logoutToLogin(); return { kind: 'handled' }; }
+        const data = await res.json().catch(() => null);
+        return GIFT.resolveOutcome(res.status, data);
+      } catch (_) { return { kind: 'fallback' }; } finally { clearTimeout(t); }
+    }
+    async function dashGiftScan(text) {
+      stopScanner();
+      setScanStatus('Cadeaubon ophalen…');
+      const o = await dashResolve(text);
+      if (o.kind === 'handled') return;
+      if (o.kind === 'gift') { showDashGift(o.gift_card, o.can_redeem, o.blocked_message); return; }
+      if (o.kind === 'stamp') { setScanStatus(''); onQrDetected(o.holder.customer_qr_code || o.holder.id || text); return; }
+      if (o.kind === 'error') {
+        setScanStatus(o.message, true);
+        if (o.planLock) setDashGiftEnabled(false);
+        return;
+      }
+      // Terugval: zelf herkennen, en een bon dan via de gewone lookup ophalen.
+      const c = GIFT.classifyScan(text);
+      if (c.kind !== 'gift') { setScanStatus(''); onQrDetected(text); return; }
+      try {
+        const data = await gcFetch('/api/stamp/gift-cards/lookup?code=' + encodeURIComponent(c.code) + '&card_id=' + encodeURIComponent(activeCardId()));
+        showDashGift(data.gift_card || {}, data.can_redeem === true, null);
+      } catch (err) {
+        if (err && err.code === 'unauthorized') return;
+        setScanStatus(gcErrText(err), true);
+        if (err && GIFT.isPlanLock(err.code)) setDashGiftEnabled(false);
+      }
+    }
+    function showDashGift(gc, canRedeem, blockedMessage) {
+      setScanStatus('');
+      scanView.hidden = true;
+      customerView.hidden = true;
+      stampResult.hidden = true;
+      giftScanView.hidden = false;
+      mountGiftRedeem(giftScanView, gc, {
+        canRedeem, blockedMessage, closeLabel: 'Volgende scan',
+        onClose: () => { resetScanFlow(); dGiftCode.value = ''; },
+      });
+    }
+
+    // ===== Cadeaubon afschrijven: één onderdeel voor de scanner en de bonnenlijst =====
+    // POST /api/stamp/gift-cards/redeem met gift_card_id + card_id (de code zit niet in het
+    // resolve-antwoord) en één idempotency-sleutel per poging: opnieuw versturen na een
+    // netwerkfout schrijft nooit dubbel af.
+    function mountGiftRedeem(box, gcIn, opts) {
+      const o = opts || {};
+      let gc = Object.assign({}, gcIn);
+      let can = o.canRedeem === true;
+      let blockedMsg = o.blockedMessage || null;
+      let attempt = null, busy = false, step = 'form', done = null, msg = '';
+      const cents = () => GIFT.parseEuroToCents(box.querySelector('#grAmount') ? box.querySelector('#grAmount').value : '');
+
+      function head() {
+        const st = GIFT.giftStatus(gc);
+        const init = Number(gc.initial_amount_cents) || 0, bal = Number(gc.balance_cents) || 0;
+        const pct = init > 0 ? Math.max(0, Math.min(100, Math.round(bal / init * 100))) : 0;
+        const exp = gc.expires_at && st === 'active' ? ' · geldig t/m ' + gcDate(gc.expires_at) : '';
+        return `<div class="gr-head">
+            <div><div class="gr-to">${escapeHtml(gc.recipient_name ? 'Voor ' + gc.recipient_name : 'Cadeaubon')}</div>
+              <div class="gr-code">${escapeHtml(GIFT.giftShortCodeDisplay(gc))}</div></div>
+            <span class="gc-badge ${st}">${escapeHtml(GIFT.STATUS_LABELS[st] || 'Niet bruikbaar')}</span>
+          </div>
+          <div class="gr-bal-lbl">Saldo</div>
+          <div class="gr-bal" id="grBal">${GIFT.formatCents(bal)}</div>
+          ${init > 0 ? `<div class="gr-of">van ${GIFT.formatCents(init)}${escapeHtml(exp)}</div><div class="gr-bar"><i style="width:${pct}%"></i></div>` : ''}`;
+      }
+      function render() {
+        const st = GIFT.giftStatus(gc);
+        const stop = !can || st !== 'active';
+        if (step === 'done' && done) {
+          box.innerHTML = `<div class="gr gr-done">
+              <div class="gr-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+              <h4>${GIFT.formatCents(done.amount_cents)} afgeschreven</h4>
+              <dl class="gr-rows">
+                <div><dt>Nieuw saldo</dt><dd id="grNewBal">${done.balance_after_cents === null ? 'Wordt bijgewerkt' : GIFT.formatCents(done.balance_after_cents)}</dd></div>
+                <div><dt>Referentie</dt><dd id="grRef">${escapeHtml(done.reference_number || 'Volgt in het overzicht')}</dd></div>
+              </dl>
+              <div class="gr-actions"><button type="button" class="btn btn-primary" data-gr-close>${escapeHtml(o.closeLabel || 'Klaar')}</button></div>
+            </div>`;
+        } else if (stop) {
+          box.innerHTML = `<div class="gr">${head()}
+              <div class="gr-stop" role="alert" id="grStop">${escapeHtml(blockedMsg || GIFT.MESSAGES['gift_card_' + st] || GIFT.MESSAGES.gift_card_unusable)}</div>
+              <div class="gr-actions" style="margin-top:16px"><button type="button" class="btn btn-ghost" data-gr-close>${escapeHtml(o.closeLabel || 'Sluiten')}</button></div>
+            </div>`;
+        } else if (step === 'confirm') {
+          box.innerHTML = `<div class="gr">${head()}
+              <div class="gr-confirm"><small>Afschrijven van deze cadeaubon</small><b id="grConfirmAmt">${GIFT.formatCents(attempt.amount)}</b>
+                <small>Nieuw saldo: ${GIFT.formatCents((Number(gc.balance_cents) || 0) - attempt.amount)}</small></div>
+              <div class="gr-msg" id="grMsg" role="alert">${escapeHtml(msg)}</div>
+              <div class="gr-actions">
+                <button type="button" class="btn btn-primary" id="grConfirm" ${busy ? 'disabled' : ''}>${busy ? 'Bezig…' : 'Bevestig afschrijving'}</button>
+                <button type="button" class="btn btn-ghost" id="grBack" ${busy ? 'disabled' : ''}>Bedrag aanpassen</button>
+              </div>
+            </div>`;
+        } else {
+          const bal = Number(gc.balance_cents) || 0;
+          const prev = attempt ? (attempt.amount / 100).toFixed(2).replace('.', ',') : '';
+          box.innerHTML = `<div class="gr">${head()}
+              <div class="gr-form">
+                <label for="grAmount">Bedrag afschrijven</label>
+                <div class="gr-amt"><span>€</span><input type="text" id="grAmount" inputmode="decimal" autocomplete="off" placeholder="0,00" value="${escapeHtml(prev)}" /></div>
+                <div class="gr-chips"><button type="button" class="gr-chip" id="grFull">Volledig saldo · ${GIFT.formatCents(bal)}</button></div>
+                <div class="gr-msg" id="grMsg" role="alert">${escapeHtml(msg)}</div>
+              </div>
+              <div class="gr-actions">
+                <button type="button" class="btn btn-primary" id="grNext" disabled>Afschrijven</button>
+                <button type="button" class="btn btn-ghost" data-gr-close>Annuleren</button>
+              </div>
+            </div>`;
+          const inp = box.querySelector('#grAmount');
+          const sync = () => {
+            const c = cents(), btn = box.querySelector('#grNext');
+            const ok = Number.isInteger(c) && c > 0 && c <= bal;
+            btn.disabled = !ok;
+            btn.textContent = ok ? GIFT.formatCents(c) + ' afschrijven' : 'Afschrijven';
+            const m = box.querySelector('#grMsg');
+            m.textContent = Number.isInteger(c) && c > bal ? 'Dat is meer dan het saldo van ' + GIFT.formatCents(bal) + '.' : (inp.value && c === null ? 'Vul een bedrag in, bijvoorbeeld 12,50.' : msg);
+          };
+          inp.addEventListener('input', () => { msg = ''; sync(); });
+          inp.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !box.querySelector('#grNext').disabled) box.querySelector('#grNext').click(); });
+          box.querySelector('#grFull').addEventListener('click', () => { inp.value = (bal / 100).toFixed(2).replace('.', ','); msg = ''; sync(); });
+          box.querySelector('#grNext').addEventListener('click', () => {
+            const c = cents();
+            if (!Number.isInteger(c) || c <= 0 || c > bal) return;
+            // Zelfde bedrag als de vorige, mislukte poging: zelfde sleutel. Ander bedrag: nieuwe poging.
+            if (!attempt || attempt.amount !== c) attempt = { key: GIFT.newIdempotencyKey(), amount: c };
+            step = 'confirm'; msg = ''; render();
+          });
+          sync();
+          if (!o.noFocus) setTimeout(() => { try { inp.focus(); } catch (_) {} }, 30);
+        }
+        box.querySelectorAll('[data-gr-close]').forEach(b => b.addEventListener('click', () => { if (!busy && o.onClose) o.onClose(); }));
+        const back = box.querySelector('#grBack');
+        if (back) back.addEventListener('click', () => { if (!busy) { step = 'form'; msg = ''; render(); } });
+        const conf = box.querySelector('#grConfirm');
+        if (conf) conf.addEventListener('click', submit);
+      }
+      async function submit() {
+        if (busy || !attempt) return;
+        busy = true; msg = ''; render();
+        try {
+          const data = await gcFetch('/api/stamp/gift-cards/redeem', { method: 'POST', body: JSON.stringify({
+            card_id: gc.card_id || activeCardId(), gift_card_id: gc.id, amount_cents: attempt.amount, idempotency_key: attempt.key }) });
+          done = GIFT.redeemResult(data, attempt.amount, null);
+          if (data.gift_card) gc = Object.assign(gc, data.gift_card);
+          else if (Number.isInteger(done.balance_after_cents)) gc.balance_cents = done.balance_after_cents;
+          attempt = null; step = 'done';
+          if (o.onRedeemed) o.onRedeemed(gc, done);
+        } catch (err) {
+          const code = err && err.code;
+          if (code === 'unauthorized') return;
+          if (isNetworkError(err)) msg = 'Geen verbinding. Er is niet dubbel afgeschreven: probeer het opnieuw.';
+          else if (code === 'insufficient_balance' && err.data && Number.isInteger(err.data.balance_cents)) {
+            gc.balance_cents = err.data.balance_cents; attempt = null; step = 'form'; msg = err.message;
+          } else if (code === 'gift_card_blocked' || code === 'gift_card_expired' || code === 'gift_card_empty') {
+            can = false; blockedMsg = err.message; attempt = null; step = 'form';
+            if (code === 'gift_card_blocked') gc.status = 'blocked';
+            if (code === 'gift_card_empty') gc.balance_cents = 0;
+            if (code === 'gift_card_expired') gc.status = 'expired';
+          } else { attempt = null; step = 'form'; msg = gcErrText(err); }
+        } finally {
+          busy = false; render();
+        }
+      }
+      render();
+    }
 
     // ---- Klanten ----
     let customersLoaded = false;
@@ -8130,7 +8497,7 @@
           <div class="switch-row">
             <span class="switch-tx">
               <strong>Cadeaubon-scanner voor uw medewerkers</strong>
-              <small>Staat dit aan, dan zien uw medewerkers in de scanapp onder de stempelscanner een blok “Cadeaubon scannen” om bonnen op te zoeken en af te schrijven.</small>
+              <small>Staat dit aan, dan staat bovenaan de scanner (scanapp en Geef Stempel) de keuze Stempelen of Cadeaubon, om bonnen op te zoeken en af te schrijven.</small>
             </span>
             <input type="checkbox" class="switch" id="gcScannerSwitch" disabled aria-label="Cadeaubon-scanner voor uw medewerkers" />
           </div>
@@ -8274,8 +8641,8 @@
         const on = GIFT.scannerEnabledFrom(data);
         sw.checked = on;
         gcScannerNote(on
-          ? 'Aan. Uw medewerkers zien vanaf nu een blok “Cadeaubon scannen” onder de stempelscanner.'
-          : 'Uit. De cadeaubon-scanner is verborgen voor uw medewerkers.', 'ok');
+          ? 'Aan. Bovenaan de scanner staat vanaf nu de keuze Stempelen of Cadeaubon.'
+          : 'Uit. De scanner toont alleen nog Stempelen.', 'ok');
       } catch (err) {
         sw.checked = !want;                               // terug naar wat de server nog heeft
         if (err && GIFT.isPlanLock(err.code)) { renderGiftLock(); return; }
