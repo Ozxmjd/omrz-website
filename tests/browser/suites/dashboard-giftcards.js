@@ -148,22 +148,9 @@ module.exports = async function run(env) {
   check('3. already_reversed → Nederlandse melding', true);
   await p.click('#modalClose');
 
-  // ===== 4. Rapport =====
-  await p.click('[data-gc-view="report"]'); await p.waitForSelector('#gcReportBox .stat-grid');
-  const now = new Date(); const first = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
-  check('4. Standaard deze maand', (await p.inputValue('#gcRepFrom')) === first && (await p.inputValue('#gcRepTo')) === now.toISOString().slice(0, 10) || (await p.inputValue('#gcRepFrom')) === first, await p.inputValue('#gcRepFrom') + ' t/m ' + await p.inputValue('#gcRepTo'));
-  const rep = await txt(p, '#gcReportBox');
-  check('4. Vijf totaalkaarten', ['Verkocht', 'Ingewisseld', 'Teruggedraaid', 'Netto ingewisseld', 'Openstaand'].every(w => rep.includes(w)));
-  check('4. Dagtabel + uitleg voor boekhouder', (await p.$$('#gcReportBox tbody tr')).length >= 1 && rep.includes('Verkocht en ingewisseld staan apart, handig voor uw boekhouder.'));
-  check('4. Vestigingsfilter (2 vestigingen)', await vis(p, '#gcRepLoc'));
-  await p.screenshot({ path: OUT + '/' + 'gcd-report-1440.png', fullPage: true });
-  const reqP = p.waitForRequest(r => r.url().includes('format=csv'));
-  const dlP = p.waitForEvent('download');
-  await p.click('[data-gc-csv]');
-  const [req, dl] = await Promise.all([reqP, dlP]);
-  check('4. Download CSV met Authorization-header en juiste bestandsnaam', /Bearer tok-pp/.test(req.headers()['authorization'] || '') && /^cadeaubonnen-.*\.csv$/.test(dl.suggestedFilename()), dl.suggestedFilename());
-  await p.evaluate(() => { document.getElementById('gcRepFrom').value = '2026-12-01'; document.getElementById('gcRepFrom').dispatchEvent(new Event('change')); });
-  check('4. Van na Tot → melding', /geldig datumbereik/.test(await txt(p, '#gcReportBox')));
+  // ===== 4. Rapport (uitgebreid in suites/dashboard-report.js) =====
+  await p.click('[data-gc-view="report"]'); await p.waitForSelector('#gcRepStats');
+  check('4. Rapport laadt met kaarten (standaard 30 dagen)', /Uitgegeven/.test(await txt(p, '#gcRepStats')) && (await p.getAttribute('[data-gc-preset="30d"]', 'aria-selected')) === 'true');
   await ctx.close();
 
   // ===== 5. Manager: pagina Cadeaubonnen bestaat niet =====
@@ -563,7 +550,7 @@ module.exports = async function run(env) {
     check(`8. ${vp.width}px succesblok: geen horizontale scroll`, await noH(p));
     await p.screenshot({ path: OUT + '/' + `gcd-success-${vp.width}.png`, fullPage: true });
     await p.click('[data-gc-close]');
-    await p.click('[data-gc-view="report"]'); await p.waitForSelector('#gcReportBox .stat-grid');
+    await p.click('[data-gc-view="report"]'); await p.waitForSelector('#gcRepStats');
     check(`8. ${vp.width}px rapport: geen horizontale scroll`, await noH(p));
     await p.screenshot({ path: OUT + '/' + `gcd-report-${vp.width}.png`, fullPage: true });
     await ctx.close();

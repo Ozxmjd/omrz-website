@@ -401,9 +401,71 @@
     return (data && typeof data.error === 'string' && data.error) || 'Er ging iets mis. Probeer het opnieuw.';
   }
 
+  // ===== Rapport (GET /api/stamp/gift-cards/report, backend de7021f) =====
+  const REPORT_PRESETS = ['7d', '30d', '90d', 'ytd', 'custom'];
+  // De querystring: preset, of bij 'custom' from/to (YYYY-MM-DD). expiring_days alleen als gezet.
+  function reportQuery(cardId, sel) {
+    const s = sel || {};
+    const qs = new URLSearchParams({ card_id: cardId });
+    const preset = REPORT_PRESETS.includes(s.preset) ? s.preset : '30d';
+    qs.set('preset', preset);
+    if (preset === 'custom') {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s.from || '')) qs.set('from', s.from);
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s.to || '')) qs.set('to', s.to);
+    }
+    if (Number.isInteger(s.expiring_days) && s.expiring_days > 0) qs.set('expiring_days', String(s.expiring_days));
+    return qs.toString();
+  }
+  // by_day bevat alleen dagen waarop iets gebeurde; de grafiek wil elke dag van de periode.
+  // Rekent op datumsleutels (UTC-middernacht), dus zomer- en wintertijd spelen geen rol.
+  const DAY_MS = 86400000;
+  function dayKeyToMs(k) { return /^\d{4}-\d{2}-\d{2}$/.test(String(k || '')) ? Date.parse(k + 'T00:00:00Z') : NaN; }
+  function fillDays(from, to, byDay) {
+    const a = dayKeyToMs(from), b = dayKeyToMs(to);
+    if (isNaN(a) || isNaN(b) || b < a) return [];
+    const map = new Map((Array.isArray(byDay) ? byDay : []).map(d => [d.day, d]));
+    const out = [];
+    for (let t = a; t <= b && out.length < 800; t += DAY_MS) {
+      const day = new Date(t).toISOString().slice(0, 10);
+      const d = map.get(day) || {};
+      out.push({ day, issued_cents: d.issued_cents || 0, issued_count: d.issued_count || 0,
+        redeemed_cents: d.redeemed_cents || 0, redeemed_count: d.redeemed_count || 0 });
+    }
+    return out;
+  }
+  // Naam per vestiging-rij. Afschrijvingen zonder vestiging deed de eigenaar zelf.
+  function locationLabel(row) {
+    if (!row || !row.location_id) return 'Zonder vestiging (eigenaar)';
+    return row.location_name || 'Verwijderde vestiging';
+  }
+  // Is er iets om te laten zien? Geen enkele bon = de "Zo werkt het"-staat, niet een leeg rapport.
+  function reportHasCards(data) {
+    const st = (data && Array.isArray(data.by_status)) ? data.by_status : [];
+    return st.some(r => (r.count || 0) > 0);
+  }
+  // De lijst "laatste transacties" komt later in het rapport. Tot de backend de veldnaam
+  // bevestigt staat hij hier op één plek; zonder het veld (of als het geen lijst is) geen sectie.
+  const REPORT_TX_FIELD = 'recent_transactions';
+  function reportRecentTx(data) {
+    const v = data && data[REPORT_TX_FIELD];
+    return Array.isArray(v) ? v : null;
+  }
+  // CSV voor de boekhouder: puntkomma en komma-decimalen (Nederlandse Excel), één regel per dag
+  // van de periode plus een totaalregel. Bewust zonder btw-kolommen.
+  function csvEuro(c) { const n = Number(c) || 0; return (n < 0 ? '-' : '') + (Math.abs(n) / 100).toFixed(2).replace('.', ','); }
+  function reportCsv(data) {
+    const d = data || {}, r = d.range || {}, t = d.totals || {};
+    const days = fillDays(r.from, r.to, d.by_day);
+    const lines = [['Datum', 'Uitgegeven (EUR)', 'Aantal uitgegeven', 'Afgeschreven (EUR)', 'Aantal afschrijvingen']];
+    days.forEach(x => lines.push([x.day, csvEuro(x.issued_cents), x.issued_count, csvEuro(x.redeemed_cents), x.redeemed_count]));
+    lines.push(['Totaal', csvEuro(t.issued_cents), t.issued_count || 0, csvEuro(t.redeemed_cents), t.redeemed_count || 0]);
+    return '﻿' + lines.map(l => l.join(';')).join('\r\n') + '\r\n';
+  }
+
   const api = { formatCents, parseEuroToCents, normalizeShortCode, classifyScan, resolveOutcome, SCAN_MODE_KEY, readScanMode, saveScanMode, GIFT_QR_PREFIX, giftShareUrl, giftShortCodeDisplay, redeemResult, newIdempotencyKey, endOfDayAmsterdamISO,
     giftStatus, STATUS_LABELS, isPlanLock, scannerEnabledFrom, referenceFrom, scannerSettingsBody, errorMessage, isNotLive, MESSAGES, NOT_LIVE_MESSAGE,
     DELIVERY_MODES, validateGiftDelivery, giftCreateBody, resendBody, mailStateOf, mailOutcome, mailAddress,
+    REPORT_PRESETS, reportQuery, fillDays, locationLabel, reportHasCards, REPORT_TX_FIELD, reportRecentTx, reportCsv,
     DESIGN_FIELDS, NO_INHERIT_FIELDS, designBody, validateDesignValue, isHexColor, isHttpsUrl, normalizeColor, designValue };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else root.OMRZGift = api;

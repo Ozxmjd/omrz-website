@@ -1037,6 +1037,80 @@
     .gc-report-filters label { display: block; font-size: 12px; font-weight: 500; color: var(--pearl); margin-bottom: 6px; }
     .gc-report-filters .btn { margin-left: auto; }
     .gc-explain { font-size: 12.5px; color: var(--muted); margin-top: 10px; }
+    /* ---- Rapport (fase C) ---- */
+    .gc-rep-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+    .gc-rep-bar .seg button { min-height: 36px; }
+    .gc-rep-bar [data-gc-csv] { margin-left: auto; }
+    .gc-rep-custom { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
+    .gc-rep-custom[hidden] { display: none; }
+    .gc-rep-custom label { display: block; font-size: 12px; font-weight: 500; color: var(--pearl); margin-bottom: 6px; }
+    .gc-rep-range { font-size: 13px; color: var(--muted); margin: 0 0 18px; font-variant-numeric: tabular-nums; min-height: 18px; }
+    .gc-rep-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); margin-bottom: 16px; }
+    .gc-rep-stats .stat:nth-child(5) { --c: #7c6ff5; --c-soft: rgba(124,111,245,.14); }
+    .gc-rep-stats .stat:nth-child(6) { --c: #eab68a; --c-soft: rgba(251,146,60,.14); }
+    .gc-rep-stats .s-val { font-size: 28px; font-variant-numeric: tabular-nums; }
+    .gc-rep-stats .s-val.is-text { font-size: 17px; letter-spacing: -.01em; line-height: 1.3; }
+    .gc-life { display: inline-flex; align-items: center; gap: 4px; margin-left: auto; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 500;
+      color: var(--muted); border: 1px solid var(--border-strong); cursor: help; white-space: nowrap; }
+    .gc-rep-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 16px; margin-bottom: 16px; align-items: start; }
+    .gc-rep-card { padding: 20px 22px; }
+    .gc-rep-card h3 { font-size: 14.5px; font-weight: 600; color: var(--text-strong); letter-spacing: -.01em; }
+    .gc-rep-card .gc-rep-sub { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+    .gc-rep-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+    .gc-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+    .gc-legend i { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+    .gc-legend .lg-issued { background: #6366f1; } .gc-legend .lg-redeemed { background: #34d399; }
+    .gc-donut-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .gc-donut { width: 156px; height: 156px; }
+    .gc-donut circle { fill: none; stroke-width: 16; }
+    .gc-donut .dn-track { stroke: rgba(var(--ink), .06); }
+    .dn-active { stroke: #4ade80; } .dn-empty { stroke: #8b8b95; } .dn-blocked { stroke: #f87171; } .dn-expired { stroke: #fb923c; }
+    .gc-donut text { fill: var(--text-strong); font-size: 26px; font-weight: 600; text-anchor: middle; font-family: var(--font); }
+    .gc-donut text.dn-sub { fill: var(--muted); font-size: 11px; font-weight: 500; }
+    .gc-status-list { width: 100%; list-style: none; margin: 0; padding: 0; }
+    .gc-status-list li { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .gc-status-list li:last-child { border-bottom: 0; }
+    .gc-status-list .dot { width: 9px; height: 9px; border-radius: 50%; }
+    .dot.dn-active { background: #4ade80; } .dot.dn-empty { background: #8b8b95; } .dot.dn-blocked { background: #f87171; } .dot.dn-expired { background: #fb923c; }
+    .gc-status-list .lbl { color: var(--pearl); }
+    .gc-status-list .n { color: var(--muted); font-variant-numeric: tabular-nums; }
+    .gc-status-list .eur { color: var(--text-strong); font-weight: 500; font-variant-numeric: tabular-nums; min-width: 84px; text-align: right; }
+    .gc-chart { width: 100%; height: auto; display: block; overflow: visible; }
+    .gc-chart .gl { stroke: rgba(var(--ink), .07); stroke-width: 1; }
+    .gc-chart .ax { fill: var(--muted); font-size: 10.5px; font-family: var(--font); font-variant-numeric: tabular-nums; }
+    .gc-chart .b-issued { fill: #6366f1; } .gc-chart .b-redeemed { fill: #34d399; }
+    .gc-chart .l-issued { stroke: #6366f1; } .gc-chart .l-redeemed { stroke: #34d399; }
+    .gc-chart .a-issued { fill: rgba(99,102,241,.12); } .gc-chart .a-redeemed { fill: rgba(52,211,153,.10); }
+    .gc-chart .hit { fill: transparent; } .gc-chart .hit:hover { fill: rgba(var(--ink), .05); }
+    .gc-chart-empty { display: grid; place-items: center; min-height: 180px; font-size: 13px; color: var(--muted); text-align: center; border: 1px dashed var(--border-strong); border-radius: 12px; }
+    .gc-loc-bar { height: 6px; border-radius: 99px; background: rgba(var(--ink), .07); min-width: 80px; overflow: hidden; }
+    .gc-loc-bar i { display: block; height: 100%; border-radius: inherit; background: #34d399; }
+    .gc-rep-note { font-size: 12.5px; color: var(--muted); margin-top: 6px; line-height: 1.55; }
+    .gc-rep-section { margin-bottom: 16px; }
+    .gc-skel { height: 104px; border-radius: 16px; background: rgba(var(--ink), .04); animation: ovPulse 1.2s var(--ease) infinite; }
+    @media (prefers-reduced-motion: reduce) { .gc-skel { animation: none; } }
+    @media (max-width: 980px) {
+      .gc-rep-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      #gcRepLocs .gc-table th, #gcRepLocs .gc-table td, #gcRepRecent .gc-table td { white-space: normal; }
+      #gcRepRecent .gc-table th:nth-child(4), #gcRepRecent .gc-table td:nth-child(4),
+      #gcRepRecent .gc-table th:nth-child(6), #gcRepRecent .gc-table td:nth-child(6) { display: none; }
+      .gc-rep-grid { grid-template-columns: minmax(0, 1fr); }
+    }
+    @media (max-width: 560px) {
+      .gc-rep-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+      .gc-rep-stats .stat { padding: 16px 14px; }
+      .gc-rep-stats .s-top { flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+      .gc-rep-stats .gc-life { margin-left: 0; }
+      .gc-rep-stats .s-val { font-size: 21px; }
+      .gc-rep-stats .s-val.is-text { font-size: 14px; }
+      .gc-rep-bar .seg { width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+      .gc-rep-bar .seg button { justify-content: center; }
+      .gc-loc-share { display: none; }
+      #gcRepRecent .gc-table th, #gcRepRecent .gc-table td { padding: 8px 5px; font-size: 12px; }
+      #gcRepRecent .gc-table td.gc-when { min-width: 0; }
+      .gc-rep-bar [data-gc-csv] { margin-left: 0; width: 100%; justify-content: center; }
+      .gc-rep-card { padding: 18px 16px; }
+    }
     @media (max-width: 560px) {
       .gc-row { flex-wrap: wrap; }
       .gc-main { flex-basis: calc(100% - 52px); }
@@ -8399,7 +8473,8 @@
     let gcListSeq = 0;
     let gcSearchTimer = null;
     let gcReportSeq = 0;
-    let gcReport = { from: null, to: null, location: '' };
+    let gcReport = { preset: '30d', from: '', to: '' };   // to/from alleen bij 'Aangepast'
+    let gcReportData = null;                                  // laatste antwoord, voor de CSV
     let gcLastTotals = null;           // laatst opgehaalde totals (openstaand tegoed) van de lijst
 
     // Premium Plus volgens het pakket zelf, met dezelfde hulpfunctie als de andere Premium
@@ -8485,13 +8560,6 @@
     }
 
     function renderGiftShell() {
-      const today = new Date();
-      if (!gcReport.from) { gcReport.from = gcDateKey(new Date(today.getFullYear(), today.getMonth(), 1)); gcReport.to = gcDateKey(today); }
-      const locOpts = locations.length > 1
-        ? `<div><label for="gcRepLoc">Vestiging</label><select class="gc-select" id="gcRepLoc">
-            <option value="">Alle vestigingen</option>
-            ${locations.map(l => `<option value="${escapeHtml(l.id)}">${escapeHtml(l.name)}</option>`).join('')}
-          </select></div>` : '';
       document.getElementById('gcWrap').innerHTML = `
         <div class="block glass gc-setting">
           <div class="switch-row">
@@ -8542,20 +8610,24 @@
         </div>
 
         <div id="gcReportView" hidden>
-          <div class="block glass gc-report-filters">
-            <div><label for="gcRepFrom">Van</label><input type="date" class="gc-date" id="gcRepFrom" value="${gcReport.from}" /></div>
-            <div><label for="gcRepTo">Tot en met</label><input type="date" class="gc-date" id="gcRepTo" value="${gcReport.to}" /></div>
-            ${locOpts}
-            <button type="button" class="btn btn-ghost" data-gc-csv>Download CSV</button>
+          <div class="gc-rep-bar">
+            <div class="seg" role="tablist" aria-label="Periode">
+              ${[['7d', '7 dagen'], ['30d', '30 dagen'], ['90d', '90 dagen'], ['ytd', 'Dit jaar'], ['custom', 'Aangepast']].map(([k, l]) =>
+                `<button type="button" role="tab" data-gc-preset="${k}">${l}</button>`).join('')}
+            </div>
+            <div class="gc-rep-custom" id="gcRepCustom" hidden>
+              <div><label for="gcRepFrom">Van</label><input type="date" class="gc-date" id="gcRepFrom" /></div>
+              <div><label for="gcRepTo">Tot en met</label><input type="date" class="gc-date" id="gcRepTo" /></div>
+            </div>
+            <button type="button" class="btn btn-ghost" data-gc-csv disabled>CSV exporteren</button>
           </div>
+          <p class="gc-rep-range" id="gcRepRange" aria-live="polite"></p>
           <div id="gcReportBox"></div>
         </div>
 
         <div id="gcDesignView" hidden>
           <div id="gcDesignBox"></div>
         </div>`;
-      const sel = document.getElementById('gcRepLoc');
-      if (sel) sel.value = gcReport.location;
       document.getElementById('gcScannerSwitch').addEventListener('change', (e) => toggleGiftScanner(e.target));
       loadGiftScannerSetting();
       probeGiftDesign();
@@ -8564,15 +8636,19 @@
         gcSearchTimer = setTimeout(() => loadGiftList(true), 250);
       });
       document.getElementById('gcStatusFilter').addEventListener('change', () => loadGiftList(true));
-      ['gcRepFrom', 'gcRepTo', 'gcRepLoc'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('change', () => {
-          gcReport.from = document.getElementById('gcRepFrom').value;
-          gcReport.to = document.getElementById('gcRepTo').value;
-          gcReport.location = sel ? sel.value : '';
-          loadGiftReport();
-        });
-      });
+      document.querySelectorAll('[data-gc-preset]').forEach(btn => btn.addEventListener('click', () => {
+        gcReport.preset = btn.dataset.gcPreset;
+        if (gcReport.preset === 'custom' && !gcReport.from) {
+          const t = new Date();
+          gcReport.from = gcDateKey(new Date(t.getFullYear(), t.getMonth(), 1)); gcReport.to = gcDateKey(t);
+        }
+        loadGiftReport();
+      }));
+      ['gcRepFrom', 'gcRepTo'].forEach(id => document.getElementById(id).addEventListener('change', () => {
+        gcReport.from = document.getElementById('gcRepFrom').value;
+        gcReport.to = document.getElementById('gcRepTo').value;
+        loadGiftReport();
+      }));
     }
 
     function setGiftView(view) {
@@ -9264,71 +9340,242 @@
       }
     }
 
-    // ---- Rapport ----
-    function gcReportQuery(format) {
-      const qs = new URLSearchParams({ card_id: cardId, from: gcReport.from, to: gcReport.to });
-      if (gcReport.location) qs.set('location_id', gcReport.location);
-      if (format) qs.set('format', format);
-      return qs.toString();
+    // ---- Rapport (GET /gift-cards/report, backend de7021f) ----
+    // Periode, kaarten, verdeling per status, verloop per dag, per vestiging en (zodra de backend
+    // hem meestuurt) de laatste transacties. Openstaand, actieve bonnen en binnenkort verlopen gaan
+    // over de hele looptijd, niet over de periode: dat staat er ook bij.
+    const GC_STATUS_ORDER = ['active', 'empty', 'blocked', 'expired'];
+    const GC_LIFE_TIP = 'Over alle bonnen, ongeacht de gekozen periode';
+    const gcShortDate = k => { const d = new Date(k + 'T12:00:00Z'); return isNaN(d) ? '' : d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', timeZone: 'UTC' }); };
+    const gcLongDate = k => { const d = new Date(k + 'T12:00:00Z'); return isNaN(d) ? '' : d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }); };
+    const gcPlural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+
+    function syncReportBar() {
+      document.querySelectorAll('[data-gc-preset]').forEach(b => {
+        const on = b.dataset.gcPreset === gcReport.preset;
+        b.classList.toggle('active', on); b.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      const custom = gcReport.preset === 'custom';
+      document.getElementById('gcRepCustom').hidden = !custom;
+      if (custom) { document.getElementById('gcRepFrom').value = gcReport.from || ''; document.getElementById('gcRepTo').value = gcReport.to || ''; }
+    }
+    function gcReportSkeleton() {
+      return `<div class="stat-grid gc-rep-stats">${'<div class="gc-skel"></div>'.repeat(6)}</div>
+        <div class="gc-rep-grid"><div class="gc-skel" style="height:300px"></div><div class="gc-skel" style="height:300px"></div></div>`;
     }
     async function loadGiftReport() {
       const box = document.getElementById('gcReportBox');
       if (!box) return;
-      if (!gcReport.from || !gcReport.to || gcReport.from > gcReport.to) {
-        box.innerHTML = '<div class="gc-banner error">Kies een geldig datumbereik: "Van" mag niet na "Tot en met" liggen.</div>';
+      syncReportBar();
+      const csv = document.querySelector('[data-gc-csv]');
+      const range = document.getElementById('gcRepRange');
+      if (gcReport.preset === 'custom' && (!gcReport.from || !gcReport.to)) {
+        range.textContent = '';
+        box.innerHTML = '<div class="gc-banner">Kies een begin- en einddatum.</div>';
+        if (csv) csv.disabled = true;
         return;
       }
       const seq = ++gcReportSeq;
-      box.innerHTML = '<div class="block glass"><div class="loader"><span class="spinner"></span> Rapport laden…</div></div>';
+      if (csv) csv.disabled = true;
+      box.innerHTML = gcReportSkeleton();
       try {
-        const data = await gcFetch('/api/stamp/gift-cards/report?' + gcReportQuery('json'));
+        const data = await gcFetch('/api/stamp/gift-cards/report?' + GIFT.reportQuery(cardId, gcReport));
         if (seq !== gcReportSeq) return;
-        const t = data.totals || {};
-        const days = Array.isArray(data.days) ? data.days : [];
-        const card5 = (lbl, v, sub) => `<div class="stat glass"><div class="s-top">${lbl}</div><div class="s-val">${GIFT.formatCents(v)}</div><div class="s-sub">${sub}</div></div>`;
-        box.innerHTML = `<div class="stat-grid">
-            ${card5('Verkocht', t.issued_cents, 'Nieuwe bonnen in deze periode')}
-            ${card5('Ingewisseld', t.redeemed_cents, 'Afgeschreven aan de kassa')}
-            ${card5('Teruggedraaid', t.reversed_cents, 'Gecorrigeerde afschrijvingen')}
-            ${card5('Netto ingewisseld', t.net_redeemed_cents, 'Ingewisseld min teruggedraaid')}
-            ${card5('Openstaand', t.outstanding_cents, 'Nog te besteden saldo')}
-          </div>
-          ${days.length ? `<div class="gc-table-wrap"><table class="gc-table">
-              <thead><tr><th>Datum</th><th class="num">Verkocht</th><th class="num">Ingewisseld</th><th class="num">Netto ingewisseld</th></tr></thead>
-              <tbody>${days.map(d => `<tr><td>${escapeHtml(gcDate(d.date))}</td><td class="num">${GIFT.formatCents(d.issued_cents)}</td><td class="num">${GIFT.formatCents(d.redeemed_cents)}</td><td class="num">${GIFT.formatCents(d.net_redeemed_cents)}</td></tr>`).join('')}</tbody>
-            </table></div>` : '<div class="block glass"><div class="empty-state"><span class="es-ic">' + GC_GIFT_SVG + '</span><h4>Geen bewegingen</h4><p>In deze periode zijn er geen cadeaubonnen verkocht of ingewisseld.</p></div></div>'}
-          <p class="gc-explain">Verkocht en ingewisseld staan apart, handig voor uw boekhouder.</p>`;
+        gcReportData = data;
+        const r = data.range || {};
+        // De backend zet een omgekeerde periode zelf recht; laat de velden dat ook zien.
+        if (gcReport.preset === 'custom' && r.from && r.to) { gcReport.from = r.from; gcReport.to = r.to; syncReportBar(); }
+        range.textContent = r.from && r.to
+          ? `${gcLongDate(r.from)} – ${gcLongDate(r.to)} · ${gcPlural(r.days || GIFT.fillDays(r.from, r.to).length, 'dag', 'dagen')}`
+          : '';
+        renderGiftReport(box, data);
+        if (csv) csv.disabled = !(r.from && r.to);
       } catch (err) {
         if (seq !== gcReportSeq || gcPageError(err)) return;
-        box.innerHTML = `<div class="gc-banner error">${escapeHtml(gcErrText(err))}<button type="button" class="btn btn-ghost" data-gc-retry>Opnieuw proberen</button></div>`;
+        range.textContent = '';
+        box.innerHTML = `<div class="gc-banner error">Rapport niet geladen: ${escapeHtml(gcErrText(err))}<button type="button" class="btn btn-ghost" data-gc-retry>Opnieuw proberen</button></div>`;
       }
     }
 
-    // CSV met de inlog-token ophalen (een gewone link kan geen Authorization-header meesturen).
-    async function downloadGiftCsv(btn) {
-      if (!gcReport.from || !gcReport.to || gcReport.from > gcReport.to) return;
-      if (btn.disabled) return;
-      const label = btn.textContent;
-      btn.disabled = true; btn.textContent = 'Downloaden…';
-      try {
-        const res = await fetch(API_BASE + '/api/stamp/gift-cards/report?' + gcReportQuery('csv'), { headers: authHeaders() });
-        if (res.status === 401) { logoutToLogin(); return; }
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          throw new Error(GIFT.isNotLive(res.status, data) ? GIFT.NOT_LIVE_MESSAGE : GIFT.errorMessage(data.code, data));
-        }
-        const blob = await res.blob();
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `cadeaubonnen-${gcReport.from}-tm-${gcReport.to}.csv`;
-        document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-      } catch (err) {
-        const box = document.getElementById('gcReportBox');
-        if (box) box.insertAdjacentHTML('afterbegin', `<div class="gc-banner error" style="margin-bottom:14px">CSV downloaden mislukt: ${escapeHtml(gcErrText(err))}</div>`);
-      } finally {
-        btn.disabled = false; btn.textContent = label;
+    function renderGiftReport(box, data) {
+      const t = data.totals || {};
+      if (!GIFT.reportHasCards(data)) {
+        box.innerHTML = `<div class="block glass"><div class="empty-state">
+            <span class="es-ic">${GC_GIFT_SVG}</span>
+            <h4>Nog geen cadeaubonnen</h4>
+            <p>Zodra u een cadeaubon uitgeeft, ziet u hier wat er is uitgegeven, afgeschreven en nog openstaat.</p>
+            <button type="button" class="btn btn-primary" data-gc-new>Nieuwe cadeaubon</button>
+          </div></div>`;
+        return;
       }
+      const life = `<span class="gc-life" title="${GC_LIFE_TIP}" aria-label="${GC_LIFE_TIP}">Alle bonnen *</span>`;
+      const card = (lbl, val, sub, opts) => `<div class="stat glass">
+          <div class="s-top">${lbl}${opts && opts.life ? life : ''}</div>
+          <div class="s-val${opts && opts.text ? ' is-text' : ''}">${val}</div>
+          <div class="s-sub">${sub}</div>
+        </div>`;
+      const rev = t.reversed_cents > 0 ? ` · ${GIFT.formatCents(t.reversed_cents)} teruggedraaid` : '';
+      const stats = `<div class="stat-grid gc-rep-stats" id="gcRepStats">
+          ${card('Uitgegeven', GIFT.formatCents(t.issued_cents), gcPlural(t.issued_count || 0, 'bon', 'bonnen') + ' in deze periode')}
+          ${card('Afgeschreven', GIFT.formatCents(t.redeemed_cents), gcPlural(t.redeemed_count || 0, 'afschrijving', 'afschrijvingen') + rev)}
+          ${card('Openstaand', GIFT.formatCents(t.outstanding_cents), 'Nog te besteden op actieve bonnen', { life: true })}
+          ${card('Actieve bonnen', String(t.outstanding_count || 0), 'Met saldo, niet verlopen of geblokkeerd', { life: true })}
+          ${t.issued_count ? card('Gemiddelde bonwaarde', GIFT.formatCents(t.average_issued_cents), 'Per uitgegeven bon in deze periode')
+            : card('Gemiddelde bonwaarde', 'Geen uitgifte in deze periode', 'Kies een langere periode om dit te zien', { text: true })}
+          ${card('Binnenkort verlopen', GIFT.formatCents(t.expiring_soon_cents), `${gcPlural(t.expiring_soon_count || 0, 'bon', 'bonnen')} binnen ${t.expiring_soon_days || 30} dagen`, { life: true })}
+        </div>`;
+      const recent = GIFT.reportRecentTx(data);
+      box.innerHTML = stats + `
+        <div class="gc-rep-grid">
+          <div class="block glass gc-rep-card" id="gcRepStatus">
+            <div class="gc-rep-head"><div><h3>Bonnen per status</h3><div class="gc-rep-sub">Alle bonnen, nu *</div></div></div>
+            ${gcDonut(data.by_status)}
+          </div>
+          <div class="block glass gc-rep-card" id="gcRepDays">
+            <div class="gc-rep-head">
+              <div><h3>Per dag</h3><div class="gc-rep-sub">Uitgegeven en afgeschreven in deze periode</div></div>
+              <div class="gc-legend"><span><i class="lg-issued"></i>Uitgegeven</span><span><i class="lg-redeemed"></i>Afgeschreven</span></div>
+            </div>
+            <div id="gcRepChart">${gcDayChart(GIFT.fillDays((data.range || {}).from, (data.range || {}).to, data.by_day), gcChartWidth(box))}</div>
+          </div>
+        </div>
+        <div class="block glass gc-rep-card gc-rep-section" id="gcRepLocs">
+          <div class="gc-rep-head"><div><h3>Afschrijvingen per vestiging</h3><div class="gc-rep-sub">Waar bonnen aan de kassa zijn ingewisseld. Uitgifte hoort bij de zaak, niet bij een vestiging.</div></div></div>
+          ${gcLocTable(data.by_location)}
+        </div>
+        ${recent ? `<div class="block glass gc-rep-card gc-rep-section" id="gcRepRecent">
+          <div class="gc-rep-head"><div><h3>Laatste transacties</h3><div class="gc-rep-sub">De meest recente bewegingen op uw cadeaubonnen</div></div></div>
+          ${gcRecentTable(recent)}
+        </div>` : ''}
+        <p class="gc-rep-note">* Openstaand, actieve bonnen, binnenkort verlopen en de verdeling per status gaan over alle bonnen, niet alleen over de gekozen periode.${t.adjusted_count ? ` Uitgegeven en afgeschreven tellen correcties niet mee; in deze periode ${t.adjusted_count === 1 ? 'is er 1 correctie' : 'zijn er ' + t.adjusted_count + ' correcties'} van samen ${GIFT.formatCents(t.adjusted_cents)}.` : ''}</p>`;
+    }
+
+    // Donut: elke status een boog, in de volgorde van de lijst; het midden telt alle bonnen.
+    function gcDonut(byStatus) {
+      const rows = GC_STATUS_ORDER.map(st => (Array.isArray(byStatus) ? byStatus : []).find(r => r.status === st) || { status: st, count: 0, balance_cents: 0 });
+      const total = rows.reduce((n, r) => n + (r.count || 0), 0);
+      const R = 62, C = 2 * Math.PI * R;
+      let off = 0;
+      const arcs = rows.filter(r => r.count > 0).map(r => {
+        const len = r.count / total * C;
+        // Kleine tussenruimte tussen bogen, behalve als er maar één status is.
+        const gap = rows.filter(x => x.count > 0).length > 1 ? Math.min(3, len / 3) : 0;
+        const el = `<circle class="dn-${r.status}" r="${R}" cx="80" cy="80" stroke-dasharray="${(len - gap).toFixed(2)} ${(C - len + gap).toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 80 80)"><title>${escapeHtml(GIFT.STATUS_LABELS[r.status])}: ${r.count}</title></circle>`;
+        off += len;
+        return el;
+      }).join('');
+      return `<div class="gc-donut-wrap">
+          <svg class="gc-donut" viewBox="0 0 160 160" role="img" aria-label="${rows.map(r => GIFT.STATUS_LABELS[r.status] + ' ' + r.count).join(', ')}">
+            <circle class="dn-track" r="${R}" cx="80" cy="80"></circle>${arcs}
+            <text x="80" y="84">${total}</text><text class="dn-sub" x="80" y="102">${total === 1 ? 'bon' : 'bonnen'}</text>
+          </svg>
+          <ul class="gc-status-list">${rows.map(r => `<li data-status="${r.status}"><span class="dot dn-${r.status}"></span><span class="lbl">${escapeHtml(GIFT.STATUS_LABELS[r.status])}</span>
+            <span class="n">${r.count}</span><span class="eur">${GIFT.formatCents(r.balance_cents)}</span></li>`).join('')}</ul>
+        </div>`;
+    }
+
+    // Verloop per dag. Tot 120 dagen staafjes naast elkaar; daarboven (Dit jaar) twee lijnen, anders
+    // worden de staafjes dunner dan een pixel. Elke dag heeft een tooltip met bedragen en aantallen.
+    // De grafiek tekent op de echte breedte, zodat de aslabels op een telefoon even groot zijn als op een laptop.
+    function gcChartWidth(box) {
+      const w = box && box.clientWidth ? box.clientWidth : 900;
+      return Math.round(Math.max(300, Math.min(900, (w > 980 ? w * 2 / 3 : w) - 60)));
+    }
+    let gcChartResize = null;
+    window.addEventListener('resize', () => {
+      clearTimeout(gcChartResize);
+      gcChartResize = setTimeout(() => {
+        const el = document.getElementById('gcRepChart'), box = document.getElementById('gcReportBox'), d = gcReportData;
+        if (!el || !box || !d || !d.range) return;
+        el.innerHTML = gcDayChart(GIFT.fillDays(d.range.from, d.range.to, d.by_day), gcChartWidth(box));
+      }, 200);
+    });
+    function gcDayChart(days, width) {
+      if (!days.length) return '<div class="gc-chart-empty">Geen periode gekozen.</div>';
+      const max = Math.max(0, ...days.map(d => Math.max(d.issued_cents, d.redeemed_cents)));
+      if (max === 0) return '<div class="gc-chart-empty">Geen uitgifte of afschrijvingen in deze periode.</div>';
+      const W = width || 640, H = 220, L = 56, Rr = 8, T = 10, Bm = 26, iw = W - L - Rr, ih = H - T - Bm;
+      // Nette bovengrens: 1, 2, 2,5 of 5 maal een macht van tien.
+      const step = (() => { const raw = max / 3, p = Math.pow(10, Math.floor(Math.log10(raw))); return [1, 2, 2.5, 5, 10].map(m => m * p).find(v => v >= raw); })();
+      const top = step * Math.ceil(max / step);
+      const y = v => T + ih - v / top * ih;
+      const eur0 = c => '€ ' + Math.round(c / 100).toLocaleString('nl-NL');
+      let g = '';
+      for (let v = 0; v <= top + 1; v += step) g += `<line class="gl" x1="${L}" x2="${W - Rr}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}"/><text class="ax" x="${L - 8}" y="${(y(v) + 3.5).toFixed(1)}" text-anchor="end">${eur0(v)}</text>`;
+      const n = days.length, slot = iw / n;
+      const ticks = n <= 8 ? days.map((_, i) => i) : [0, Math.floor((n - 1) / 2), n - 1];
+      ticks.forEach(i => { g += `<text class="ax" x="${(L + slot * i + slot / 2).toFixed(1)}" y="${H - 8}" text-anchor="${i === 0 && n > 8 ? 'start' : i === n - 1 && n > 8 ? 'end' : 'middle'}">${escapeHtml(gcShortDate(days[i].day))}</text>`; });
+      const tip = d => `${gcLongDate(d.day)}: uitgegeven ${GIFT.formatCents(d.issued_cents)} (${d.issued_count}), afgeschreven ${GIFT.formatCents(d.redeemed_cents)} (${d.redeemed_count})`;
+      let marks = '';
+      if (n <= 120) {
+        const bw = Math.max(1.5, Math.min(18, slot * 0.36));
+        days.forEach((d, i) => {
+          const cx = L + slot * i + slot / 2;
+          const bar = (v, x, cls) => v > 0 ? `<rect class="${cls}" x="${x.toFixed(1)}" y="${y(v).toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(1, ih - (y(v) - T)).toFixed(1)}" rx="${Math.min(3, bw / 2).toFixed(1)}"/>` : '';
+          marks += `<g class="gc-day" data-day="${d.day}"><rect class="hit" x="${(L + slot * i).toFixed(1)}" y="${T}" width="${slot.toFixed(1)}" height="${ih}"/>`
+            + bar(d.issued_cents, cx - bw - 1, 'b-issued') + bar(d.redeemed_cents, cx + 1, 'b-redeemed') + `<title>${escapeHtml(tip(d))}</title></g>`;
+        });
+      } else {
+        const pts = key => days.map((d, i) => `${(L + slot * i + slot / 2).toFixed(1)},${y(d[key]).toFixed(1)}`);
+        const area = (key, cls) => `<polygon class="${cls}" points="${(L + slot / 2).toFixed(1)},${y(0).toFixed(1)} ${pts(key).join(' ')} ${(L + slot * (n - 1) + slot / 2).toFixed(1)},${y(0).toFixed(1)}"/>`;
+        marks = area('issued_cents', 'a-issued') + area('redeemed_cents', 'a-redeemed')
+          + `<polyline class="l-issued" fill="none" stroke-width="2" stroke-linejoin="round" points="${pts('issued_cents').join(' ')}"/>`
+          + `<polyline class="l-redeemed" fill="none" stroke-width="2" stroke-linejoin="round" points="${pts('redeemed_cents').join(' ')}"/>`
+          + days.map((d, i) => `<g class="gc-day" data-day="${d.day}"><rect class="hit" x="${(L + slot * i).toFixed(1)}" y="${T}" width="${slot.toFixed(1)}" height="${ih}"/><title>${escapeHtml(tip(d))}</title></g>`).join('');
+      }
+      return `<svg class="gc-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Uitgegeven en afgeschreven per dag">${g}${marks}</svg>`;
+    }
+
+    function gcLocTable(rows) {
+      const list = Array.isArray(rows) ? rows : [];
+      if (!list.length) return '<div class="gc-chart-empty" style="min-height:90px">Geen afschrijvingen in deze periode.</div>';
+      const max = Math.max(1, ...list.map(r => r.redeemed_cents || 0));
+      return `<div class="gc-table-wrap"><table class="gc-table">
+          <thead><tr><th>Vestiging</th><th class="num">Afgeschreven</th><th class="num">Aantal</th><th class="gc-loc-share" aria-label="Aandeel"></th></tr></thead>
+          <tbody>${list.map(r => `<tr><td>${escapeHtml(GIFT.locationLabel(r))}</td><td class="num">${GIFT.formatCents(r.redeemed_cents)}</td>
+            <td class="num">${r.redeemed_count || 0}</td><td class="gc-loc-share"><div class="gc-loc-bar"><i style="width:${Math.round((r.redeemed_cents || 0) / max * 100)}%"></i></div></td></tr>`).join('')}</tbody>
+        </table></div>`;
+    }
+
+    // Laatste transacties: bedragen in het kasboek zijn altijd positief, de richting zit in type.
+    const GC_TX_SIGN = { issue: 1, redeem: -1, reverse: 1 };
+    function gcTxAmount(t) {
+      const a = Math.abs(Number(t.amount_cents) || 0);
+      if (t.type === 'block' || t.type === 'unblock') return '<span class="gc-when">Geen bedrag</span>';
+      const sign = GC_TX_SIGN[t.type] || 0;
+      const txt = (sign < 0 ? '−' : sign > 0 ? '+' : '') + GIFT.formatCents(a);
+      return `<span class="${sign < 0 ? 'neg' : sign > 0 ? 'pos' : ''}">${txt}</span>`;
+    }
+    function gcLocName(id) {
+      if (!id) return 'Eigenaar';
+      const l = (locations || []).find(x => String(x.id) === String(id));
+      return l ? l.name : 'Vestiging';
+    }
+    function gcRecentTable(list) {
+      if (!list.length) return '<div class="gc-chart-empty" style="min-height:90px">Nog geen transacties.</div>';
+      return `<div class="gc-table-wrap"><table class="gc-table">
+          <thead><tr><th>Datum</th><th>Soort</th><th class="num">Bedrag</th><th class="num">Saldo na</th><th>Referentie</th><th>Waar</th></tr></thead>
+          <tbody>${list.map(t => `<tr>
+              <td class="gc-when">${escapeHtml(gcDate(t.created_at, true))}</td>
+              <td>${escapeHtml(GC_TX_TYPES[t.type] || 'Overig')}</td>
+              <td class="num">${gcTxAmount(t)}</td>
+              <td class="num">${Number.isInteger(t.balance_after_cents) ? GIFT.formatCents(t.balance_after_cents) : ''}</td>
+              <td class="gc-code">${escapeHtml(t.reference_number || '')}</td>
+              <td>${escapeHtml(gcLocName(t.location_id))}</td>
+            </tr>`).join('')}</tbody>
+        </table></div>`;
+    }
+
+    // CSV uit het geladen rapport (de backend levert geen CSV): één regel per dag plus een totaal.
+    function downloadGiftCsv(btn) {
+      const d = gcReportData, r = (d && d.range) || {};
+      if (!d || !r.from || !r.to || btn.disabled) return;
+      const blob = new Blob([GIFT.reportCsv(d)], { type: 'text/csv;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `cadeaubonnen-${r.from}-tm-${r.to}.csv`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
     }
 
     // ---- Klikken (pagina en modal) ----

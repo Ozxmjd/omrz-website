@@ -37,6 +37,7 @@ sluit hem na afloop. Exitcode 0 = alles geslaagd. Schermafbeeldingen komen in `t
 | `scanapp` | `suites/scanapp.js` + `suites/stamp-sequence.js` | Stempelflow en cadeaubonflow in `scan.html`, plus **onderdeel S**: meerdere stempels en inwisselingen achter elkaar zonder reload, na een server- of netwerkfout en na een Special Guest, op Basic en Premium Plus |
 | `stamp-regression` | `suites/stamp-regression.js` | Stempel geven en inwisselen in `scan.html` en Geef Stempel in het dashboard, op Basic en Premium Plus |
 | `dashboard-giftcards` | `suites/dashboard-giftcards.js` | Pagina Cadeaubonnen: lijst, aanmaken, detail, eigenaar-acties, rapport, toegang per pakket, schermformaten |
+| `dashboard-report` | `suites/dashboard-report.js` | Rapport: periodes, kaarten (periode en hele looptijd), donut per status, grafiek per dag met gevulde gaten, per vestiging, CSV, laatste transacties met en zonder het veld, lege staat, fouten, schermformaten |
 | `dashboard-scanner` | `suites/dashboard-scanner.js` | Geef Stempel met de keuze Stempelen \| Cadeaubon: zichtbaarheid per pakket, `/scan/resolve`, afschrijven, foutmeldingen, terugval, onthouden per apparaat, camera wisselen, schermformaten |
 
 ## Nep-API

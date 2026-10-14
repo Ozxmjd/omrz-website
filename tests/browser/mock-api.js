@@ -38,7 +38,7 @@ function mk(card, cents, extra, t, short, code) {
 }
 function redeemRaw(g, cents, loc) {
   g.balance_cents -= cents; if (g.balance_cents === 0) g.status = 'empty';
-  const tx = { id: crypto.randomUUID(), gift_card_id: g.id, card_id: g.card_id, type: 'redeem', amount_cents: -cents, balance_after_cents: g.balance_cents, reference_number: ref(), location_id: loc || null, actor: 'staff', note: null, created_at: new Date().toISOString() };
+  const tx = { id: crypto.randomUUID(), gift_card_id: g.id, card_id: g.card_id, type: 'redeem', amount_cents: cents, balance_after_cents: g.balance_cents, reference_number: ref(), location_id: loc || null, actor: 'staff', note: null, created_at: new Date().toISOString() };
   S.txs.push(tx); return tx;
 }
 // Stempelkaart-waarden waar het ontwerp van de cadeaubon op terugvalt.
@@ -87,7 +87,7 @@ const findCode = (card, code) => {
   return S.gifts.find(g => g.card_id === card && g.short_code === normShort(c));
 };
 
-function api(req, res, url, body, rawBody) {
+async function api(req, res, url, body, rawBody) {
   const p = url.pathname, q = url.searchParams; let m;
   const tok = tokens[(req.headers.authorization || '').replace('Bearer ', '')];
   if (p === '/__reset') { reset(); return send(res, 200, {}); }
@@ -314,17 +314,60 @@ function api(req, res, url, body, rawBody) {
       };
       return S.cfg.redeemDelay ? setTimeout(done, S.cfg.redeemDelay) : done();
     }
+    // GET /report, zoals ai-review-bot de7021f (eigenaar). Bedragen in het kasboek zijn altijd
+    // positief; de richting zit in type. Dagen in Amsterdamse tijd.
     if (p === '/api/stamp/gift-cards/report') {
-      const from = q.get('from'), to = q.get('to'), loc = q.get('location_id');
-      const txs = S.txs.filter(t => t.card_id === card && t.created_at.slice(0, 10) >= from && t.created_at.slice(0, 10) <= to && (!loc || t.location_id === loc || t.type === 'issue'));
-      const sum = f => txs.filter(f).reduce((n, t) => n + Math.abs(t.amount_cents), 0);
-      const issued = sum(t => t.type === 'issue'), redeemed = sum(t => t.type === 'redeem'), reversed = sum(t => t.type === 'reverse');
-      const dayMap = {};
-      txs.forEach(t => { const d = t.created_at.slice(0, 10); dayMap[d] = dayMap[d] || { date: d, issued_cents: 0, redeemed_cents: 0, net_redeemed_cents: 0 };
-        if (t.type === 'issue') dayMap[d].issued_cents += t.amount_cents; if (t.type === 'redeem') { dayMap[d].redeemed_cents += -t.amount_cents; dayMap[d].net_redeemed_cents += -t.amount_cents; } if (t.type === 'reverse') dayMap[d].net_redeemed_cents -= t.amount_cents; });
-      const days = Object.values(dayMap).sort((a, b) => a.date.localeCompare(b.date));
-      if (q.get('format') === 'csv') { res.writeHead(200, { 'Content-Type': 'text/csv', 'Access-Control-Allow-Origin': '*' }); return res.end('date;issued_cents;redeemed_cents\n' + days.map(d => [d.date, d.issued_cents, d.redeemed_cents].join(';')).join('\n')); }
-      return send(res, 200, { success: true, totals: { issued_cents: issued, redeemed_cents: redeemed, reversed_cents: reversed, net_redeemed_cents: redeemed - reversed, outstanding_cents: S.gifts.filter(g => g.card_id === card && g.status === 'active').reduce((n, g) => n + g.balance_cents, 0) }, days, rows: txs });
+      if (!tok.owner) return fail(res, 403, 'owner_only', 'Alleen de eigenaar');
+      if (S.cfg.reportFail === 'migration') return fail(res, 503, 'migration_missing', 'Draai migratie 038_gift_cards.sql.');
+      if (S.cfg.reportFail === 500) return send(res, 500, { error: 'boem' });
+      if (S.cfg.reportDelay) await new Promise(r => setTimeout(r, S.cfg.reportDelay));
+      S.log.report = (S.log.report || []).concat([Object.fromEntries(q)]);
+      const dayKey = v => new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Amsterdam', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(v));
+      const shift = (k, n) => new Date(Date.parse(k + 'T00:00:00Z') + n * 864e5).toISOString().slice(0, 10);
+      const dk = v => (/^\d{4}-\d{2}-\d{2}$/.test(String(v || '')) ? String(v) : null);
+      const today = dayKey(Date.now()), fq = dk(q.get('from')), tq = dk(q.get('to'));
+      let preset = ['7d', '30d', '90d', 'ytd', 'custom'].includes(q.get('preset')) ? q.get('preset') : null;
+      if (fq || tq) preset = 'custom';
+      if (!preset) preset = '30d';
+      let from, to;
+      if (preset === 'custom') { from = fq; to = tq || (fq && fq > today ? fq : today); }
+      else if (preset === 'ytd') { from = today.slice(0, 4) + '-01-01'; to = today; }
+      else { from = shift(today, -({ '7d': 7, '30d': 30, '90d': 90 }[preset] - 1)); to = today; }
+      if (fq && tq && from > to) { const h = from; from = to; to = h; }
+      const days = from && to ? Math.round((Date.parse(to) - Date.parse(from)) / 864e5) + 1 : null;
+      const expDays = Math.min(Math.max(Number(q.get('expiring_days')) || 30, 1), 365);
+      const bonnen = S.gifts.filter(g => g.card_id === card);
+      const per = S.txs.filter(t => t.card_id === card).filter(t => { const d = dayKey(t.created_at); return (!from || d >= from) && (!to || d <= to); });
+      const som = ty => per.filter(t => t.type === ty).reduce((n, t) => n + (t.amount_cents || 0), 0);
+      const cnt = ty => per.filter(t => t.type === ty).length;
+      const stOf = g => g.status === 'blocked' ? 'blocked' : (g.status === 'expired' || (g.expires_at && Date.parse(g.expires_at) <= Date.now())) ? 'expired' : (g.balance_cents <= 0 ? 'empty' : 'active');
+      const ps = { active: [], empty: [], blocked: [], expired: [] }; bonnen.forEach(g => ps[stOf(g)].push(g));
+      const bal = l => l.reduce((n, g) => n + g.balance_cents, 0);
+      const soon = ps.active.filter(g => g.expires_at && Date.parse(g.expires_at) > Date.now() && Date.parse(g.expires_at) <= Date.now() + expDays * 864e5);
+      const dm = new Map();
+      per.forEach(t => { const d = dayKey(t.created_at); if (!dm.has(d)) dm.set(d, { day: d, issued_cents: 0, issued_count: 0, redeemed_cents: 0, redeemed_count: 0 });
+        const r = dm.get(d); if (t.type === 'issue') { r.issued_cents += t.amount_cents; r.issued_count++; } if (t.type === 'redeem') { r.redeemed_cents += t.amount_cents; r.redeemed_count++; } });
+      const LOCS = { L1: 'Centrum', L2: 'Noord' };
+      const lm = new Map();
+      per.filter(t => t.type === 'redeem').forEach(t => { const k = t.location_id || '__geen__';
+        if (!lm.has(k)) lm.set(k, { location_id: t.location_id || null, location_name: t.location_id ? (LOCS[t.location_id] || null) : null, redeemed_cents: 0, redeemed_count: 0 });
+        const r = lm.get(k); r.redeemed_cents += t.amount_cents; r.redeemed_count++; });
+      const issued = som('issue'), issuedN = cnt('issue');
+      const out = { success: true, card_id: card, timezone: 'Europe/Amsterdam', generated_at: new Date().toISOString(), range: { preset, from, to, days },
+        totals: { issued_cents: issued, issued_count: issuedN, redeemed_cents: som('redeem'), redeemed_count: cnt('redeem'), reversed_cents: som('reverse'), reversed_count: cnt('reverse'),
+          adjusted_cents: som('adjust'), adjusted_count: cnt('adjust'), net_redeemed_cents: som('redeem') - som('reverse'),
+          outstanding_cents: bal(ps.active), outstanding_count: ps.active.length, average_issued_cents: issuedN ? Math.round(issued / issuedN) : 0,
+          expiring_soon_cents: bal(soon), expiring_soon_count: soon.length, expiring_soon_days: expDays },
+        by_status: ['active', 'empty', 'blocked', 'expired'].map(st => ({ status: st, count: ps[st].length, balance_cents: bal(ps[st]) })),
+        by_day: [...dm.values()].sort((a, b) => (a.day < b.day ? -1 : 1)),
+        by_location: [...lm.values()].sort((a, b) => b.redeemed_cents - a.redeemed_cents) };
+      // Nog niet in de backend: de lijst "laatste transacties". Alleen met cfg.reportTx, onder de
+      // voorlopige naam uit js/giftcards.js (REPORT_TX_FIELD), in de vorm van giftTransactionPublic.
+      if (S.cfg.reportTxBad) out.recent_transactions = 'niet-een-lijst';
+      if (S.cfg.reportTx) out[S.cfg.reportTxField || 'recent_transactions'] = S.txs.filter(t => t.card_id === card).slice(-10).reverse()
+        .map(t => ({ id: t.id, gift_card_id: t.gift_card_id, type: t.type, amount_cents: t.amount_cents, balance_after_cents: t.balance_after_cents, reference_number: t.reference_number,
+          bill_total_cents: null, location_id: t.location_id || null, actor: t.actor || null, note: t.note || null, reverses_transaction_id: t.reverses_transaction_id || null, created_at: t.created_at }));
+      return send(res, 200, out);
     }
     if ((m = p.match(/^\/api\/stamp\/gift-cards\/transactions\/([\w-]+)\/reverse$/)) && req.method === 'POST') {
       if (!tok.owner) return fail(res, 403, 'owner_only', 'Alleen eigenaar');
@@ -332,8 +375,8 @@ function api(req, res, url, body, rawBody) {
       if (!tx) return fail(res, 404, 'gift_card_not_found', 'Niet gevonden');
       if (tx.reversed) return fail(res, 409, 'already_reversed', 'Al teruggedraaid');
       const g = S.gifts.find(x => x.id === tx.gift_card_id);
-      g.balance_cents += -tx.amount_cents; if (g.status === 'empty') g.status = 'active'; tx.reversed = true;
-      S.txs.push({ id: crypto.randomUUID(), gift_card_id: g.id, card_id: g.card_id, type: 'reverse', reverses_transaction_id: tx.id, amount_cents: -tx.amount_cents, balance_after_cents: g.balance_cents, reference_number: ref(), location_id: null, actor: 'owner', note: body.note, created_at: new Date().toISOString() });
+      g.balance_cents += tx.amount_cents; if (g.status === 'empty') g.status = 'active'; tx.reversed = true;
+      S.txs.push({ id: crypto.randomUUID(), gift_card_id: g.id, card_id: g.card_id, type: 'reverse', reverses_transaction_id: tx.id, amount_cents: tx.amount_cents, balance_after_cents: g.balance_cents, reference_number: ref(), location_id: null, actor: 'owner', note: body.note, created_at: new Date().toISOString() });
       return send(res, 200, { success: true });
     }
     if ((m = p.match(/^\/api\/stamp\/gift-cards\/([\w-]+)\/(adjust|block|unblock)$/)) && req.method === 'POST') {
@@ -344,7 +387,7 @@ function api(req, res, url, body, rawBody) {
         if (!Number.isInteger(body.delta_cents) || body.delta_cents === 0 || !body.note) return fail(res, 400, 'invalid_amount', 'Ongeldig');
         if (g.balance_cents + body.delta_cents < 0) return fail(res, 409, 'insufficient_balance', 'Onvoldoende', { balance_cents: g.balance_cents });
         g.balance_cents += body.delta_cents; g.status = g.balance_cents === 0 ? 'empty' : (g.status === 'empty' ? 'active' : g.status);
-        S.txs.push({ id: crypto.randomUUID(), gift_card_id: g.id, card_id: card, type: 'adjust', amount_cents: body.delta_cents, balance_after_cents: g.balance_cents, reference_number: ref(), actor: 'owner', note: body.note, created_at: new Date().toISOString() });
+        S.txs.push({ id: crypto.randomUUID(), gift_card_id: g.id, card_id: card, type: 'adjust', amount_cents: Math.abs(body.delta_cents), balance_after_cents: g.balance_cents, reference_number: ref(), actor: 'owner', note: body.note, created_at: new Date().toISOString() });
       } else g.status = m[2] === 'block' ? 'blocked' : (g.balance_cents > 0 ? 'active' : 'empty');
       return send(res, 200, { success: true, gift_card: pub(g) });
     }
@@ -361,7 +404,7 @@ http.createServer((req, res) => {
   const url = new URL(req.url, BASE);
   if (req.method === 'OPTIONS') { res.writeHead(204, { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*', 'Access-Control-Allow-Methods': '*' }); return res.end(); }
   if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/__')) {
-    let b = ''; req.on('data', c => b += c); req.on('end', () => { let body = {}; try { body = JSON.parse(b || '{}'); } catch (_) {} api(req, res, url, body, b); }); return;
+    let b = ''; req.on('data', c => b += c); req.on('end', () => { let body = {}; try { body = JSON.parse(b || '{}'); } catch (_) {} Promise.resolve(api(req, res, url, body, b)).catch(e => { console.error(e); send(res, 500, { error: String(e) }); }); }); return;
   }
   const f = path.join(SITE, url.pathname === '/' ? 'index.html' : url.pathname);
   if (!f.startsWith(SITE) || !fs.existsSync(f)) { res.writeHead(404); return res.end(); }

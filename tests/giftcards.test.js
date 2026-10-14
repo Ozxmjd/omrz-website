@@ -320,3 +320,49 @@ test('scan-modus: per apparaat onthouden, standaard stempelen', () => {
   assert.equal(G.readScanMode(broken), 'stamp'); G.saveScanMode(broken, 'gift');
   assert.equal(G.readScanMode(null), 'stamp');
 });
+
+test('rapport: querystring per periode', () => {
+  const q = s => Object.fromEntries(new URLSearchParams(G.reportQuery('c1', s)));
+  assert.deepEqual(q({ preset: '7d' }), { card_id: 'c1', preset: '7d' });
+  assert.deepEqual(q({}), { card_id: 'c1', preset: '30d' });
+  assert.deepEqual(q({ preset: 'iets' }), { card_id: 'c1', preset: '30d' });
+  assert.deepEqual(q({ preset: 'ytd', from: '2026-01-01' }), { card_id: 'c1', preset: 'ytd' });           // from alleen bij custom
+  assert.deepEqual(q({ preset: 'custom', from: '2026-02-01', to: '2026-02-28' }), { card_id: 'c1', preset: 'custom', from: '2026-02-01', to: '2026-02-28' });
+  assert.deepEqual(q({ preset: 'custom', from: '1-2-2026' }), { card_id: 'c1', preset: 'custom' });
+  assert.equal(q({ preset: '7d', expiring_days: 14 }).expiring_days, '14');
+});
+
+test('rapport: gaten in by_day vullen, ook over de zomertijd heen', () => {
+  const d = G.fillDays('2026-03-27', '2026-03-31', [{ day: '2026-03-29', issued_cents: 500, issued_count: 1, redeemed_cents: 200, redeemed_count: 1 }]);
+  assert.deepEqual(d.map(x => x.day), ['2026-03-27', '2026-03-28', '2026-03-29', '2026-03-30', '2026-03-31']);
+  assert.equal(d[2].issued_cents, 500); assert.equal(d[2].redeemed_count, 1); assert.equal(d[0].issued_cents, 0);
+  assert.equal(G.fillDays('2026-10-25', '2026-10-26', []).length, 2);                                       // wintertijd
+  assert.equal(G.fillDays('2026-01-01', '2026-12-31', null).length, 365);
+  assert.deepEqual(G.fillDays('2026-02-02', '2026-02-01', []), []);
+  assert.deepEqual(G.fillDays(null, '2026-02-01', []), []);
+});
+
+test('rapport: vestigingnaam, lege staat, laatste transacties alleen als het veld er is', () => {
+  assert.equal(G.locationLabel({ location_id: null, location_name: null }), 'Zonder vestiging (eigenaar)');
+  assert.equal(G.locationLabel({ location_id: 'L1', location_name: 'Centrum' }), 'Centrum');
+  assert.equal(G.locationLabel({ location_id: 'L9', location_name: null }), 'Verwijderde vestiging');
+  assert.equal(G.reportHasCards({ by_status: [{ status: 'active', count: 0 }, { status: 'empty', count: 0 }] }), false);
+  assert.equal(G.reportHasCards({ by_status: [{ status: 'empty', count: 2 }] }), true);
+  assert.equal(G.reportHasCards({}), false);
+  assert.equal(G.reportRecentTx({}), null);
+  assert.equal(G.reportRecentTx({ [G.REPORT_TX_FIELD]: 'x' }), null);
+  assert.deepEqual(G.reportRecentTx({ [G.REPORT_TX_FIELD]: [] }), []);
+});
+
+test('rapport: CSV met puntkomma, komma-decimalen, elke dag en een totaal', () => {
+  const csv = G.reportCsv({ range: { from: '2026-02-01', to: '2026-02-03' },
+    by_day: [{ day: '2026-02-02', issued_cents: 2500, issued_count: 1, redeemed_cents: 1250, redeemed_count: 2 }],
+    totals: { issued_cents: 2500, issued_count: 1, redeemed_cents: 1250, redeemed_count: 2 } });
+  assert.ok(csv.startsWith('﻿Datum;Uitgegeven (EUR);Aantal uitgegeven;Afgeschreven (EUR);Aantal afschrijvingen\r\n'));
+  const rows = csv.trim().split('\r\n');
+  assert.equal(rows.length, 5);
+  assert.equal(rows[1], '2026-02-01;0,00;0;0,00;0');
+  assert.equal(rows[2], '2026-02-02;25,00;1;12,50;2');
+  assert.equal(rows[4], 'Totaal;25,00;1;12,50;2');
+  assert.ok(!/btw/i.test(csv));
+});
