@@ -1102,10 +1102,10 @@
     .gc-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--pearl); white-space: nowrap; }
     .gc-table tr:last-child td { border-bottom: 0; }
     .gc-table td.num, .gc-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
-    .gc-table td.neg { color: #f0a8a8; }
-    .gc-table td.pos { color: #8fe0b0; }
-    [data-theme="light"] .gc-table td.neg { color: #b91c1c; }
-    [data-theme="light"] .gc-table td.pos { color: #15803d; }
+    .gc-table td.neg, .gc-table span.neg { color: #f0a8a8; }
+    .gc-table td.pos, .gc-table span.pos { color: #8fe0b0; }
+    [data-theme="light"] .gc-table td.neg, [data-theme="light"] .gc-table span.neg { color: #b91c1c; }
+    [data-theme="light"] .gc-table td.pos, [data-theme="light"] .gc-table span.pos { color: #15803d; }
     .gc-table .btn { padding: 5px 10px; font-size: 12px; border-radius: 8px; }
     .gc-reversed { font-size: 12px; font-weight: 500; color: var(--muted); }
     .gc-table td.gc-when { white-space: normal; min-width: 96px; }
@@ -1253,6 +1253,7 @@
     .gc-chart-empty { display: grid; place-items: center; min-height: 180px; font-size: 13px; color: var(--muted); text-align: center; border: 1px dashed var(--border-strong); border-radius: 12px; }
     .gc-loc-bar { height: 6px; border-radius: 99px; background: rgba(var(--ink), .07); min-width: 80px; overflow: hidden; }
     .gc-loc-bar i { display: block; height: 100%; border-radius: inherit; background: #34d399; }
+    .gc-txnote { font-size: 11.5px; color: var(--muted); font-style: italic; white-space: normal; margin-top: 2px; }
     .gc-rep-note { font-size: 12.5px; color: var(--muted); margin-top: 6px; line-height: 1.55; }
     .gc-rep-section { margin-bottom: 16px; }
     .gc-skel { height: 104px; border-radius: 16px; background: rgba(var(--ink), .04); animation: ovPulse 1.2s var(--ease) infinite; }
@@ -1260,8 +1261,9 @@
     @media (max-width: 980px) {
       .gc-rep-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       #gcRepLocs .gc-table th, #gcRepLocs .gc-table td, #gcRepRecent .gc-table td { white-space: normal; }
-      #gcRepRecent .gc-table th:nth-child(4), #gcRepRecent .gc-table td:nth-child(4),
-      #gcRepRecent .gc-table th:nth-child(6), #gcRepRecent .gc-table td:nth-child(6) { display: none; }
+      #gcRepRecent .gc-table th:nth-child(5), #gcRepRecent .gc-table td:nth-child(5),
+      #gcRepRecent .gc-table th:nth-child(6), #gcRepRecent .gc-table td:nth-child(6),
+      #gcRepRecent .gc-table th:nth-child(7), #gcRepRecent .gc-table td:nth-child(7) { display: none; }
       .gc-rep-grid { grid-template-columns: minmax(0, 1fr); }
     }
     @media (max-width: 560px) {
@@ -9983,7 +9985,7 @@
           ${gcLocTable(data.by_location)}
         </div>
         ${recent ? `<div class="block glass gc-rep-card gc-rep-section" id="gcRepRecent">
-          <div class="gc-rep-head"><div><h3>Laatste transacties</h3><div class="gc-rep-sub">De meest recente bewegingen op uw cadeaubonnen</div></div></div>
+          <div class="gc-rep-head"><div><h3>Laatste transacties</h3><div class="gc-rep-sub">${Number.isInteger(data.recent_limit) ? 'De laatste ' + data.recent_limit + ' mutaties' : 'De laatste mutaties'} in deze periode, nieuwste eerst. Klik op een bon voor de details.</div></div></div>
           ${gcRecentTable(recent)}
         </div>` : ''}
         <p class="gc-rep-note">* Openstaand, actieve bonnen, binnenkort verlopen en de verdeling per status gaan over alle bonnen, niet alleen over de gekozen periode.${t.adjusted_count ? ` Uitgegeven en afgeschreven tellen correcties niet mee; in deze periode ${t.adjusted_count === 1 ? 'is er 1 correctie' : 'zijn er ' + t.adjusted_count + ' correcties'} van samen ${GIFT.formatCents(t.adjusted_cents)}.` : ''}</p>`;
@@ -10076,32 +10078,26 @@
         </table></div>`;
     }
 
-    // Laatste transacties: bedragen in het kasboek zijn altijd positief, de richting zit in type.
-    const GC_TX_SIGN = { issue: 1, redeem: -1, reverse: 1 };
-    function gcTxAmount(t) {
-      const a = Math.abs(Number(t.amount_cents) || 0);
-      if (t.type === 'block' || t.type === 'unblock') return '<span class="gc-when">Geen bedrag</span>';
-      const sign = GC_TX_SIGN[t.type] || 0;
-      const txt = (sign < 0 ? '−' : sign > 0 ? '+' : '') + GIFT.formatCents(a);
-      return `<span class="${sign < 0 ? 'neg' : sign > 0 ? 'pos' : ''}">${txt}</span>`;
-    }
+    // Laatste transacties (recent_transactions, backend e8b0952): de richting zit in type,
+    // amount_cents is altijd positief. Zie GIFT.recentTxRows.
     function gcLocName(id) {
       if (!id) return 'Eigenaar';
       const l = (locations || []).find(x => String(x.id) === String(id));
       return l ? l.name : 'Vestiging';
     }
     function gcRecentTable(list) {
-      if (!list.length) return '<div class="gc-chart-empty" style="min-height:90px">Nog geen transacties.</div>';
+      if (!list.length) return '<div class="gc-chart-empty" style="min-height:90px">Geen transacties in deze periode.</div>';
       return `<div class="gc-table-wrap"><table class="gc-table">
-          <thead><tr><th>Datum</th><th>Soort</th><th class="num">Bedrag</th><th class="num">Saldo na</th><th>Referentie</th><th>Waar</th></tr></thead>
-          <tbody>${list.map(t => `<tr>
+          <thead><tr><th>Datum</th><th>Soort</th><th>Bon</th><th class="num">Bedrag</th><th class="num">Saldo na</th><th>Referentie</th><th>Waar</th></tr></thead>
+          <tbody>${GIFT.recentTxRows(list).map(r => { const t = r.tx; return `<tr data-tx="${escapeHtml(String(t.id))}" data-type="${escapeHtml(t.type || '')}">
               <td class="gc-when">${escapeHtml(gcDate(t.created_at, true))}</td>
-              <td>${escapeHtml(GC_TX_TYPES[t.type] || 'Overig')}</td>
-              <td class="num">${gcTxAmount(t)}</td>
+              <td>${escapeHtml(GC_TX_TYPES[t.type] || 'Overig')}${t.note ? `<div class="gc-txnote">“${escapeHtml(t.note)}”</div>` : ''}</td>
+              <td>${t.gift_card_id && t.short_code_display ? `<button type="button" class="gc-linkbtn gc-code" data-gc-id="${escapeHtml(String(t.gift_card_id))}">${escapeHtml(t.short_code_display)}</button>` : escapeHtml(t.short_code_display || 'Onbekend')}</td>
+              <td class="num">${r.hasAmount ? `<span class="${r.sign < 0 ? 'neg' : r.sign > 0 ? 'pos' : ''}">${r.sign < 0 ? '−' : r.sign > 0 ? '+' : ''}${GIFT.formatCents(r.amount_cents)}</span>` : '<span class="gc-when">Geen bedrag</span>'}</td>
               <td class="num">${Number.isInteger(t.balance_after_cents) ? GIFT.formatCents(t.balance_after_cents) : ''}</td>
               <td class="gc-code">${escapeHtml(t.reference_number || '')}</td>
-              <td>${escapeHtml(gcLocName(t.location_id))}</td>
-            </tr>`).join('')}</tbody>
+              <td>${escapeHtml(r.where)}</td>
+            </tr>`; }).join('')}</tbody>
         </table></div>`;
     }
 

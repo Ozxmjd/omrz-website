@@ -505,12 +505,30 @@
     const st = (data && Array.isArray(data.by_status)) ? data.by_status : [];
     return st.some(r => (r.count || 0) > 0);
   }
-  // De lijst "laatste transacties" komt later in het rapport. Tot de backend de veldnaam
-  // bevestigt staat hij hier op één plek; zonder het veld (of als het geen lijst is) geen sectie.
+  // De laatste mutaties in de periode (backend e8b0952: recent_transactions, nieuwste eerst,
+  // standaard 20, max 100 via recent_limit). Zonder het veld (oudere backend) of als het geen
+  // lijst is: geen sectie.
   const REPORT_TX_FIELD = 'recent_transactions';
   function reportRecentTx(data) {
     const v = data && data[REPORT_TX_FIELD];
     return Array.isArray(v) ? v : null;
+  }
+  // Rijen voor "Laatste transacties". amount_cents is altijd positief; de richting zit in type
+  // (uitgifte en terugdraaien +, afschrijving −, blokkeren zonder bedrag). Een correctie krijgt
+  // alleen een teken als een eerdere regel van dezelfde bon in de lijst staat; anders geen teken.
+  function recentTxRows(list) {
+    const rows = Array.isArray(list) ? list : [];
+    const sign = new Map();
+    const perBon = new Map();
+    rows.forEach(t => { const k = String(t.gift_card_id || ''); if (!perBon.has(k)) perBon.set(k, []); perBon.get(k).push(t); });
+    perBon.forEach(txs => giftTimeline(txs).forEach(it => sign.set(it.tx, it.sign)));
+    return rows.map(t => ({
+      tx: t,
+      sign: TX_SIGN[t.type] !== undefined ? TX_SIGN[t.type] : (sign.get(t) || 0),
+      amount_cents: Math.abs(Number(t.amount_cents) || 0),
+      hasAmount: t.type !== 'block' && t.type !== 'unblock',
+      where: !t.location_id ? 'Eigenaar' : (t.location_name || 'Verwijderde vestiging'),
+    }));
   }
   // CSV voor de boekhouder: puntkomma en komma-decimalen (Nederlandse Excel), één regel per dag
   // van de periode plus een totaalregel. Bewust zonder btw-kolommen.
@@ -583,7 +601,7 @@
     giftStatus, STATUS_LABELS, isPlanLock, scannerEnabledFrom, referenceFrom, scannerSettingsBody, errorMessage, isNotLive, MESSAGES, NOT_LIVE_MESSAGE,
     DELIVERY_MODES, validateGiftDelivery, giftCreateBody, resendBody, mailStateOf, mailOutcome, mailAddress,
     giftSearchQuery, actorLabel, giftTimeline, balancePercent, blockConflictCard,
-    REPORT_PRESETS, reportQuery, fillDays, locationLabel, reportHasCards, REPORT_TX_FIELD, reportRecentTx, reportCsv,
+    REPORT_PRESETS, reportQuery, fillDays, locationLabel, reportHasCards, REPORT_TX_FIELD, reportRecentTx, recentTxRows, reportCsv,
     DESIGN_FIELDS, NO_INHERIT_FIELDS, designBody, validateDesignValue, contrastRatio, CHANNELS, CHANNEL_LABELS, channelsOf,
     UPLOAD_TYPES, UPLOAD_MAX_BYTES, validateUpload, uploadErrorMessage, isHexColor, isHttpsUrl, normalizeColor, designValue };
   if (typeof module === 'object' && module.exports) module.exports = api;

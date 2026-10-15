@@ -64,7 +64,7 @@ module.exports = async function run(env) {
   check('1. Tooltip per dag met bedragen en aantallen', tips.some(t => /uitgegeven €\s50,00 \(1\)/.test(t)) && tips.every(t => /afgeschreven/.test(t)));
   // Per vestiging
   check('1. Per vestiging: Centrum € 10,00, 1', /Centrum\s+€\s10,00\s+1/.test(await txt(p, '#gcRepLocs tbody')), await txt(p, '#gcRepLocs tbody'));
-  check('1. Zonder lijst laatste transacties: geen sectie, geen melding', !(await vis(p, '#gcRepRecent')) && !/transacties/i.test(await txt(p, '#gcReportBox')));
+  check('1. Backend e8b0952 stuurt recent_transactions mee → sectie "Laatste transacties"', await vis(p, '#gcRepRecent'));
   check('1. Geen btw-kolommen of -teksten', !/btw/i.test(await txt(p, '#gcReportView')));
   check('1. Nergens een kale streep', !/(^|\s)—(\s|$)/.test(await txt(p, '#gcReportView')));
   await p.screenshot({ path: OUT + '/' + 'gcr-30d-1440.png', fullPage: true });
@@ -107,19 +107,63 @@ module.exports = async function run(env) {
   check('3. CSV: geen extra verzoek naar de server', p.reports.slice(-1)[0].format === undefined);
   await ctx.close();
 
-  // ===== 4. Laatste transacties: alleen als het veld in het antwoord zit =====
-  await post('/__cfg', { reportTx: true });
+  // ===== 4. Laatste transacties (recent_transactions, vorm van e8b0952) =====
+  const gid = sc => fetch(B + '/__state').then(r => r.json()).then(s => s.gifts.find(g => g.short_code === sc).id);
+  const own = (path, body) => fetch(B + path, { method: 'POST', headers: { Authorization: 'Bearer tok-pp', 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(r => r.json());
+  await own(`/api/stamp/gift-cards/${await gid('BZKD000001')}/unblock`, {});
+  await own(`/api/stamp/gift-cards/${await gid('BZKD000001')}/block`, { note: 'Klant is de bon kwijt' });
+  await own(`/api/stamp/gift-cards/${await gid('ABCDEFGHJK')}/adjust`, { delta_cents: -300, note: 'Kassaverschil' });
+  await own(`/api/stamp/gift-cards/${await gid('EXPR000003')}/adjust`, { delta_cents: 200, note: 'Goodwill' });   // uitgifte valt buiten de periode
+  // De vorm die de backend geeft, rechtstreeks gecontroleerd
+  const raw = await fetch(B + '/api/stamp/gift-cards/report?card_id=pp&preset=30d', { headers: { Authorization: 'Bearer tok-pp' } }).then(r => r.json());
+  const keys = new Set(raw.recent_transactions.flatMap(r => Object.keys(r)));
+  check('4. Nep-API = e8b0952: velden, nieuwste eerst, recent_limit 20, geen namen of e-mail', [...keys].sort().join(',') === 'amount_cents,balance_after_cents,created_at,gift_card_id,id,location_id,location_name,note,reference_number,short_code_display,type'
+    && raw.recent_limit === 20 && raw.recent_transactions.every((r, i, l) => i === 0 || String(l[i - 1].created_at) >= String(r.created_at)) && !/Sanne|@/.test(JSON.stringify(raw.recent_transactions))
+    && raw.recent_transactions.filter(r => 'note' in r).every(r => r.note), [...keys].sort().join(','));
+  for (const [q, want] of [['3', 3], ['500', 100], ['0', 20], ['abc', 20]]) {
+    const j = await fetch(B + '/api/stamp/gift-cards/report?card_id=pp&preset=30d&recent_limit=' + q, { headers: { Authorization: 'Bearer tok-pp' } }).then(r => r.json());
+    check(`4. recent_limit=${q} → ${want}`, j.recent_limit === want && j.recent_transactions.length <= want);
+  }
+  const mgr = await fetch(B + '/api/stamp/gift-cards/report?card_id=pp', { headers: { Authorization: 'Bearer tok-mgr' } });
+  check('4. Alleen de eigenaar (medewerker → 403 owner_only)', mgr.status === 403 && (await mgr.json()).code === 'owner_only');
   ({ ctx, p } = await open(b));
-  check('4. Met het veld: sectie "Laatste transacties" zichtbaar', await vis(p, '#gcRepRecent'));
-  const tr = await p.$$eval('#gcRepRecent tbody tr', r => r.map(x => [...x.cells].map(c => c.innerText)));
-  check('4. Rijen met datum, soort, bedrag, saldo, referentie en waar', tr.length >= 5 && tr.every(r => r.length === 6 && /CB-\d{4}/.test(r[4])), JSON.stringify(tr[0]));
-  const rd = tr.find(r => r[1] === 'Afschrijving' && /15,00/.test(r[2])), is = tr.find(r => r[1] === 'Uitgifte');
-  check('4. Afschrijving met min, uitgifte met plus (backend: bedrag altijd positief)', rd && rd[2] === `−€${NB}15,00` && rd[5] === 'Eigenaar' && is && is[2].startsWith('+€'), JSON.stringify([rd, is]));
-  const cen = tr.find(r => r[1] === 'Afschrijving' && /10,00/.test(r[2]));
-  check('4. Vestiging bij naam', cen && cen[5] === 'Centrum', JSON.stringify(cen));
+  check('4. Sectie "Laatste transacties" met "De laatste 20 mutaties in deze periode"', await vis(p, '#gcRepRecent') && /De laatste 20 mutaties in deze periode/.test(await txt(p, '#gcRepRecent .gc-rep-sub')));
+  const tr = await p.$$eval('#gcRepRecent tbody tr', r => r.map(x => ({ type: x.dataset.type, c: [...x.cells].map(c => c.innerText.trim()) })));
+  check('4. Kolommen: datum, soort, bon, bedrag, saldo na, referentie, waar', (await p.$$eval('#gcRepRecent thead th', h => h.map(x => x.innerText.trim().toLowerCase()))).join('|') === 'datum|soort|bon|bedrag|saldo na|referentie|waar' && tr.every(r => r.c.length === 7 && /CB-\d{4}/.test(r.c[5])));
+  check('4. Nieuwste eerst (laatste mutatie bovenaan: correctie op de verlopen bon)', tr[0].type === 'adjust' && /EXPR-0000-03/.test(tr[0].c[2]), JSON.stringify(tr[0]));
+  const find = (type, bon, amt) => tr.find(r => r.type === type && r.c[2] === bon && (!amt || r.c[3].includes(amt)));
+  const iss = find('issue', 'ABCD-EFGH-JK'), red = find('redeem', 'ABCD-EFGH-JK'), redC = find('redeem', 'EMPT-0000-02');
+  check('4. Uitgifte met plus: +€ 50,00', iss && iss.c[3] === `+€${NB}50,00` && iss.c[1] === 'Uitgifte', JSON.stringify(iss));
+  check('4. Afschrijving met min: −€ 15,00, door de eigenaar', red && red.c[3] === `−€${NB}15,00` && red.c[6] === 'Eigenaar', JSON.stringify(red));
+  check('4. Afschrijving in een vestiging: −€ 10,00, "Centrum" (location_name)', redC && redC.c[3] === `−€${NB}10,00` && redC.c[6] === 'Centrum', JSON.stringify(redC));
+  const adjS = find('adjust', 'ABCD-EFGH-JK'), adjE = find('adjust', 'EXPR-0000-03');
+  check('4. Correctie met eerdere regel van dezelfde bon: −€ 3,00 (saldo 35,00 → 32,00), notitie zichtbaar', adjS && adjS.c[3] === `−€${NB}3,00` && /Kassaverschil/.test(adjS.c[1]), JSON.stringify(adjS));
+  check('4. Correctie zonder eerdere regel in de lijst: bedrag zonder teken (richting onbekend)', adjE && adjE.c[3] === `€${NB}2,00` && /Goodwill/.test(adjE.c[1]), JSON.stringify(adjE));
+  const blk = find('block', 'BZKD-0000-01'), unb = find('unblock', 'BZKD-0000-01');
+  check('4. Blokkeren/deblokkeren: "Geen bedrag", notitie alleen waar ingevuld', blk && blk.c[3] === 'Geen bedrag' && /Klant is de bon kwijt/.test(blk.c[1]) && unb && unb.c[3] === 'Geen bedrag' && !/“/.test(unb.c[1]), JSON.stringify([blk, unb]));
+  check('4. Kleur: min rood, plus groen (licht thema)', await p.evaluate(() => { document.documentElement.setAttribute('data-theme', 'light');
+    const c = sel => getComputedStyle(document.querySelector(sel)).color;
+    const r = [c('#gcRepRecent tr[data-type="redeem"] span.neg'), c('#gcRepRecent tr[data-type="issue"] span.pos')];
+    document.documentElement.removeAttribute('data-theme'); return r[0] === 'rgb(185, 28, 28)' && r[1] === 'rgb(21, 128, 61)'; }));
+  check('4. Geen namen of e-mailadressen in de lijst', !/Sanne|Daan|@/.test(await txt(p, '#gcRepRecent tbody')));
   await p.screenshot({ path: OUT + '/' + 'gcr-recent-1440.png', fullPage: true });
+  await p.click('#gcRepRecent [data-gc-id] >> text=BZKD-0000-01'); await p.waitForSelector('.gc-detail');
+  check('4. Klik op de korte code → detail van die bon', /BZKD-0000-01/.test(await txt(p, '.gc-code-big')));
+  await p.click('#modalClose');
   await ctx.close();
-  await post('/__cfg', { reportTx: false, reportTxBad: true });
+  for (const vp of [{ width: 820, height: 1180 }, { width: 390, height: 844 }]) {
+    ({ ctx, p } = await open(b, { vp }));
+    check(`4. ${vp.width}px: lijst past zonder zijwaarts scrollen, bedrag en bon blijven zichtbaar`, await p.evaluate(() => { const w = document.querySelector('#gcRepRecent .gc-table-wrap'); return w.scrollWidth <= w.clientWidth + 1; })
+      && await vis(p, '#gcRepRecent tbody tr td:nth-child(4)') && await vis(p, '#gcRepRecent tbody tr td:nth-child(3)'));
+    await p.screenshot({ path: OUT + '/' + `gcr-recent-${vp.width}.png`, fullPage: true });
+    await ctx.close();
+  }
+  // Oudere backend zonder het veld, verkeerde vorm, lege lijst
+  await post('/__cfg', { reportNoTx: true });
+  ({ ctx, p } = await open(b));
+  check('4. Zonder het veld (oudere backend): geen sectie, geen melding', !(await vis(p, '#gcRepRecent')) && !/transacties/i.test(await txt(p, '#gcReportBox')) && await vis(p, '#gcRepStats'));
+  await ctx.close();
+  await post('/__cfg', { reportNoTx: false, reportTxBad: true });
   ({ ctx, p } = await open(b));
   check('4. Veld met verkeerde vorm → geen sectie, geen foutmelding', !(await vis(p, '#gcRepRecent')) && !(await vis(p, '#gcReportBox .gc-banner.error')) && await vis(p, '#gcRepStats'));
   await ctx.close();
@@ -127,7 +171,7 @@ module.exports = async function run(env) {
   ({ ctx, p } = await open(b, { waitFor: '#gcReportBox' }));
   await p.route('**/gift-cards/report**', async r => { const res = await r.fetch(); const j = await res.json(); j.recent_transactions = []; r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(j) }); });
   await preset(p, '7d');
-  check('4. Veld aanwezig maar leeg → sectie met "Nog geen transacties."', await vis(p, '#gcRepRecent') && /Nog geen transacties\./.test(await txt(p, '#gcRepRecent')));
+  check('4. Veld aanwezig maar leeg → "Geen transacties in deze periode."', await vis(p, '#gcRepRecent') && /Geen transacties in deze periode\./.test(await txt(p, '#gcRepRecent')));
   await ctx.close();
 
   // ===== 5. Lege staat, binnenkort verlopen, correcties =====
@@ -174,7 +218,6 @@ module.exports = async function run(env) {
 
   // ===== 7. Schermformaten en licht thema =====
   for (const vp of [{ width: 1440, height: 1000 }, { width: 820, height: 1180 }, { width: 390, height: 844 }]) {
-    await post('/__cfg', { reportTx: true });
     ({ ctx, p } = await open(b, { vp }));
     check(`7. ${vp.width}px: geen horizontale scroll`, await noH(p));
     check(`7. ${vp.width}px: aslabels leesbaar (≥ 9px op het scherm)`, await p.evaluate(() => { const t = document.querySelector('#gcRepDays .ax'); return t && t.getBoundingClientRect().height >= 9; }));
@@ -189,5 +232,4 @@ module.exports = async function run(env) {
   await p.screenshot({ path: OUT + '/' + 'gcr-light-1440.png', fullPage: true });
   check('7. Licht thema: rapport rendert', await vis(p, '#gcRepStats') && await vis(p, '.gc-donut'));
   await ctx.close();
-  await post('/__cfg', { reportTx: false });
 };

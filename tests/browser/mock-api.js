@@ -439,12 +439,23 @@ async function api(req, res, url, body, rawBody) {
         by_status: ['active', 'empty', 'blocked', 'expired'].map(st => ({ status: st, count: ps[st].length, balance_cents: bal(ps[st]) })),
         by_day: [...dm.values()].sort((a, b) => (a.day < b.day ? -1 : 1)),
         by_location: [...lm.values()].sort((a, b) => b.redeemed_cents - a.redeemed_cents) };
-      // Nog niet in de backend: de lijst "laatste transacties". Alleen met cfg.reportTx, onder de
-      // voorlopige naam uit js/giftcards.js (REPORT_TX_FIELD), in de vorm van giftTransactionPublic.
+      // recent_transactions zoals e8b0952: uit de periode, nieuwste eerst, recent_limit standaard 20
+      // (max 100, ongeldig = 20), geen namen of e-mail, note alleen als er iets staat.
+      // cfg.reportNoTx: oudere backend zonder het veld; cfg.reportTxBad: veld met verkeerde vorm.
+      if (!S.cfg.reportNoTx) {
+        const rl = Number(q.get('recent_limit'));
+        const lim = Number.isFinite(rl) && rl >= 1 ? Math.min(Math.floor(rl), 100) : 20;
+        const kort = new Map(bonnen.map(g => [g.id, g.short_code]));
+        out.recent_transactions = per.slice().sort((x, y) => (String(y.created_at) < String(x.created_at) ? -1 : 1)).slice(0, lim).map(t => {
+          const r = { id: t.id, type: t.type, amount_cents: t.amount_cents, balance_after_cents: t.balance_after_cents, reference_number: t.reference_number, created_at: t.created_at || null,
+            gift_card_id: t.gift_card_id, short_code_display: kort.has(t.gift_card_id) ? fmtShort(kort.get(t.gift_card_id)) : null,
+            location_id: t.location_id || null, location_name: t.location_id ? (LOCS[t.location_id] || null) : null };
+          if (t.note && String(t.note).trim()) r.note = String(t.note).trim().slice(0, 500);
+          return r;
+        });
+        out.recent_limit = lim;
+      }
       if (S.cfg.reportTxBad) out.recent_transactions = 'niet-een-lijst';
-      if (S.cfg.reportTx) out[S.cfg.reportTxField || 'recent_transactions'] = S.txs.filter(t => t.card_id === card).slice(-10).reverse()
-        .map(t => ({ id: t.id, gift_card_id: t.gift_card_id, type: t.type, amount_cents: t.amount_cents, balance_after_cents: t.balance_after_cents, reference_number: t.reference_number,
-          bill_total_cents: null, location_id: t.location_id || null, actor: t.actor || null, note: t.note || null, reverses_transaction_id: t.reverses_transaction_id || null, created_at: t.created_at }));
       return send(res, 200, out);
     }
     if ((m = p.match(/^\/api\/stamp\/gift-cards\/transactions\/([\w-]+)\/reverse$/)) && req.method === 'POST') {

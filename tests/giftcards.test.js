@@ -462,3 +462,28 @@ test('tijdlijn: richting uit type, correctie uit het saldo, teruggedraaid gemark
   assert.deepEqual(G.blockConflictCard('already_blocked', { gift_card: { id: 'g' } }), { id: 'g' });
   assert.equal(G.blockConflictCard('owner_only', { gift_card: { id: 'g' } }), null);
 });
+
+test('laatste transacties (backend e8b0952): tekens per type, correctie alleen met eerdere regel, waar', () => {
+  assert.equal(G.REPORT_TX_FIELD, 'recent_transactions');
+  // Precies de vorm uit server.js e8b0952; note alleen als er iets staat.
+  const row = (id, type, amount, after, at, bon, extra) => Object.assign({ id, type, amount_cents: amount, balance_after_cents: after, reference_number: 'CB-' + id,
+    created_at: at, gift_card_id: bon, short_code_display: bon === 'g1' ? 'ABCD-EFGH-JK' : 'BZKD-0000-01', location_id: null, location_name: null }, extra || {});
+  const list = [
+    row('7', 'unblock', 0, 2500, '2026-10-07T10:00:00Z', 'g2'),
+    row('6', 'block', 0, 2500, '2026-10-06T10:00:00Z', 'g2', { note: 'kwijt' }),
+    row('5', 'adjust', 300, 4000, '2026-10-05T10:00:00Z', 'g1', { note: 'kassaverschil' }),
+    row('4', 'reverse', 1000, 4300, '2026-10-04T10:00:00Z', 'g1'),
+    row('3', 'redeem', 1000, 3300, '2026-10-03T10:00:00Z', 'g1', { location_id: 'L1', location_name: 'Centrum' }),
+    row('2', 'adjust', 500, 3000, '2026-10-02T10:00:00Z', 'g2'),
+    row('1', 'issue', 4300, 4300, '2026-10-01T10:00:00Z', 'g1', { location_id: 'L9', location_name: null }),
+  ];
+  const r = Object.fromEntries(G.recentTxRows(list).map(x => [x.tx.id, x]));
+  assert.deepEqual(G.recentTxRows(list).map(x => x.tx.id), ['7', '6', '5', '4', '3', '2', '1']);   // volgorde van de backend
+  assert.equal(r['1'].sign, 1, 'uitgifte +'); assert.equal(r['3'].sign, -1, 'afschrijving −'); assert.equal(r['4'].sign, 1, 'terugdraaien +');
+  assert.equal(r['5'].sign, -1, 'correctie van 4300 naar 4000 is eraf (eerdere regel van dezelfde bon)');
+  assert.equal(r['2'].sign, 0, 'correctie zonder eerdere regel van die bon: geen teken');
+  assert.equal(r['6'].hasAmount, false); assert.equal(r['7'].hasAmount, false); assert.equal(r['3'].hasAmount, true);
+  assert.equal(r['3'].where, 'Centrum'); assert.equal(r['5'].where, 'Eigenaar'); assert.equal(r['1'].where, 'Verwijderde vestiging');
+  assert.equal(r['3'].amount_cents, 1000);
+  assert.deepEqual(G.recentTxRows(null), []);
+});
