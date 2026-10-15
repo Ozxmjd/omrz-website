@@ -427,3 +427,38 @@ test('ontwerp v2: contrast, kanalen en uploadcontrole', () => {
   assert.equal(G.uploadErrorMessage(500, { error: 'storage kapot' }), G.MESSAGES.upload_failed);
   assert.equal(G.uploadErrorMessage(401, {}), G.MESSAGES.unauthorized);
 });
+
+test('bonnenlijst: zoeken zoals de backend (volledige korte code of exact e-mailadres)', () => {
+  assert.deepEqual(G.giftSearchQuery(''), { q: '' });
+  assert.deepEqual(G.giftSearchQuery('abcd-efgh-jk'), { q: 'ABCDEFGHJK', kind: 'code' });
+  assert.deepEqual(G.giftSearchQuery(' ABCD EFGH JK '), { q: 'ABCDEFGHJK', kind: 'code' });
+  assert.deepEqual(G.giftSearchQuery('abcd'), { hint: 'code' });
+  assert.deepEqual(G.giftSearchQuery('Sanne'), { hint: 'code' });
+  assert.deepEqual(G.giftSearchQuery('Sanne@Voorbeeld.NL'), { q: 'sanne@voorbeeld.nl', kind: 'email' });
+  assert.deepEqual(G.giftSearchQuery('sanne@'), { hint: 'email' });
+});
+
+test('tijdlijn: richting uit type, correctie uit het saldo, teruggedraaid gemarkeerd', () => {
+  const txs = [
+    { id: 'u', type: 'unblock', amount_cents: 0, balance_after_cents: 4500, created_at: '2026-10-06T10:00:00Z', actor: 'eigenaar:a@b.nl' },
+    { id: 'b', type: 'block', amount_cents: 0, balance_after_cents: 4500, created_at: '2026-10-05T10:00:00Z', actor: 'eigenaar:a@b.nl', note: 'kwijt' },
+    { id: 'a2', type: 'adjust', amount_cents: 500, balance_after_cents: 4500, created_at: '2026-10-04T10:00:00Z' },
+    { id: 'rv', type: 'reverse', amount_cents: 1000, balance_after_cents: 5000, reverses_transaction_id: 'r1', created_at: '2026-10-03T10:00:00Z' },
+    { id: 'r1', type: 'redeem', amount_cents: 1000, balance_after_cents: 4000, created_at: '2026-10-02T10:00:00Z', actor: 'medewerker:m@b.nl' },
+    { id: 'i', type: 'issue', amount_cents: 5000, balance_after_cents: 5000, created_at: '2026-10-01T10:00:00Z', actor: 'eigenaar:a@b.nl' },
+  ];
+  const t = Object.fromEntries(G.giftTimeline(txs).map(x => [x.tx.id, x]));
+  assert.deepEqual(G.giftTimeline(txs).map(x => x.tx.id), ['u', 'b', 'a2', 'rv', 'r1', 'i']);       // volgorde blijft
+  assert.equal(t.i.sign, 1); assert.equal(t.r1.sign, -1); assert.equal(t.rv.sign, 1);
+  assert.equal(t.a2.sign, -1, 'correctie van 5000 naar 4500 is eraf');
+  assert.equal(t.b.sign, 0); assert.equal(t.u.sign, 0);
+  assert.equal(t.r1.reversed, true); assert.equal(t.i.reversed, false);
+  assert.equal(t.r1.actor, 'Medewerker'); assert.equal(t.i.actor, 'Eigenaar'); assert.equal(t.a2.actor, '');
+  assert.equal(t.r1.amount_cents, 1000);
+  const up = G.giftTimeline([{ id: 'x', type: 'adjust', amount_cents: 700, balance_after_cents: 1700, created_at: '2' }, { id: 'y', type: 'issue', amount_cents: 1000, balance_after_cents: 1000, created_at: '1' }]);
+  assert.equal(up[0].sign, 1, 'correctie omhoog');
+  assert.equal(G.balancePercent({ initial_amount_cents: 5000, balance_cents: 1250 }), 25);
+  assert.equal(G.balancePercent({ initial_amount_cents: 0, balance_cents: 0 }), 0);
+  assert.deepEqual(G.blockConflictCard('already_blocked', { gift_card: { id: 'g' } }), { id: 'g' });
+  assert.equal(G.blockConflictCard('owner_only', { gift_card: { id: 'g' } }), null);
+});

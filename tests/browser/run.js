@@ -46,7 +46,10 @@ function startMock() {
     for (const [key, title] of run) {
       await fetch(B + '/__reset', { method: 'POST' });
       const R = [], pageErrors = [], consoleErrors = [];
-      const check = (n, ok, x) => R.push((ok ? 'PASS ' : 'FAIL ') + n + (x !== undefined ? '  [' + x + ']' : ''));
+      const check = (n, ok, x) => {
+        R.push((ok ? 'PASS ' : 'FAIL ') + n + (x !== undefined ? '  [' + x + ']' : ''));
+        if (process.env.TEST_LIVE) console.log('  ' + R[R.length - 1]);          // TEST_LIVE=1: direct tonen, handig als iets blijft hangen
+      };
       console.log('\n=== ' + title);
       try {
         await require('./suites/' + key + '.js')({ browser, B, check, pageErrors, consoleErrors, out: OUT });

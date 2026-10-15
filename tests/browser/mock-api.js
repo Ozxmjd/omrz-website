@@ -98,10 +98,19 @@ const normShort = v => String(v || '').toUpperCase().replace(/[^0-9A-Z]/g, '').r
 const fmtShort = c => c.length === 10 ? c.slice(0, 4) + '-' + c.slice(4, 8) + '-' + c.slice(8) : c;
 // Zonder code en url, zoals giftCardPublic(bon) bij de lookup.
 const lookupPub = g => ({ id: g.id, card_id: g.card_id, short_code: g.short_code, short_code_display: fmtShort(g.short_code), initial_amount_cents: g.initial_amount_cents,
-  balance_cents: g.balance_cents, status: g.status, recipient_name: g.recipient_name, recipient_email: g.recipient_email, message: g.message, expires_at: g.expires_at,
-  expired: !!(g.expires_at && Date.parse(g.expires_at) <= Date.now()), created_at: g.created_at, updated_at: g.updated_at || g.created_at || null });
+  balance_cents: g.balance_cents, status: derivedStatus(g), recipient_name: g.recipient_name, recipient_email: g.recipient_email, message: g.message, expires_at: g.expires_at,
+  expired: isExpired(g), created_at: g.created_at, updated_at: g.updated_at || g.created_at || null });
+// Zoals giftStatus/giftIsExpired in de backend: blocked > expired > empty > active.
+const isExpired = g => g.status === 'expired' || !!(g.expires_at && Date.parse(g.expires_at) <= Date.now());
+const derivedStatus = g => g.status === 'blocked' ? 'blocked' : isExpired(g) ? 'expired' : (g.status === 'empty' || g.balance_cents <= 0) ? 'empty' : 'active';
+// Zoals giftTransactionPublic.
+const txPub = t => ({ id: t.id, gift_card_id: t.gift_card_id, type: t.type, amount_cents: t.amount_cents, balance_after_cents: t.balance_after_cents, reference_number: t.reference_number,
+  bill_total_cents: t.bill_total_cents == null ? null : t.bill_total_cents, location_id: t.location_id || null, actor: t.actor || null, note: t.note || null,
+  reverses_transaction_id: t.reverses_transaction_id || null, created_at: t.created_at || null });
 const pub = g => {
-  const { card_id, pass_mail_tried_ms, buyer_mail_tried_ms, pass_mail_sent_at, pass_mail_error, buyer_mail_sent_at, buyer_mail_error, last_mail_attempt_at, ...r } = g;
+  const { pass_mail_tried_ms, buyer_mail_tried_ms, pass_mail_sent_at, pass_mail_error, buyer_mail_sent_at, buyer_mail_error, last_mail_attempt_at, ...r } = g;
+  r.status = derivedStatus(g);                                               // backend: giftStatus, 'expired' afgeleid
+  r.expired = isExpired(g);
   r.short_code_display = fmtShort(g.short_code);
   r.url = 'https://api.omrzdigital.nl/cadeaubon/' + g.code;                   // backend: url, niet share_url
   r.mail = { pass: { sent_at: pass_mail_sent_at || null, error: pass_mail_error || null },
@@ -337,13 +346,18 @@ async function api(req, res, url, body, rawBody) {
         return send(res, 200, { success: true, card_id: card, design: designOf(card), options: DESIGN_OPTIONS, preview_url: previewUrl });
       }
     }
+    // GET /gift-cards zoals de7021f: geen totals; q = exacte korte code of exact e-mailadres van de
+    // ontvanger; status afgeleid (verlopen op datum).
     if (p === '/api/stamp/gift-cards' && req.method === 'GET') {
+      if (!tok.owner) return fail(res, 403, 'owner_only', 'Alleen eigenaar');
+      S.log.list = (S.log.list || []).concat([Object.fromEntries(q)]);
       let list = S.gifts.filter(g => g.card_id === card).sort((a, b) => b.created_at.localeCompare(a.created_at));
-      if (q.get('status')) list = list.filter(g => g.status === q.get('status'));
-      if (q.get('q')) { const t = q.get('q').toLowerCase(); list = list.filter(g => (g.recipient_name || '').toLowerCase().includes(t) || g.short_code.toLowerCase().includes(normShort(t).toLowerCase())); }
-      const all = S.gifts.filter(g => g.card_id === card && g.status === 'active');
-      const off = Number(q.get('offset') || 0), lim = Number(q.get('limit') || 50);
-      return send(res, 200, { success: true, gift_cards: list.slice(off, off + lim).map(pub), total: list.length, totals: { outstanding_cents: all.reduce((n, g) => n + g.balance_cents, 0), active_count: all.length } });
+      const st = ['active', 'empty', 'blocked', 'expired'].includes(q.get('status')) ? q.get('status') : null;
+      if (st) list = list.filter(g => derivedStatus(g) === st);
+      const zoek = String(q.get('q') || '').trim();
+      if (zoek) { const k = normShort(zoek); list = k.length === 10 ? list.filter(g => g.short_code === k) : list.filter(g => (g.recipient_email || '') === zoek.toLowerCase()); }
+      const off = Math.max(Number(q.get('offset')) || 0, 0), lim = Math.min(Math.max(Number(q.get('limit')) || 50, 1), 200);
+      return send(res, 200, { success: true, card_id: card, total: list.length, limit: lim, offset: off, gift_cards: list.slice(off, off + lim).map(pub) });
     }
     if (p === '/api/stamp/gift-cards/lookup') {
       S.log.lookup.push(q.get('code'));
@@ -443,22 +457,36 @@ async function api(req, res, url, body, rawBody) {
       S.txs.push({ id: crypto.randomUUID(), gift_card_id: g.id, card_id: g.card_id, type: 'reverse', reverses_transaction_id: tx.id, amount_cents: tx.amount_cents, balance_after_cents: g.balance_cents, reference_number: ref(), location_id: null, actor: 'owner', note: body.note, created_at: new Date().toISOString() });
       return send(res, 200, { success: true });
     }
+    // adjust / block / unblock zoals de7021f (alleen eigenaar). Blokkeren is een kasboekregel met 0;
+    // dezelfde stand opnieuw vragen geeft 409 met de bon in het antwoord.
     if ((m = p.match(/^\/api\/stamp\/gift-cards\/([\w-]+)\/(adjust|block|unblock)$/)) && req.method === 'POST') {
-      if (!tok.owner) return fail(res, 403, 'owner_only', 'Alleen eigenaar');
+      if (!tok.owner) return fail(res, 403, 'owner_only', 'Alleen de eigenaar van de zaak kan dit doen.');
+      if (S.cfg.blockFail === 503 && m[2] !== 'adjust') return fail(res, 503, 'migration_missing', 'Draai migratie 038_gift_cards.sql.');
       const g = S.gifts.find(x => x.id === m[1] && x.card_id === card);
-      if (!g) return fail(res, 404, 'gift_card_not_found', 'Niet gevonden');
+      if (!g) return fail(res, 404, 'gift_card_not_found', 'Deze cadeaubon bestaat niet.');
+      const actor = 'eigenaar:winkelier@omrz.ai';
       if (m[2] === 'adjust') {
-        if (!Number.isInteger(body.delta_cents) || body.delta_cents === 0 || !body.note) return fail(res, 400, 'invalid_amount', 'Ongeldig');
+        if (!Number.isInteger(body.delta_cents) || body.delta_cents === 0) return fail(res, 400, 'invalid_amount', 'Ongeldig bedrag');
         if (g.balance_cents + body.delta_cents < 0) return fail(res, 409, 'insufficient_balance', 'Onvoldoende', { balance_cents: g.balance_cents });
-        g.balance_cents += body.delta_cents; g.status = g.balance_cents === 0 ? 'empty' : (g.status === 'empty' ? 'active' : g.status);
-        S.txs.push({ id: crypto.randomUUID(), gift_card_id: g.id, card_id: card, type: 'adjust', amount_cents: Math.abs(body.delta_cents), balance_after_cents: g.balance_cents, reference_number: ref(), actor: 'owner', note: body.note, created_at: new Date().toISOString() });
-      } else g.status = m[2] === 'block' ? 'blocked' : (g.balance_cents > 0 ? 'active' : 'empty');
-      return send(res, 200, { success: true, gift_card: pub(g) });
+        g.balance_cents += body.delta_cents; g.status = g.status === 'blocked' ? 'blocked' : (g.balance_cents === 0 ? 'empty' : 'active');
+        const tx = { id: crypto.randomUUID(), gift_card_id: g.id, card_id: card, type: 'adjust', amount_cents: Math.abs(body.delta_cents), balance_after_cents: g.balance_cents, reference_number: ref(), location_id: null, actor, note: String(body.note || '').trim().slice(0, 500) || null, created_at: new Date().toISOString() };
+        S.txs.push(tx);
+        return send(res, 200, { success: true, transaction: { id: tx.id, reference_number: tx.reference_number, delta_cents: body.delta_cents, balance_after_cents: g.balance_cents }, gift_card: pub(g) });
+      }
+      S.log.block = (S.log.block || []).concat([{ id: g.id, action: m[2], body, raw: rawBody }]);
+      const blokkeren = m[2] === 'block';
+      if (blokkeren && g.status === 'blocked') return send(res, 409, { error: 'Deze cadeaubon is al geblokkeerd.', code: 'already_blocked', gift_card: pub(g) });
+      if (!blokkeren && g.status !== 'blocked') return send(res, 409, { error: 'Deze cadeaubon is niet geblokkeerd.', code: 'not_blocked', gift_card: pub(g) });
+      g.status = blokkeren ? 'blocked' : (g.balance_cents > 0 ? 'active' : 'empty');
+      const tx = { id: crypto.randomUUID(), gift_card_id: g.id, card_id: card, type: m[2], amount_cents: 0, balance_after_cents: g.balance_cents, reference_number: ref(), location_id: null, actor, note: String((body && body.note) || '').trim().slice(0, 500) || null, created_at: new Date().toISOString() };
+      S.txs.push(tx);
+      return send(res, 200, { success: true, transaction: { id: tx.id, reference_number: tx.reference_number }, gift_card: pub(g) });
     }
     if ((m = p.match(/^\/api\/stamp\/gift-cards\/([\w-]+)$/)) && req.method === 'GET') {
+      if (!tok.owner) return fail(res, 403, 'owner_only', 'Alleen eigenaar');
       const g = S.gifts.find(x => x.id === m[1] && x.card_id === card);
-      if (!g) return fail(res, 404, 'gift_card_not_found', 'Niet gevonden');
-      return send(res, 200, { success: true, gift_card: pub(g), transactions: S.txs.filter(t => t.gift_card_id === g.id).slice().reverse() });
+      if (!g) return fail(res, 404, 'gift_card_not_found', 'Deze cadeaubon bestaat niet.');
+      return send(res, 200, { success: true, gift_card: pub(g), transactions: S.txs.filter(t => t.gift_card_id === g.id).slice().sort((x, y) => (x.created_at < y.created_at ? 1 : x.created_at > y.created_at ? -1 : 0)).map(txPub) });
     }
     return fail(res, 404, 'gift_card_not_found', 'Onbekend');
   }

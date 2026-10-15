@@ -440,6 +440,8 @@
     upload_size: 'Deze afbeelding is groter dan 5 MB. Kies een kleinere afbeelding.',
     upload_empty: 'Er is geen afbeelding gekozen.',
     upload_failed: 'Uploaden is niet gelukt. Probeer het opnieuw.',
+    already_blocked: 'Deze cadeaubon was al geblokkeerd.',
+    not_blocked: 'Deze cadeaubon was niet geblokkeerd.',
   };
   const NOT_LIVE_MESSAGE = 'Cadeaubonnen zijn nog niet beschikbaar. Probeer het later opnieuw.';
 
@@ -522,9 +524,65 @@
     return '﻿' + lines.map(l => l.join(';')).join('\r\n') + '\r\n';
   }
 
+  // ===== Bonnenlijst en tijdlijn (fase E) =====
+  // De backend zoekt alleen op een volledige korte code of een exact e-mailadres van de
+  // ontvanger. Halve invoer versturen geeft altijd "niets gevonden"; dan liever een hint.
+  function giftSearchQuery(input) {
+    const raw = String(input == null ? '' : input).trim();
+    if (!raw) return { q: '' };
+    if (raw.indexOf('@') !== -1) return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw) ? { q: raw.toLowerCase(), kind: 'email' } : { hint: 'email' };
+    const k = raw.toUpperCase().replace(/[^0-9A-Z]/g, '').replace(/O/g, '0').replace(/[IL]/g, '1');
+    if (k.length === 10 && /^[0-9A-HJKMNP-TV-Z]{10}$/.test(k)) return { q: k, kind: 'code' };
+    return { hint: k.length > 10 ? 'code_long' : 'code' };
+  }
+  // Wie het deed, uit actor ("eigenaar:…" / "medewerker:…"). Nooit het e-mailadres tonen.
+  function actorLabel(actor) {
+    const a = String(actor || '').toLowerCase();
+    if (a.startsWith('eigenaar') || a.startsWith('owner')) return 'Eigenaar';
+    if (a.startsWith('medewerker') || a.startsWith('staff') || a.startsWith('manager')) return 'Medewerker';
+    if (a.startsWith('systeem') || a.startsWith('system')) return 'Automatisch';
+    return '';
+  }
+  // Tijdlijn uit GET /gift-cards/:id (nieuwste eerst). amount_cents is altijd positief; de
+  // richting zit in type. Bij een correctie volgt de richting uit het saldo ervoor en erna.
+  const TX_SIGN = { issue: 1, redeem: -1, reverse: 1, block: 0, unblock: 0 };
+  function giftTimeline(txs) {
+    const list = (Array.isArray(txs) ? txs : []).slice();
+    const asc = list.slice().sort((a, b) => String(a.created_at || '').localeCompare(String(b.created_at || '')));
+    const reversed = new Set(list.filter(t => t.type === 'reverse' && t.reverses_transaction_id).map(t => String(t.reverses_transaction_id)));
+    const sign = new Map();
+    let prev = null;
+    asc.forEach(t => {
+      let sg = TX_SIGN[t.type];
+      if (sg === undefined) {                                  // adjust (of onbekend): uit het saldoverloop
+        const after = Number(t.balance_after_cents);
+        sg = prev === null || !Number.isFinite(after) ? 0 : (after > prev ? 1 : after < prev ? -1 : 0);
+      }
+      sign.set(t.id, sg);
+      if (Number.isFinite(Number(t.balance_after_cents))) prev = Number(t.balance_after_cents);
+    });
+    return list.map(t => ({
+      tx: t,
+      sign: sign.get(t.id) || 0,
+      amount_cents: Math.abs(Number(t.amount_cents) || 0),
+      reversed: t.type === 'redeem' && reversed.has(String(t.id)),
+      actor: actorLabel(t.actor),
+    }));
+  }
+  // Hoeveel van de bon er nog over is, 0–100.
+  function balancePercent(g) {
+    const init = Number(g && g.initial_amount_cents) || 0, bal = Number(g && g.balance_cents) || 0;
+    return init > 0 ? Math.max(0, Math.min(100, Math.round(bal / init * 100))) : 0;
+  }
+  // 409 already_blocked / not_blocked: geen fout, de bon staat al in die stand.
+  function blockConflictCard(code, data) {
+    return (code === 'already_blocked' || code === 'not_blocked') && data && data.gift_card ? data.gift_card : null;
+  }
+
   const api = { formatCents, parseEuroToCents, normalizeShortCode, classifyScan, resolveOutcome, SCAN_MODE_KEY, readScanMode, saveScanMode, GIFT_QR_PREFIX, giftShareUrl, giftShortCodeDisplay, redeemResult, newIdempotencyKey, endOfDayAmsterdamISO,
     giftStatus, STATUS_LABELS, isPlanLock, scannerEnabledFrom, referenceFrom, scannerSettingsBody, errorMessage, isNotLive, MESSAGES, NOT_LIVE_MESSAGE,
     DELIVERY_MODES, validateGiftDelivery, giftCreateBody, resendBody, mailStateOf, mailOutcome, mailAddress,
+    giftSearchQuery, actorLabel, giftTimeline, balancePercent, blockConflictCard,
     REPORT_PRESETS, reportQuery, fillDays, locationLabel, reportHasCards, REPORT_TX_FIELD, reportRecentTx, reportCsv,
     DESIGN_FIELDS, NO_INHERIT_FIELDS, designBody, validateDesignValue, contrastRatio, CHANNELS, CHANNEL_LABELS, channelsOf,
     UPLOAD_TYPES, UPLOAD_MAX_BYTES, validateUpload, uploadErrorMessage, isHexColor, isHttpsUrl, normalizeColor, designValue };

@@ -24,6 +24,7 @@ uitgerold zonder build, en zo hoeft Vercel bij een deploy niets te installeren.
 npm run test:browser                      # alle suites
 npm run test:browser -- scanapp           # alleen de scanapp
 npm run test:browser -- stamp-regression dashboard-giftcards
+TEST_LIVE=1 npm run test:browser -- scanapp   # elke controle direct tonen (handig als iets blijft hangen)
 ```
 
 Het commando start zelf de nep-API op poort 8799 (anders: `TEST_PORT=9000 npm run test:browser`) en

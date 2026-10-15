@@ -33,7 +33,9 @@ module.exports = async function run(env) {
 
   // ===== 1. Standaard: 30 dagen =====
   let { ctx, p } = await open(b);
-  check('1. Eerste verzoek: preset=30d, card_id, geen from/to', p.reports.length >= 1 && p.reports[0].preset === '30d' && p.reports[0].card_id === 'pp' && !('from' in p.reports[0]), JSON.stringify(p.reports[0]));
+  // De bonnenlijst vraagt ook een rapport op (preset 7d) voor het openstaand tegoed; de tab zelf vraagt 30d.
+  const firstRep = p.reports.find(r => r.preset !== '7d') || {};
+  check('1. Rapporttab: verzoek met preset=30d, card_id, geen from/to', firstRep.preset === '30d' && firstRep.card_id === 'pp' && !('from' in firstRep), JSON.stringify(p.reports));
   check('1. Periodeknop 30 dagen actief, periode in woorden', (await p.getAttribute('[data-gc-preset="30d"]', 'aria-selected')) === 'true' && /– .* · 30 dagen$/.test(await txt(p, '#gcRepRange')), await txt(p, '#gcRepRange'));
   let c = await card(p, 'Uitgegeven');
   check('1. Uitgegeven € 100,00, 4 bonnen', c && c.val === `€${NB}100,00` && /4 bonnen in deze periode/.test(c.sub), JSON.stringify(c));
