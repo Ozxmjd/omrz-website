@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OMRZ Digital · Slimmere tools voor slimmere ondernemers</title>
+  <title>OnePlume · Slimmere tools voor slimmere ondernemers</title>
   <meta name="description" content="De digitale stempelkaart voor Nederlandse ondernemers die klanten terugbrengt. Geen app nodig, direct in Apple en Google Wallet. Review Bot binnenkort beschikbaar." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -59,6 +59,8 @@
     .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 66px; }
     .brand { font-size: 20px; font-weight: 800; letter-spacing: -.02em; color: #fff; display: inline-flex; align-items: center; gap: 10px; }
     .brand-logo { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; object-position: center; flex-shrink: 0; }
+    /* Woordmerk OnePlume: "One" normaal, "Plume" vet, in het lettertype van de site. */
+    .brand-word { letter-spacing: -.02em; } .brand-word .bw-one { font-weight: 400; } .brand-word .bw-plume { font-weight: 700; } .brand .brand-word span { color: inherit; }
     .nav-links { display: flex; gap: 30px; list-style: none; }
     .nav-links a { font-size: 14.5px; font-weight: 500; color: var(--muted); transition: color .2s var(--ease); }
     .nav-links a:hover { color: #fff; }
@@ -372,7 +374,7 @@
   <!-- ===== Nav ===== -->
   <header class="nav" id="nav">
     <div class="container nav-inner">
-      <a href="index.html" class="brand"><img class="brand-logo" src="images/gold-logo.png" alt="OMRZ Digital logo" />OMRZ Digital</a>
+      <a href="index.html" class="brand"><span class="brand-word"><span class="bw-one">One</span><span class="bw-plume">Plume</span></span></a>
       <nav>
         <ul class="nav-links" id="navLinks">
           <li><a href="#producten">Producten</a></li>
@@ -419,7 +421,7 @@
               <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:11px;">
                 <div style="display:flex;align-items:center;gap:5px;">
                   <span style="width:17px;height:17px;border-radius:5px;background:rgba(255,255,255,.1);display:grid;place-items:center;font-size:10px;flex-shrink:0;">☕</span>
-                  <span style="font-size:10px;font-weight:800;color:#fff;letter-spacing:-.01em;">Café OMRZ</span>
+                  <span style="font-size:10px;font-weight:800;color:#fff;letter-spacing:-.01em;">Café Voorbeeld</span>
                 </div>
                 <span style="font-size:8px;color:#9aa3b8;margin-top:2px;">Stempelkaart</span>
               </div>
@@ -445,7 +447,7 @@
       <!-- 3. Dashboard statistieken -->
       <div class="screen s-dash" style="top:66%; animation-delay:-3.33s;">
         <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;">
-          <span style="font-weight:700;color:#fff;font-size:11.5px;">OMRZ Dashboard</span>
+          <span style="font-weight:700;color:#fff;font-size:11.5px;">OnePlume Dashboard</span>
           <span style="color:#9a9a9a;font-size:9.5px;">Jul 2026</span>
         </div>
         <div style="font-size:19px;font-weight:800;color:#fff;line-height:1.1;">847</div>
@@ -499,10 +501,10 @@
           <span style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#f59e0b,#ea6a0a);display:grid;place-items:center;font-size:15px;flex-shrink:0;">📍</span>
           <div style="min-width:0;flex:1;">
             <div style="display:flex;justify-content:space-between;gap:8px;">
-              <span style="color:#666;font-weight:600;font-size:9px;letter-spacing:.02em;text-transform:uppercase;">OMRZ Stempelkaart</span>
+              <span style="color:#666;font-weight:600;font-size:9px;letter-spacing:.02em;text-transform:uppercase;">OnePlume Stempelkaart</span>
               <span style="color:#888;font-size:9px;">nu</span>
             </div>
-            <div style="color:#111;font-weight:700;font-size:10.5px;margin-top:2px;">Café OMRZ is in de buurt!</div>
+            <div style="color:#111;font-weight:700;font-size:10.5px;margin-top:2px;">Café Voorbeeld is in de buurt!</div>
             <div style="color:#333;font-size:10px;line-height:1.3;margin-top:2px;">Je hebt 4/6 stempels. Kom binnen en verdien je 5e stempel!</div>
           </div>
         </div>
@@ -522,7 +524,7 @@
       <div class="screen s-qr" style="top:34%; animation-delay:-11.67s;">
         <div style="font-weight:700;color:#fff;font-size:11.5px;margin-bottom:6px;">Stempel ontvangen!</div>
         <div style="width:38px;height:38px;border-radius:50%;background:rgba(34,197,94,.15);border:1.5px solid rgba(34,197,94,.5);display:grid;place-items:center;margin:0 auto 8px;"><span style="color:#22c55e;font-size:20px;">✓</span></div>
-        <div style="color:#9a9a9a;font-size:10px;margin-bottom:7px;">Café OMRZ · Stempel 4/6</div>
+        <div style="color:#9a9a9a;font-size:10px;margin-bottom:7px;">Café Voorbeeld · Stempel 4/6</div>
         <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-bottom:7px;">
           <span style="height:8px;border-radius:3px;background:linear-gradient(135deg,#f5c542,#c9922e);"></span>
           <span style="height:8px;border-radius:3px;background:linear-gradient(135deg,#f5c542,#c9922e);"></span>
@@ -561,7 +563,7 @@
               <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:11px;">
                 <div style="display:flex;align-items:center;gap:5px;">
                   <span style="width:17px;height:17px;border-radius:5px;background:rgba(255,255,255,.1);display:grid;place-items:center;font-size:10px;flex-shrink:0;">☕</span>
-                  <span style="font-size:10px;font-weight:800;color:#fff;letter-spacing:-.01em;">Café OMRZ</span>
+                  <span style="font-size:10px;font-weight:800;color:#fff;letter-spacing:-.01em;">Café Voorbeeld</span>
                 </div>
                 <span style="font-size:8px;color:#9aa3b8;margin-top:2px;">Stempelkaart</span>
               </div>
@@ -590,10 +592,10 @@
           <span style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#f59e0b,#ea6a0a);display:grid;place-items:center;font-size:15px;flex-shrink:0;">📍</span>
           <div style="min-width:0;flex:1;">
             <div style="display:flex;justify-content:space-between;gap:8px;">
-              <span style="color:#666;font-weight:600;font-size:9px;letter-spacing:.02em;text-transform:uppercase;">OMRZ Stempelkaart</span>
+              <span style="color:#666;font-weight:600;font-size:9px;letter-spacing:.02em;text-transform:uppercase;">OnePlume Stempelkaart</span>
               <span style="color:#888;font-size:9px;">nu</span>
             </div>
-            <div style="color:#111;font-weight:700;font-size:10.5px;margin-top:2px;">Café OMRZ is in de buurt!</div>
+            <div style="color:#111;font-weight:700;font-size:10.5px;margin-top:2px;">Café Voorbeeld is in de buurt!</div>
             <div style="color:#333;font-size:10px;line-height:1.3;margin-top:2px;">Je hebt 4/6 stempels. Kom binnen en verdien je 5e stempel!</div>
           </div>
         </div>
@@ -658,7 +660,7 @@
               <div class="phone-screen">
                 <div class="wallet-card">
                   <div class="wc-top">
-                    <span class="wc-brand">Café OMRZ</span>
+                    <span class="wc-brand">Café Voorbeeld</span>
                     <span class="wc-chip"></span>
                   </div>
                   <div class="wc-label">Koffie Spaarkaart</div>
@@ -698,7 +700,7 @@
   <section class="section" style="padding-top:0;">
     <div class="container">
       <div class="section-head">
-        <span class="eyebrow reveal">Waarom OMRZ Digital</span>
+        <span class="eyebrow reveal">Waarom OnePlume</span>
         <h2 class="section-title reveal">Gebouwd voor de ondernemer</h2>
       </div>
       <div class="features">
@@ -789,7 +791,7 @@
     <div class="container">
       <div class="footer-top">
         <div class="footer-brand">
-          <a href="index.html" class="brand"><img class="brand-logo" src="images/gold-logo.png" alt="OMRZ Digital logo" />OMRZ Digital</a>
+          <a href="index.html" class="brand"><span class="brand-word"><span class="bw-one">One</span><span class="bw-plume">Plume</span></span></a>
           <p>Slimme digitale tools die Nederlandse ondernemers laten groeien.</p>
         </div>
         <div class="footer-cols">
@@ -806,18 +808,18 @@
             <ul>
               <li><a href="index.html">Home</a></li>
               <li><a href="contact.html">Contact</a></li>
-              <li><a href="mailto:info@omrzdigital.nl">info@omrzdigital.nl</a></li>
+              <li><a href="mailto:info@oneplume.nl">info@oneplume.nl</a></li>
             </ul>
           </div>
         </div>
       </div>
       <div class="footer-bottom">
-        <span>© <span id="year">2026</span> OMRZ Digital · Alle rechten voorbehouden</span>
+        <span>© <span id="year">2026</span> OnePlume · Alle rechten voorbehouden</span>
         <div class="footer-legal" style="display:flex; gap:20px; flex-wrap:wrap; align-items:center;">
           <a href="privacy.html">Privacybeleid</a>
           <a href="voorwaarden.html">Algemene voorwaarden</a>
           <a href="verwerkersovereenkomst.html">Verwerkersovereenkomst</a>
-          <a href="mailto:info@omrzdigital.nl">info@omrzdigital.nl</a>
+          <a href="mailto:info@oneplume.nl">info@oneplume.nl</a>
         </div>
       </div>
     </div>

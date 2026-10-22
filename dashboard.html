@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard · OMRZ Digital</title>
+  <title>Dashboard · OnePlume</title>
   <meta name="description" content="Beheer je digitale stempelkaart, bekijk statistieken en deel je QR-code." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -120,6 +120,8 @@
 
     .brand { font-size: 17px; font-weight: 600; letter-spacing: -.02em; color: var(--text-strong); display: inline-flex; align-items: center; gap: 10px; }
     .brand-logo { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; object-position: center; flex-shrink: 0; }
+    /* Woordmerk OnePlume: "One" normaal, "Plume" vet, in het lettertype van de site. */
+    .brand-word { letter-spacing: -.02em; } .brand-word .bw-one { font-weight: 400; } .brand-word .bw-plume { font-weight: 700; } .brand .brand-word span { color: inherit; }
     .glass {
       background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
       box-shadow: var(--shadow-md);
@@ -2196,7 +2198,7 @@
     <!-- ===== Sidebar ===== -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-head">
-        <a href="index.html" class="brand"><img class="brand-logo" src="images/gold-logo.png" alt="OMRZ Digital logo" />OMRZ Digital</a>
+        <a href="index.html" class="brand"><span class="brand-word"><span class="bw-one">One</span><span class="bw-plume">Plume</span></span></a>
       </div>
 
       <nav class="side-nav">
@@ -2433,7 +2435,7 @@
                 <div class="wp-band wp-header" id="pvHeader">
                   <div class="sc-brand">
                     <img class="sc-logo" id="pvLogo" alt="Logo" hidden />
-                    <span class="sc-biz" id="pvBiz">Café OMRZ</span>
+                    <span class="sc-biz" id="pvBiz">Café Voorbeeld</span>
                   </div>
                   <div class="wp-hi" id="pvHi">Hi Sara!</div>
                 </div>
@@ -2471,7 +2473,7 @@
                 <div class="form-grid">
                   <div class="field">
                     <label for="fBiz">Bedrijfsnaam</label>
-                    <input type="text" id="fBiz" placeholder="Café OMRZ" />
+                    <input type="text" id="fBiz" placeholder="Café Voorbeeld" />
                   </div>
                   <div class="field">
                     <label for="fTitle">Kaart titel</label>
@@ -2946,7 +2948,7 @@
           <div class="block glass" id="locFormWrap" hidden style="margin-bottom:18px;">
             <h3 id="locFormTitle">Nieuwe vestiging</h3>
             <form class="form-grid" id="locForm">
-              <div class="field"><label for="lfName">Naam</label><input type="text" id="lfName" placeholder="Café OMRZ Centrum" required /></div>
+              <div class="field"><label for="lfName">Naam</label><input type="text" id="lfName" placeholder="Café Voorbeeld Centrum" required /></div>
               <div class="field"><label for="lfAddress">Adres</label><input type="text" id="lfAddress" placeholder="Hoofdstraat 1" /></div>
               <div class="field-row">
                 <div class="field"><label for="lfPostcode">Postcode</label><input type="text" id="lfPostcode" placeholder="1011 AB" /></div>
@@ -3099,7 +3101,7 @@
               <form class="form-grid" id="profileForm">
                 <div class="field">
                   <label for="sBiz">Naam van je zaak</label>
-                  <input type="text" id="sBiz" placeholder="Café OMRZ" />
+                  <input type="text" id="sBiz" placeholder="Café Voorbeeld" />
                 </div>
                 <div class="field">
                   <label for="sEmail">E-mailadres</label>
@@ -3156,7 +3158,7 @@
                   <div class="form-grid">
                     <div class="field">
                       <label for="bgName">Bedrijfsnaam</label>
-                      <input type="text" id="bgName" placeholder="Café OMRZ" autocomplete="organization" />
+                      <input type="text" id="bgName" placeholder="Café Voorbeeld" autocomplete="organization" />
                     </div>
                     <div class="field-row">
                       <div class="field">
@@ -3584,7 +3586,7 @@
 
     // ---- Huidige kaartstatus (lokaal, gevuld vanuit de API) ----
     let card = {
-      business_name: 'Café OMRZ',
+      business_name: 'Café Voorbeeld',
       card_title: 'Koffie Spaarkaart',
       reward_description: 'Gratis koffie',
       show_reward_text: true,
@@ -5700,7 +5702,7 @@
       const id = cardId || 'demo';
       return API_BASE + '/stamp/scan?card=' + encodeURIComponent(id);
     }
-    // Bestandsnaam-vriendelijke variant van een naam ("Café OMRZ" → "cafe-omrz").
+    // Bestandsnaam-vriendelijke variant van een naam ("Café Voorbeeld" → "cafe-voorbeeld").
     function slug(text) {
       return (text || '').toString().normalize('NFD').replace(/[̀-ͯ]/g, '')
         .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'qr-code';
@@ -11646,7 +11648,7 @@
 
     // De tekst die de winkelier doorstuurt naar zijn manager.
     function managerCredentialsText(loc, name, email) {
-      return `Inloggegevens voor het OMRZ-dashboard (${loc.name})\n`
+      return `Inloggegevens voor het OnePlume-dashboard (${loc.name})\n`
         + `Inloggen op: ${LOGIN_URL}\n`
         + `E-mailadres: ${email}\n`
         + `Wachtwoord: het wachtwoord dat je van mij hebt gekregen\n\n`

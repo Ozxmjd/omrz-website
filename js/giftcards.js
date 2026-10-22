@@ -430,7 +430,7 @@
     invalid_target: 'Kies of de mail naar de ontvanger of naar de koper moet.',
     invalid_expires_at: 'De vervaldatum klopt niet of ligt in het verleden. Kies een datum in de toekomst.',
     invalid_color: 'Deze kleur klopt niet. Gebruik een kleurcode zoals #1F4D2B.',
-    invalid_url: 'Deze afbeelding moet een https-link uit de eigen opslag van OMRZ zijn.',
+    invalid_url: 'Deze afbeelding moet een https-link uit de eigen opslag van OnePlume zijn.',
     invalid_show_name: 'Kies of de naam wel of niet op de cadeaubon komt.',
     nothing_to_update: 'Er is niets gewijzigd.',
     invalid_theme: 'Kies een van de thema\'s uit de lijst.',

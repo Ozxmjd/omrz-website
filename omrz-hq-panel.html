@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Dashboard · OMRZ Digital</title>
-  <meta name="description" content="Beheerdersdashboard voor OMRZ Digital — winkeliers, statistieken en omzet." />
+  <title>Admin Dashboard · OnePlume</title>
+  <meta name="description" content="Beheerdersdashboard voor OnePlume — winkeliers, statistieken en omzet." />
   <meta name="robots" content="noindex, nofollow, noarchive" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -43,6 +43,8 @@
 
     .brand { font-size: 19px; font-weight: 800; letter-spacing: -.02em; color: #fff; display: inline-flex; align-items: center; gap: 10px; }
     .brand-logo { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; object-position: center; flex-shrink: 0; }
+    /* Woordmerk OnePlume: "One" normaal, "Plume" vet, in het lettertype van de site. */
+    .brand-word { letter-spacing: -.02em; } .brand-word .bw-one { font-weight: 400; } .brand-word .bw-plume { font-weight: 700; } .brand .brand-word span { color: inherit; }
     .glass {
       background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
       backdrop-filter: blur(18px) saturate(160%); -webkit-backdrop-filter: blur(18px) saturate(160%);
@@ -435,7 +437,7 @@
     <!-- ===== Sidebar ===== -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-head">
-        <a href="index.html" class="brand"><img class="brand-logo" src="images/gold-logo.png" alt="OMRZ Digital logo" />OMRZ Digital</a>
+        <a href="index.html" class="brand"><span class="brand-word"><span class="bw-one">One</span><span class="bw-plume">Plume</span></span></a>
       </div>
       <span class="admin-tag">Admin</span>
 
@@ -481,7 +483,7 @@
         <button class="menu-btn" id="menuBtn" aria-label="Menu"><span></span><span></span><span></span></button>
         <h1 id="pageTitle">Overzicht</h1>
         <div class="spacer"></div>
-        <span class="biz-chip"><span class="biz-dot"></span>OMRZ Digital</span>
+        <span class="biz-chip"><span class="biz-dot"></span>OnePlume</span>
       </div>
 
       <div class="page">
@@ -490,7 +492,7 @@
         <section class="panel active" id="panel-overzicht">
           <div class="panel-head">
             <h2>Overzicht</h2>
-            <p>De gezondheid van OMRZ Digital in één oogopslag.</p>
+            <p>De gezondheid van OnePlume in één oogopslag.</p>
           </div>
 
           <div class="stat-grid">

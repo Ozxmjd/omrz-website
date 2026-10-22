@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Contact · OMRZ Digital</title>
-  <meta name="description" content="Neem contact op met OMRZ Digital of start een gratis proefperiode. We helpen Nederlandse ondernemers graag verder." />
+  <title>Contact · OnePlume</title>
+  <meta name="description" content="Neem contact op met OnePlume of start een gratis proefperiode. We helpen Nederlandse ondernemers graag verder." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -44,6 +44,8 @@
     .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 66px; }
     .brand { font-size: 20px; font-weight: 800; letter-spacing: -.02em; color: #fff; display: inline-flex; align-items: center; gap: 10px; }
     .brand-logo { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; object-position: center; flex-shrink: 0; }
+    /* Woordmerk OnePlume: "One" normaal, "Plume" vet, in het lettertype van de site. */
+    .brand-word { letter-spacing: -.02em; } .brand-word .bw-one { font-weight: 400; } .brand-word .bw-plume { font-weight: 700; } .brand .brand-word span { color: inherit; }
     .nav-links { display: flex; gap: 30px; list-style: none; }
     .nav-links a { font-size: 14.5px; font-weight: 500; color: var(--muted); transition: color .2s var(--ease); }
     .nav-links a:hover, .nav-links a.active { color: #fff; }
@@ -149,7 +151,7 @@
   <!-- ===== Navbar ===== -->
   <header class="nav" id="nav">
     <div class="container nav-inner">
-      <a href="index.html" class="brand"><img class="brand-logo" src="images/gold-logo.png" alt="OMRZ Digital logo" />OMRZ Digital</a>
+      <a href="index.html" class="brand"><span class="brand-word"><span class="bw-one">One</span><span class="bw-plume">Plume</span></span></a>
       <nav>
         <ul class="nav-links" id="navLinks">
           <li><a href="index.html#showcase">Producten</a></li>
@@ -186,7 +188,7 @@
 
           <div class="contact-info-item">
             <div class="ci-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div>
-            <div><div class="ci-label">E-mail</div><a class="ci-value" href="mailto:info@omrzdigital.nl">info@omrzdigital.nl</a></div>
+            <div><div class="ci-label">E-mail</div><a class="ci-value" href="mailto:info@oneplume.nl">info@oneplume.nl</a></div>
           </div>
 
           <div class="card reveal" style="margin-top:30px;">
@@ -239,21 +241,21 @@
     <div class="container">
       <div class="footer-top">
         <div class="footer-brand">
-          <a href="index.html" class="brand"><img class="brand-logo" src="images/gold-logo.png" alt="OMRZ Digital logo" />OMRZ Digital</a>
+          <a href="index.html" class="brand"><span class="brand-word"><span class="bw-one">One</span><span class="bw-plume">Plume</span></span></a>
           <p>Slimme digitale tools die Nederlandse ondernemers laten groeien.</p>
         </div>
         <div class="footer-cols">
           <div class="footer-col"><h4>Producten</h4><ul><li><a href="index.html#coming-soon">Review Bot <span style="opacity:.6">· binnenkort</span></a></li><li><a href="stempelkaart.html">Digitale Stempelkaart</a></li><li><a href="index.html#prijzen">Prijzen</a></li></ul></div>
-          <div class="footer-col"><h4>Bedrijf</h4><ul><li><a href="index.html">Home</a></li><li><a href="contact.html">Contact</a></li><li><a href="mailto:info@omrzdigital.nl">info@omrzdigital.nl</a></li></ul></div>
+          <div class="footer-col"><h4>Bedrijf</h4><ul><li><a href="index.html">Home</a></li><li><a href="contact.html">Contact</a></li><li><a href="mailto:info@oneplume.nl">info@oneplume.nl</a></li></ul></div>
         </div>
       </div>
       <div class="footer-bottom">
-        <span>© <span id="year">2026</span> OMRZ Digital · Alle rechten voorbehouden</span>
+        <span>© <span id="year">2026</span> OnePlume · Alle rechten voorbehouden</span>
         <div class="footer-legal" style="display:flex; gap:20px; flex-wrap:wrap; align-items:center;">
           <a href="privacy.html">Privacybeleid</a>
           <a href="voorwaarden.html">Algemene voorwaarden</a>
           <a href="verwerkersovereenkomst.html">Verwerkersovereenkomst</a>
-          <a href="mailto:info@omrzdigital.nl">info@omrzdigital.nl</a>
+          <a href="mailto:info@oneplume.nl">info@oneplume.nl</a>
         </div>
       </div>
     </div>
