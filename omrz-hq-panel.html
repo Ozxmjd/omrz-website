@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" sizes="32x32" href="images/oneplume-logo/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="64x64" href="images/oneplume-logo/favicon-64.png" />
+  <link rel="apple-touch-icon" href="images/oneplume-logo/apple-touch-icon.png" />
   <title>Admin Dashboard · OnePlume</title>
   <meta name="description" content="Beheerdersdashboard voor OnePlume — winkeliers, statistieken en omzet." />
   <meta name="robots" content="noindex, nofollow, noarchive" />
@@ -45,6 +48,8 @@
     .brand-logo { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; object-position: center; flex-shrink: 0; }
     /* Woordmerk OnePlume: "One" normaal, "Plume" vet, in het lettertype van de site. */
     .brand-word { letter-spacing: -.02em; } .brand-word .bw-one { font-weight: 400; } .brand-word .bw-plume { font-weight: 700; } .brand .brand-word span { color: inherit; }
+    /* Veer naast het woordmerk: wit op donker, zwart op licht. */
+    .brand-mark { height: 28px; width: auto; flex-shrink: 0; display: block; } .brand-mark-on-light { display: none; }
     .glass {
       background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
       backdrop-filter: blur(18px) saturate(160%); -webkit-backdrop-filter: blur(18px) saturate(160%);
@@ -437,7 +442,7 @@
     <!-- ===== Sidebar ===== -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-head">
-        <a href="index.html" class="brand"><span class="brand-word"><span class="bw-one">One</span><span class="bw-plume">Plume</span></span></a>
+        <a href="index.html" class="brand"><img class="brand-mark brand-mark-on-dark" src="images/oneplume-logo/oneplume-mark-white.svg" alt="" width="17" height="28" /><img class="brand-mark brand-mark-on-light" src="images/oneplume-logo/oneplume-mark-black.svg" alt="" width="17" height="28" /><span class="brand-word"><span class="bw-one">One</span><span class="bw-plume">Plume</span></span></a>
       </div>
       <span class="admin-tag">Admin</span>
 

@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" sizes="32x32" href="images/oneplume-logo/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="64x64" href="images/oneplume-logo/favicon-64.png" />
+  <link rel="apple-touch-icon" href="images/oneplume-logo/apple-touch-icon.png" />
   <title>Contact · OnePlume</title>
   <meta name="description" content="Neem contact op met OnePlume of start een gratis proefperiode. We helpen Nederlandse ondernemers graag verder." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -46,6 +49,8 @@
     .brand-logo { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; object-position: center; flex-shrink: 0; }
     /* Woordmerk OnePlume: "One" normaal, "Plume" vet, in het lettertype van de site. */
     .brand-word { letter-spacing: -.02em; } .brand-word .bw-one { font-weight: 400; } .brand-word .bw-plume { font-weight: 700; } .brand .brand-word span { color: inherit; }
+    /* Veer naast het woordmerk: wit op donker, zwart op licht. */
+    .brand-mark { height: 28px; width: auto; flex-shrink: 0; display: block; } .brand-mark-on-light { display: none; }
     .nav-links { display: flex; gap: 30px; list-style: none; }
     .nav-links a { font-size: 14.5px; font-weight: 500; color: var(--muted); transition: color .2s var(--ease); }
     .nav-links a:hover, .nav-links a.active { color: #fff; }
@@ -151,7 +156,7 @@
   <!-- ===== Navbar ===== -->
   <header class="nav" id="nav">
     <div class="container nav-inner">
-      <a href="index.html" class="brand"><span class="brand-word"><span class="bw-one">One</span><span class="bw-plume">Plume</span></span></a>
+      <a href="index.html" class="brand"><img class="brand-mark brand-mark-on-dark" src="images/oneplume-logo/oneplume-mark-white.svg" alt="" width="17" height="28" /><img class="brand-mark brand-mark-on-light" src="images/oneplume-logo/oneplume-mark-black.svg" alt="" width="17" height="28" /><span class="brand-word"><span class="bw-one">One</span><span class="bw-plume">Plume</span></span></a>
       <nav>
         <ul class="nav-links" id="navLinks">
           <li><a href="index.html#showcase">Producten</a></li>
@@ -241,7 +246,7 @@
     <div class="container">
       <div class="footer-top">
         <div class="footer-brand">
-          <a href="index.html" class="brand"><span class="brand-word"><span class="bw-one">One</span><span class="bw-plume">Plume</span></span></a>
+          <a href="index.html" class="brand"><img class="brand-mark brand-mark-on-dark" src="images/oneplume-logo/oneplume-mark-white.svg" alt="" width="17" height="28" /><img class="brand-mark brand-mark-on-light" src="images/oneplume-logo/oneplume-mark-black.svg" alt="" width="17" height="28" /><span class="brand-word"><span class="bw-one">One</span><span class="bw-plume">Plume</span></span></a>
           <p>Slimme digitale tools die Nederlandse ondernemers laten groeien.</p>
         </div>
         <div class="footer-cols">
