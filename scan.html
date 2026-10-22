@@ -758,8 +758,9 @@
 
     <script src="js/plan.js"></script>
     <script src="js/giftcards.js"></script>
+    <script src="js/config.js"></script>
     <script>
-        const API_BASE = 'https://api.omrzdigital.nl'; // backend
+        const API_BASE = window.SiteConfig.API_BASE;   // per domein, zie js/config.js
         const LS = {
             card_id: 'stamp_card_id', token: 'stamp_token', pincode_set: 'stamp_pincode_set',
             email: 'stamp_email', biz: 'stamp_business_name', required: 'stamp_required', reward: 'stamp_reward',

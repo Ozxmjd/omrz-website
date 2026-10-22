@@ -3,7 +3,7 @@
   "private": true,
   "description": "Statische site van OMRZ Digital. Geen build; deze scripts zijn alleen voor tests.",
   "scripts": {
-    "test": "node --test tests/giftcards.test.js tests/plan.test.js",
+    "test": "node --test tests/giftcards.test.js tests/plan.test.js tests/config.test.js",
     "test:browser": "node tests/browser/run.js"
   }
 }

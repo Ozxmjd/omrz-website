@@ -3539,8 +3539,9 @@
     </div>
   </div>
 
+  <script src="js/config.js"></script>
   <script>
-    const API_BASE = 'https://api.omrzdigital.nl';
+    const API_BASE = window.SiteConfig.API_BASE;   // per domein, zie js/config.js
     // Zet localStorage.omrz_debug = '1' om API-responsen in de console te zien.
     function debugOn() {
       try { return localStorage.getItem('omrz_debug') === '1'; } catch (e) { return false; }
@@ -11589,7 +11590,7 @@
     // De inlogpagina van dit dashboard: precies het adres dat de manager moet gebruiken.
     const LOGIN_URL = (location.protocol === 'http:' || location.protocol === 'https:')
       ? new URL('login.html', location.href).href
-      : 'https://omrzdigital.nl/login.html';
+      : '/login.html';
     const LOGIN_URL_LABEL = LOGIN_URL.replace(/^https?:\/\//, '');
 
     const INFO_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>';

@@ -72,14 +72,14 @@
   // lange code: 32 hex-tekens. Een stempelkaart-QR is altijd een UUID met streepjes
   // (8-4-4-4-12). Die twee vormen overlappen nooit. Herkend als cadeaubon:
   //  - de lange code (32 hex, hoofd- of kleine letters);
-  //  - een link naar /cadeaubon/<code> op een domein van OMRZ (omrzdigital.nl en subdomeinen);
+  //  - een link naar /cadeaubon/<code> op een van onze domeinen (omrzdigital.nl, oneplume.nl en subdomeinen);
   //  - de korte code, met of zonder streepjes.
   // Al het andere gaat ongewijzigd naar de stempelflow.
   const UUID_RX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const LONG_RX = /^[0-9a-f]{32}$/i;
   function isOurHost(host) {
     const h = String(host || '').toLowerCase();
-    return h === 'omrzdigital.nl' || h.endsWith('.omrzdigital.nl');
+    return h === 'omrzdigital.nl' || h.endsWith('.omrzdigital.nl') || h === 'oneplume.nl' || h.endsWith('.oneplume.nl');
   }
   // Sinds backend e101948 staat er in de QR van een bon OMRZCB1:<32 hex>. Dat voorvoegsel
   // gebruikt alleen een cadeaubon. Dit is de terugval voor als /scan/resolve niet antwoordt;

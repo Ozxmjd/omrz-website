@@ -224,8 +224,9 @@
     </div>
   </main>
 
+  <script src="js/config.js"></script>
   <script>
-    const API_BASE = 'https://api.omrzdigital.nl';
+    const API_BASE = window.SiteConfig.API_BASE;   // per domein, zie js/config.js
     const MIN_LEN = 8;
 
     const $ = id => document.getElementById(id);

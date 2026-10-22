@@ -512,7 +512,8 @@ http.createServer((req, res) => {
   const f = path.join(SITE, url.pathname === '/' ? 'index.html' : url.pathname);
   if (!f.startsWith(SITE) || !fs.existsSync(f)) { res.writeHead(404); return res.end(); }
   let data = fs.readFileSync(f);
-  if (f.endsWith('.html')) data = Buffer.from(data.toString().split("'https://api.omrzdigital.nl'").join("'" + BASE + "'"));
+  // De API-basis staat in js/config.js (en in oudere pagina's nog in de HTML): naar de nep-API.
+  if (f.endsWith('.html') || f.endsWith(path.join('js', 'config.js'))) data = Buffer.from(data.toString().split("'https://api.omrzdigital.nl'").join("'" + BASE + "'"));
   res.writeHead(200, { 'Content-Type': { '.html': 'text/html; charset=utf-8', '.png': 'image/png', '.svg': 'image/svg+xml', '.css': 'text/css', '.js': 'text/javascript' }[path.extname(f)] || 'application/octet-stream' });
   res.end(data);
 }).listen(PORT, () => console.log('nep-API op', BASE));
